@@ -1,6 +1,6 @@
 ﻿<div align="center">
 
-# 🚀 VitrineZap SaaS — Catálogos Interativos Multi-Tenant
+# 🚀 Vitrine SaaS — Catálogos Interativos Multi-Tenant
 
 ### *A plataforma SaaS de catálogos digitais com conversão direta para o WhatsApp — sem atrito, sem login do cliente e com altíssima taxa de fechamento.*
 
