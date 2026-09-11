@@ -1,0 +1,15 @@
+﻿import { createClient } from '@/lib/supabase/server'
+import VehicleForm from '@/components/admin/VehicleForm'
+
+export default async function NovoVeiculoPage({ params }: { params: { slug: string } }) {
+  const supabase = await createClient()
+  const { data: store } = await supabase.from('stores').select('id').eq('slug', params.slug).single()
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-zinc-900 mb-1">Novo Veiculo</h1>
+      <p className="text-zinc-500 mb-6">Adicione um veiculo ao catalogo</p>
+      <VehicleForm slug={params.slug} storeId={store?.id ?? ''} />
+    </div>
+  )
+}
