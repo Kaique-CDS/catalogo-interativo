@@ -12,7 +12,7 @@ interface Props {
 const DEMO_STORE: Store = {
   id: 'demo-store-id',
   slug: 'loja-exemplo',
-  name: 'AutoCenter Premium',
+  name: 'AutoCenter Motors Premium',
   logo_url: null,
   address: 'Av. das Nações, 1500 - São Paulo, SP',
   whatsapp: '5511999999999',
@@ -24,13 +24,18 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '1',
     store_id: 'demo-store-id',
-    title: 'Honda Civic Touring 1.5 Turbo',
+    title: 'Honda Civic Touring 1.5 Turbo CVT',
     brand: 'Honda',
     model: 'Civic',
-    year: 2022,
-    mileage: 28000,
-    price: 149900,
-    description: 'Único dono, todas revisões na concessionária, teto solar, bancos em couro.',
+    year: 2023,
+    mileage: 26000,
+    price: 154900,
+    fuel: 'Gasolina',
+    transmission: 'Automático CVT',
+    plate_end: '7',
+    badge: 'Imperdível 🔥',
+    features: ['Teto Solar', 'Bancos em Couro', 'Painel Digital TFT', 'Faróis Full LED', 'Laudo Cautelar 100%'],
+    description: 'Único dono, revisões rigorosamente em dia na autorizada, impecável sem nenhum retoque.',
     images: ['https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?auto=format&fit=crop&w=800&q=80'],
     is_active: true,
     created_at: new Date().toISOString(),
@@ -38,13 +43,18 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '2',
     store_id: 'demo-store-id',
-    title: 'Toyota Corolla XEi 2.0 Flex',
+    title: 'Toyota Corolla XEi 2.0 Dynamic Force',
     brand: 'Toyota',
     model: 'Corolla',
     year: 2023,
-    mileage: 18500,
-    price: 138900,
-    description: 'Impecável, garantia de fábrica ativa, IPVA 2024 pago.',
+    mileage: 19800,
+    price: 139900,
+    fuel: 'Flex',
+    transmission: 'Automático Direct Shift',
+    plate_end: '3',
+    badge: 'Único Dono ✨',
+    features: ['Garantia de Fábrica', 'Central Multimídia', 'Controle de Estabilidade', 'Câmera de Ré'],
+    description: 'Carro de não-fumante, IPVA 2024 quitado, estado de zero quilômetro.',
     images: ['https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800&q=80'],
     is_active: true,
     created_at: new Date().toISOString(),
@@ -52,13 +62,18 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '3',
     store_id: 'demo-store-id',
-    title: 'Jeep Compass Longitude T270 Turbo',
+    title: 'Jeep Compass Longitude T270 Turbo Flex',
     brand: 'Jeep',
     model: 'Compass',
-    year: 2021,
-    mileage: 42000,
-    price: 132000,
-    description: 'Pacote premium de som Beats, faróis em LED, pneus novos.',
+    year: 2022,
+    mileage: 38000,
+    price: 136900,
+    fuel: 'Flex',
+    transmission: 'Automático 6 marchas',
+    plate_end: '9',
+    badge: 'Oportunidade 💎',
+    features: ['Som Premium Beats', 'Painel Full Digital', 'Ar Dual Zone', 'Sensor de Ponto Cego'],
+    description: 'SUV em excepcional estado de conservação, laudo cautelar aprovado e pneus novos.',
     images: ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80'],
     is_active: true,
     created_at: new Date().toISOString(),
@@ -69,10 +84,15 @@ const DEMO_VEHICLES: Vehicle[] = [
     title: 'Volkswagen T-Cross Highline 250 TSI',
     brand: 'Volkswagen',
     model: 'T-Cross',
-    year: 2022,
-    mileage: 31000,
-    price: 119900,
-    description: 'Painel digital active info display, chave presencial, piloto automático adaptativo.',
+    year: 2023,
+    mileage: 24000,
+    price: 122900,
+    fuel: 'Flex',
+    transmission: 'Automático Tiptronic',
+    plate_end: '4',
+    badge: 'Abaixo da Fipe 📉',
+    features: ['Active Info Display', 'Partida Start/Stop', 'Chave Presencial', 'Piloto Automático Adaptativo'],
+    description: 'Versão topo de linha com motor turbo de 150cv, economia e esportividade.',
     images: ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'],
     is_active: true,
     created_at: new Date().toISOString(),
@@ -88,16 +108,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (store) {
       return {
         title: `${store.name} - Catálogo de Veículos`,
-        description: `Confira o catálogo de veículos da ${store.name}`,
+        description: `Confira os veículos disponíveis na ${store.name}`,
       }
     }
-  } catch (e) {
-    // Supabase fallback
-  }
+  } catch (e) {}
 
   return {
-    title: `${DEMO_STORE.name} - Catálogo Demo`,
-    description: `Confira o catálogo de veículos da ${DEMO_STORE.name}`,
+    title: `${DEMO_STORE.name} - Catálogo de Veículos`,
+    description: `Confira o catálogo de seminovos da ${DEMO_STORE.name}`,
   }
 }
 
@@ -122,20 +140,23 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
         .eq('store_id', store.id).eq('is_active', true)
         .order('created_at', { ascending: false })
 
-      if (sParams.brand)    query = query.ilike('brand', `%${sParams.brand}%`)
-      if (sParams.q)        query = query.or(`title.ilike.%${sParams.q}%,brand.ilike.%${sParams.q}%,model.ilike.%${sParams.q}%`)
+      if (sParams.brand && sParams.brand !== 'all') {
+        query = query.ilike('brand', `%${sParams.brand}%`)
+      }
+      if (sParams.q) {
+        query = query.or(`title.ilike.%${sParams.q}%,brand.ilike.%${sParams.q}%,model.ilike.%${sParams.q}%`)
+      }
       if (sParams.minPrice) query = query.gte('price', Number(sParams.minPrice))
       if (sParams.maxPrice) query = query.lte('price', Number(sParams.maxPrice))
-      if (sParams.year)     query = query.eq('year', Number(sParams.year))
+      if (sParams.year && sParams.year !== 'all') query = query.eq('year', Number(sParams.year))
 
       const { data: vData } = await query
       vehicles = vData ?? []
     }
   } catch (err) {
-    console.error('Supabase query error, fallback to demo:', err)
+    console.error('Supabase query fallback:', err)
   }
 
-  // Fallback demo caso não haja loja ou o Supabase ainda não esteja configurado
   if (!store) {
     isDemoMode = true
     store = { ...DEMO_STORE, slug }
@@ -163,14 +184,14 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
   const years  = [...new Set(vehicles.map((v) => v.year))].sort((a, b) => b - a)
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 font-sans pb-12">
       {isDemoMode && (
-        <div className="bg-amber-500 text-white text-xs font-medium py-2 px-4 text-center">
-          ⚡ Modo Demonstração Ativo — Para conectar seu banco, insira as credenciais no arquivo <code>.env.local</code>.
+        <div className="bg-amber-500 text-white text-xs font-semibold py-2 px-4 text-center">
+          ⚡ Modo Demonstração Ativo — Conecte seu Supabase em <code>.env.local</code> para gerenciar dados reais.
         </div>
       )}
       <StoreHeader store={store} />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         <VehicleGrid
           vehicles={vehicles}
           store={store}
@@ -179,10 +200,10 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
           searchParams={sParams}
         />
       </main>
-      <footer className="border-t bg-white mt-16">
-        <div className="container mx-auto px-4 py-6 text-center text-sm text-zinc-400">
-          {store.name} - Catálogo interativo por AutoCatálogo
-        </div>
+      <footer className="border-t border-zinc-200 bg-white mt-12 py-6 text-center text-xs text-zinc-500">
+        <p className="font-semibold text-zinc-900">{store.name}</p>
+        <p className="mt-0.5">{store.address}</p>
+        <p className="text-[11px] text-zinc-400 mt-2">Catálogo Interativo Mobile First com Checkout Direto via WhatsApp</p>
       </footer>
     </div>
   )

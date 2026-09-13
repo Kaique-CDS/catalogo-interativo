@@ -17,6 +17,7 @@ const INITIAL_PRODUCTS = [
     category: 'Bolos Festivos',
     price: 185.00,
     servings: '15 a 20 fatias',
+    badge: 'Mais Pedido 🍓',
     isActive: true,
     image: 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=800&q=80',
   },
@@ -26,6 +27,7 @@ const INITIAL_PRODUCTS = [
     category: 'Bolos Festivos',
     price: 165.00,
     servings: '12 a 15 fatias',
+    badge: 'Destaque ✨',
     isActive: true,
     image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
   },
@@ -35,6 +37,7 @@ const INITIAL_PRODUCTS = [
     category: 'Bento Cakes',
     price: 55.00,
     servings: '1 a 2 pessoas',
+    badge: 'Presente Perfeito 🎁',
     isActive: true,
     image: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
   },
@@ -53,6 +56,7 @@ const INITIAL_PRODUCTS = [
     category: 'Doces Finos',
     price: 48.00,
     servings: '12 unidades',
+    badge: 'Artesanal 🍫',
     isActive: false,
     image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=800&q=80',
   }
@@ -79,21 +83,67 @@ export default function ProdutosPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5 pb-8">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-black text-rose-950 tracking-tight">Cardápio & Itens de Confeitaria</h1>
-          <p className="text-xs text-zinc-500 mt-0.5">Gerencie os bolos, doces finos e sobremesas exibidos aos clientes.</p>
+          <h1 className="text-xl sm:text-2xl font-black text-rose-950 tracking-tight">Cardápio do Ateliê 🍓</h1>
+          <p className="text-xs text-zinc-500 mt-0.5">Controle os doces e bolos visíveis para encomendas.</p>
         </div>
         <Link href="/confeitaria/admin/produtos/novo">
-          <Button className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs gap-1.5 shadow-xs font-semibold">
-            <Plus className="h-4 w-4" /> Novo Bolo / Doce
+          <Button className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs gap-1.5 shadow-xs font-semibold px-3 py-2 sm:px-4">
+            <Plus className="h-4 w-4" /> Novo Doce
           </Button>
         </Link>
       </div>
 
-      {/* Tabela de Produtos */}
-      <div className="bg-white rounded-3xl border border-rose-100 overflow-hidden shadow-xs">
+      {/* 1. Visão Mobile: Lista de Cards de Produtos */}
+      <div className="md:hidden space-y-3">
+        {products.map((item) => (
+          <div key={item.id} className="bg-white p-3.5 rounded-2xl border border-rose-100 shadow-2xs flex gap-3 items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0 border border-rose-100">
+                <Image src={item.image} alt={item.name} fill className="object-cover" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-rose-950 text-xs truncate">{item.name}</p>
+                <p className="text-[11px] text-zinc-400">{item.category} • {item.servings}</p>
+                <p className="text-xs font-black text-rose-950 mt-0.5">{formatCurrency(item.price)}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <Badge
+                variant={item.isActive ? 'default' : 'secondary'}
+                className={item.isActive ? 'bg-emerald-600 hover:bg-emerald-600 text-[9px] px-1.5 py-0' : 'text-[9px] px-1.5 py-0'}
+              >
+                {item.isActive ? 'Visível' : 'Pausado'}
+              </Badge>
+
+              <div className="flex items-center gap-0.5">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => toggleStatus(item.id)}
+                  className="h-7 w-7 text-zinc-400 hover:text-rose-600"
+                >
+                  {item.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleDelete(item.id)}
+                  className="h-7 w-7 text-zinc-400 hover:text-red-500"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 2. Visão Desktop: Tabela Tradicional */}
+      <div className="hidden md:block bg-white rounded-3xl border border-rose-100 overflow-hidden shadow-xs">
         <Table>
           <TableHeader className="bg-rose-50/50">
             <TableRow className="border-rose-100 text-xs">
@@ -116,16 +166,11 @@ export default function ProdutosPage() {
                 </TableCell>
                 <TableCell>
                   <p className="font-bold text-rose-950 text-xs">{item.name}</p>
+                  {item.badge && <span className="text-[10px] text-rose-600 font-semibold">{item.badge}</span>}
                 </TableCell>
-                <TableCell>
-                  <span className="text-zinc-500">{item.category}</span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-zinc-500">{item.servings}</span>
-                </TableCell>
-                <TableCell>
-                  <span className="font-bold text-rose-950">{formatCurrency(item.price)}</span>
-                </TableCell>
+                <TableCell><span className="text-zinc-500">{item.category}</span></TableCell>
+                <TableCell><span className="text-zinc-500">{item.servings}</span></TableCell>
+                <TableCell><span className="font-bold text-rose-950">{formatCurrency(item.price)}</span></TableCell>
                 <TableCell>
                   <Badge
                     variant={item.isActive ? 'default' : 'secondary'}
@@ -140,7 +185,6 @@ export default function ProdutosPage() {
                       size="icon"
                       variant="ghost"
                       onClick={() => toggleStatus(item.id)}
-                      title={item.isActive ? 'Pausar' : 'Publicar'}
                       className="h-8 w-8 text-zinc-400 hover:text-rose-600"
                     >
                       {item.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -43,6 +43,12 @@
           year: number
           mileage: number
           price: number
+          fuel?: string | null
+          transmission?: string | null
+          color?: string | null
+          plate_end?: string | null
+          features?: string[] | null
+          badge?: string | null
           description: string | null
           images: string[]
           is_active: boolean
@@ -57,6 +63,12 @@
           year: number
           mileage?: number
           price: number
+          fuel?: string | null
+          transmission?: string | null
+          color?: string | null
+          plate_end?: string | null
+          features?: string[] | null
+          badge?: string | null
           description?: string | null
           images?: string[]
           is_active?: boolean
@@ -71,6 +83,12 @@
           year?: number
           mileage?: number
           price?: number
+          fuel?: string | null
+          transmission?: string | null
+          color?: string | null
+          plate_end?: string | null
+          features?: string[] | null
+          badge?: string | null
           description?: string | null
           images?: string[]
           is_active?: boolean
