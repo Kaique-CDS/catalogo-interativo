@@ -1,5 +1,9 @@
-﻿import VehicleCard from './VehicleCard'
+﻿'use client'
+
+import React, { useState } from 'react'
+import VehicleCard from './VehicleCard'
 import SearchFilters from './SearchFilters'
+import VehicleDetailModal from './VehicleDetailModal'
 import { Car } from 'lucide-react'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 
@@ -12,28 +16,46 @@ interface Props {
 }
 
 export default function VehicleGrid({ vehicles, store, brands, years, searchParams }: Props) {
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+
   return (
     <div>
       <SearchFilters brands={brands} years={years} searchParams={searchParams} />
 
       {vehicles.length === 0 ? (
-        <div className="text-center py-24">
-          <Car className="h-16 w-16 text-zinc-200 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-zinc-700 mb-1">Nenhum veiculo encontrado</h3>
-          <p className="text-zinc-400 text-sm">Tente ajustar os filtros ou volte em breve.</p>
+        <div className="text-center py-20 bg-white rounded-2xl border border-zinc-200/80 p-8 max-w-md mx-auto">
+          <Car className="h-14 w-14 text-zinc-300 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-zinc-800 mb-1">Nenhum veículo encontrado</h3>
+          <p className="text-zinc-400 text-xs">Tente alterar os filtros ou limpar a pesquisa para ver mais opções.</p>
         </div>
       ) : (
         <>
-          <p className="text-sm text-zinc-500 mb-4">
-            {vehicles.length} veiculo{vehicles.length !== 1 ? 's' : ''} encontrado{vehicles.length !== 1 ? 's' : ''}
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs font-semibold text-zinc-500">
+              {vehicles.length} veículo{vehicles.length !== 1 ? 's' : ''} disponíve{vehicles.length !== 1 ? 'is' : 'l'}
+            </p>
+            <span className="text-[11px] text-zinc-400 hidden sm:inline">Clique no veículo para ver fotos e ficha técnica</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {vehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} store={store} />
+              <VehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                store={store}
+                onSelect={(v) => setSelectedVehicle(v)}
+              />
             ))}
           </div>
         </>
       )}
+
+      {/* Modal de Detalhes do Veículo */}
+      <VehicleDetailModal
+        vehicle={selectedVehicle}
+        store={store}
+        onClose={() => setSelectedVehicle(null)}
+      />
     </div>
   )
 }

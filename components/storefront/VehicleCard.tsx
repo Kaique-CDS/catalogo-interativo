@@ -1,17 +1,22 @@
 ﻿'use client'
 
 import Image from 'next/image'
-import { MessageCircle, Gauge, Calendar, Car, Sparkles, Fuel, Cog } from 'lucide-react'
+import { MessageCircle, Gauge, Calendar, Car, Sparkles, Fuel, Cog, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, formatMileage } from '@/lib/utils'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 
-interface Props { vehicle: Vehicle; store: Store }
+interface Props {
+  vehicle: Vehicle
+  store: Store
+  onSelect?: (vehicle: Vehicle) => void
+}
 
-export default function VehicleCard({ vehicle, store }: Props) {
-  const handleWhatsApp = () => {
+export default function VehicleCard({ vehicle, store, onSelect }: Props) {
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation()
     const url = buildWhatsAppUrl({
       whatsapp: store.whatsapp,
       storeName: store.name,
@@ -29,7 +34,10 @@ export default function VehicleCard({ vehicle, store }: Props) {
   const imageUrl = vehicle.images?.[0]
 
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200/80 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group">
+    <div
+      onClick={() => onSelect?.(vehicle)}
+      className="bg-white rounded-2xl border border-zinc-200/80 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group cursor-pointer"
+    >
       {/* Foto com Badges */}
       <div className="relative aspect-[16/10] sm:h-52 bg-zinc-100 overflow-hidden">
         {imageUrl ? (
@@ -56,6 +64,13 @@ export default function VehicleCard({ vehicle, store }: Props) {
               {vehicle.badge}
             </span>
           )}
+        </div>
+
+        {/* Hover / Dica de Toque para Expandir */}
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <span className="bg-white/90 text-zinc-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+            <Eye className="h-3.5 w-3.5" /> Ver detalhes
+          </span>
         </div>
 
         {vehicle.plate_end && (
@@ -125,13 +140,22 @@ export default function VehicleCard({ vehicle, store }: Props) {
             </span>
           </div>
 
-          <Button
-            className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 font-bold text-sm shadow-sm active:scale-[0.98] transition-all"
-            onClick={handleWhatsApp}
-          >
-            <MessageCircle className="h-4 w-4" />
-            Tenho Interesse
-          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              onClick={() => onSelect?.(vehicle)}
+              className="w-full text-xs font-bold rounded-xl py-2.5 text-zinc-700 hover:bg-zinc-50"
+            >
+              Ver Detalhes
+            </Button>
+            <Button
+              className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 font-bold text-xs shadow-xs"
+              onClick={handleWhatsApp}
+            >
+              <MessageCircle className="h-3.5 w-3.5" />
+              WhatsApp
+            </Button>
+          </div>
         </div>
       </div>
     </div>
