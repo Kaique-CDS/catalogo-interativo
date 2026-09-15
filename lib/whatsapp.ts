@@ -37,7 +37,7 @@ export interface WhatsAppFinancingParams {
 }
 
 /**
- * Builds a short WhatsApp URL using the vehicle SKU.
+ * Builds a WhatsApp URL placing the vehicle name first and the SKU reference at the end.
  * Routes to the correct number based on sector.
  */
 export function buildWhatsAppUrl(params: WhatsAppLeadParams): string {
@@ -60,14 +60,18 @@ export function buildWhatsAppUrl(params: WhatsAppLeadParams): string {
 
   const lines: string[] = [
     `Olá, *${storeName}*! 👋`,
-    `Tenho interesse no veículo *SKU: #${sku}* (${brand} ${model} ${year}).`,
+    `Tenho interesse no veículo *${brand} ${model} (${year})*.`,
   ]
 
   if (hasTradeIn) {
     lines.push(`🔄 *Tenho um veículo usado para dar na troca.*`)
   }
 
-  lines.push(`O veículo ainda está disponível? Aguardo retorno!`)
+  lines.push(
+    `O veículo ainda está disponível? Gostaria de saber mais detalhes!`,
+    ``,
+    `_(Ref. SKU: #${sku})_`
+  )
 
   const message = lines.join('\n')
   const cleanPhone = targetNumber.replace(/\D/g, '')
@@ -76,7 +80,7 @@ export function buildWhatsAppUrl(params: WhatsAppLeadParams): string {
 
 /**
  * Builds a WhatsApp URL with full financing simulation data.
- * Always routes to the financeiro number when available.
+ * Places the vehicle name first and the SKU reference at the end.
  */
 export function buildFinancingWhatsAppUrl(params: WhatsAppFinancingParams): string {
   const {
@@ -104,7 +108,7 @@ export function buildFinancingWhatsAppUrl(params: WhatsAppFinancingParams): stri
 
   const lines: string[] = [
     `Olá, *${storeName}*! 👋`,
-    `Gostaria de simular um *financiamento* para o veículo *SKU: #${sku}* (${brand} ${model} ${year}).`,
+    `Gostaria de simular um *financiamento* para o veículo *${brand} ${model} (${year})*.`,
     ``,
     `📋 *Dados para simulação:*`,
     `👤 Nome: ${nome}`,
@@ -123,7 +127,12 @@ export function buildFinancingWhatsAppUrl(params: WhatsAppFinancingParams): stri
     lines.push(`🔄 *Tenho um veículo usado para dar na troca.*`)
   }
 
-  lines.push(``, `Aguardo o contato da equipe financeira. Obrigado!`)
+  lines.push(
+    ``,
+    `Aguardo o contato da equipe financeira. Obrigado!`,
+    ``,
+    `_(Ref. SKU: #${sku})_`
+  )
 
   const message = lines.join('\n')
   const cleanPhone = targetNumber.replace(/\D/g, '')

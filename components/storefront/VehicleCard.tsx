@@ -38,15 +38,10 @@ export default function VehicleCard({ vehicle, store, onSelect }: Props) {
         )}
 
         {/* Marca Badge */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
+        <div className="absolute top-2.5 left-2.5 flex items-start">
           <Badge variant="secondary" className="bg-white/95 backdrop-blur-xs text-zinc-800 font-bold text-[11px] shadow-xs">
             {vehicle.brand}
           </Badge>
-          {vehicle.badge && (
-            <span className="bg-amber-500 text-white font-black text-[10px] px-2 py-0.5 rounded-md shadow-xs uppercase tracking-wide">
-              {vehicle.badge}
-            </span>
-          )}
         </div>
 
         {/* Hover / Dica de Toque para Expandir */}
@@ -55,12 +50,6 @@ export default function VehicleCard({ vehicle, store, onSelect }: Props) {
             <Eye className="h-3.5 w-3.5" /> Ver detalhes
           </span>
         </div>
-
-        {vehicle.plate_end && (
-          <div className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded">
-            Placa final {vehicle.plate_end}
-          </div>
-        )}
       </div>
 
       {/* Conteúdo do Card */}
@@ -93,6 +82,13 @@ export default function VehicleCard({ vehicle, store, onSelect }: Props) {
               <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 truncate">
                 <Fuel className="h-3.5 w-3.5 text-zinc-400" />
                 {vehicle.fuel}
+              </span>
+            )}
+            {vehicle.plate_end && (
+              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 col-span-2">
+                <span className="font-mono font-bold text-[10px] bg-zinc-200 text-zinc-700 px-1.5 py-0.2 rounded">
+                  Placa final {vehicle.plate_end}
+                </span>
               </span>
             )}
           </div>

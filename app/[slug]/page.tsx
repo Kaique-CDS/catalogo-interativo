@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import StoreHeader from '@/components/storefront/StoreHeader'
 import VehicleGrid from '@/components/storefront/VehicleGrid'
 import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import type { Store, Vehicle } from '@/lib/supabase/types'
 
@@ -15,10 +16,14 @@ const DEMO_STORE: Store = {
   slug: 'loja-exemplo',
   name: 'AutoCenter Motors Premium',
   logo_url: null,
+  banner_url: null,
   address: 'Av. das Nações, 1500 - São Paulo, SP',
   whatsapp: '5511993270543',
   whatsapp_financeiro: '5511993270543',
   opening_hours: 'Seg a Sex: 09h às 18h | Sáb: 09h às 13h',
+  primary_color: '#18181B',
+  font_family: 'Inter',
+  slogan: 'Os melhores veículos seminovos com laudo 100% aprovado e procedência garantida.',
   owner_id: 'demo-owner',
   created_at: new Date().toISOString(),
 }
@@ -37,7 +42,6 @@ const DEMO_VEHICLES: Vehicle[] = [
     fuel: 'Gasolina',
     transmission: 'Automático CVT',
     plate_end: '7',
-    badge: 'Imperdível 🔥',
     features: ['Teto Solar', 'Bancos em Couro', 'Painel Digital TFT', 'Faróis Full LED', 'Laudo Cautelar 100%'],
     description: 'Único dono, revisões rigorosamente em dia na autorizada, impecável sem nenhum retoque.',
     images: ['https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?auto=format&fit=crop&w=800&q=80'],
@@ -57,7 +61,6 @@ const DEMO_VEHICLES: Vehicle[] = [
     fuel: 'Flex',
     transmission: 'Automático Direct Shift',
     plate_end: '3',
-    badge: 'Único Dono ✨',
     features: ['Garantia de Fábrica', 'Central Multimídia', 'Controle de Estabilidade', 'Câmera de Ré'],
     description: 'Carro de não-fumante, IPVA 2024 quitado, estado de zero quilômetro.',
     images: ['https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=800&q=80'],
@@ -77,7 +80,6 @@ const DEMO_VEHICLES: Vehicle[] = [
     fuel: 'Flex',
     transmission: 'Automático 6 marchas',
     plate_end: '9',
-    badge: 'Oportunidade 💎',
     features: ['Som Premium Beats', 'Painel Full Digital', 'Ar Dual Zone', 'Sensor de Ponto Cego'],
     description: 'SUV em excepcional estado de conservação, laudo cautelar aprovado e pneus novos.',
     images: ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80'],
@@ -97,7 +99,6 @@ const DEMO_VEHICLES: Vehicle[] = [
     fuel: 'Flex',
     transmission: 'Automático Tiptronic',
     plate_end: '4',
-    badge: 'Abaixo da Fipe 📉',
     features: ['Active Info Display', 'Partida Start/Stop', 'Chave Presencial', 'Piloto Automático Adaptativo'],
     description: 'Versão topo de linha com motor turbo de 150cv, economia e esportividade.',
     images: ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'],
@@ -111,18 +112,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const supabase = await createClient()
     const { data: store } = await supabase
-      .from('stores').select('name').eq('slug', slug).maybeSingle()
+      .from('stores').select('name, slogan').eq('slug', slug).maybeSingle()
     if (store) {
       return {
         title: `${store.name} - Catálogo de Veículos`,
-        description: `Confira os veículos disponíveis na ${store.name}`,
+        description: store.slogan || `Confira os veículos disponíveis na ${store.name}`,
       }
     }
   } catch (e) {}
 
   return {
     title: `${DEMO_STORE.name} - Catálogo de Veículos`,
-    description: `Confira o catálogo de seminovos da ${DEMO_STORE.name}`,
+    description: DEMO_STORE.slogan || `Confira o catálogo de seminovos da ${DEMO_STORE.name}`,
   }
 }
 
@@ -190,14 +191,42 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
   const brands = [...new Set(vehicles.map((v) => v.brand))].sort()
   const years  = [...new Set(vehicles.map((v) => v.year))].sort((a, b) => b - a)
 
+  const fontFamily = store.font_family || 'Inter'
+  const fontGoogleUrl = fontFamily !== 'Inter'
+    ? `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@400;500;600;700;800;900&display=swap`
+    : null
+
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans pb-12">
+    <div
+      className="min-h-screen bg-zinc-50 pb-12"
+      style={{ fontFamily: `'${fontFamily}', sans-serif` }}
+    >
+      {fontGoogleUrl && (
+        // eslint-disable-next-line @next/next/no-page-custom-font
+        <link rel="stylesheet" href={fontGoogleUrl} />
+      )}
+
       {isDemoMode && (
         <div className="bg-amber-500 text-white text-xs font-semibold py-2 px-4 text-center">
           ⚡ Modo Demonstração Ativo — Conecte seu Supabase em <code>.env.local</code> para gerenciar dados reais.
         </div>
       )}
+
       <StoreHeader store={store} />
+
+      {/* Hero Banner (se configurado) */}
+      {store.banner_url && (
+        <div className="container mx-auto px-3 sm:px-4 pt-4 max-w-7xl">
+          <div className="relative aspect-[21/9] sm:aspect-[24/5] w-full rounded-2xl overflow-hidden shadow-xs border border-zinc-200">
+            <Image src={store.banner_url} alt={store.name} fill className="object-cover" priority />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-6 text-white">
+              <h2 className="text-xl sm:text-3xl font-black">{store.name}</h2>
+              {store.slogan && <p className="text-xs sm:text-sm text-zinc-200 mt-1">{store.slogan}</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         <VehicleGrid
           vehicles={vehicles}
@@ -207,6 +236,7 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
           searchParams={sParams}
         />
       </main>
+
       <footer className="border-t border-zinc-200 bg-white mt-12 py-8 text-center text-xs text-zinc-500">
         <p className="font-semibold text-zinc-900">{store.name}</p>
         {store.address && <p className="mt-0.5">{store.address}</p>}
@@ -215,6 +245,7 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
         )}
         <p className="text-[11px] text-zinc-400 mt-3">Catálogo Interativo Mobile First com Checkout Direto via WhatsApp</p>
       </footer>
+
       <FloatingWhatsApp storeName={store.name} whatsapp={store.whatsapp} />
     </div>
   )

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -89,12 +89,7 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
           <div className="flex-1">
             <h3 className="font-bold text-zinc-900">Simulação de Financiamento</h3>
             <p className="text-xs text-zinc-500">
-              {vehicle.brand} {vehicle.model} {vehicle.year}
-              {vehicle.sku && (
-                <span className="ml-1.5 font-mono font-semibold text-blue-600">
-                  #{vehicle.sku}
-                </span>
-              )}
+              {vehicle.brand} {vehicle.model} ({vehicle.year})
             </p>
           </div>
           <button
@@ -111,12 +106,12 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
           onSubmit={handleSubmit(onSubmit)}
           className="overflow-y-auto flex-1 px-5 py-4 space-y-4"
         >
-          {/* SKU (read-only) */}
-          <div className="p-3 bg-blue-50 rounded-xl flex items-center gap-3">
-            <div className="text-xs text-blue-600 font-medium">Veículo de interesse</div>
-            <div className="ml-auto font-mono text-sm font-bold text-blue-700">
-              SKU: #{vehicle.sku ?? 'N/A'}
-            </div>
+          {/* Vehicle info box */}
+          <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100 flex items-center justify-between">
+            <span className="text-xs text-zinc-500 font-medium">Veículo de interesse:</span>
+            <span className="text-xs font-bold text-zinc-800">
+              {vehicle.brand} {vehicle.model} {vehicle.year}
+            </span>
           </div>
 
           {/* Required fields */}

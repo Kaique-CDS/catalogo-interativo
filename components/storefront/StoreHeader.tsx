@@ -1,12 +1,14 @@
 ﻿import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, MessageCircle, LayoutDashboard } from 'lucide-react'
+import { MapPin, MessageCircle, LayoutDashboard, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Store } from '@/lib/supabase/types'
 
 interface Props { store: Store }
 
 export default function StoreHeader({ store }: Props) {
+  const brandColor = store.primary_color || '#18181B'
+
   return (
     <header className="bg-white border-b border-zinc-200/80 sticky top-0 z-20 shadow-2xs">
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-3 max-w-7xl">
@@ -20,7 +22,10 @@ export default function StoreHeader({ store }: Props) {
               className="rounded-xl object-contain border bg-zinc-50 p-1 flex-shrink-0"
             />
           ) : (
-            <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white font-black text-lg flex-shrink-0 shadow-xs">
+            <div
+              className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0 shadow-xs"
+              style={{ backgroundColor: brandColor }}
+            >
               {store.name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -28,12 +33,17 @@ export default function StoreHeader({ store }: Props) {
             <h1 className="font-black text-base sm:text-xl text-zinc-900 truncate leading-tight">
               {store.name}
             </h1>
-            {store.address && (
+            {store.slogan ? (
+              <p className="text-[11px] sm:text-xs text-zinc-500 truncate flex items-center gap-1 mt-0.5 font-medium">
+                <Sparkles className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                <span className="truncate">{store.slogan}</span>
+              </p>
+            ) : store.address ? (
               <p className="text-[11px] sm:text-xs text-zinc-500 flex items-center gap-1 mt-0.5 truncate">
                 <MapPin className="h-3 w-3 flex-shrink-0 text-zinc-400" />
                 <span className="truncate">{store.address}</span>
               </p>
-            )}
+            ) : null}
           </div>
         </div>
 

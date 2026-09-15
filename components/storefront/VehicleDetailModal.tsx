@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
@@ -118,28 +118,9 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
 
             {/* Badges */}
             <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-white/95 text-zinc-900 font-black text-xs shadow-md">
-                  {vehicle.brand}
-                </Badge>
-                {vehicle.badge && (
-                  <span className="bg-amber-500 text-white font-black text-xs px-2.5 py-0.5 rounded-md shadow-md uppercase">
-                    {vehicle.badge}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-1.5">
-                {vehicle.sku && (
-                  <span className="bg-blue-600/90 backdrop-blur-xs text-white text-xs px-2 py-0.5 rounded font-mono font-bold">
-                    #{vehicle.sku}
-                  </span>
-                )}
-                {vehicle.plate_end && (
-                  <span className="bg-black/60 backdrop-blur-xs text-white text-xs px-2 py-0.5 rounded font-mono font-bold">
-                    Placa final {vehicle.plate_end}
-                  </span>
-                )}
-              </div>
+              <Badge className="bg-white/95 text-zinc-900 font-black text-xs shadow-md">
+                {vehicle.brand}
+              </Badge>
             </div>
           </div>
 
@@ -157,20 +138,45 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
             </div>
 
             {/* Spec grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {[
-                { icon: Calendar, label: 'Ano', value: vehicle.year },
-                { icon: Gauge, label: 'Quilometragem', value: formatMileage(vehicle.mileage) },
-                { icon: Cog, label: 'Câmbio', value: vehicle.transmission || 'Automático' },
-                { icon: Fuel, label: 'Combustível', value: vehicle.fuel || 'Flex' },
-              ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
+                  <Calendar className="h-3 w-3" /> Ano
+                </span>
+                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{vehicle.year}</span>
+              </div>
+
+              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
+                  <Gauge className="h-3 w-3" /> Km
+                </span>
+                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{formatMileage(vehicle.mileage)}</span>
+              </div>
+
+              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
+                  <Cog className="h-3 w-3" /> Câmbio
+                </span>
+                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{vehicle.transmission || 'Automático'}</span>
+              </div>
+
+              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
+                  <Fuel className="h-3 w-3" /> Combustível
+                </span>
+                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{vehicle.fuel || 'Flex'}</span>
+              </div>
+
+              {vehicle.plate_end && (
+                <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl col-span-2 sm:col-span-1">
                   <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
-                    <Icon className="h-3 w-3" /> {label}
+                    Placa
                   </span>
-                  <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{value}</span>
+                  <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate font-mono">
+                    Final {vehicle.plate_end}
+                  </span>
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Features */}

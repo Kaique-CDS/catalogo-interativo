@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -58,12 +58,7 @@ export default function InterestOptionsSheet({ vehicle, store, onClose, onOpenFi
           <div>
             <h3 className="text-lg font-bold text-zinc-900">Como deseja prosseguir?</h3>
             <p className="text-sm text-zinc-500 mt-0.5">
-              {vehicle.brand} {vehicle.model} {vehicle.year}{' '}
-              {vehicle.sku && (
-                <span className="text-xs font-mono font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-                  #{vehicle.sku}
-                </span>
-              )}
+              {vehicle.brand} {vehicle.model} ({vehicle.year})
             </p>
           </div>
           <button

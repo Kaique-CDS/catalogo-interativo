@@ -7,10 +7,14 @@
           slug: string
           name: string
           logo_url: string | null
+          banner_url: string | null
           address: string | null
           whatsapp: string
           whatsapp_financeiro: string | null
           opening_hours: string | null
+          primary_color: string | null
+          font_family: string | null
+          slogan: string | null
           owner_id: string
           created_at: string
         }
@@ -19,10 +23,14 @@
           slug: string
           name: string
           logo_url?: string | null
+          banner_url?: string | null
           address?: string | null
           whatsapp: string
           whatsapp_financeiro?: string | null
           opening_hours?: string | null
+          primary_color?: string | null
+          font_family?: string | null
+          slogan?: string | null
           owner_id: string
           created_at?: string
         }
@@ -31,10 +39,14 @@
           slug?: string
           name?: string
           logo_url?: string | null
+          banner_url?: string | null
           address?: string | null
           whatsapp?: string
           whatsapp_financeiro?: string | null
           opening_hours?: string | null
+          primary_color?: string | null
+          font_family?: string | null
+          slogan?: string | null
           owner_id?: string
           created_at?: string
         }

@@ -47,7 +47,6 @@ const vehicleSchema = z.object({
   transmission: z.string().optional(),
   color: z.string().optional(),
   plate_end: z.string().max(2).optional(),
-  badge: z.string().optional(),
   description: z.string().min(10, 'Descrição é obrigatória (mín. 10 caracteres)'),
 })
 
@@ -64,7 +63,6 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(vehicle?.features ?? [])
   const [fuel, setFuel] = useState<string>(vehicle?.fuel ?? 'Flex')
   const [transmission, setTransmission] = useState<string>(vehicle?.transmission ?? 'Automático')
-  const [badge, setBadge] = useState<string>(vehicle?.badge ?? 'Nenhum')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [sku, setSku] = useState<string>(vehicle?.sku ?? '')
@@ -90,12 +88,10 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       transmission: vehicle.transmission ?? 'Automático',
       color: vehicle.color ?? '',
       plate_end: vehicle.plate_end ?? '',
-      badge: vehicle.badge ?? '',
       description: vehicle.description ?? '',
     } : {
       fuel: 'Flex',
       transmission: 'Automático',
-      badge: '',
     },
   })
 
@@ -107,16 +103,23 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
-    if (!files.length) return
+    if (files.length === 0) return
+
     setUploading(true)
     const newUrls: string[] = []
+
     for (const file of files) {
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        newUrls.push(URL.createObjectURL(file))
+        continue
+      }
       const ext = file.name.split('.').pop()
-      const path = `${storeId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error } = await supabase.storage.from('vehicles').upload(path, file, { upsert: true })
-      if (error) { toast.error(`Erro ao enviar ${file.name}`); continue }
-      const { data } = supabase.storage.from('vehicles').getPublicUrl(path)
-      newUrls.push(data.publicUrl)
+      const path = `${storeId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+      const { error } = await supabase.storage.from('vehicles').upload(path, file)
+      if (!error) {
+        const { data } = supabase.storage.from('vehicles').getPublicUrl(path)
+        newUrls.push(data.publicUrl)
+      }
     }
     setImages(prev => [...prev, ...newUrls])
     setUploading(false)
@@ -130,7 +133,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       sku: sku || generateSKU(),
       fuel,
       transmission,
-      badge: badge === 'Nenhum' ? null : badge,
+      badge: null,
       features: selectedFeatures,
       store_id: storeId,
       images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'],
@@ -232,7 +235,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="brand" className="text-xs font-semibold text-zinc-700">Marca *</Label>
               <Input id="brand" placeholder="Ex: Honda, Toyota, BMW" className="text-sm rounded-xl" {...register('brand')} />
@@ -242,20 +245,6 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               <Label htmlFor="model" className="text-xs font-semibold text-zinc-700">Modelo *</Label>
               <Input id="model" placeholder="Ex: Civic, Corolla, X1" className="text-sm rounded-xl" {...register('model')} />
               {errors.model && <p className="text-xs text-red-500">{errors.model.message}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700">Selo Promocional</Label>
-              <Select value={badge} onValueChange={setBadge}>
-                <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Selecione selo" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Nenhum">Sem selo</SelectItem>
-                  <SelectItem value="Imperdível 🔥">Imperdível 🔥</SelectItem>
-                  <SelectItem value="Único Dono ✨">Único Dono ✨</SelectItem>
-                  <SelectItem value="Oportunidade 💎">Oportunidade 💎</SelectItem>
-                  <SelectItem value="Abaixo da Fipe 📉">Abaixo da Fipe 📉</SelectItem>
-                  <SelectItem value="Garantia de Fábrica 🛡️">Garantia de Fábrica 🛡️</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
