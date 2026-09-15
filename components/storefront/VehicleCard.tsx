@@ -1,11 +1,10 @@
 'use client'
 
 import Image from 'next/image'
-import { MessageCircle, Gauge, Calendar, Car, Sparkles, Fuel, Cog, Eye } from 'lucide-react'
+import { Gauge, Calendar, Car, Fuel, Cog, Eye, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatCurrency, formatMileage } from '@/lib/utils'
-import { buildWhatsAppUrl } from '@/lib/whatsapp'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 
 interface Props {
@@ -15,21 +14,6 @@ interface Props {
 }
 
 export default function VehicleCard({ vehicle, store, onSelect }: Props) {
-  const handleWhatsApp = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    const url = buildWhatsAppUrl({
-      whatsapp: store.whatsapp,
-      whatsappFinanceiro: store.whatsapp_financeiro,
-      storeName: store.name,
-      sku: vehicle.sku ?? 'N/A',
-      brand: vehicle.brand,
-      model: vehicle.model,
-      year: vehicle.year,
-      sector: 'vendas',
-    })
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
   const imageUrl = vehicle.images?.[0]
 
   return (
@@ -148,11 +132,11 @@ export default function VehicleCard({ vehicle, store, onSelect }: Props) {
               Ver Detalhes
             </Button>
             <Button
-              className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 font-bold text-xs shadow-xs"
-              onClick={handleWhatsApp}
+              className="w-full gap-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 font-bold text-xs shadow-xs"
+              onClick={() => onSelect?.(vehicle)}
             >
-              <MessageCircle className="h-3.5 w-3.5" />
-              WhatsApp
+              Tenho Interesse
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>

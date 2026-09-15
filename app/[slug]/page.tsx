@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import StoreHeader from '@/components/storefront/StoreHeader'
 import VehicleGrid from '@/components/storefront/VehicleGrid'
+import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
 import type { Metadata } from 'next'
 import type { Store, Vehicle } from '@/lib/supabase/types'
 
@@ -214,6 +215,7 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
         )}
         <p className="text-[11px] text-zinc-400 mt-3">Catálogo Interativo Mobile First com Checkout Direto via WhatsApp</p>
       </footer>
+      <FloatingWhatsApp storeName={store.name} whatsapp={store.whatsapp} />
     </div>
   )
 }
