@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, X, Loader2, Car, Sparkles, Check, Hash } from 'lucide-react'
+import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
@@ -28,12 +28,13 @@ const COMMON_FEATURES = [
   'Câmera de Ré / Sensor',
   'Freios ABS / Airbags',
   'Faróis de LED',
-  'Rodas de Liga Leve',
   'Piloto Automático',
+  'Chave Presencial / Start-Stop',
+  'Painel 100% Digital',
   'Garantia de Fábrica',
+  'Laudo Cautelar Aprovado',
   'Único Dono',
   'IPVA Pago',
-  'Laudo Cautelar Aprovado'
 ]
 
 const vehicleSchema = z.object({
@@ -63,6 +64,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(vehicle?.features ?? [])
   const [fuel, setFuel] = useState<string>(vehicle?.fuel ?? 'Flex')
   const [transmission, setTransmission] = useState<string>(vehicle?.transmission ?? 'Automático')
+  const [isActive, setIsActive] = useState<boolean>(vehicle?.is_active ?? true)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [sku, setSku] = useState<string>(vehicle?.sku ?? '')
@@ -133,6 +135,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       sku: sku || generateSKU(),
       fuel,
       transmission,
+      is_active: isActive,
       badge: null,
       features: selectedFeatures,
       store_id: storeId,
@@ -140,7 +143,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     }
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-      toast.success(isEditing ? 'Veículo atualizado (Modo Demo)!' : 'Veículo adicionado (Modo Demo)!')
+      toast.success(isEditing ? 'Veículo atualizado (Modo Demo)!' : 'Veículo cadastrado (Modo Demo)!')
       router.push(`/${slug}/admin/estoque`)
       return
     }
@@ -148,7 +151,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     if (isEditing) {
       const { error } = await supabase.from('vehicles').update(payload).eq('id', vehicle.id)
       if (error) { toast.error('Erro ao salvar alterações'); setSaving(false); return }
-      toast.success('Veículo atualizado!')
+      toast.success('Veículo atualizado com sucesso!')
     } else {
       const { error } = await supabase.from('vehicles').insert(payload)
       if (error) { toast.error('Erro ao cadastrar o veículo'); setSaving(false); return }
@@ -163,36 +166,28 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       {/* 1. Fotos */}
       <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <Label className="text-sm font-bold text-zinc-900 block">Fotos do Veículo</Label>
-              <p className="text-xs text-zinc-500">A primeira foto será o destaque da vitrine.</p>
-            </div>
-            <span className="text-xs font-semibold text-zinc-400">{images.length} adicionada(s)</span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-            {images.map((url, index) => (
-              <div key={url} className="relative aspect-video rounded-xl overflow-hidden border bg-zinc-100 group">
-                <Image src={url} alt="Foto" fill className="object-cover" sizes="200px" />
-                {index === 0 && (
-                  <span className="absolute bottom-1 left-1 bg-zinc-900/85 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                    Capa
-                  </span>
-                )}
+          <Label className="text-xs font-bold text-zinc-900 block mb-2">Fotos do Veículo (Capa e Galeria)</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {images.map((url, i) => (
+              <div key={i} className="relative aspect-video rounded-xl bg-zinc-100 overflow-hidden group border border-zinc-200/80">
+                <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
                 <button
                   type="button"
-                  onClick={() => setImages(p => p.filter(i => i !== url))}
-                  className="absolute top-1 right-1 h-6 w-6 bg-red-600 rounded-full flex items-center justify-center text-white hover:bg-red-700 shadow-sm"
+                  onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
+                  className="absolute top-1.5 right-1.5 p-1 bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
+                {i === 0 && (
+                  <span className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                    Foto Principal
+                  </span>
+                )}
               </div>
             ))}
-
-            <label className="aspect-video rounded-xl border-2 border-dashed border-zinc-300 flex flex-col items-center justify-center cursor-pointer hover:border-zinc-500 hover:bg-zinc-50 transition-all">
+            <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-200 hover:border-zinc-400 cursor-pointer bg-zinc-50/50 hover:bg-zinc-50 transition-colors">
               {uploading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+                <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
               ) : (
                 <>
                   <Upload className="h-5 w-5 text-zinc-500 mb-1" />
@@ -307,15 +302,14 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
         <CardContent className="pt-6">
           <Label className="text-xs font-bold text-zinc-900 block mb-1">Opcionais & Diferenciais Rápidos</Label>
-          <p className="text-xs text-zinc-500 mb-3">Selecione os itens presentes no carro para destacar ao cliente na vitrine e no WhatsApp.</p>
-
+          <p className="text-[11px] text-zinc-400 mb-3">Selecione os itens que mais valorizam o veículo</p>
           <div className="flex flex-wrap gap-2">
             {COMMON_FEATURES.map((feature) => {
               const isSelected = selectedFeatures.includes(feature)
               return (
                 <button
-                  type="button"
                   key={feature}
+                  type="button"
                   onClick={() => toggleFeature(feature)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                     isSelected
@@ -343,6 +337,44 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             />
             <p className="text-[10px] text-zinc-400">Mín. 10 caracteres. Uma boa descrição aumenta as chances de venda!</p>
             {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 4. Status de Publicação */}
+      <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-200">
+            <div className="flex items-center gap-3.5">
+              <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-colors ${
+                isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-500'
+              }`}>
+                {isActive ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-zinc-900">
+                  {isActive ? 'Veículo Publicado no Catálogo' : 'Veículo Pausado / Oculto'}
+                </p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  {isActive
+                    ? 'Disponível e visível para todos os visitantes da sua vitrine.'
+                    : 'Oculto do catálogo online. Não aparece para os compradores.'}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsActive(!isActive)}
+              className={`relative inline-flex h-7 w-13 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                isActive ? 'bg-emerald-600' : 'bg-zinc-300'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                  isActive ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         </CardContent>
       </Card>
