@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Image from 'next/image'
 import { MessageCircle, Gauge, Calendar, Car, Sparkles, Fuel, Cog, Eye } from 'lucide-react'
@@ -19,14 +19,13 @@ export default function VehicleCard({ vehicle, store, onSelect }: Props) {
     e.stopPropagation()
     const url = buildWhatsAppUrl({
       whatsapp: store.whatsapp,
+      whatsappFinanceiro: store.whatsapp_financeiro,
       storeName: store.name,
+      sku: vehicle.sku ?? 'N/A',
       brand: vehicle.brand,
       model: vehicle.model,
       year: vehicle.year,
-      price: vehicle.price,
-      transmission: vehicle.transmission,
-      fuel: vehicle.fuel,
-      address: store.address,
+      sector: 'vendas',
     })
     window.open(url, '_blank', 'noopener,noreferrer')
   }

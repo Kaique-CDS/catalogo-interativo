@@ -9,6 +9,8 @@
           logo_url: string | null
           address: string | null
           whatsapp: string
+          whatsapp_financeiro: string | null
+          opening_hours: string | null
           owner_id: string
           created_at: string
         }
@@ -19,6 +21,8 @@
           logo_url?: string | null
           address?: string | null
           whatsapp: string
+          whatsapp_financeiro?: string | null
+          opening_hours?: string | null
           owner_id: string
           created_at?: string
         }
@@ -29,6 +33,8 @@
           logo_url?: string | null
           address?: string | null
           whatsapp?: string
+          whatsapp_financeiro?: string | null
+          opening_hours?: string | null
           owner_id?: string
           created_at?: string
         }
@@ -37,6 +43,7 @@
         Row: {
           id: string
           store_id: string
+          sku: string | null
           title: string
           brand: string
           model: string
@@ -57,6 +64,7 @@
         Insert: {
           id?: string
           store_id: string
+          sku?: string | null
           title: string
           brand: string
           model: string
@@ -77,6 +85,7 @@
         Update: {
           id?: string
           store_id?: string
+          sku?: string | null
           title?: string
           brand?: string
           model?: string

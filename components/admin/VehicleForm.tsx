@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,9 +13,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, X, Loader2, Car, Sparkles, Check } from 'lucide-react'
+import { Upload, X, Loader2, Car, Sparkles, Check, Hash } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Vehicle } from '@/lib/supabase/types'
+import { generateSKU } from '@/lib/sku'
 
 const COMMON_FEATURES = [
   'Ar-condicionado',
@@ -47,7 +48,7 @@ const vehicleSchema = z.object({
   color: z.string().optional(),
   plate_end: z.string().max(2).optional(),
   badge: z.string().optional(),
-  description: z.string().optional(),
+  description: z.string().min(10, 'Descrição é obrigatória (mín. 10 caracteres)'),
 })
 
 type VehicleFormData = z.infer<typeof vehicleSchema>
@@ -66,6 +67,15 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const [badge, setBadge] = useState<string>(vehicle?.badge ?? 'Nenhum')
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [sku, setSku] = useState<string>(vehicle?.sku ?? '')
+
+  // Auto-generate SKU for new vehicles on mount
+  useEffect(() => {
+    if (!isEditing && !sku) {
+      setSku(generateSKU())
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const { register, handleSubmit, formState: { errors } } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
@@ -117,6 +127,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     setSaving(true)
     const payload = {
       ...data,
+      sku: sku || generateSKU(),
       fuel,
       transmission,
       badge: badge === 'Nenhum' ? null : badge,
@@ -195,6 +206,26 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       {/* 2. Informações Principais */}
       <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
         <CardContent className="pt-6 space-y-4">
+          {/* SKU read-only */}
+          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+            <Hash className="h-4 w-4 text-blue-500 flex-shrink-0" />
+            <div className="flex-1">
+              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">
+                Código SKU (gerado automaticamente)
+              </span>
+              <span className="font-mono text-sm font-bold text-blue-800">{sku || '—'}</span>
+            </div>
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={() => setSku(generateSKU())}
+                className="text-[10px] text-blue-500 hover:text-blue-700 underline"
+              >
+                Gerar novo
+              </button>
+            )}
+          </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="title" className="text-xs font-semibold text-zinc-700">Título do Anúncio *</Label>
             <Input id="title" placeholder="Ex: Honda Civic Touring 1.5 Turbo - Único Dono / Teto Solar" className="text-sm rounded-xl" {...register('title')} />
@@ -311,14 +342,18 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           </div>
 
           <div className="mt-4 space-y-1.5">
-            <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">Observações Extras / Laudo / Histórico</Label>
+            <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">
+              Descrição do Veículo <span className="text-red-500">*</span>
+            </Label>
             <Textarea
               id="description"
-              placeholder="Ex: Todas as revisões feitas em concessionária, pneus Pirelli novos, laudo Dekra 100% aprovado, sem retoques..."
-              rows={3}
+              placeholder="Ex: Todas as revisões feitas em concessionária, pneus Pirelli novos, laudo Dekra 100% aprovado, sem retoques. Carro em excelente estado, único dono."
+              rows={4}
               className="text-sm rounded-xl"
               {...register('description')}
             />
+            <p className="text-[10px] text-zinc-400">Mín. 10 caracteres. Uma boa descrição aumenta as chances de venda!</p>
+            {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
           </div>
         </CardContent>
       </Card>

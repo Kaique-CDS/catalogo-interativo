@@ -1,42 +1,131 @@
-﻿import { formatCurrency } from './utils'
+﻿export type WhatsAppSector = 'vendas' | 'financeiro'
 
 export interface WhatsAppLeadParams {
+  /** Main sales WhatsApp number */
   whatsapp: string
+  /** Finance sector WhatsApp number (optional) */
+  whatsappFinanceiro?: string | null
   storeName: string
+  sku: string
   brand: string
   model: string
   year: number
-  price: number
-  transmission?: string | null
-  fuel?: string | null
-  address?: string | null
+  sector?: WhatsAppSector
+  /** Whether the customer has a trade-in vehicle */
+  hasTradeIn?: boolean
 }
 
-export function buildWhatsAppUrl(params: WhatsAppLeadParams): string {
-  const { whatsapp, storeName, brand, model, year, price, transmission, fuel, address } = params
+export interface WhatsAppFinancingParams {
+  whatsappFinanceiro?: string | null
+  whatsapp: string
+  storeName: string
+  sku: string
+  brand: string
+  model: string
+  year: number
+  // Financing form data
+  nome: string
+  cpf: string
+  cnh?: string
+  dataNascimento?: string
+  rendaMensal?: string
+  valorEntrada?: string
+  banco?: string
+  email?: string
+  contato: string
+  hasTradeIn?: boolean
+}
 
-  const formattedPrice = formatCurrency(price)
+/**
+ * Builds a short WhatsApp URL using the vehicle SKU.
+ * Routes to the correct number based on sector.
+ */
+export function buildWhatsAppUrl(params: WhatsAppLeadParams): string {
+  const {
+    whatsapp,
+    whatsappFinanceiro,
+    storeName,
+    sku,
+    brand,
+    model,
+    year,
+    sector = 'vendas',
+    hasTradeIn = false,
+  } = params
+
+  const targetNumber =
+    sector === 'financeiro' && whatsappFinanceiro
+      ? whatsappFinanceiro
+      : whatsapp
 
   const lines: string[] = [
     `Olá, *${storeName}*! 👋`,
-    `Vi este veículo no catálogo online e tenho real interesse:`,
-    '',
-    `🚗 *${brand} ${model} (${year})*`,
-    `💰 *Valor:* ${formattedPrice}`,
+    `Tenho interesse no veículo *SKU: #${sku}* (${brand} ${model} ${year}).`,
   ]
 
-  const specs = [transmission, fuel].filter(Boolean)
-  if (specs.length > 0) {
-    lines.push(`⚙️ *Detalhes:* ${specs.join(' • ')}`)
+  if (hasTradeIn) {
+    lines.push(`🔄 *Tenho um veículo usado para dar na troca.*`)
   }
 
-  if (address) {
-    lines.push(`📍 *Localização:* ${address}`)
-  }
-
-  lines.push('', 'O veículo ainda está disponível? Gostaria de saber sobre propostas e formas de pagamento!')
+  lines.push(`O veículo ainda está disponível? Aguardo retorno!`)
 
   const message = lines.join('\n')
-  const cleanPhone = whatsapp.replace(/\D/g, '')
+  const cleanPhone = targetNumber.replace(/\D/g, '')
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
+}
+
+/**
+ * Builds a WhatsApp URL with full financing simulation data.
+ * Always routes to the financeiro number when available.
+ */
+export function buildFinancingWhatsAppUrl(params: WhatsAppFinancingParams): string {
+  const {
+    whatsappFinanceiro,
+    whatsapp,
+    storeName,
+    sku,
+    brand,
+    model,
+    year,
+    nome,
+    cpf,
+    cnh,
+    dataNascimento,
+    rendaMensal,
+    valorEntrada,
+    banco,
+    email,
+    contato,
+    hasTradeIn = false,
+  } = params
+
+  const targetNumber =
+    whatsappFinanceiro ? whatsappFinanceiro : whatsapp
+
+  const lines: string[] = [
+    `Olá, *${storeName}*! 👋`,
+    `Gostaria de simular um *financiamento* para o veículo *SKU: #${sku}* (${brand} ${model} ${year}).`,
+    ``,
+    `📋 *Dados para simulação:*`,
+    `👤 Nome: ${nome}`,
+    `🪪 CPF: ${cpf}`,
+  ]
+
+  if (cnh) lines.push(`🚗 CNH: ${cnh}`)
+  if (dataNascimento) lines.push(`📅 Data de Nascimento: ${dataNascimento}`)
+  if (rendaMensal) lines.push(`💼 Renda Mensal: R$ ${rendaMensal}`)
+  if (valorEntrada) lines.push(`💰 Valor de Entrada: R$ ${valorEntrada}`)
+  if (banco) lines.push(`🏦 Banco: ${banco}`)
+  if (email) lines.push(`📧 E-mail: ${email}`)
+  lines.push(`📱 Contato: ${contato}`)
+
+  if (hasTradeIn) {
+    lines.push(`🔄 *Tenho um veículo usado para dar na troca.*`)
+  }
+
+  lines.push(``, `Aguardo o contato da equipe financeira. Obrigado!`)
+
+  const message = lines.join('\n')
+  const cleanPhone = targetNumber.replace(/\D/g, '')
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
 }

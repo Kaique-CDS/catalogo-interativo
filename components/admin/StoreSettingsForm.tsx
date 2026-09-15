@@ -9,15 +9,17 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
-import { Upload, Loader2, Globe } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Upload, Loader2, Globe, Phone, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Store } from '@/lib/supabase/types'
 
 const settingsSchema = z.object({
-  name:     z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
-  whatsapp: z.string().min(10, 'Informe um numero de WhatsApp valido (com DDI)'),
-  address:  z.string().optional(),
+  name:                z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
+  whatsapp:            z.string().min(10, 'Informe um numero de WhatsApp valido (com DDI)'),
+  whatsapp_financeiro: z.string().optional(),
+  opening_hours:       z.string().optional(),
+  address:             z.string().optional(),
 })
 
 type SettingsFormData = z.infer<typeof settingsSchema>
@@ -32,7 +34,13 @@ export default function StoreSettingsForm({ store, slug }: Props) {
 
   const { register, handleSubmit, formState: { errors } } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: { name: store.name, whatsapp: store.whatsapp, address: store.address ?? '' },
+    defaultValues: {
+      name:                store.name,
+      whatsapp:            store.whatsapp,
+      whatsapp_financeiro: store.whatsapp_financeiro ?? '',
+      opening_hours:       store.opening_hours ?? 'Seg a Sex: 09h às 18h',
+      address:             store.address ?? '',
+    },
   })
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,9 +59,24 @@ export default function StoreSettingsForm({ store, slug }: Props) {
 
   const onSubmit = async (data: SettingsFormData) => {
     setSaving(true)
-    const { error } = await supabase.from('stores').update({ ...data, logo_url: logoUrl }).eq('id', store.id)
-    if (error) { toast.error('Erro ao salvar as configuracoes'); setSaving(false); return }
-    toast.success('Configuracoes salvas!')
+    const payload = {
+      name: data.name,
+      whatsapp: data.whatsapp,
+      whatsapp_financeiro: data.whatsapp_financeiro || null,
+      opening_hours: data.opening_hours || null,
+      address: data.address || null,
+      logo_url: logoUrl,
+    }
+
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+      toast.success('Configurações salvas (Modo Demo)!')
+      setSaving(false)
+      return
+    }
+
+    const { error } = await supabase.from('stores').update(payload).eq('id', store.id)
+    if (error) { toast.error('Erro ao salvar as configurações'); setSaving(false); return }
+    toast.success('Configurações salvas!')
     setSaving(false)
   }
 
@@ -63,6 +86,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
+      {/* Vitrine URL */}
       <Card className="border-blue-100 bg-blue-50">
         <CardContent className="pt-6">
           <div className="flex items-center gap-2 text-sm font-medium text-blue-800 mb-1">
@@ -72,6 +96,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
         </CardContent>
       </Card>
 
+      {/* Logo */}
       <Card>
         <CardContent className="pt-6">
           <Label className="mb-3 block">Logo da loja</Label>
@@ -95,28 +120,69 @@ export default function StoreSettingsForm({ store, slug }: Props) {
         </CardContent>
       </Card>
 
+      {/* Informações Básicas */}
       <Card>
-        <CardContent className="pt-6 space-y-4">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-bold text-zinc-700">Informações da Loja</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="name">Nome da loja *</Label>
             <Input id="name" {...register('name')} />
             {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="whatsapp">WhatsApp (com DDI) *</Label>
-            <Input id="whatsapp" placeholder="5511999999999" {...register('whatsapp')} />
-            <p className="text-xs text-zinc-400">Somente numeros com DDI (ex: 5511999999999)</p>
+            <Label htmlFor="address">Endereço físico</Label>
+            <Input id="address" placeholder="Av. das Nações, 1500 - São Paulo, SP" {...register('address')} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="opening_hours" className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-zinc-400" />
+              Horário de Funcionamento
+            </Label>
+            <Input
+              id="opening_hours"
+              placeholder="Ex: Seg a Sex: 09h às 18h | Sáb: 09h às 13h"
+              {...register('opening_hours')}
+            />
+            <p className="text-xs text-zinc-400">Aparece no rodapé da vitrine e no modal do veículo.</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* WhatsApp */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-bold text-zinc-700 flex items-center gap-2">
+            <Phone className="h-4 w-4" /> WhatsApp por Setor
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="whatsapp">WhatsApp — Vendas * <span className="text-[10px] text-zinc-400">(número principal)</span></Label>
+            <Input id="whatsapp" placeholder="5511993270543" {...register('whatsapp')} />
+            <p className="text-xs text-zinc-400">Somente números com DDI (ex: 5511993270543)</p>
             {errors.whatsapp && <p className="text-xs text-red-500">{errors.whatsapp.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="address">Endereco fisico</Label>
-            <Input id="address" placeholder="Av. das Nacoes, 1500 - Sao Paulo, SP" {...register('address')} />
+            <Label htmlFor="whatsapp_financeiro">
+              WhatsApp — Financeiro <span className="text-[10px] text-zinc-400">(opcional)</span>
+            </Label>
+            <Input
+              id="whatsapp_financeiro"
+              placeholder="5511993270543"
+              {...register('whatsapp_financeiro')}
+            />
+            <p className="text-xs text-zinc-400">
+              Clientes que solicitam simulação de financiamento serão direcionados para este número.
+              Se não preenchido, usará o número de Vendas.
+            </p>
           </div>
         </CardContent>
       </Card>
 
       <Button type="submit" disabled={saving} className="gap-2">
-        {saving && <Loader2 className="h-4 w-4 animate-spin" />}Salvar Configuracoes
+        {saving && <Loader2 className="h-4 w-4 animate-spin" />}Salvar Configurações
       </Button>
     </form>
   )

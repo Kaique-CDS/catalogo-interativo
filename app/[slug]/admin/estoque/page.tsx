@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
@@ -9,6 +9,7 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '1',
     store_id: 'demo-store-id',
+    sku: 'CIV23',
     title: 'Honda Civic Touring 1.5 Turbo',
     brand: 'Honda',
     model: 'Civic',
@@ -23,6 +24,7 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '2',
     store_id: 'demo-store-id',
+    sku: 'COR23',
     title: 'Toyota Corolla XEi 2.0 Flex',
     brand: 'Toyota',
     model: 'Corolla',

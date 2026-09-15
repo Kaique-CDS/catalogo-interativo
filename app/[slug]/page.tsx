@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import StoreHeader from '@/components/storefront/StoreHeader'
 import VehicleGrid from '@/components/storefront/VehicleGrid'
 import type { Metadata } from 'next'
@@ -15,7 +15,9 @@ const DEMO_STORE: Store = {
   name: 'AutoCenter Motors Premium',
   logo_url: null,
   address: 'Av. das Nações, 1500 - São Paulo, SP',
-  whatsapp: '5511999999999',
+  whatsapp: '5511993270543',
+  whatsapp_financeiro: '5511993270543',
+  opening_hours: 'Seg a Sex: 09h às 18h | Sáb: 09h às 13h',
   owner_id: 'demo-owner',
   created_at: new Date().toISOString(),
 }
@@ -24,6 +26,7 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '1',
     store_id: 'demo-store-id',
+    sku: 'CIV23',
     title: 'Honda Civic Touring 1.5 Turbo CVT',
     brand: 'Honda',
     model: 'Civic',
@@ -43,6 +46,7 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '2',
     store_id: 'demo-store-id',
+    sku: 'COR23',
     title: 'Toyota Corolla XEi 2.0 Dynamic Force',
     brand: 'Toyota',
     model: 'Corolla',
@@ -62,6 +66,7 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '3',
     store_id: 'demo-store-id',
+    sku: 'JCP22',
     title: 'Jeep Compass Longitude T270 Turbo Flex',
     brand: 'Jeep',
     model: 'Compass',
@@ -81,6 +86,7 @@ const DEMO_VEHICLES: Vehicle[] = [
   {
     id: '4',
     store_id: 'demo-store-id',
+    sku: 'TCR23',
     title: 'Volkswagen T-Cross Highline 250 TSI',
     brand: 'Volkswagen',
     model: 'T-Cross',
@@ -200,10 +206,13 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
           searchParams={sParams}
         />
       </main>
-      <footer className="border-t border-zinc-200 bg-white mt-12 py-6 text-center text-xs text-zinc-500">
+      <footer className="border-t border-zinc-200 bg-white mt-12 py-8 text-center text-xs text-zinc-500">
         <p className="font-semibold text-zinc-900">{store.name}</p>
-        <p className="mt-0.5">{store.address}</p>
-        <p className="text-[11px] text-zinc-400 mt-2">Catálogo Interativo Mobile First com Checkout Direto via WhatsApp</p>
+        {store.address && <p className="mt-0.5">{store.address}</p>}
+        {store.opening_hours && (
+          <p className="mt-1 text-zinc-600 font-medium">🕐 {store.opening_hours}</p>
+        )}
+        <p className="text-[11px] text-zinc-400 mt-3">Catálogo Interativo Mobile First com Checkout Direto via WhatsApp</p>
       </footer>
     </div>
   )
