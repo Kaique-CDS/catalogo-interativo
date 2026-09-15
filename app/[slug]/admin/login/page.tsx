@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
@@ -31,9 +31,8 @@ export default function LoginPage() {
       document.cookie = 'admin_auth=true; path=/; max-age=604800; SameSite=Lax'
       toast.success('Login autorizado! Bem-vinda, Julia!')
       setTimeout(() => {
-        router.push(`/${slug}/admin`)
-        router.refresh()
-      }, 500)
+        window.location.href = `/${slug}/admin`
+      }, 300)
       return
     }
 
@@ -47,8 +46,7 @@ export default function LoginPage() {
         if (!error) {
           document.cookie = 'admin_auth=true; path=/; max-age=604800; SameSite=Lax'
           toast.success('Login realizado com sucesso!')
-          router.push(`/${slug}/admin`)
-          router.refresh()
+          window.location.href = `/${slug}/admin`
           return
         }
       } catch (err) {
@@ -60,8 +58,7 @@ export default function LoginPage() {
     if (cleanPass === 'milhati' || cleanUser === 'julia') {
       document.cookie = 'admin_auth=true; path=/; max-age=604800; SameSite=Lax'
       toast.success('Acesso liberado!')
-      router.push(`/${slug}/admin`)
-      router.refresh()
+      window.location.href = `/${slug}/admin`
       return
     }
 
