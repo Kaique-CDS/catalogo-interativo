@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import StoreHeader from '@/components/storefront/StoreHeader'
 import VehicleGrid from '@/components/storefront/VehicleGrid'
 import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
@@ -8,7 +8,7 @@ import type { Store, Vehicle } from '@/lib/supabase/types'
 
 interface Props {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ q?: string; brand?: string; minPrice?: string; maxPrice?: string; year?: string }>
+  searchParams: Promise<{ q?: string; brand?: string; minPrice?: string; maxPrice?: string; year?: string; v?: string; veiculo?: string }>
 }
 
 const DEMO_STORE: Store = {

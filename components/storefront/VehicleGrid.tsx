@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import VehicleCard from './VehicleCard'
 import SearchFilters from './SearchFilters'
 import VehicleDetailModal from './VehicleDetailModal'
@@ -12,11 +12,43 @@ interface Props {
   store: Store
   brands: string[]
   years: number[]
-  searchParams: { q?: string; brand?: string; minPrice?: string; maxPrice?: string; year?: string }
+  searchParams: { q?: string; brand?: string; minPrice?: string; maxPrice?: string; year?: string; v?: string; veiculo?: string }
 }
 
 export default function VehicleGrid({ vehicles, store, brands, years, searchParams }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+
+  // Auto-open vehicle modal if ?v=ID or ?veiculo=ID is present in URL
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const targetId = params.get('v') || params.get('veiculo') || searchParams.v || searchParams.veiculo
+    if (targetId) {
+      const match = vehicles.find(v => v.id === targetId || (v.sku && v.sku.toLowerCase() === targetId.toLowerCase()))
+      if (match) {
+        setSelectedVehicle(match)
+      }
+    }
+  }, [vehicles, searchParams])
+
+  const handleSelectVehicle = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.set('v', vehicle.id)
+      window.history.replaceState(null, '', url.toString())
+    }
+  }
+
+  const handleCloseVehicle = () => {
+    setSelectedVehicle(null)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('v')
+      url.searchParams.delete('veiculo')
+      window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''))
+    }
+  }
 
   return (
     <div>
@@ -43,7 +75,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
                 key={vehicle.id}
                 vehicle={vehicle}
                 store={store}
-                onSelect={(v) => setSelectedVehicle(v)}
+                onSelect={handleSelectVehicle}
               />
             ))}
           </div>
@@ -54,7 +86,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
       <VehicleDetailModal
         vehicle={selectedVehicle}
         store={store}
-        onClose={() => setSelectedVehicle(null)}
+        onClose={handleCloseVehicle}
       />
     </div>
   )

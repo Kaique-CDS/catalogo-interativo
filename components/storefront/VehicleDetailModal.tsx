@@ -51,15 +51,29 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
 
   if (!vehicle) return null
 
-  const handleShare = () => {
+  const handleShare = async () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const shareUrl = `${origin}/${store.slug}?v=${vehicle.id}`
+    const shareTitle = `${vehicle.title} (${vehicle.year}) - ${store.name}`
+    const shareText = `🚗 *${vehicle.title} (${vehicle.year})*\n💰 *${formatCurrency(vehicle.price)}* à vista\n\nConfira fotos e ficha completa na *${store.name}*:\n${shareUrl}`
+
     if (navigator.share) {
-      navigator.share({
-        title: vehicle.title,
-        text: `Confira este ${vehicle.brand} ${vehicle.model} por ${formatCurrency(vehicle.price)} na ${store.name}`,
-        url: window.location.href,
-      }).catch(() => {})
-    } else {
-      navigator.clipboard.writeText(window.location.href)
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        })
+        return
+      } catch (err) {
+        // Usuário cancelou ou navegador não suportou, fallback para copiar
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText)
+      toast.success('Link e dados do veículo copiados!')
+    } catch {
       toast.success('Link do veículo copiado!')
     }
   }
