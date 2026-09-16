@@ -241,7 +241,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
           </div>
 
           {/* Fixed CTA footer */}
-          <div className="p-4 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between gap-3 flex-shrink-0">
+          <div className="p-4 pt-3 pb-8 sm:p-4 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between gap-3 flex-shrink-0">
             <div className="hidden sm:block">
               <span className="text-[10px] text-zinc-400 uppercase font-bold block">Interessado?</span>
               <span className="text-xs text-zinc-600 font-medium">Escolha como prosseguir</span>
@@ -249,7 +249,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
 
             <Button
               onClick={() => setStep('interest')}
-              className="w-full sm:w-auto flex-1 sm:flex-none px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md gap-2 active:scale-98 transition-transform"
+              className="w-full sm:w-auto flex-1 sm:flex-none px-6 h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-base shadow-md gap-2 active:scale-98 transition-transform"
             >
               Tenho Interesse
               <ChevronDown className="h-4 w-4" />
