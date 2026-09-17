@@ -81,8 +81,8 @@ export default function InterestOptionsSheet({ vehicle, store, onClose, onOpenFi
               <Banknote className="h-6 w-6 text-green-700" />
             </div>
             <div>
-              <p className="font-semibold text-zinc-900">Compra à Vista</p>
-              <p className="text-sm text-zinc-500">Falar com a equipe de Vendas</p>
+              <p className="font-semibold text-zinc-900">Consultar Valor & Condições</p>
+              <p className="text-sm text-zinc-500">Negociação direta com a equipe de Vendas</p>
             </div>
           </button>
 

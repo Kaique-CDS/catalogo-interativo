@@ -1,4 +1,4 @@
-﻿export type WhatsAppSector = 'vendas' | 'financeiro'
+export type WhatsAppSector = 'vendas' | 'financeiro'
 
 export interface WhatsAppLeadParams {
   /** Main sales WhatsApp number */
@@ -68,7 +68,7 @@ export function buildWhatsAppUrl(params: WhatsAppLeadParams): string {
   }
 
   lines.push(
-    `O veículo ainda está disponível? Gostaria de saber mais detalhes!`,
+    `O veículo ainda está disponível? Gostaria de saber o valor e mais informações!`,
     ``,
     `_(Ref. SKU: #${sku})_`
   )

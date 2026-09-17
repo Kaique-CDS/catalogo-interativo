@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { formatCurrency, formatMileage } from '@/lib/utils'
+import { formatMileage } from '@/lib/utils'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 import { toast } from 'sonner'
 import InterestOptionsSheet from './InterestOptionsSheet'
@@ -55,7 +55,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const shareUrl = `${origin}/${store.slug}?v=${vehicle.id}`
     const shareTitle = `${vehicle.title} (${vehicle.year}) - ${store.name}`
-    const shareText = `🚗 *${vehicle.title} (${vehicle.year})*\n💰 *${formatCurrency(vehicle.price)}* à vista\n\nConfira fotos e ficha completa na *${store.name}*:\n${shareUrl}`
+    const shareText = `🚗 *${vehicle.title} (${vehicle.year})*\n💬 *Preço sob consulta via WhatsApp*\n\nConfira fotos e ficha completa na *${store.name}*:\n${shareUrl}`
 
     if (navigator.share) {
       try {
@@ -143,11 +143,13 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
             <div>
               <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{vehicle.model}</span>
               <h2 className="text-xl sm:text-2xl font-black text-zinc-900 leading-snug">{vehicle.title}</h2>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl sm:text-3xl font-black text-emerald-600">
-                  {formatCurrency(vehicle.price)}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xl sm:text-2xl font-black text-emerald-700">
+                  Preço sob consulta
                 </span>
-                <span className="text-xs text-zinc-400 font-medium">à vista / sob consulta</span>
+                <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                  Direto no WhatsApp
+                </span>
               </div>
             </div>
 

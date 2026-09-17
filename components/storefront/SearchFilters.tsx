@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
@@ -22,8 +22,6 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
   const [q, setQ] = useState(searchParams.q ?? '')
   const [brand, setBrand] = useState(searchParams.brand ?? 'all')
   const [year, setYear] = useState(searchParams.year ?? 'all')
-  const [minPrice, setMinPrice] = useState(searchParams.minPrice ?? '')
-  const [maxPrice, setMaxPrice] = useState(searchParams.maxPrice ?? '')
   const [showAdvanced, setShowAdvanced] = useState(false)
 
   const applyFilters = useCallback(() => {
@@ -31,17 +29,15 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
     if (q) params.set('q', q)
     if (brand && brand !== 'all') params.set('brand', brand)
     if (year && year !== 'all') params.set('year', year)
-    if (minPrice) params.set('minPrice', minPrice)
-    if (maxPrice) params.set('maxPrice', maxPrice)
     router.push(`${pathname}?${params.toString()}`)
-  }, [q, brand, year, minPrice, maxPrice, router, pathname])
+  }, [q, brand, year, router, pathname])
 
   const clearFilters = () => {
-    setQ(''); setBrand('all'); setYear('all'); setMinPrice(''); setMaxPrice('')
+    setQ(''); setBrand('all'); setYear('all')
     router.push(pathname)
   }
 
-  const hasFilters = q || (brand && brand !== 'all') || (year && year !== 'all') || minPrice || maxPrice
+  const hasFilters = q || (brand && brand !== 'all') || (year && year !== 'all')
 
   return (
     <div className="bg-white border border-zinc-200/80 rounded-2xl p-3.5 sm:p-4 mb-6 shadow-xs">
@@ -100,29 +96,6 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
           </Select>
         </div>
 
-        {/* Preço Mínimo */}
-        <div className="w-full sm:w-[120px]">
-          <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">Preço Mín.</label>
-          <Input
-            placeholder="R$ Mín"
-            type="number"
-            className="w-full h-9 rounded-xl text-xs"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-          />
-        </div>
-
-        {/* Preço Máximo */}
-        <div className="w-full sm:w-[120px]">
-          <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">Preço Máx.</label>
-          <Input
-            placeholder="R$ Máx"
-            type="number"
-            className="w-full h-9 rounded-xl text-xs"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-          />
-        </div>
 
         <div className="col-span-2 sm:col-span-1 flex gap-2 w-full sm:w-auto">
           <Button onClick={applyFilters} className="h-9 px-4 rounded-xl text-xs font-semibold bg-zinc-900 text-white flex-1 sm:hidden">

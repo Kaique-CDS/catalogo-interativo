@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { Gauge, Calendar, Car, Fuel, Cog, Eye, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { formatCurrency, formatMileage } from '@/lib/utils'
+import { formatMileage } from '@/lib/utils'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 
 interface Props {
@@ -111,11 +111,16 @@ export default function VehicleCard({ vehicle, store, onSelect }: Props) {
         </div>
 
         {/* Preço e Botão Tenho Interesse */}
-        <div className="pt-2 border-t border-zinc-100 mt-2">
-          <div className="flex items-baseline justify-between mb-3">
-            <span className="text-[11px] text-zinc-400 font-medium">Valor à vista</span>
-            <span className="text-2xl font-black text-zinc-900 tracking-tight">
-              {formatCurrency(vehicle.price)}
+        <div className="pt-2.5 border-t border-zinc-100 mt-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider block">Condição comercial</span>
+              <span className="text-sm font-extrabold text-emerald-700 tracking-tight">
+                Consulte no WhatsApp
+              </span>
+            </div>
+            <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+              Sob Consulta
             </span>
           </div>
 
