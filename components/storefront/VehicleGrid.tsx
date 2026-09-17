@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import VehicleCard from './VehicleCard'
@@ -17,6 +17,7 @@ interface Props {
 
 export default function VehicleGrid({ vehicles, store, brands, years, searchParams }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+  const [modalStep, setModalStep] = useState<'detail' | 'interest'>('detail')
 
   // Auto-open vehicle modal if ?v=ID or ?veiculo=ID is present in URL
   useEffect(() => {
@@ -27,12 +28,24 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
       const match = vehicles.find(v => v.id === targetId || (v.sku && v.sku.toLowerCase() === targetId.toLowerCase()))
       if (match) {
         setSelectedVehicle(match)
+        setModalStep('detail')
       }
     }
   }, [vehicles, searchParams])
 
   const handleSelectVehicle = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle)
+    setModalStep('detail')
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.set('v', vehicle.id)
+      window.history.replaceState(null, '', url.toString())
+    }
+  }
+
+  const handleInterestVehicle = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle)
+    setModalStep('interest')
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href)
       url.searchParams.set('v', vehicle.id)
@@ -42,6 +55,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
 
   const handleCloseVehicle = () => {
     setSelectedVehicle(null)
+    setModalStep('detail')
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href)
       url.searchParams.delete('v')
@@ -76,6 +90,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
                 vehicle={vehicle}
                 store={store}
                 onSelect={handleSelectVehicle}
+                onInterest={handleInterestVehicle}
               />
             ))}
           </div>
@@ -86,6 +101,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
       <VehicleDetailModal
         vehicle={selectedVehicle}
         store={store}
+        initialStep={modalStep}
         onClose={handleCloseVehicle}
       />
     </div>

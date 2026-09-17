@@ -18,12 +18,13 @@ interface Props {
   vehicle: Vehicle | null
   store: Store
   onClose: () => void
+  initialStep?: ModalStep
 }
 
 type ModalStep = 'detail' | 'interest' | 'financing'
 
-export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
-  const [step, setStep]           = useState<ModalStep>('detail')
+export default function VehicleDetailModal({ vehicle, store, onClose, initialStep = 'detail' }: Props) {
+  const [step, setStep]           = useState<ModalStep>(initialStep)
   const [hasTradeIn, setHasTradeIn] = useState(false)
 
   useEffect(() => {
@@ -43,11 +44,11 @@ export default function VehicleDetailModal({ vehicle, store, onClose }: Props) {
     }
   }, [vehicle, onClose, step])
 
-  // Reset step when modal changes vehicle
+  // Reset step when modal changes vehicle or initialStep changes
   useEffect(() => {
-    setStep('detail')
+    setStep(initialStep)
     setHasTradeIn(false)
-  }, [vehicle?.id])
+  }, [vehicle?.id, initialStep])
 
   if (!vehicle) return null
 
