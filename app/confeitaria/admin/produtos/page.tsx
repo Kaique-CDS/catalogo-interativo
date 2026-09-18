@@ -140,7 +140,6 @@ export default function ProdutosPage() {
                 </TableCell>
                 <TableCell>
                   <p className="font-bold text-rose-950 text-xs">{item.name}</p>
-                  {item.badge && <span className="text-[10px] text-rose-600 font-semibold">{item.badge}</span>}
                 </TableCell>
                 <TableCell><span className="text-zinc-500">{item.category}</span></TableCell>
                 <TableCell><span className="text-zinc-500">{item.servings}</span></TableCell>

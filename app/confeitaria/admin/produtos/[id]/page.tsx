@@ -10,12 +10,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Upload, Loader2, Check, Cake, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Upload, Loader2, Cake, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   CATEGORIES_CONFEITARIA,
-  POPULAR_BADGES_CONFEITARIA,
-  DIETARY_OPTIONS_CONFEITARIA,
   getConfeitariaProducts,
   saveConfeitariaProduct,
   ConfeitariaProduct
@@ -31,12 +29,10 @@ export default function EditarDocePage() {
 
   const [name, setName] = useState('')
   const [category, setCategory] = useState(CATEGORIES_CONFEITARIA[0])
-  const [badge, setBadge] = useState('Nenhum')
   const [price, setPrice] = useState('')
   const [servings, setServings] = useState('')
   const [prepTime, setPrepTime] = useState('')
   const [description, setDescription] = useState('')
-  const [selectedDietary, setSelectedDietary] = useState<string[]>([])
   const [image, setImage] = useState('')
   const [isActive, setIsActive] = useState(true)
 
@@ -47,22 +43,14 @@ export default function EditarDocePage() {
       setProduct(found)
       setName(found.name)
       setCategory(found.category)
-      setBadge(found.badge || 'Nenhum')
       setPrice(String(found.price))
       setServings(found.servings || '')
       setPrepTime(found.prepTime || '')
       setDescription(found.description || '')
-      setSelectedDietary(found.dietary || [])
       setImage(found.image)
       setIsActive(found.isActive)
     }
   }, [id])
-
-  const toggleDietary = (item: string) => {
-    setSelectedDietary(prev =>
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    )
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -82,12 +70,12 @@ export default function EditarDocePage() {
       id,
       name: name.trim(),
       category,
-      badge: badge === 'Nenhum' ? '' : badge,
+      badge: '',
       price: numPrice,
       servings: servings.trim(),
       prepTime: prepTime.trim(),
       description: description.trim(),
-      dietary: selectedDietary,
+      dietary: [],
       image: image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
       isActive
     }
@@ -168,34 +156,18 @@ export default function EditarDocePage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold text-zinc-700">Categoria *</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="rounded-xl border-rose-200 text-sm">
-                    <SelectValue placeholder="Selecione categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES_CONFEITARIA.map(c => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold text-zinc-700">Selo Promocional</Label>
-                <Select value={badge} onValueChange={setBadge}>
-                  <SelectTrigger className="rounded-xl border-rose-200 text-sm">
-                    <SelectValue placeholder="Selecione selo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {POPULAR_BADGES_CONFEITARIA.map(b => (
-                      <SelectItem key={b} value={b}>{b}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-zinc-700">Categoria *</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="rounded-xl border-rose-200 text-sm">
+                  <SelectValue placeholder="Selecione categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES_CONFEITARIA.map(c => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -233,31 +205,6 @@ export default function EditarDocePage() {
                   placeholder="Ex: 24h antecedência"
                   className="rounded-xl border-rose-200 text-sm"
                 />
-              </div>
-            </div>
-
-            {/* Restrições e Características */}
-            <div className="pt-2">
-              <Label className="text-xs font-bold text-zinc-800 block mb-2">Características & Restrições Alimentares</Label>
-              <div className="flex flex-wrap gap-2">
-                {DIETARY_OPTIONS_CONFEITARIA.map((item) => {
-                  const isChecked = selectedDietary.includes(item)
-                  return (
-                    <button
-                      type="button"
-                      key={item}
-                      onClick={() => toggleDietary(item)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        isChecked
-                          ? 'bg-rose-600 text-white shadow-xs'
-                          : 'bg-rose-50/70 text-rose-900 hover:bg-rose-100 border border-rose-100'
-                      }`}
-                    >
-                      {isChecked && <Check className="h-3 w-3" />}
-                      {item}
-                    </button>
-                  )
-                })}
               </div>
             </div>
 

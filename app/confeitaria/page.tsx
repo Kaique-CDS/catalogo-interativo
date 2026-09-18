@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MessageCircle, Heart, Search, Sparkles, MapPin, Clock, Settings, LayoutDashboard, X, Share2, Check, ShieldCheck, Eye, Utensils } from 'lucide-react'
+import { MessageCircle, Heart, Search, Sparkles, MapPin, Clock, Settings, LayoutDashboard, X, Share2, Eye, Utensils } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -330,13 +330,6 @@ export default function ConfeitariaPage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
-                  {product.badge && (
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-white/95 backdrop-blur-xs text-rose-900 text-xs font-bold px-3 py-1 rounded-full shadow-xs">
-                        {product.badge}
-                      </span>
-                    </div>
-                  )}
                   <div className="absolute top-3 right-3">
                     <span className="bg-rose-950/75 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
                       {product.category}
@@ -453,12 +446,7 @@ export default function ConfeitariaPage() {
                 </button>
               </div>
 
-              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                {activeModalProduct.badge ? (
-                  <span className="bg-white/95 text-rose-900 text-xs font-black px-3 py-1 rounded-full shadow-xs">
-                    {activeModalProduct.badge}
-                  </span>
-                ) : <div />}
+              <div className="absolute bottom-3 right-4">
                 <span className="bg-rose-950/70 text-white text-xs font-semibold px-3 py-0.5 rounded-full">
                   {activeModalProduct.category}
                 </span>
@@ -498,23 +486,6 @@ export default function ConfeitariaPage() {
                   </span>
                 </div>
               </div>
-
-              {/* Ingredientes e Restrições */}
-              {activeModalProduct.dietary && activeModalProduct.dietary.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <ShieldCheck className="h-4 w-4 text-rose-500" />
-                    Características & Ingredientes
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeModalProduct.dietary.map((d) => (
-                      <span key={d} className="inline-flex items-center gap-1 text-[11px] bg-rose-50 text-rose-900 border border-rose-100 px-2.5 py-1 rounded-full font-medium">
-                        <Check className="h-3 w-3 text-rose-500" /> {d}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Descrição Longa */}
               <div>
