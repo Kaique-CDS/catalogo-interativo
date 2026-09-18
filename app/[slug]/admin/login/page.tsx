@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useActionState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -14,19 +14,42 @@ export default function LoginPage() {
   const params = useParams()
   const slug = (params?.slug as string) || 'loja-exemplo'
   const [pending, setPending] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
-  const [state, formAction] = useActionState(carAdminLoginAction, null)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setPending(true)
+    setErrorMsg('')
 
-  useEffect(() => {
-    if (state && !state.error) {
-      sessionStorage.setItem('car_admin_session', 'true')
-      toast.success('Login realizado com sucesso!')
-      window.location.href = `/${slug}/admin`
-    } else if (state?.error) {
-      toast.error(state.error)
+    const formData = new FormData(e.currentTarget)
+    const user = ((formData.get('username') as string) || '').trim()
+    const pass = ((formData.get('password') as string) || '').trim()
+
+    if (!user || !pass) {
+      setErrorMsg('Preencha o usuário e a senha.')
+      toast.error('Preencha o usuário e a senha.')
+      setPending(false)
+      return
+    }
+
+    try {
+      const res = await carAdminLoginAction(null, formData)
+      if (res?.error) {
+        setErrorMsg(res.error)
+        toast.error(res.error)
+        setPending(false)
+      } else {
+        document.cookie = 'admin_auth=true; path=/; samesite=lax'
+        toast.success('Login realizado com sucesso!')
+        window.location.reload()
+      }
+    } catch (err) {
+      console.error(err)
+      setErrorMsg('Erro de conexão ao verificar credenciais. Tente novamente.')
+      toast.error('Erro ao verificar credenciais.')
       setPending(false)
     }
-  }, [state, slug])
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8 font-sans">
@@ -39,7 +62,7 @@ export default function LoginPage() {
           Painel de Controle
         </h1>
         <p className="text-xs text-zinc-400 text-center mt-1.5 mb-6">
-          Acesso restrito da concessionaria{' '}
+          Acesso restrito da concessionária{' '}
           <span className="font-bold text-zinc-200 font-mono">#{slug}</span>
         </p>
 
@@ -47,26 +70,27 @@ export default function LoginPage() {
           <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-2xl border border-zinc-200">
             <ShieldCheck className="h-5 w-5 text-zinc-500 flex-shrink-0" />
             <p className="text-xs text-zinc-600 font-medium">
-              Area restrita. Apenas usuarios autorizados.
+              Área restrita. Apenas usuários autorizados.
             </p>
           </div>
 
-          <form
-            action={(formData) => {
-              setPending(true)
-              formAction(formData)
-            }}
-            className="space-y-4"
-          >
+          {errorMsg && (
+            <div className="flex items-center gap-2 p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-xs font-semibold animate-in fade-in-0 duration-200">
+              <span className="text-base flex-shrink-0">❌</span>
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="username" className="text-xs font-bold text-zinc-700 flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5 text-zinc-400" /> Usuario
+                <User className="h-3.5 w-3.5 text-zinc-400" /> Usuário
               </Label>
               <Input
                 id="username"
                 name="username"
                 type="text"
-                placeholder="Digite seu usuario"
+                placeholder="Digite seu usuário"
                 className="rounded-xl h-11 text-sm border-zinc-200 focus-visible:ring-zinc-900"
                 required
               />
@@ -86,15 +110,9 @@ export default function LoginPage() {
               />
             </div>
 
-            {state?.error && (
-              <p className="text-xs text-red-600 font-medium bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-                {state.error}
-              </p>
-            )}
-
             <Button
               type="submit"
-              className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl h-12 text-sm shadow-md gap-2 active:scale-98 transition-transform"
+              className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl h-12 text-sm shadow-md gap-2 active:scale-98 transition-transform cursor-pointer"
               disabled={pending}
             >
               {pending ? (
