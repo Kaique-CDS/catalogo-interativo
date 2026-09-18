@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useActionState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,11 @@ export default function ConfeitariaLoginPage() {
   const [state, formAction] = useActionState(confeitariaLoginAction, null)
 
   useEffect(() => {
-    if (state?.error) {
+    if (state && !state.error) {
+      sessionStorage.setItem('confeitaria_admin_session', 'true')
+      toast.success('Login autorizado! Bem-vinda!')
+      window.location.href = '/confeitaria/admin'
+    } else if (state?.error) {
       toast.error(state.error)
       setPending(false)
     }

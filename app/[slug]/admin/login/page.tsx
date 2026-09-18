@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useActionState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (state && !state.error) {
-      // Sucesso - redirect
+      sessionStorage.setItem('car_admin_session', 'true')
       toast.success('Login realizado com sucesso!')
       window.location.href = `/${slug}/admin`
     } else if (state?.error) {

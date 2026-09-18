@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -9,11 +9,19 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { confeitariaLogoutAction } from '@/app/confeitaria/admin/actions'
+import ConfeitariaLoginPage from '@/app/confeitaria/admin/login/page'
 
 function LogoutButton() {
+  const handleLogout = async (e: React.FormEvent) => {
+    e.preventDefault()
+    sessionStorage.removeItem('confeitaria_admin_session')
+    await confeitariaLogoutAction()
+    window.location.reload()
+  }
+
   return (
-    <form action={confeitariaLogoutAction}>
-      <Button variant="ghost" size="sm" type="submit" className="w-full text-xs text-zinc-400 hover:text-rose-600 gap-1">
+    <form onSubmit={handleLogout}>
+      <Button variant="ghost" size="sm" type="submit" className="w-full text-xs text-zinc-400 hover:text-rose-600 gap-1 cursor-pointer">
         <LogOut className="h-3.5 w-3.5" /> Sair
       </Button>
     </form>
@@ -29,6 +37,25 @@ const navItems = [
 export default function ConfeitariaAdminSidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const session = sessionStorage.getItem('confeitaria_admin_session')
+    if (session === 'true') {
+      setIsAuthenticated(true)
+    } else {
+      setIsAuthenticated(false)
+      confeitariaLogoutAction()
+    }
+  }, [])
+
+  if (isAuthenticated === false) {
+    return <ConfeitariaLoginPage />
+  }
+
+  if (isAuthenticated === null) {
+    return null
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-[#FFF9F6] text-zinc-800 overflow-hidden font-sans">

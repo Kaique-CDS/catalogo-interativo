@@ -1,30 +1,28 @@
-﻿'use server'
+'use server'
 
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 
 export async function confeitariaLoginAction(
   prevState: { error: string } | null,
   formData: FormData
-) {
+): Promise<{ error: string }> {
   const username = ((formData.get('username') as string) || '').trim().toLowerCase()
   const password = ((formData.get('password') as string) || '').trim()
 
-  const validUser = (process.env.CONFEITARIA_ADMIN_USER || 'admin').toLowerCase()
-  const validPass = process.env.CONFEITARIA_ADMIN_PASS || 'doceencanto123'
+  const validUser = (process.env.CONFEITARIA_ADMIN_USER || 'julia').toLowerCase()
+  const validPass = process.env.CONFEITARIA_ADMIN_PASS || 'milhati'
 
   if (username === validUser && password === validPass) {
     const cookieStore = await cookies()
     cookieStore.set('confeitaria_admin_auth', 'true', {
       path: '/',
-      maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
       sameSite: 'lax',
     })
-    redirect('/confeitaria/admin')
+    return { error: '' }
   }
 
-  return { error: 'Usuario ou senha incorretos.' }
+  return { error: 'Usuário ou senha incorretos.' }
 }
 
 export async function confeitariaLogoutAction() {
@@ -35,5 +33,4 @@ export async function confeitariaLogoutAction() {
     httpOnly: true,
     sameSite: 'lax',
   })
-  redirect('/confeitaria/admin/login')
 }

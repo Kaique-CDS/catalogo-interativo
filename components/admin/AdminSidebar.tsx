@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Props {
   store: { id: string; name: string; slug: string }
@@ -26,12 +26,32 @@ export default function AdminSidebar({ store, slug }: Props) {
   const supabase = createClient()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const session = sessionStorage.getItem('car_admin_session')
+    if (session === 'true') {
+      setIsAuthenticated(true)
+    } else {
+      setIsAuthenticated(false)
+      import('@/app/[slug]/admin/login/actions').then(({ carAdminLogoutAction }) => {
+        carAdminLogoutAction().then(() => {
+          window.location.reload()
+        })
+      })
+    }
+  }, [])
+
   const handleLogout = async () => {
-    // Clear cookie via server action
+    sessionStorage.removeItem('car_admin_session')
     const { carAdminLogoutAction } = await import('@/app/[slug]/admin/login/actions')
     await carAdminLogoutAction()
-    toast.success('Voce saiu do painel!')
+    toast.success('Você saiu do painel!')
     window.location.reload()
+  }
+
+  if (isAuthenticated === false) {
+    return null
   }
 
   const items = navItems(slug)

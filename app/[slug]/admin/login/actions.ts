@@ -1,4 +1,4 @@
-﻿'use server'
+'use server'
 
 import { cookies } from 'next/headers'
 
@@ -16,7 +16,6 @@ export async function carAdminLoginAction(
     const cookieStore = await cookies()
     cookieStore.set('admin_auth', 'true', {
       path: '/',
-      maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
       sameSite: 'lax',
     })
