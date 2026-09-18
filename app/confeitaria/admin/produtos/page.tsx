@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plus, Pencil, Trash2, Eye, EyeOff, Cake } from 'lucide-react'
@@ -9,68 +9,29 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
-
-const INITIAL_PRODUCTS = [
-  {
-    id: '1',
-    name: 'Bolo Red Velvet Supreme com Frutas Vermelhas',
-    category: 'Bolos Festivos',
-    price: 185.00,
-    servings: '15 a 20 fatias',
-    badge: 'Mais Pedido 🍓',
-    isActive: true,
-    image: 'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '2',
-    name: 'Bolo Trufado Chocomenta & Ninho',
-    category: 'Bolos Festivos',
-    price: 165.00,
-    servings: '12 a 15 fatias',
-    badge: 'Destaque ✨',
-    isActive: true,
-    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '3',
-    name: 'Bento Cake Personalizado Divertido',
-    category: 'Bento Cakes',
-    price: 55.00,
-    servings: '1 a 2 pessoas',
-    badge: 'Presente Perfeito 🎁',
-    isActive: true,
-    image: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '4',
-    name: 'Torta Cheesecake New York com Calda de Maracujá',
-    category: 'Sobremesas na Taça',
-    price: 140.00,
-    servings: '10 fatias',
-    isActive: true,
-    image: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: '5',
-    name: 'Caixa Degustação de Brigadeiros Gourmet (12 un)',
-    category: 'Doces Finos',
-    price: 48.00,
-    servings: '12 unidades',
-    badge: 'Artesanal 🍫',
-    isActive: false,
-    image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=800&q=80',
-  }
-]
+import {
+  getConfeitariaProducts,
+  saveConfeitariaProduct,
+  deleteConfeitariaProduct,
+  ConfeitariaProduct,
+  DEFAULT_CONFEITARIA_PRODUCTS
+} from '@/lib/confeitaria'
 
 export default function ProdutosPage() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS)
+  const [products, setProducts] = useState<ConfeitariaProduct[]>(DEFAULT_CONFEITARIA_PRODUCTS)
+
+  useEffect(() => {
+    setProducts(getConfeitariaProducts())
+  }, [])
 
   const toggleStatus = (id: string) => {
     setProducts(prev => prev.map(p => {
       if (p.id === id) {
         const nextState = !p.isActive
+        const updated = { ...p, isActive: nextState }
+        saveConfeitariaProduct(updated)
         toast.success(nextState ? 'Doce publicado no cardápio!' : 'Doce pausado da vitrine.')
-        return { ...p, isActive: nextState }
+        return updated
       }
       return p
     }))
@@ -78,6 +39,7 @@ export default function ProdutosPage() {
 
   const handleDelete = (id: string) => {
     if (!confirm('Deseja realmente remover este doce do catálogo?')) return
+    deleteConfeitariaProduct(id)
     setProducts(prev => prev.filter(p => p.id !== id))
     toast.success('Item removido com sucesso.')
   }
@@ -125,14 +87,26 @@ export default function ProdutosPage() {
                   variant="ghost"
                   onClick={() => toggleStatus(item.id)}
                   className="h-7 w-7 text-zinc-400 hover:text-rose-600"
+                  title={item.isActive ? "Pausar" : "Publicar"}
                 >
                   {item.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </Button>
+                <Link href={`/confeitaria/admin/produtos/${item.id}`}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 text-zinc-400 hover:text-rose-600"
+                    title="Editar produto"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={() => handleDelete(item.id)}
                   className="h-7 w-7 text-zinc-400 hover:text-red-500"
+                  title="Excluir produto"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -186,14 +160,26 @@ export default function ProdutosPage() {
                       variant="ghost"
                       onClick={() => toggleStatus(item.id)}
                       className="h-8 w-8 text-zinc-400 hover:text-rose-600"
+                      title={item.isActive ? "Pausar" : "Publicar"}
                     >
                       {item.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
+                    <Link href={`/confeitaria/admin/produtos/${item.id}`}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-zinc-400 hover:text-rose-600"
+                        title="Editar produto"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </Link>
                     <Button
                       size="icon"
                       variant="ghost"
                       onClick={() => handleDelete(item.id)}
                       className="h-8 w-8 text-zinc-400 hover:text-red-500"
+                      title="Excluir produto"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

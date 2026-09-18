@@ -1,35 +1,62 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Upload, Loader2, Sparkles, Check } from 'lucide-react'
+import { ArrowLeft, Upload, Loader2, Check, Cake, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   CATEGORIES_CONFEITARIA,
   POPULAR_BADGES_CONFEITARIA,
   DIETARY_OPTIONS_CONFEITARIA,
-  saveConfeitariaProduct
+  getConfeitariaProducts,
+  saveConfeitariaProduct,
+  ConfeitariaProduct
 } from '@/lib/confeitaria'
 
-export default function NovoDocePage() {
+export default function EditarDocePage() {
   const router = useRouter()
+  const params = useParams()
+  const id = String(params?.id || '')
+
   const [loading, setLoading] = useState(false)
+  const [product, setProduct] = useState<ConfeitariaProduct | null>(null)
+
   const [name, setName] = useState('')
   const [category, setCategory] = useState(CATEGORIES_CONFEITARIA[0])
-  const [badge, setBadge] = useState('Mais Pedido 🍓')
+  const [badge, setBadge] = useState('Nenhum')
   const [price, setPrice] = useState('')
   const [servings, setServings] = useState('')
   const [prepTime, setPrepTime] = useState('')
   const [description, setDescription] = useState('')
+  const [selectedDietary, setSelectedDietary] = useState<string[]>([])
   const [image, setImage] = useState('')
-  const [selectedDietary, setSelectedDietary] = useState<string[]>(['Artesanal & Sem Conservantes'])
+  const [isActive, setIsActive] = useState(true)
+
+  useEffect(() => {
+    const list = getConfeitariaProducts()
+    const found = list.find(p => p.id === id)
+    if (found) {
+      setProduct(found)
+      setName(found.name)
+      setCategory(found.category)
+      setBadge(found.badge || 'Nenhum')
+      setPrice(String(found.price))
+      setServings(found.servings || '')
+      setPrepTime(found.prepTime || '')
+      setDescription(found.description || '')
+      setSelectedDietary(found.dietary || [])
+      setImage(found.image)
+      setIsActive(found.isActive)
+    }
+  }, [id])
 
   const toggleDietary = (item: string) => {
     setSelectedDietary(prev =>
@@ -51,8 +78,8 @@ export default function NovoDocePage() {
 
     setLoading(true)
 
-    saveConfeitariaProduct({
-      id: Date.now().toString(),
+    const updatedProduct: ConfeitariaProduct = {
+      id,
       name: name.trim(),
       category,
       badge: badge === 'Nenhum' ? '' : badge,
@@ -62,13 +89,25 @@ export default function NovoDocePage() {
       description: description.trim(),
       dietary: selectedDietary,
       image: image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
-      isActive: true
-    })
+      isActive
+    }
+
+    saveConfeitariaProduct(updatedProduct)
 
     setTimeout(() => {
-      toast.success('Bolo/Doce publicado no catálogo com sucesso!')
+      setLoading(false)
+      toast.success('Doce/Bolo atualizado com sucesso!')
       router.push('/confeitaria/admin/produtos')
     }, 400)
+  }
+
+  if (!product) {
+    return (
+      <div className="max-w-2xl mx-auto py-12 text-center">
+        <Cake className="h-12 w-12 text-rose-300 mx-auto mb-3 animate-pulse" />
+        <p className="text-sm font-semibold text-zinc-600">Carregando produto para edição...</p>
+      </div>
+    )
   }
 
   return (
@@ -80,20 +119,36 @@ export default function NovoDocePage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-xl font-black text-rose-950">Cadastrar Novo Doce ou Bolo 🧁</h1>
-          <p className="text-xs text-zinc-500">Detalhes essenciais para o cliente decidir rápido e pedir no WhatsApp.</p>
+          <h1 className="text-xl font-black text-rose-950">Editar Doce ou Bolo 🍰</h1>
+          <p className="text-xs text-zinc-500">Atualize fotos, valores, porções e informações do cardápio.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Upload de Fotos */}
+        {/* Foto do Produto */}
         <Card className="rounded-2xl border-rose-100 bg-white shadow-xs">
-          <CardContent className="p-5 sm:p-6">
-            <Label className="text-xs font-bold text-rose-950 block mb-2">Fotos do Produto</Label>
-            <div className="border-2 border-dashed border-rose-200 rounded-2xl p-6 text-center hover:border-rose-400 transition-colors bg-rose-50/20 cursor-pointer">
-              <Upload className="h-8 w-8 text-rose-400 mx-auto mb-2" />
-              <p className="text-xs font-semibold text-rose-950">Clique para selecionar ou arraste as fotos</p>
-              <p className="text-[11px] text-zinc-400 mt-1">Imagens de dar água na boca convertem até 3x mais!</p>
+          <CardContent className="p-5 sm:p-6 space-y-3">
+            <Label className="text-xs font-bold text-rose-950 block">Foto do Produto</Label>
+            <div className="flex items-center gap-4">
+              <div className="relative h-20 w-24 rounded-2xl overflow-hidden bg-rose-50 border border-rose-200 flex-shrink-0">
+                {image ? (
+                  <Image src={image} alt={name} fill className="object-cover" />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-rose-300">
+                    <Cake className="h-8 w-8" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 space-y-1.5">
+                <Label htmlFor="image" className="text-[11px] font-medium text-zinc-500">URL da Imagem</Label>
+                <Input
+                  id="image"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="https://..."
+                  className="rounded-xl border-rose-200 text-xs"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -107,7 +162,7 @@ export default function NovoDocePage() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Bolo Red Velvet Supreme com Frutas Vermelhas"
+                placeholder="Ex: Bolo Red Velvet Supreme"
                 className="rounded-xl border-rose-200 text-sm"
                 required
               />
@@ -135,7 +190,9 @@ export default function NovoDocePage() {
                     <SelectValue placeholder="Selecione selo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {POPULAR_BADGES_CONFEITARIA.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                    {POPULAR_BADGES_CONFEITARIA.map(b => (
+                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -162,7 +219,7 @@ export default function NovoDocePage() {
                   id="servings"
                   value={servings}
                   onChange={(e) => setServings(e.target.value)}
-                  placeholder="Ex: 15 a 20 fatias (2.2kg)"
+                  placeholder="Ex: 15 a 20 fatias"
                   className="rounded-xl border-rose-200 text-sm"
                 />
               </div>
@@ -173,13 +230,13 @@ export default function NovoDocePage() {
                   id="prepTime"
                   value={prepTime}
                   onChange={(e) => setPrepTime(e.target.value)}
-                  placeholder="Ex: 24h antecedência ou Pronta Entrega"
+                  placeholder="Ex: 24h antecedência"
                   className="rounded-xl border-rose-200 text-sm"
                 />
               </div>
             </div>
 
-            {/* Selos / Informações Nutricionais e Dietéticas */}
+            {/* Restrições e Características */}
             <div className="pt-2">
               <Label className="text-xs font-bold text-zinc-800 block mb-2">Características & Restrições Alimentares</Label>
               <div className="flex flex-wrap gap-2">
@@ -204,16 +261,36 @@ export default function NovoDocePage() {
               </div>
             </div>
 
+            {/* Descrição */}
             <div className="space-y-1 pt-2">
-              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">Descrição Irresistível (Massa, Recheios e Coberturas)</Label>
+              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">Descrição (Massa, Recheios e Coberturas)</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ex: Massa aveludada com toque de cacau 100%, recheio duplo de cream cheese artesanal e brigadeiro de Ninho, coberto com morangos frescos e mirtilos..."
+                placeholder="Ex: Massa aveludada com toque de cacau..."
                 rows={3}
                 className="rounded-xl border-rose-200 text-sm"
               />
+            </div>
+
+            {/* Status do Produto */}
+            <div className="pt-3 border-t border-rose-100 flex items-center justify-between">
+              <div>
+                <Label className="text-xs font-bold text-rose-950 block">Disponibilidade no Cardápio</Label>
+                <p className="text-[11px] text-zinc-400">Quando pausado, o doce não aparece para pedidos dos clientes.</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsActive(!isActive)}
+                className={`text-xs font-bold rounded-xl gap-1.5 ${
+                  isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+                }`}
+              >
+                {isActive ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                {isActive ? 'Publicado (Visível)' : 'Pausado'}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -224,7 +301,7 @@ export default function NovoDocePage() {
             disabled={loading}
             className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm py-3 shadow-xs"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Publicar Doce no Cardápio'}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Salvar Alterações'}
           </Button>
           <Link href="/confeitaria/admin/produtos">
             <Button variant="outline" type="button" className="rounded-xl border-rose-200 text-sm text-zinc-600">
