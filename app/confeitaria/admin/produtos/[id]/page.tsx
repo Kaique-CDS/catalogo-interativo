@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Upload, Loader2, Cake, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Upload, Loader2, Cake, Eye, EyeOff, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   CATEGORIES_CONFEITARIA,
@@ -18,6 +18,7 @@ import {
   saveConfeitariaProduct,
   ConfeitariaProduct
 } from '@/lib/confeitaria'
+import { generateWithGemini, buildCakeDescriptionPrompt } from '@/lib/gemini'
 
 export default function EditarDocePage() {
   const router = useRouter()
@@ -35,6 +36,36 @@ export default function EditarDocePage() {
   const [description, setDescription] = useState('')
   const [image, setImage] = useState('')
   const [isActive, setIsActive] = useState(true)
+  const [aiLoading, setAiLoading] = useState(false)
+
+  const handleGenerateDescription = async () => {
+    if (!name.trim()) {
+      toast.error('Informe o nome do doce/bolo antes de gerar com IA.')
+      return
+    }
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    if (!apiKey) {
+      toast.error('Chave do Gemini não configurada. Adicione NEXT_PUBLIC_GEMINI_API_KEY no .env.local')
+      return
+    }
+    setAiLoading(true)
+    try {
+      const prompt = buildCakeDescriptionPrompt({
+        name,
+        category,
+        servings,
+        prepTime
+      })
+      const result = await generateWithGemini(prompt)
+      setDescription(result)
+      toast.success('Descrição gerada com sucesso!')
+    } catch (err) {
+      toast.error('Erro ao gerar descrição com IA.')
+      console.error(err)
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   useEffect(() => {
     const list = getConfeitariaProducts()
@@ -210,7 +241,22 @@ export default function EditarDocePage() {
 
             {/* Descrição */}
             <div className="space-y-1 pt-2">
-              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">Descrição (Massa, Recheios e Coberturas)</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">Descrição (Massa, Recheios e Coberturas)</Label>
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  disabled={aiLoading}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg border border-rose-200 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {aiLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {aiLoading ? 'Gerando com IA...' : '✨ Gerar com IA'}
+                </button>
+              </div>
               <Textarea
                 id="description"
                 value={description}

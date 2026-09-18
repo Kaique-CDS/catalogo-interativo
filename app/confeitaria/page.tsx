@@ -12,6 +12,8 @@ import { toast } from 'sonner'
 import { getConfeitariaProducts } from '@/lib/confeitaria'
 import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
 import CookieBanner from '@/components/storefront/CookieBanner'
+import ClosedScreen from '@/components/storefront/ClosedScreen'
+import { isBusinessOpen, getNextOpenInfo, CONFEITARIA_HOURS } from '@/lib/businessHours'
 
 interface Product {
   id: string
@@ -129,6 +131,12 @@ export default function ConfeitariaPage() {
   const [selectedPersonalizations, setSelectedPersonalizations] = useState<string[]>([])
   const [personalizationText, setPersonalizationText] = useState('')
 
+  // Verificacao de horario de funcionamento
+  const [isOpen, setIsOpen] = useState<boolean | null>(null)
+  useEffect(() => {
+    setIsOpen(isBusinessOpen(CONFEITARIA_HOURS))
+  }, [])
+
   // Carrega produtos cadastrados/editados no admin via localStorage
   useEffect(() => {
     const custom = getConfeitariaProducts()
@@ -221,6 +229,18 @@ export default function ConfeitariaPage() {
       navigator.clipboard.writeText(window.location.href)
       toast.success('Link do doce copiado!')
     }
+  }
+
+  // Tela de fechado: se isOpen for false, exibe a tela de encerramento
+  if (isOpen === false) {
+    return (
+      <ClosedScreen
+        storeName={STORE.name}
+        nextOpen={getNextOpenInfo(CONFEITARIA_HOURS)}
+        theme="rose"
+        whatsapp={STORE.whatsapp}
+      />
+    )
   }
 
   return (

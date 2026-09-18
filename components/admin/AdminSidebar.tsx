@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -27,11 +27,10 @@ export default function AdminSidebar({ store, slug }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleLogout = async () => {
-    document.cookie = 'admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
-      try { await supabase.auth.signOut() } catch (e) {}
-    }
-    toast.success('Você saiu do painel!')
+    // Clear cookie via server action
+    const { carAdminLogoutAction } = await import('@/app/[slug]/admin/login/actions')
+    await carAdminLogoutAction()
+    toast.success('Voce saiu do painel!')
     window.location.reload()
   }
 

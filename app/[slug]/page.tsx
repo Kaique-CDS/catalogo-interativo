@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import StoreHeader from '@/components/storefront/StoreHeader'
 import VehicleGrid from '@/components/storefront/VehicleGrid'
 import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
+import ClosedScreen from '@/components/storefront/ClosedScreen'
+import { isBusinessOpen, getNextOpenInfo, CONCESSIONARIA_HOURS } from '@/lib/businessHours'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import type { Store, Vehicle } from '@/lib/supabase/types'
@@ -195,6 +197,22 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
   const fontGoogleUrl = fontFamily !== 'Inter'
     ? `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@400;500;600;700;800;900&display=swap`
     : null
+
+  // Verificacao de horario de funcionamento (fuso Sao Paulo, UTC-3)
+  const saoPauloNow = new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })
+  )
+  const businessOpen = isBusinessOpen(CONCESSIONARIA_HOURS, saoPauloNow)
+  if (!businessOpen) {
+    return (
+      <ClosedScreen
+        storeName={store.name}
+        nextOpen={getNextOpenInfo(CONCESSIONARIA_HOURS, saoPauloNow)}
+        theme="zinc"
+        whatsapp={store.whatsapp}
+      />
+    )
+  }
 
   return (
     <div

@@ -1,28 +1,23 @@
 ﻿'use client'
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import React, { useState, useActionState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Lock, User, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
+import { confeitariaLoginAction } from '../actions'
 
 export default function ConfeitariaLoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [pending, setPending] = useState(false)
+  const [state, formAction] = useActionState(confeitariaLoginAction, null)
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setTimeout(() => {
-      toast.success('Bem-vindo(a) de volta ao Ateliê!')
-      router.push('/confeitaria/admin')
-    }, 600)
-  }
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error)
+      setPending(false)
+    }
+  }, [state])
 
   return (
     <div className="min-h-screen bg-[#FFF9F6] flex items-center justify-center p-4 font-sans">
@@ -31,48 +26,63 @@ export default function ConfeitariaLoginPage() {
           🎂
         </div>
 
-        <h2 className="text-2xl font-black text-rose-950">Acesso ao Ateliê</h2>
-        <p className="text-xs text-zinc-500 mt-1 mb-6">Gerenciador de Cardápio & Confeitaria</p>
+        <h2 className="text-2xl font-black text-rose-950">Acesso ao Atelie</h2>
+        <p className="text-xs text-zinc-500 mt-1 mb-2">Gerenciador de Cardapio &amp; Confeitaria</p>
 
-        <form onSubmit={handleLogin} className="space-y-4 text-left">
+        <div className="flex items-center justify-center gap-1.5 mb-6">
+          <ShieldCheck className="h-3.5 w-3.5 text-rose-400" />
+          <span className="text-[11px] text-zinc-400 font-medium">Area restrita. Apenas usuarios autorizados.</span>
+        </div>
+
+        <form
+          action={(formData) => {
+            setPending(true)
+            formAction(formData)
+          }}
+          className="space-y-4 text-left"
+        >
           <div className="space-y-1">
-            <Label htmlFor="email" className="text-xs text-zinc-600">E-mail de acesso</Label>
+            <Label htmlFor="username" className="text-xs text-zinc-600 flex items-center gap-1.5">
+              <User className="h-3.5 w-3.5 text-zinc-400" /> Usuario
+            </Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="atelie@confeitaria.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Digite seu usuario"
               className="rounded-xl border-rose-200 text-xs"
               required
             />
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="password" className="text-xs text-zinc-600">Senha</Label>
+            <Label htmlFor="password" className="text-xs text-zinc-600 flex items-center gap-1.5">
+              <Lock className="h-3.5 w-3.5 text-zinc-400" /> Senha
+            </Label>
             <Input
               id="password"
+              name="password"
               type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Digite sua senha"
               className="rounded-xl border-rose-200 text-xs"
               required
             />
           </div>
+
+          {state?.error && (
+            <p className="text-xs text-red-600 font-medium bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+              {state.error}
+            </p>
+          )}
 
           <Button
             type="submit"
             className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs py-2.5 shadow-xs"
-            disabled={loading}
+            disabled={pending}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Entrar no Painel'}
+            {pending ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Entrar no Painel'}
           </Button>
         </form>
-
-        <p className="text-[11px] text-zinc-400 mt-6">
-          Dúvidas? <Link href="/confeitaria" className="text-rose-600 hover:underline">Voltar para a vitrine</Link>
-        </p>
       </div>
     </div>
   )

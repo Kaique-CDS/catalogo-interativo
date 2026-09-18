@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -13,10 +13,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff } from 'lucide-react'
+import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
+import { generateWithGemini, buildVehicleDescriptionPrompt } from '@/lib/gemini'
 
 const COMMON_FEATURES = [
   'Ar-condicionado',
@@ -68,6 +69,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [sku, setSku] = useState<string>(vehicle?.sku ?? '')
+  const [aiLoading, setAiLoading] = useState(false)
 
   // Auto-generate SKU for new vehicles on mount
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const { register, handleSubmit, formState: { errors } } = useForm<VehicleFormData>({
+  const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
     defaultValues: vehicle ? {
       title: vehicle.title,
@@ -101,6 +103,40 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     setSelectedFeatures(prev =>
       prev.includes(item) ? prev.filter(f => f !== item) : [...prev, item]
     )
+  }
+
+  const generateDescription = async () => {
+    const values = getValues()
+    if (!values.title && !values.brand) {
+      toast.error('Preencha pelo menos o titulo e a marca antes de gerar a descricao.')
+      return
+    }
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    if (!apiKey) {
+      toast.error('Chave do Gemini nao configurada. Adicione NEXT_PUBLIC_GEMINI_API_KEY no .env.local')
+      return
+    }
+    setAiLoading(true)
+    try {
+      const prompt = buildVehicleDescriptionPrompt({
+        title: values.title || '',
+        brand: values.brand || '',
+        model: values.model || '',
+        year: values.year || new Date().getFullYear(),
+        mileage: values.mileage || 0,
+        fuel,
+        transmission,
+        features: selectedFeatures,
+      })
+      const result = await generateWithGemini(prompt)
+      setValue('description', result)
+      toast.success('Descricao gerada com sucesso!')
+    } catch (err) {
+      toast.error('Erro ao gerar descricao. Verifique sua chave do Gemini.')
+      console.error(err)
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,9 +361,24 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           </div>
 
           <div className="mt-4 space-y-1.5">
-            <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">
-              Descrição do Veículo <span className="text-red-500">*</span>
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">
+                Descrição do Veículo <span className="text-red-500">*</span>
+              </Label>
+              <button
+                type="button"
+                onClick={generateDescription}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg border border-purple-200 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {aiLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+                {aiLoading ? 'Gerando com IA...' : '✨ Gerar com IA'}
+              </button>
+            </div>
             <Textarea
               id="description"
               placeholder="Ex: Todas as revisões feitas em concessionária, pneus Pirelli novos, laudo Dekra 100% aprovado, sem retoques. Carro em excelente estado, único dono."
