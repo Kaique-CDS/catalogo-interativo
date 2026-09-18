@@ -17,7 +17,7 @@ import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles } from 'luc
 import { toast } from 'sonner'
 import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
-import { generateWithGemini, buildVehicleDescriptionPrompt } from '@/lib/gemini'
+import { generateWithGemini, buildVehicleDescriptionPrompt, getGeminiApiKey } from '@/lib/gemini'
 
 const COMMON_FEATURES = [
   'Ar-condicionado',
@@ -126,9 +126,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       return
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    const apiKey = getGeminiApiKey()
     if (!apiKey) {
-      toast.error('Chave do Gemini não configurada. Adicione NEXT_PUBLIC_GEMINI_API_KEY no .env.local')
+      toast.error('Chave do Gemini não configurada.')
       return
     }
 

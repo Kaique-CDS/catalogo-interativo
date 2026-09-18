@@ -15,7 +15,7 @@ import {
   CATEGORIES_CONFEITARIA,
   saveConfeitariaProduct
 } from '@/lib/confeitaria'
-import { generateWithGemini, buildCakeDescriptionPrompt } from '@/lib/gemini'
+import { generateWithGemini, buildCakeDescriptionPrompt, getGeminiApiKey } from '@/lib/gemini'
 
 export default function NovoDocePage() {
   const router = useRouter()
@@ -45,9 +45,9 @@ export default function NovoDocePage() {
       return
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    const apiKey = getGeminiApiKey()
     if (!apiKey) {
-      toast.error('Chave do Gemini não configurada. Adicione NEXT_PUBLIC_GEMINI_API_KEY no .env.local')
+      toast.error('Chave do Gemini não configurada.')
       return
     }
 
