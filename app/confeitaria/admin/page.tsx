@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -58,23 +58,6 @@ export default function ConfeitariaDashboardPage() {
         ))}
       </div>
 
-      {/* 2. Banner de Alerta / Oportunidade Sazonal */}
-      <div className="bg-gradient-to-r from-rose-500 to-pink-600 rounded-3xl p-5 sm:p-6 text-white shadow-md shadow-rose-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2.5 py-1 rounded-full">
-            💡 Insight de Confeitaria
-          </span>
-          <h3 className="text-base sm:text-lg font-bold mt-2">72% das encomendas do fim de semana são pedidas na Quinta-Feira!</h3>
-          <p className="text-xs text-rose-100 mt-1 max-w-xl">
-            Programe stories no Instagram nas quartas e quintas-feiras com o link do catálogo para lotar sua agenda de entregas.
-          </p>
-        </div>
-        <Link href="/confeitaria" target="_blank">
-          <Button className="bg-white text-rose-700 hover:bg-rose-50 font-bold text-xs rounded-xl shadow-xs whitespace-nowrap">
-            Copiar Link do Cardápio
-          </Button>
-        </Link>
-      </div>
 
       {/* 3. Tabela de Performance dos Doces & Taxa de Conversão */}
       <div className="bg-white rounded-3xl border border-rose-100 p-5 sm:p-6 shadow-xs">

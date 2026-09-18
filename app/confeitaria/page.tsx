@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { formatCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
+import { getConfeitariaProducts } from '@/lib/confeitaria'
 
 interface Product {
   id: string
@@ -107,10 +108,49 @@ const PRODUCTS: Product[] = [
   },
 ]
 
+const PERSONALIZATION_TAGS = [
+  '🎂 Velinha de Aniversário',
+  '🎈 Topo de Bolo Personalizado',
+  '✍️ Nome / Frase no Bolo',
+  '🎁 Embalagem para Presente',
+  '🚫 Sem Nozes / Castanhas',
+  '🥛 Sem Lactose / Troca de Recheio',
+  '🍓 Frutas Extras',
+]
+
 export default function ConfeitariaPage() {
+  const [productsList, setProductsList] = useState<Product[]>(PRODUCTS)
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [search, setSearch] = useState('')
   const [activeModalProduct, setActiveModalProduct] = useState<Product | null>(null)
+
+  const [selectedPersonalizations, setSelectedPersonalizations] = useState<string[]>([])
+  const [personalizationText, setPersonalizationText] = useState('')
+
+  // Carrega produtos cadastrados/editados no admin via localStorage
+  useEffect(() => {
+    const custom = getConfeitariaProducts()
+    if (custom && custom.length > 0) {
+      setProductsList(custom.filter(p => p.isActive !== false).map(p => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        servings: p.servings,
+        prepTime: p.prepTime,
+        badge: p.badge,
+        dietary: p.dietary,
+        description: p.description || '',
+        images: [p.image]
+      })))
+    }
+  }, [])
+
+  // Reseta campos de personalização ao trocar de produto
+  useEffect(() => {
+    setSelectedPersonalizations([])
+    setPersonalizationText('')
+  }, [activeModalProduct?.id])
 
   // Travar scroll quando modal aberto
   useEffect(() => {
@@ -124,7 +164,7 @@ export default function ConfeitariaPage() {
     }
   }, [activeModalProduct])
 
-  const filteredProducts = PRODUCTS.filter((item) => {
+  const filteredProducts = productsList.filter((item) => {
     const matchesCategory = selectedCategory === 'Todos' || item.category === selectedCategory
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
                           item.description.toLowerCase().includes(search.toLowerCase())
@@ -134,17 +174,36 @@ export default function ConfeitariaPage() {
   const sendOrderWhatsApp = (product: Product) => {
     const lines = [
       `Olá, *${STORE.name}*! 🍰✨`,
-      `Estava navegando pelo catálogo e gostaria de encomendar / saber mais sobre:`,
+      `Estava no cardápio e gostaria de encomendar:`,
       '',
       `🧁 *${product.name}*`,
-      `💰 *Valor:* ${formatCurrency(product.price)}`,
+      `💰 *Valor base:* ${formatCurrency(product.price)}`,
       product.servings ? `🍴 *Rendimento:* ${product.servings}` : '',
-      product.prepTime ? `⏰ *Prazo:* ${product.prepTime}` : '',
-      '',
-      `Vocês têm disponibilidade para a data de hoje/próximos dias?`,
-    ].filter(Boolean)
+      product.prepTime ? `⏰ *Prazo estimado:* ${product.prepTime}` : '',
+    ]
 
-    const message = lines.join('\n')
+    const hasPersonalization = selectedPersonalizations.length > 0 || personalizationText.trim()
+
+    if (hasPersonalization) {
+      lines.push(
+        '',
+        '🎈 *PERSONALIZAÇÃO & REQUISITOS DO PEDIDO:*'
+      )
+      if (selectedPersonalizations.length > 0) {
+        lines.push(`• *Itens / Serviços:* ${selectedPersonalizations.join(', ')}`)
+      }
+      if (personalizationText.trim()) {
+        lines.push(`• *Observações:* "${personalizationText.trim()}"`)
+      }
+      lines.push('*(Gostaria de combinar os detalhes e valor final com você aqui no chat)*')
+    }
+
+    lines.push(
+      '',
+      `Vocês têm disponibilidade para essa data/pedido? Como podemos fechar?`
+    )
+
+    const message = lines.filter(line => line !== undefined).join('\n')
     const url = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(message)}`
     window.open(url, '_blank', 'noopener,noreferrer')
   }
@@ -472,6 +531,59 @@ export default function ConfeitariaPage() {
                 <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed bg-zinc-50 p-3.5 rounded-2xl border border-zinc-100">
                   {activeModalProduct.description}
                 </p>
+              </div>
+
+              {/* Personalização do Pedido (Aniversário, Ingredientes, etc.) */}
+              <div className="bg-rose-50/60 border border-rose-200/80 p-4 rounded-2xl space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-xl leading-none">🎈</span>
+                  <div>
+                    <h4 className="text-xs font-bold text-rose-950 uppercase tracking-wider">
+                      Deseja Personalizar? (Aniversário ou Ingredientes)
+                    </h4>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      Selecione itens especiais ou escreva alterações para combinar direto no WhatsApp com a confeiteira.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {PERSONALIZATION_TAGS.map((tag) => {
+                    const isSelected = selectedPersonalizations.includes(tag)
+                    return (
+                      <button
+                        type="button"
+                        key={tag}
+                        onClick={() => {
+                          setSelectedPersonalizations(prev =>
+                            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+                          )
+                        }}
+                        className={`text-xs px-2.5 py-1.5 rounded-xl font-semibold border transition-all ${
+                          isSelected
+                            ? 'bg-rose-600 border-rose-600 text-white shadow-xs'
+                            : 'bg-white border-rose-200 text-rose-950 hover:bg-rose-100/60'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="space-y-1 pt-1">
+                  <label htmlFor="custom-notes" className="text-[11px] font-bold text-zinc-700 block">
+                    Observações de aniversário ou alterações de ingredientes:
+                  </label>
+                  <textarea
+                    id="custom-notes"
+                    rows={2}
+                    value={personalizationText}
+                    onChange={(e) => setPersonalizationText(e.target.value)}
+                    placeholder="Ex: Nome da aniversariante (Sofia, 15 anos), velinha dourada, trocar recheio por Ninho puro, retirar castanhas..."
+                    className="w-full text-xs rounded-xl border border-rose-200 p-2.5 bg-white text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                  />
+                </div>
               </div>
 
               <div className="text-xs text-zinc-500 flex items-center gap-2 pt-2 border-t border-rose-50">
