@@ -39,28 +39,41 @@ export default function EditarDocePage() {
   const [aiLoading, setAiLoading] = useState(false)
 
   const handleGenerateDescription = async () => {
-    if (!name.trim()) {
-      toast.error('Informe o nome do doce/bolo antes de gerar com IA.')
+    const missing: string[] = []
+    if (!name.trim()) missing.push('Nome do Doce / Bolo')
+    if (!category?.trim()) missing.push('Categoria')
+    const numPrice = parseFloat(price.replace(',', '.'))
+    if (isNaN(numPrice) || numPrice <= 0) missing.push('Preço (R$)')
+    if (!servings.trim()) missing.push('Rendimento / Porções')
+    if (!prepTime.trim()) missing.push('Prazo de Encomenda')
+
+    if (missing.length > 0) {
+      toast.error(`Preencha todos os campos obrigatórios antes de gerar a legenda com IA: ${missing.join(', ')}.`, {
+        duration: 6000,
+      })
       return
     }
+
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
       toast.error('Chave do Gemini não configurada. Adicione NEXT_PUBLIC_GEMINI_API_KEY no .env.local')
       return
     }
+
     setAiLoading(true)
     try {
       const prompt = buildCakeDescriptionPrompt({
-        name,
+        name: name.trim(),
         category,
-        servings,
-        prepTime
+        price: numPrice,
+        servings: servings.trim(),
+        prepTime: prepTime.trim(),
       })
       const result = await generateWithGemini(prompt)
       setDescription(result)
-      toast.success('Descrição gerada com sucesso!')
+      toast.success('Legenda gerada com sucesso pela IA!')
     } catch (err) {
-      toast.error('Erro ao gerar descrição com IA.')
+      toast.error('Erro ao gerar descrição com IA. Verifique sua chave do Gemini.')
       console.error(err)
     } finally {
       setAiLoading(false)

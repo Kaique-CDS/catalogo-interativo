@@ -107,32 +107,50 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
   const generateDescription = async () => {
     const values = getValues()
-    if (!values.title && !values.brand) {
-      toast.error('Preencha pelo menos o titulo e a marca antes de gerar a descricao.')
+    const missing: string[] = []
+
+    if (!values.title?.trim()) missing.push('Título')
+    if (!values.brand?.trim()) missing.push('Marca')
+    if (!values.model?.trim()) missing.push('Modelo')
+    if (!values.year) missing.push('Ano')
+    if (values.mileage === undefined || values.mileage === null || String(values.mileage).trim() === '') missing.push('Km Rodados')
+    if (!values.price || Number(values.price) <= 0) missing.push('Preço')
+    if (!fuel?.trim()) missing.push('Combustível')
+    if (!transmission?.trim()) missing.push('Câmbio')
+    if (!values.color?.trim()) missing.push('Cor')
+
+    if (missing.length > 0) {
+      toast.error(`Preencha todos os campos obrigatórios antes de gerar a legenda com IA: ${missing.join(', ')}.`, {
+        duration: 6000,
+      })
       return
     }
+
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY
     if (!apiKey) {
-      toast.error('Chave do Gemini nao configurada. Adicione NEXT_PUBLIC_GEMINI_API_KEY no .env.local')
+      toast.error('Chave do Gemini não configurada. Adicione NEXT_PUBLIC_GEMINI_API_KEY no .env.local')
       return
     }
+
     setAiLoading(true)
     try {
       const prompt = buildVehicleDescriptionPrompt({
-        title: values.title || '',
-        brand: values.brand || '',
-        model: values.model || '',
-        year: values.year || new Date().getFullYear(),
-        mileage: values.mileage || 0,
+        title: (values.title || '').trim(),
+        brand: (values.brand || '').trim(),
+        model: (values.model || '').trim(),
+        year: values.year,
+        mileage: values.mileage,
+        price: values.price,
         fuel,
         transmission,
+        color: (values.color || '').trim(),
         features: selectedFeatures,
       })
       const result = await generateWithGemini(prompt)
-      setValue('description', result)
-      toast.success('Descricao gerada com sucesso!')
+      setValue('description', result, { shouldValidate: true })
+      toast.success('Legenda gerada com sucesso pela IA!')
     } catch (err) {
-      toast.error('Erro ao gerar descricao. Verifique sua chave do Gemini.')
+      toast.error('Erro ao gerar descrição com IA. Verifique sua chave do Gemini.')
       console.error(err)
     } finally {
       setAiLoading(false)
