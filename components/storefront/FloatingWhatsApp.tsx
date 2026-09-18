@@ -1,13 +1,14 @@
-﻿'use client'
+'use client'
 
 interface Props {
   storeName: string
   whatsapp: string
+  customMessage?: string
 }
 
-export default function FloatingWhatsApp({ storeName, whatsapp }: Props) {
+export default function FloatingWhatsApp({ storeName, whatsapp, customMessage }: Props) {
   const cleanPhone = whatsapp.replace(/\D/g, '')
-  const message = `Olá, *${storeName}*! 👋\nGostaria de tirar algumas dúvidas sobre os veículos disponíveis no catálogo.`
+  const message = customMessage || `Olá, *${storeName}*! 👋\nGostaria de tirar algumas dúvidas sobre os veículos disponíveis no catálogo.`
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
 
   return (

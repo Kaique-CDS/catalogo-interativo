@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { formatCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
 import { getConfeitariaProducts } from '@/lib/confeitaria'
+import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
 
 interface Product {
   id: string
@@ -617,6 +618,12 @@ export default function ConfeitariaPage() {
         <p>{STORE.address} • {STORE.openingHours}</p>
         <p className="text-[11px] text-zinc-400">Cardápio Interativo SaaS com Checkout direto no WhatsApp</p>
       </footer>
+
+      <FloatingWhatsApp
+        storeName={STORE.name}
+        whatsapp={STORE.whatsapp}
+        customMessage={`Olá, *${STORE.name}*! 🍰👋\nGostaria de tirar algumas dúvidas sobre os doces, bolos e encomendas do cardápio.`}
+      />
     </div>
   )
 }
