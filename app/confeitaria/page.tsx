@@ -11,6 +11,7 @@ import { formatCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
 import { getConfeitariaProducts } from '@/lib/confeitaria'
 import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
+import CookieBanner from '@/components/storefront/CookieBanner'
 
 interface Product {
   id: string
@@ -257,15 +258,6 @@ export default function ConfeitariaPage() {
                 <span className="hidden sm:inline">Painel</span> Admin
               </Button>
             </Link>
-            <a
-              href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent('Olá! Gostaria de falar com o atendimento da confeitaria.')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all"
-            >
-              <MessageCircle className="h-4 w-4" />
-              WhatsApp
-            </a>
           </div>
         </div>
       </header>
@@ -624,6 +616,8 @@ export default function ConfeitariaPage() {
         whatsapp={STORE.whatsapp}
         customMessage={`Olá, *${STORE.name}*! 🍰👋\nGostaria de tirar algumas dúvidas sobre os doces, bolos e encomendas do cardápio.`}
       />
+
+      <CookieBanner storageKey="confeitaria_lgpd_accepted" />
     </div>
   )
 }

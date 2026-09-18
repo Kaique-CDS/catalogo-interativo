@@ -1,26 +1,28 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Cookie, X } from 'lucide-react'
 
-const COOKIE_KEY = 'catalogo_lgpd_accepted'
+interface Props {
+  storageKey?: string
+}
 
-export default function CookieBanner() {
+export default function CookieBanner({ storageKey = 'catalogo_lgpd_accepted' }: Props) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     try {
-      const accepted = localStorage.getItem(COOKIE_KEY)
+      const accepted = localStorage.getItem(storageKey)
       if (!accepted) setVisible(true)
     } catch {
       // localStorage unavailable (SSR/private mode)
     }
-  }, [])
+  }, [storageKey])
 
   const accept = () => {
     try {
-      localStorage.setItem(COOKIE_KEY, '1')
+      localStorage.setItem(storageKey, '1')
     } catch { /* empty */ }
     setVisible(false)
   }
