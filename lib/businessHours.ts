@@ -1,4 +1,4 @@
-﻿export interface DayHours {
+export interface DayHours {
   open: number
   close: number
 }
@@ -29,7 +29,12 @@ export const CONFEITARIA_HOURS: WeeklyHours = {
   6: { open: 9, close: 19 },
 }
 
+// Alterne para false quando quiser reativar o bloqueio de expediente
+export const DISABLE_BUSINESS_HOURS_GATE = true
+
 export function isBusinessOpen(hours: WeeklyHours, now?: Date): boolean {
+  if (DISABLE_BUSINESS_HOURS_GATE) return true
+
   const date = now ?? new Date()
   const day = date.getDay()
   const minutes = date.getHours() * 60 + date.getMinutes()
