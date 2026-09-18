@@ -162,15 +162,55 @@ export default function ConfeitariaPage() {
     setPersonalizationText('')
   }, [activeModalProduct?.id])
 
-  // Travar scroll quando modal aberto
+  // Auto-abrir modal se ?v=ID, ?doce=ID ou ?produto=ID estiver na URL
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const targetId = params.get('v') || params.get('doce') || params.get('produto')
+    if (targetId && productsList.length > 0) {
+      const match = productsList.find(p => p.id === targetId)
+      if (match) {
+        setActiveModalProduct(match)
+      }
+    }
+  }, [productsList])
+
+  const handleOpenModal = (product: Product) => {
+    setActiveModalProduct(product)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.set('v', product.id)
+      window.history.replaceState(null, '', url.toString())
+    }
+  }
+
+  const handleCloseModal = () => {
+    setActiveModalProduct(null)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('v')
+      url.searchParams.delete('doce')
+      url.searchParams.delete('produto')
+      window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''))
+    }
+  }
+
+  // Travar scroll e fechar com Escape quando modal aberto
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCloseModal()
+      }
+    }
     if (activeModalProduct) {
       document.body.style.overflow = 'hidden'
+      window.addEventListener('keydown', handleKeyDown)
     } else {
       document.body.style.overflow = 'unset'
     }
     return () => {
       document.body.style.overflow = 'unset'
+      window.removeEventListener('keydown', handleKeyDown)
     }
   }, [activeModalProduct])
 
@@ -218,15 +258,29 @@ export default function ConfeitariaPage() {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  const handleShareProduct = (product: Product) => {
+  const handleShareProduct = async (product: Product) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const shareUrl = `${origin}/confeitaria?v=${product.id}`
+    const shareTitle = `${product.name} - ${STORE.name}`
+    const shareText = `🧁 *${product.name}*\n💰 *Valor:* ${formatCurrency(product.price)}${product.servings ? `\n🍴 *Rendimento:* ${product.servings}` : ''}${product.prepTime ? `\n⏰ *Prazo:* ${product.prepTime}` : ''}\n\nConfira fotos e faça sua encomenda no *${STORE.name}*:\n${shareUrl}`
+
     if (navigator.share) {
-      navigator.share({
-        title: product.name,
-        text: `Olha que delícia: ${product.name} no ateliê ${STORE.name}!`,
-        url: window.location.href,
-      }).catch(() => {})
-    } else {
-      navigator.clipboard.writeText(window.location.href)
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        })
+        return
+      } catch (err) {
+        // Fallback para copiar caso usuário cancele ou navegador não suporte Web Share API
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText)
+      toast.success('Link e detalhes do doce copiados!')
+    } catch {
       toast.success('Link do doce copiado!')
     }
   }
@@ -338,7 +392,7 @@ export default function ConfeitariaPage() {
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                onClick={() => setActiveModalProduct(product)}
+                onClick={() => handleOpenModal(product)}
                 className="bg-white rounded-3xl border border-rose-100 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group cursor-pointer"
               >
                 {/* Imagem do Produto */}
@@ -404,7 +458,7 @@ export default function ConfeitariaPage() {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          setActiveModalProduct(product)
+                          handleOpenModal(product)
                         }}
                         className="rounded-xl border-rose-200 text-rose-900 text-xs font-semibold h-9 px-3"
                       >
@@ -433,7 +487,7 @@ export default function ConfeitariaPage() {
       {activeModalProduct && (
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto animate-in fade-in-0 duration-200"
-          onClick={() => setActiveModalProduct(null)}
+          onClick={handleCloseModal}
         >
           <div
             className="bg-white w-full max-w-xl max-h-[92vh] sm:max-h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
@@ -454,13 +508,17 @@ export default function ConfeitariaPage() {
               <div className="absolute top-3.5 right-3.5 flex items-center gap-2">
                 <button
                   onClick={() => handleShareProduct(activeModalProduct)}
-                  className="h-9 w-9 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center backdrop-blur-md transition-colors"
+                  title="Compartilhar este doce"
+                  aria-label="Compartilhar doce"
+                  className="h-9 w-9 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
                 >
                   <Share2 className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setActiveModalProduct(null)}
-                  className="h-9 w-9 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center backdrop-blur-md transition-colors"
+                  onClick={handleCloseModal}
+                  title="Fechar"
+                  aria-label="Fechar modal"
+                  className="h-9 w-9 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
