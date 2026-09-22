@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Upload, Loader2, Sparkles } from 'lucide-react'
+import { ArrowLeft, Upload, Loader2, Sparkles, Lock, Edit3 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   CATEGORIES_CONFEITARIA,
@@ -28,19 +28,22 @@ export default function NovoDocePage() {
   const [description, setDescription] = useState('')
   const [image, setImage] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
+  const [descMode, setDescMode] = useState<'manual' | 'ai'>('manual')
+
+  const numPrice = parseFloat(price.replace(',', '.'))
+  const missingFields: string[] = []
+  if (!name.trim()) missingFields.push('Nome do Doce/Bolo')
+  if (!category?.trim()) missingFields.push('Categoria')
+  if (isNaN(numPrice) || numPrice <= 0) missingFields.push('Preço')
+  if (!servings.trim()) missingFields.push('Rendimento')
+  if (!prepTime.trim()) missingFields.push('Prazo')
+
+  const isFormComplete = missingFields.length === 0
 
   const handleGenerateDescription = async () => {
-    const missing: string[] = []
-    if (!name.trim()) missing.push('Nome do Doce / Bolo')
-    if (!category?.trim()) missing.push('Categoria')
-    const numPrice = parseFloat(price.replace(',', '.'))
-    if (isNaN(numPrice) || numPrice <= 0) missing.push('Preço (R$)')
-    if (!servings.trim()) missing.push('Rendimento / Porções')
-    if (!prepTime.trim()) missing.push('Prazo de Encomenda')
-
-    if (missing.length > 0) {
-      toast.error(`Preencha todos os campos obrigatórios antes de gerar a legenda com IA: ${missing.join(', ')}.`, {
-        duration: 6000,
+    if (!isFormComplete) {
+      toast.error(`Preencha todos os campos obrigatórios antes de gerar a legenda com IA: ${missingFields.join(', ')}.`, {
+        duration: 5000,
       })
       return
     }
@@ -199,31 +202,222 @@ export default function NovoDocePage() {
               </div>
             </div>
 
-            <div className="space-y-1 pt-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">Descrição Irresistível (Massa, Recheios e Coberturas)</Label>
-                <button
-                  type="button"
-                  onClick={handleGenerateDescription}
-                  disabled={aiLoading}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-lg border border-rose-200 transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  {aiLoading ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-3.5 w-3.5" />
-                  )}
-                  {aiLoading ? 'Gerando com IA...' : '✨ Gerar com IA'}
-                </button>
+            {/* Balão Moderno de Descrição com Abas (Manual vs I.A) */}
+            <div className="rounded-2xl border border-rose-200/90 bg-gradient-to-b from-rose-50/50 to-white p-4 sm:p-5 shadow-xs space-y-3">
+              {/* Cabeçalho do Balão com Seletor de Modo */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-rose-100">
+                <div>
+                  <Label htmlFor="description" className="text-sm font-bold text-rose-950 flex items-center gap-1.5">
+                    <span>Descrição do Doce ou Bolo</span>
+                    <span className="text-rose-500">*</span>
+                  </Label>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    Escolha como deseja montar o texto irresistível para o cardápio:
+                  </p>
+                </div>
+
+                {/* Segmented Switcher (2 opções: Manual ou I.A) */}
+                <div className="inline-flex p-1 bg-rose-100/70 rounded-xl gap-1 self-start sm:self-auto border border-rose-200/60">
+                  <button
+                    type="button"
+                    onClick={() => setDescMode('manual')}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      descMode === 'manual'
+                        ? 'bg-white text-rose-950 shadow-xs'
+                        : 'text-zinc-600 hover:text-rose-950'
+                    }`}
+                  >
+                    <Edit3 className="h-3.5 w-3.5 text-rose-500" />
+                    Fazer Manualmente
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDescMode('ai')}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      descMode === 'ai'
+                        ? isFormComplete
+                          ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs'
+                          : 'bg-zinc-800 text-zinc-100 shadow-xs'
+                        : isFormComplete
+                          ? 'text-rose-700 hover:text-rose-900'
+                          : 'text-zinc-600 hover:text-zinc-800'
+                    }`}
+                  >
+                    {isFormComplete ? (
+                      <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                    ) : (
+                      <Lock className="h-3.5 w-3.5 text-zinc-400" />
+                    )}
+                    <span>Gerar com I.A</span>
+                    {!isFormComplete && (
+                      <span className="text-[9px] px-1.5 py-0.5 bg-zinc-700 text-zinc-200 rounded font-medium ml-0.5">
+                        Bloqueado
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ex: Massa aveludada com toque de cacau 100%, recheio duplo de cream cheese artesanal e brigadeiro de Ninho, coberto com morangos frescos e mirtilos..."
-                rows={3}
-                className="rounded-xl border-rose-200 text-sm"
-              />
+
+              {/* Conteúdo Interno do Balão */}
+              <div className="pt-2 space-y-3">
+                {descMode === 'manual' ? (
+                  /* MODO MANUAL */
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                      <span className="flex items-center gap-1.5 text-zinc-600 font-medium">
+                        <Edit3 className="h-3.5 w-3.5 text-rose-400" /> Escreva os detalhes de massa, recheio e textura:
+                      </span>
+                      <span className="text-[11px] text-zinc-400 font-mono">
+                        {description.length}/500 carac.
+                      </span>
+                    </div>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Ex: Massa aveludada com toque de cacau 100%, recheio duplo de brigadeiro belga e Ninho artesanal, coberto com morangos frescos e raspas de chocolate nobre..."
+                      rows={4}
+                      maxLength={500}
+                      className="text-sm rounded-xl bg-white border-rose-200 focus:border-rose-500 transition-colors"
+                    />
+                  </div>
+                ) : (
+                  /* MODO I.A */
+                  <div className="space-y-3">
+                    {!isFormComplete ? (
+                      /* ESTADO BLOQUEADO */
+                      <div className="rounded-xl border border-dashed border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-rose-50/40 to-amber-50/60 p-3.5 text-zinc-800">
+                        <div className="flex items-start gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-amber-500/15 border border-amber-300/60 flex items-center justify-center shrink-0 text-amber-700 mt-0.5">
+                            <Lock className="h-4 w-4" />
+                          </div>
+                          <div className="space-y-1.5 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                                Gerador com I.A Bloqueado
+                              </span>
+                              <span className="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-semibold">
+                                Economia de Tokens
+                              </span>
+                            </div>
+                            <p className="text-xs text-amber-900/80 leading-relaxed">
+                              Para economizar tokens e criar uma legenda irresistível para este produto, preencha os dados obrigatórios primeiro:
+                            </p>
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {missingFields.map((f) => (
+                                <span
+                                  key={f}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-200/70 border border-amber-300/80 text-[11px] font-semibold text-amber-900"
+                                >
+                                  ⚠️ {f}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Botão de IA Bloqueado dentro do balão */}
+                        <div className="mt-3 pt-3 border-t border-amber-200/60">
+                          <button
+                            type="button"
+                            disabled
+                            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-200/80 text-zinc-400 font-semibold text-xs border border-zinc-300/70 cursor-not-allowed shadow-inner"
+                          >
+                            <Lock className="h-3.5 w-3.5" />
+                            Preencha os dados acima para desbloquear a geração com I.A
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* ESTADO DESBLOQUEADO / PRONTO */
+                      <div className="rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50/90 via-pink-50/60 to-rose-50/40 p-3.5 text-zinc-900">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-950 uppercase tracking-wide">
+                                <Sparkles className="h-3.5 w-3.5 text-rose-600" /> I.A Pronta para Gerar
+                              </span>
+                              <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
+                                ✓ Dados Completos
+                              </span>
+                            </div>
+                            <p className="text-xs text-zinc-600">
+                              A I.A filtrará apenas os dados preenchidos deste doce para gastar o mínimo de tokens:
+                            </p>
+                            <div className="flex flex-wrap gap-1.5 pt-0.5 text-[11px]">
+                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                                🎂 {name.trim()}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                                🏷️ {category}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                                💰 R$ {numPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                                🍰 {servings.trim()}
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                                ⏰ {prepTime.trim()}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Botão de Gerar com IA DENTRO do balão */}
+                          <div className="shrink-0 self-stretch sm:self-center">
+                            <button
+                              type="button"
+                              onClick={handleGenerateDescription}
+                              disabled={aiLoading}
+                              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-rose-700 hover:from-rose-700 hover:to-pink-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 cursor-pointer"
+                            >
+                              {aiLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Sparkles className="h-4 w-4 text-amber-200" />
+                              )}
+                              {aiLoading ? 'Criando descrição...' : '✨ Gerar Legenda com I.A'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Campo de Texto onde a IA insere a descrição */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs text-zinc-500">
+                        <span className="text-[11px] text-zinc-500 font-medium">
+                          Texto da Descrição (gerado pela IA ou ajustado por você):
+                        </span>
+                        <span className="text-[11px] text-zinc-400 font-mono">
+                          {description.length}/500 carac.
+                        </span>
+                      </div>
+                      <Textarea
+                        id="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder={
+                          isFormComplete
+                            ? "Clique no botão '✨ Gerar Legenda com I.A' acima para criar a descrição irresistível..."
+                            : "Preencha os dados obrigatórios para liberar o botão de geração com I.A..."
+                        }
+                        rows={4}
+                        maxLength={500}
+                        className="text-sm rounded-xl bg-white border-rose-200 focus:border-rose-500 transition-colors"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Dica de rodapé */}
+                <div className="flex items-center justify-between pt-1">
+                  <p className="text-[10px] text-zinc-400">
+                    Mínimo 10 caracteres. Máximo 500 caracteres para cardápios otimizados.
+                  </p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

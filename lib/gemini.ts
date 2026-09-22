@@ -101,23 +101,20 @@ export function buildCakeDescriptionPrompt({
   name, category, price, servings, prepTime,
 }: {
   name: string; category: string; price?: number | string;
-  servings: string; prepTime: string
+  servings?: string; prepTime?: string
 }): string {
-  const formattedPrice = price ? `R$ ${Number(price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : ''
-  return `Você é uma chef confeiteira artesanal premiada.
-Escreva uma descrição irresistível, apetitosa e comercial para o cardápio do doce/bolo abaixo.
+  // Filtra estritamente os campos preenchidos para gastar o mínimo de tokens
+  const items: string[] = []
+  if (name) items.push(`Produto: ${name}`)
+  if (category) items.push(`Categoria: ${category}`)
+  if (price && Number(price) > 0) {
+    items.push(`Preço: R$ ${Number(price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+  }
+  if (servings) items.push(`Rendimento: ${servings}`)
+  if (prepTime) items.push(`Prazo: ${prepTime}`)
 
-REGRAS OBRIGATÓRIAS:
-1. O texto DEVE ter no MÁXIMO 500 caracteres (imprescindível respeitar esse limite).
-2. Baseie-se exatamente nas informações preenchidas (nome, rendimento, prazo e categoria).
-3. Não use títulos, listas, hashtags ou markdown; escreva apenas texto corrido e envolvente em português do Brasil.
-
-DADOS DO PRODUTO:
-- Nome: ${name}
-- Categoria: ${category}
-${formattedPrice ? `- Preço: ${formattedPrice}` : ''}
-- Rendimento: ${servings}
-- Prazo de Encomenda: ${prepTime}
-
-Descrição (máx. 500 caracteres):`
+  return `Escreva uma descrição irresistível, apetitosa e profissional de cardápio para este doce artesanal.
+Máximo de 450 caracteres (2 a 3 frases). Apenas texto corrido, sem markdown e sem hashtags.
+Dados: ${items.join(' | ')}
+Descrição:`
 }
