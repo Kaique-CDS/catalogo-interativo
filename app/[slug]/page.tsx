@@ -134,137 +134,38 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
   const sParams = await searchParams
 
   let store: Store | null = null
-  let vehicles: Vehicle[] = []
-  let isDemoMode = false
+  let vehicles: Vehicle[] | null = null
 
   try {
-    const supabase = await createClient()
-    const { data: storeData } = await supabase
-      .from('stores').select('*').eq('slug', slug).maybeSingle()
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+      const supabase = await createClient()
+      const { data: storeData } = await supabase
+        .from('stores').select('*').eq('slug', slug).maybeSingle()
 
-    store = storeData
-
-    if (store) {
-      let query = supabase
-        .from('vehicles').select('*')
-        .eq('store_id', store.id).eq('is_active', true)
-        .order('created_at', { ascending: false })
-
-      if (sParams.brand && sParams.brand !== 'all') {
-        query = query.ilike('brand', `%${sParams.brand}%`)
+      if (storeData) {
+        store = storeData
+        const { data: vData } = await supabase
+          .from('vehicles').select('*')
+          .eq('store_id', storeData.id).eq('is_active', true)
+          .order('created_at', { ascending: false })
+        
+        vehicles = vData || []
       }
-      if (sParams.q) {
-        query = query.or(`title.ilike.%${sParams.q}%,brand.ilike.%${sParams.q}%,model.ilike.%${sParams.q}%`)
-      }
-      if (sParams.minPrice) query = query.gte('price', Number(sParams.minPrice))
-      if (sParams.maxPrice) query = query.lte('price', Number(sParams.maxPrice))
-      if (sParams.year && sParams.year !== 'all') query = query.eq('year', Number(sParams.year))
-
-      const { data: vData } = await query
-      vehicles = vData ?? []
     }
   } catch (err) {
     console.error('Supabase query fallback:', err)
   }
 
-  if (!store) {
-    isDemoMode = true
-    store = { ...DEMO_STORE, slug }
-    vehicles = DEMO_VEHICLES
-
-    if (sParams.brand && sParams.brand !== 'all') {
-      vehicles = vehicles.filter(v => v.brand.toLowerCase() === sParams.brand?.toLowerCase())
-    }
-    if (sParams.q) {
-      const q = sParams.q.toLowerCase()
-      vehicles = vehicles.filter(v => v.title.toLowerCase().includes(q) || v.model.toLowerCase().includes(q) || v.brand.toLowerCase().includes(q))
-    }
-    if (sParams.minPrice) {
-      vehicles = vehicles.filter(v => v.price >= Number(sParams.minPrice))
-    }
-    if (sParams.maxPrice) {
-      vehicles = vehicles.filter(v => v.price <= Number(sParams.maxPrice))
-    }
-    if (sParams.year && sParams.year !== 'all') {
-      vehicles = vehicles.filter(v => v.year === Number(sParams.year))
-    }
-  }
-
-  const brands = [...new Set(vehicles.map((v) => v.brand))].sort()
-  const years  = [...new Set(vehicles.map((v) => v.year))].sort((a, b) => b - a)
-
-  const fontFamily = store.font_family || 'Inter'
-  const fontGoogleUrl = fontFamily !== 'Inter'
-    ? `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@400;500;600;700;800;900&display=swap`
-    : null
-
-  // Verificacao de horario de funcionamento (fuso Sao Paulo, UTC-3)
-  const saoPauloNow = new Date(
-    new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })
-  )
-  const businessOpen = isBusinessOpen(CONCESSIONARIA_HOURS, saoPauloNow)
-  if (!businessOpen) {
-    return (
-      <ClosedScreen
-        storeName={store.name}
-        nextOpen={getNextOpenInfo(CONCESSIONARIA_HOURS, saoPauloNow)}
-        theme="zinc"
-        whatsapp={store.whatsapp}
-      />
-    )
-  }
+  // Import dynamically or normally (since it's a server component importing a client component)
+  const StorefrontClient = (await import('./StorefrontClient')).default
 
   return (
-    <div
-      className="min-h-screen bg-zinc-50 pb-12"
-      style={{ fontFamily: `'${fontFamily}', sans-serif` }}
-    >
-      {fontGoogleUrl && (
-        // eslint-disable-next-line @next/next/no-page-custom-font
-        <link rel="stylesheet" href={fontGoogleUrl} />
-      )}
-
-      {isDemoMode && (
-        <div className="bg-amber-500 text-white text-xs font-semibold py-2 px-4 text-center">
-          ⚡ Modo Demonstração Ativo — Conecte seu Supabase em <code>.env.local</code> para gerenciar dados reais.
-        </div>
-      )}
-
-      <StoreHeader store={store} />
-
-      {/* Hero Banner (se configurado) */}
-      {store.banner_url && (
-        <div className="container mx-auto px-3 sm:px-4 pt-4 max-w-7xl">
-          <div className="relative aspect-[21/9] sm:aspect-[24/5] w-full rounded-2xl overflow-hidden shadow-xs border border-zinc-200">
-            <Image src={store.banner_url} alt={store.name} fill className="object-cover" priority />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-6 text-white">
-              <h2 className="text-xl sm:text-3xl font-black">{store.name}</h2>
-              {store.slogan && <p className="text-xs sm:text-sm text-zinc-200 mt-1">{store.slogan}</p>}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
-        <VehicleGrid
-          vehicles={vehicles}
-          store={store}
-          brands={brands}
-          years={years}
-          searchParams={sParams}
-        />
-      </main>
-
-      <footer className="border-t border-zinc-200 bg-white mt-12 py-8 text-center text-xs text-zinc-500">
-        <p className="font-semibold text-zinc-900">{store.name}</p>
-        {store.address && <p className="mt-0.5">{store.address}</p>}
-        {store.opening_hours && (
-          <p className="mt-1 text-zinc-600 font-medium">🕐 {store.opening_hours}</p>
-        )}
-        <p className="text-[11px] text-zinc-400 mt-3">Catálogo Interativo Mobile First com Checkout Direto via WhatsApp</p>
-      </footer>
-
-      <FloatingWhatsApp storeName={store.name} whatsapp={store.whatsapp} />
-    </div>
+    <StorefrontClient 
+      slug={slug} 
+      searchParams={sParams} 
+      initialStore={store} 
+      initialVehicles={vehicles} 
+      DEMO_STORE={DEMO_STORE} 
+    />
   )
 }

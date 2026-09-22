@@ -206,7 +206,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     }
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-      toast.success(isEditing ? 'Veículo atualizado (Modo Demo)!' : 'Veículo cadastrado (Modo Demo)!')
+      const { saveVehicle } = await import('@/lib/vehicles')
+      saveVehicle(payload as Vehicle)
+      toast.success(isEditing ? 'Veículo atualizado localmente!' : 'Veículo cadastrado localmente!')
       router.push(`/${slug}/admin/estoque`)
       return
     }

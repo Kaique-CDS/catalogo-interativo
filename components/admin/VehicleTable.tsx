@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Pencil, Trash2, Eye, EyeOff, Car, LayoutList, LayoutGrid } from 'lucide-react'
@@ -21,10 +21,16 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
   const [viewMode, setViewMode] = useState<ViewMode>('completo')
   const supabase = createClient()
 
+  useEffect(() => {
+    setVehicles(initialVehicles)
+  }, [initialVehicles])
+
   const toggleActive = async (vehicle: Vehicle) => {
     const nextState = !vehicle.is_active
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-      setVehicles(prev => prev.map(v => v.id === vehicle.id ? { ...v, is_active: nextState } : v))
+      const updated = { ...vehicle, is_active: nextState }
+      setVehicles(prev => prev.map(v => v.id === vehicle.id ? updated : v))
+      import('@/lib/vehicles').then(({ saveVehicle }) => saveVehicle(updated))
       toast.success(nextState ? 'Veículo publicado!' : 'Veículo pausado!')
       return
     }
@@ -38,7 +44,8 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
     if (!confirm('Tem certeza que deseja excluir este veículo?')) return
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
       setVehicles(prev => prev.filter(v => v.id !== id))
-      toast.success('Veículo excluído (Modo Demo)')
+      import('@/lib/vehicles').then(({ deleteVehicle: delVeh }) => delVeh(id))
+      toast.success('Veículo excluído (Modo Local)')
       return
     }
     const { error } = await supabase.from('vehicles').delete().eq('id', id)

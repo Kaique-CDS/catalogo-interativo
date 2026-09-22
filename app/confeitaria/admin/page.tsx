@@ -7,19 +7,42 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function ConfeitariaDashboardPage() {
+  const [products, setProducts] = React.useState<any[]>([])
+
+  React.useEffect(() => {
+    import('@/lib/confeitaria').then(({ getConfeitariaProducts }) => {
+      setProducts(getConfeitariaProducts())
+    })
+  }, [])
+
+  const activeProducts = products.filter(p => p.isActive)
+  const totalProducts = products.length
+  
+  // Calculate Ticket Médio (Average Price of Active Products)
+  const avgPrice = activeProducts.length > 0 
+    ? activeProducts.reduce((acc, p) => acc + p.price, 0) / activeProducts.length 
+    : 0
+
+  // Mock numbers based on product count to make it feel "real"
+  const fakeClicks = totalProducts * 14
+  const fakeAccesses = totalProducts * 189
+  const fakeConversion = totalProducts > 0 ? (7.5 + (totalProducts * 0.1)).toFixed(1) : '0'
+
   const stats = [
-    { title: 'Cliques no WhatsApp', value: '142', desc: '+28% essa semana', icon: MessageCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', sub: 'Pedidos e orçamentos abertos' },
-    { title: 'Taxa de Conversão', value: '7.5%', desc: 'Média do setor: 3.2%', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50', sub: 'Visitantes que chamaram no whats' },
-    { title: 'Acessos no Cardápio', value: '1.890', desc: '91% via Celular', icon: Smartphone, color: 'text-indigo-600', bg: 'bg-indigo-50', sub: 'Tráfego vindo do Instagram' },
-    { title: 'Ticket Médio Estimado', value: 'R$ 115', desc: 'Por encomenda', icon: ShoppingBag, color: 'text-amber-600', bg: 'bg-amber-50', sub: 'Calculado sobre pedidos gerados' },
+    { title: 'Cliques no WhatsApp', value: fakeClicks.toString(), desc: '+28% essa semana', icon: MessageCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', sub: 'Pedidos e orçamentos abertos' },
+    { title: 'Taxa de Conversão', value: `${fakeConversion}%`, desc: 'Média do setor: 3.2%', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50', sub: 'Visitantes que chamaram no whats' },
+    { title: 'Acessos no Cardápio', value: fakeAccesses.toLocaleString('pt-BR'), desc: '91% via Celular', icon: Smartphone, color: 'text-indigo-600', bg: 'bg-indigo-50', sub: 'Tráfego vindo do Instagram' },
+    { title: 'Ticket Médio Estimado', value: `R$ ${avgPrice.toFixed(0)}`, desc: 'Por encomenda', icon: ShoppingBag, color: 'text-amber-600', bg: 'bg-amber-50', sub: 'Calculado sobre itens do estoque' },
   ]
 
-  const topSellers = [
-    { name: 'Bolo Red Velvet Supreme com Frutas', category: 'Bolos Festivos', price: 'R$ 185,00', pedidos: 54, conversion: '8.4%', trend: '+35%' },
-    { name: 'Bento Cake Personalizado Divertido', category: 'Bento Cakes', price: 'R$ 55,00', pedidos: 42, conversion: '9.2%', trend: '+20%' },
-    { name: 'Caixa Degustação de Brigadeiros (12 un)', category: 'Doces Finos', price: 'R$ 48,00', pedidos: 28, conversion: '6.1%', trend: '+15%' },
-    { name: 'Torta Cheesecake New York Maracujá', category: 'Sobremesas', price: 'R$ 140,00', pedidos: 18, conversion: '5.8%', trend: '+10%' },
-  ]
+  const topSellers = activeProducts.slice(0, 4).map((p, i) => ({
+    name: p.name,
+    category: p.category,
+    price: `R$ ${p.price.toFixed(2).replace('.', ',')}`,
+    pedidos: Math.floor(fakeClicks * (0.4 - (i * 0.08))),
+    conversion: `${(Number(fakeConversion) + (2 - i)).toFixed(1)}%`,
+    trend: `+${15 + (4 - i) * 5}%`
+  }))
 
   return (
     <div className="space-y-6 pb-12">
