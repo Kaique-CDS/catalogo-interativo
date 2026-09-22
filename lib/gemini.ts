@@ -74,27 +74,28 @@ export function buildVehicleDescriptionPrompt({
   mileage: number | string; price?: number | string; fuel: string;
   transmission: string; color?: string; features: string[]
 }): string {
-  const formattedPrice = price ? `R$ ${Number(price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Consulte'
-  return `Você é um especialista em vendas de veículos seminovos.
-Escreva uma descrição de anúncio comercial atrativa, vendedora e profissional para o veículo abaixo.
+  // Filtra estritamente os campos preenchidos para gastar o mínimo de tokens
+  const items: string[] = []
+  if (title) items.push(`Veículo: ${title}`)
+  if (brand || model) items.push(`Modelo: ${brand} ${model}`)
+  if (year) items.push(`Ano: ${year}`)
+  if (mileage !== undefined && mileage !== null && String(mileage).trim() !== '') {
+    items.push(`Km: ${Number(mileage).toLocaleString('pt-BR')}`)
+  }
+  if (price && Number(price) > 0) {
+    items.push(`Preço: R$ ${Number(price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+  }
+  if (fuel) items.push(`Combustível: ${fuel}`)
+  if (transmission) items.push(`Câmbio: ${transmission}`)
+  if (color) items.push(`Cor: ${color}`)
+  if (features && features.length > 0) items.push(`Opcionais: ${features.join(', ')}`)
 
-REGRAS OBRIGATÓRIAS:
-1. O texto DEVE ter no MÁXIMO 500 caracteres (imprescindível respeitar esse limite).
-2. Baseie-se estritamente nas características preenchidas abaixo, sem inventar opcionais não listados.
-3. Não use títulos, listas, hashtags ou markdown; escreva apenas texto corrido em português do Brasil.
-
-DADOS DO VEÍCULO:
-- Veículo: ${title}
-- Marca: ${brand} | Modelo: ${model}
-- Ano Modelo: ${year}
-- Quilometragem: ${Number(mileage).toLocaleString('pt-BR')} km
-- Preço: ${formattedPrice}
-- Combustível: ${fuel} | Câmbio: ${transmission}
-- Cor: ${color || 'Não informada'}
-- Opcionais e Diferenciais: ${features.length > 0 ? features.join(', ') : 'Nenhum opcional informado'}
-
-Descrição (máx. 500 caracteres):`
+  return `Escreva um anúncio de venda atrativo e profissional para este seminovo.
+Máximo de 450 caracteres (2 a 3 frases). Apenas texto corrido, sem markdown e sem hashtags.
+Dados: ${items.join(' | ')}
+Descrição:`
 }
+
 
 export function buildCakeDescriptionPrompt({
   name, category, price, servings, prepTime,

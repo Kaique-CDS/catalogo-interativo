@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles } from 'lucide-react'
+import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles, Lock, Edit3 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
@@ -49,7 +49,7 @@ const vehicleSchema = z.object({
   transmission: z.string().optional(),
   color: z.string().optional(),
   plate_end: z.string().max(2).optional(),
-  description: z.string().min(10, 'Descrição é obrigatória (mín. 10 caracteres)'),
+  description: z.string().min(10, 'Descrição é obrigatória (mín. 10 caracteres)').max(500, 'Descrição deve ter no máximo 500 caracteres'),
 })
 
 type VehicleFormData = z.infer<typeof vehicleSchema>
@@ -70,6 +70,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const [saving, setSaving] = useState(false)
   const [sku, setSku] = useState<string>(vehicle?.sku ?? '')
   const [aiLoading, setAiLoading] = useState(false)
+  const [descMode, setDescMode] = useState<'manual' | 'ai'>('manual')
 
   // Auto-generate SKU for new vehicles on mount
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm<VehicleFormData>({
+  const { register, handleSubmit, formState: { errors }, getValues, setValue, watch } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
     defaultValues: vehicle ? {
       title: vehicle.title,
@@ -99,6 +100,27 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     },
   })
 
+  // Monitoramento reativo das especificações do carro para desbloqueio da I.A
+  const watchedValues = watch()
+  const titleVal = (watchedValues.title || '').trim()
+  const brandVal = (watchedValues.brand || '').trim()
+  const modelVal = (watchedValues.model || '').trim()
+  const yearVal = watchedValues.year
+  const mileageVal = watchedValues.mileage
+  const priceVal = watchedValues.price
+  const colorVal = (watchedValues.color || '').trim()
+
+  const missingFields: string[] = []
+  if (!titleVal) missingFields.push('Título')
+  if (!brandVal) missingFields.push('Marca')
+  if (!modelVal) missingFields.push('Modelo')
+  if (!yearVal) missingFields.push('Ano')
+  if (mileageVal === undefined || mileageVal === null || String(mileageVal).trim() === '') missingFields.push('Km')
+  if (!priceVal || Number(priceVal) <= 0) missingFields.push('Preço')
+  if (!colorVal) missingFields.push('Cor')
+
+  const isFormComplete = missingFields.length === 0
+
   const toggleFeature = (item: string) => {
     setSelectedFeatures(prev =>
       prev.includes(item) ? prev.filter(f => f !== item) : [...prev, item]
@@ -106,22 +128,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   }
 
   const generateDescription = async () => {
-    const values = getValues()
-    const missing: string[] = []
-
-    if (!values.title?.trim()) missing.push('Título')
-    if (!values.brand?.trim()) missing.push('Marca')
-    if (!values.model?.trim()) missing.push('Modelo')
-    if (!values.year) missing.push('Ano')
-    if (values.mileage === undefined || values.mileage === null || String(values.mileage).trim() === '') missing.push('Km Rodados')
-    if (!values.price || Number(values.price) <= 0) missing.push('Preço')
-    if (!fuel?.trim()) missing.push('Combustível')
-    if (!transmission?.trim()) missing.push('Câmbio')
-    if (!values.color?.trim()) missing.push('Cor')
-
-    if (missing.length > 0) {
-      toast.error(`Preencha todos os campos obrigatórios antes de gerar a legenda com IA: ${missing.join(', ')}.`, {
-        duration: 6000,
+    if (!isFormComplete) {
+      toast.error(`Preencha todos os campos obrigatórios antes de gerar a legenda com IA: ${missingFields.join(', ')}.`, {
+        duration: 5000,
       })
       return
     }
@@ -135,15 +144,15 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     setAiLoading(true)
     try {
       const prompt = buildVehicleDescriptionPrompt({
-        title: (values.title || '').trim(),
-        brand: (values.brand || '').trim(),
-        model: (values.model || '').trim(),
-        year: values.year,
-        mileage: values.mileage,
-        price: values.price,
+        title: titleVal,
+        brand: brandVal,
+        model: modelVal,
+        year: yearVal,
+        mileage: mileageVal,
+        price: priceVal,
         fuel,
         transmission,
-        color: (values.color || '').trim(),
+        color: colorVal,
         features: selectedFeatures,
       })
       const result = await generateWithGemini(prompt)
@@ -378,34 +387,230 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             })}
           </div>
 
-          <div className="mt-4 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700">
-                Descrição do Veículo <span className="text-red-500">*</span>
-              </Label>
-              <button
-                type="button"
-                onClick={generateDescription}
-                disabled={aiLoading}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg border border-purple-200 transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                {aiLoading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
-                )}
-                {aiLoading ? 'Gerando com IA...' : '✨ Gerar com IA'}
-              </button>
+          {/* Balão Moderno de Descrição com Abas (Manual vs I.A) */}
+          <div className="mt-6 rounded-2xl border border-zinc-200/90 bg-gradient-to-b from-zinc-50/80 to-white p-4 sm:p-5 shadow-xs">
+            {/* Cabeçalho do Balão com Seletor de Modo */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-zinc-200/70">
+              <div>
+                <Label htmlFor="description" className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
+                  <span>Descrição do Veículo</span>
+                  <span className="text-red-500">*</span>
+                </Label>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  Escolha como deseja compor a legenda do anúncio deste carro:
+                </p>
+              </div>
+
+              {/* Segmented Switcher (2 opções: Manual ou I.A) */}
+              <div className="inline-flex p-1 bg-zinc-200/70 rounded-xl gap-1 self-start sm:self-auto border border-zinc-200">
+                <button
+                  type="button"
+                  onClick={() => setDescMode('manual')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    descMode === 'manual'
+                      ? 'bg-white text-zinc-900 shadow-xs'
+                      : 'text-zinc-600 hover:text-zinc-900'
+                  }`}
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                  Fazer Manualmente
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDescMode('ai')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    descMode === 'ai'
+                      ? isFormComplete
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs'
+                        : 'bg-zinc-800 text-zinc-100 shadow-xs'
+                      : isFormComplete
+                        ? 'text-purple-700 hover:text-purple-900'
+                        : 'text-zinc-600 hover:text-zinc-800'
+                  }`}
+                >
+                  {isFormComplete ? (
+                    <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                  ) : (
+                    <Lock className="h-3.5 w-3.5 text-zinc-400" />
+                  )}
+                  <span>Gerar com I.A</span>
+                  {!isFormComplete && (
+                    <span className="text-[9px] px-1.5 py-0.5 bg-zinc-700 text-zinc-200 rounded font-medium ml-0.5">
+                      Bloqueado
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
-            <Textarea
-              id="description"
-              placeholder="Ex: Todas as revisões feitas em concessionária, pneus Pirelli novos, laudo Dekra 100% aprovado, sem retoques. Carro em excelente estado, único dono."
-              rows={4}
-              className="text-sm rounded-xl"
-              {...register('description')}
-            />
-            <p className="text-[10px] text-zinc-400">Mín. 10 caracteres. Uma boa descrição aumenta as chances de venda!</p>
-            {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
+
+            {/* Conteúdo Interno do Balão */}
+            <div className="pt-3.5 space-y-3">
+              {descMode === 'manual' ? (
+                /* MODO MANUAL */
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-zinc-500">
+                    <span className="flex items-center gap-1.5 text-zinc-600 font-medium">
+                      <Edit3 className="h-3.5 w-3.5 text-zinc-500" /> Escreva livremente o texto do seu anúncio:
+                    </span>
+                    <span className="text-[11px] text-zinc-400 font-mono">
+                      {(watchedValues.description || '').length}/500 carac.
+                    </span>
+                  </div>
+                  <Textarea
+                    id="description"
+                    placeholder="Ex: Carro impecável, único dono, todas as revisões feitas em concessionária, laudo cautelar 100% aprovado, pneus novos e sem detalhes."
+                    rows={4}
+                    maxLength={500}
+                    className="text-sm rounded-xl bg-white border-zinc-200 focus:border-zinc-900 transition-colors"
+                    {...register('description')}
+                  />
+                </div>
+              ) : (
+                /* MODO I.A */
+                <div className="space-y-3">
+                  {!isFormComplete ? (
+                    /* ESTADO BLOQUEADO */
+                    <div className="rounded-xl border border-dashed border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-amber-50/60 p-3.5 text-zinc-800">
+                      <div className="flex items-start gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-amber-500/15 border border-amber-300/60 flex items-center justify-center shrink-0 text-amber-700 mt-0.5">
+                          <Lock className="h-4 w-4" />
+                        </div>
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                              Gerador com I.A Bloqueado
+                            </span>
+                            <span className="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-semibold">
+                              Economia de Tokens
+                            </span>
+                          </div>
+                          <p className="text-xs text-amber-900/80 leading-relaxed">
+                            Para economizar tokens e gerar uma legenda altamente precisa para este carro, preencha todos os campos obrigatórios primeiro:
+                          </p>
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {missingFields.map((f) => (
+                              <span
+                                key={f}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-200/70 border border-amber-300/80 text-[11px] font-semibold text-amber-900"
+                              >
+                                ⚠️ {f}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Botão de IA Bloqueado dentro do balão */}
+                      <div className="mt-3 pt-3 border-t border-amber-200/60">
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-200/80 text-zinc-400 font-semibold text-xs border border-zinc-300/70 cursor-not-allowed shadow-inner"
+                        >
+                          <Lock className="h-3.5 w-3.5" />
+                          Preencha os dados acima para desbloquear a geração com I.A
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ESTADO DESBLOQUEADO / PRONTO */
+                    <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50/90 via-indigo-50/60 to-purple-50/40 p-3.5 text-zinc-900">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-950 uppercase tracking-wide">
+                              <Sparkles className="h-3.5 w-3.5 text-purple-600" /> I.A Pronta para Gerar
+                            </span>
+                            <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
+                              ✓ Especificações Completas
+                            </span>
+                          </div>
+                          <p className="text-xs text-zinc-600">
+                            A I.A filtrará apenas os dados preenchidos deste veículo para gastar o mínimo de tokens:
+                          </p>
+                          <div className="flex flex-wrap gap-1.5 pt-0.5 text-[11px]">
+                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                              🚗 {brandVal} {modelVal}
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                              📅 {yearVal}
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                              🛣️ {Number(mileageVal).toLocaleString('pt-BR')} km
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                              💰 R$ {Number(priceVal).toLocaleString('pt-BR')}
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                              🎨 {colorVal}
+                            </span>
+                            {selectedFeatures.length > 0 && (
+                              <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                                ⚙️ {selectedFeatures.length} opcionais
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Botão de Gerar com IA DENTRO do balão */}
+                        <div className="shrink-0 self-stretch sm:self-center">
+                          <button
+                            type="button"
+                            onClick={generateDescription}
+                            disabled={aiLoading}
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 cursor-pointer"
+                          >
+                            {aiLoading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-4 w-4 text-amber-300" />
+                            )}
+                            {aiLoading ? 'Criando legenda...' : '✨ Gerar Legenda com I.A'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Campo de Texto onde a IA insere a descrição */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                      <span className="text-[11px] text-zinc-500 font-medium">
+                        Texto da Legenda (gerado pela IA ou ajustado por você):
+                      </span>
+                      <span className="text-[11px] text-zinc-400 font-mono">
+                        {(watchedValues.description || '').length}/500 carac.
+                      </span>
+                    </div>
+                    <Textarea
+                      id="description"
+                      placeholder={
+                        isFormComplete
+                          ? "Clique no botão '✨ Gerar Legenda com I.A' acima para criar o texto automaticamente..."
+                          : "Preencha as especificações para liberar o botão de geração com I.A..."
+                      }
+                      rows={4}
+                      maxLength={500}
+                      className="text-sm rounded-xl bg-white border-zinc-200 focus:border-purple-500 transition-colors"
+                      {...register('description')}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Dica de rodapé e mensagem de validação */}
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-[10px] text-zinc-400">
+                  Mínimo 10 caracteres. Máximo 500 caracteres para anúncios otimizados.
+                </p>
+              </div>
+              {errors.description && (
+                <p className="text-xs text-red-500 font-medium mt-0.5">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
