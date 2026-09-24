@@ -229,12 +229,12 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl pb-12">
       {/* 1. Fotos */}
-      <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
+      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
         <CardContent className="pt-6">
           <Label className="text-xs font-bold text-zinc-900 block mb-2">Fotos do Veículo (Capa e Galeria)</Label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {images.map((url, i) => (
-              <div key={i} className="relative aspect-video rounded-xl bg-zinc-100 overflow-hidden group border border-zinc-200/80">
+              <div key={i} className="relative aspect-video rounded-xl bg-zinc-100 overflow-hidden group border border-zinc-200 dark:border-zinc-800/80">
                 <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
                 <button
                   type="button"
@@ -250,13 +250,13 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 )}
               </div>
             ))}
-            <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-200 hover:border-zinc-400 cursor-pointer bg-zinc-50/50 hover:bg-zinc-50 transition-colors">
+            <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-200 hover:border-zinc-400 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50/50 hover:bg-zinc-50 transition-colors">
               {uploading ? (
                 <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
               ) : (
                 <>
                   <Upload className="h-5 w-5 text-zinc-500 mb-1" />
-                  <span className="text-xs font-medium text-zinc-600">Adicionar fotos</span>
+                  <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Adicionar fotos</span>
                   <span className="text-[10px] text-zinc-400">JPG, PNG ou WebP</span>
                 </>
               )}
@@ -267,7 +267,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       </Card>
 
       {/* 2. Informações Principais */}
-      <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
+      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
         <CardContent className="pt-6 space-y-4">
           {/* SKU read-only */}
           <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
@@ -290,19 +290,19 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="title" className="text-xs font-semibold text-zinc-700">Título do Anúncio *</Label>
+            <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Título do Anúncio *</Label>
             <Input id="title" placeholder="Ex: Honda Civic Touring 1.5 Turbo - Único Dono / Teto Solar" className="text-sm rounded-xl" {...register('title')} />
             {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="brand" className="text-xs font-semibold text-zinc-700">Marca *</Label>
+              <Label htmlFor="brand" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Marca *</Label>
               <Input id="brand" placeholder="Ex: Honda, Toyota, BMW" className="text-sm rounded-xl" {...register('brand')} />
               {errors.brand && <p className="text-xs text-red-500">{errors.brand.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="model" className="text-xs font-semibold text-zinc-700">Modelo *</Label>
+              <Label htmlFor="model" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Modelo *</Label>
               <Input id="model" placeholder="Ex: Civic, Corolla, X1" className="text-sm rounded-xl" {...register('model')} />
               {errors.model && <p className="text-xs text-red-500">{errors.model.message}</p>}
             </div>
@@ -310,28 +310,28 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="year" className="text-xs font-semibold text-zinc-700">Ano Modelo *</Label>
+              <Label htmlFor="year" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Ano Modelo *</Label>
               <Input id="year" type="number" placeholder="2023" className="text-sm rounded-xl" {...register('year')} />
               {errors.year && <p className="text-xs text-red-500">{errors.year.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="mileage" className="text-xs font-semibold text-zinc-700">Km Rodados *</Label>
+              <Label htmlFor="mileage" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Km Rodados *</Label>
               <Input id="mileage" type="number" placeholder="32000" className="text-sm rounded-xl" {...register('mileage')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="price" className="text-xs font-semibold text-zinc-700">Preço (R$) *</Label>
-              <Input id="price" type="number" step="0.01" placeholder="129900" className="text-sm rounded-xl font-bold text-zinc-900" {...register('price')} />
+              <Label htmlFor="price" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Preço (R$) *</Label>
+              <Input id="price" type="number" step="0.01" placeholder="129900" className="text-sm rounded-xl font-bold text-zinc-900 dark:text-zinc-50" {...register('price')} />
               {errors.price && <p className="text-xs text-red-500">{errors.price.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="plate_end" className="text-xs font-semibold text-zinc-700">Final da Placa</Label>
+              <Label htmlFor="plate_end" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Final da Placa</Label>
               <Input id="plate_end" placeholder="Ex: 8" maxLength={2} className="text-sm rounded-xl" {...register('plate_end')} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700">Câmbio</Label>
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Câmbio</Label>
               <Select value={transmission} onValueChange={setTransmission}>
                 <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Câmbio" /></SelectTrigger>
                 <SelectContent>
@@ -343,7 +343,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700">Combustível</Label>
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Combustível</Label>
               <Select value={fuel} onValueChange={setFuel}>
                 <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Combustível" /></SelectTrigger>
                 <SelectContent>
@@ -356,7 +356,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="color" className="text-xs font-semibold text-zinc-700">Cor</Label>
+              <Label htmlFor="color" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Cor</Label>
               <Input id="color" placeholder="Ex: Branco Pérola, Preto" className="text-sm rounded-xl" {...register('color')} />
             </div>
           </div>
@@ -364,7 +364,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       </Card>
 
       {/* 3. Opcionais e Diferenciais */}
-      <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
+      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
         <CardContent className="pt-6">
           <Label className="text-xs font-bold text-zinc-900 block mb-1">Opcionais & Diferenciais Rápidos</Label>
           <p className="text-[11px] text-zinc-400 mb-3">Selecione os itens que mais valorizam o veículo</p>
@@ -390,9 +390,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           </div>
 
           {/* Balão Moderno de Descrição com Abas (Manual vs I.A) */}
-          <div className="mt-6 rounded-2xl border border-zinc-200/90 bg-gradient-to-b from-zinc-50/80 to-white p-4 sm:p-5 shadow-xs">
+          <div className="mt-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/90 bg-gradient-to-b from-zinc-50/80 to-white p-4 sm:p-5 shadow-xs">
             {/* Cabeçalho do Balão com Seletor de Modo */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-zinc-200/70">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-zinc-200 dark:border-zinc-800/70">
               <div>
                 <Label htmlFor="description" className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
                   <span>Descrição do Veículo</span>
@@ -404,14 +404,14 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               </div>
 
               {/* Segmented Switcher (2 opções: Manual ou I.A) */}
-              <div className="inline-flex p-1 bg-zinc-200/70 rounded-xl gap-1 self-start sm:self-auto border border-zinc-200">
+              <div className="inline-flex p-1 bg-zinc-200/70 rounded-xl gap-1 self-start sm:self-auto border border-zinc-200 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setDescMode('manual')}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     descMode === 'manual'
                       ? 'bg-white text-zinc-900 shadow-xs'
-                      : 'text-zinc-600 hover:text-zinc-900'
+                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-50'
                   }`}
                 >
                   <Edit3 className="h-3.5 w-3.5" />
@@ -428,7 +428,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                         : 'bg-zinc-800 text-zinc-100 shadow-xs'
                       : isFormComplete
                         ? 'text-purple-700 hover:text-purple-900'
-                        : 'text-zinc-600 hover:text-zinc-800'
+                        : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-200'
                   }`}
                 >
                   {isFormComplete ? (
@@ -451,9 +451,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               {descMode === 'manual' ? (
                 /* MODO MANUAL */
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs text-zinc-500">
+                  <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
                     <span className="flex items-center gap-1.5 text-zinc-600 font-medium">
-                      <Edit3 className="h-3.5 w-3.5 text-zinc-500" /> Escreva livremente o texto do seu anúncio:
+                      <Edit3 className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" /> Escreva livremente o texto do seu anúncio:
                     </span>
                     <span className="text-[11px] text-zinc-400 font-mono">
                       {(watchedValues.description || '').length}/500 carac.
@@ -473,7 +473,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 <div className="space-y-3">
                   {!isFormComplete ? (
                     /* ESTADO BLOQUEADO */
-                    <div className="rounded-xl border border-dashed border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-amber-50/60 p-3.5 text-zinc-800">
+                    <div className="rounded-xl border border-dashed border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-amber-50/60 p-3.5 text-zinc-800 dark:text-zinc-200">
                       <div className="flex items-start gap-3">
                         <div className="h-8 w-8 rounded-lg bg-amber-500/15 border border-amber-300/60 flex items-center justify-center shrink-0 text-amber-700 mt-0.5">
                           <Lock className="h-4 w-4" />
@@ -517,7 +517,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                     </div>
                   ) : (
                     /* ESTADO DESBLOQUEADO / PRONTO */
-                    <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50/90 via-indigo-50/60 to-purple-50/40 p-3.5 text-zinc-900">
+                    <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50/90 via-indigo-50/60 to-purple-50/40 p-3.5 text-zinc-900 dark:text-zinc-50">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
@@ -528,27 +528,27 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                               ✓ Especificações Completas
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-600">
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400">
                             A I.A filtrará apenas os dados preenchidos deste veículo para gastar o mínimo de tokens:
                           </p>
                           <div className="flex flex-wrap gap-1.5 pt-0.5 text-[11px]">
-                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
                               🚗 {brandVal} {modelVal}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
                               📅 {yearVal}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
                               🛣️ {Number(mileageVal).toLocaleString('pt-BR')} km
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
                               💰 R$ {Number(priceVal).toLocaleString('pt-BR')}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
                               🎨 {colorVal}
                             </span>
                             {selectedFeatures.length > 0 && (
-                              <span className="px-2 py-0.5 rounded bg-white/90 border border-purple-200 text-purple-900 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
                                 ⚙️ {selectedFeatures.length} opcionais
                               </span>
                             )}
@@ -577,7 +577,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
                   {/* Campo de Texto onde a IA insere a descrição */}
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                    <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
                       <span className="text-[11px] text-zinc-500 font-medium">
                         Texto da Legenda (gerado pela IA ou ajustado por você):
                       </span>
@@ -618,17 +618,17 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       </Card>
 
       {/* 4. Status de Publicação */}
-      <Card className="rounded-2xl border-zinc-200/80 shadow-xs">
+      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-200">
+          <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center gap-3.5">
               <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-colors ${
-                isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-500'
+                isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-500 dark:text-zinc-400'
               }`}>
                 {isActive ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
               </div>
               <div>
-                <p className="text-sm font-bold text-zinc-900">
+                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
                   {isActive ? 'Veículo Publicado no Catálogo' : 'Veículo Pausado / Oculto'}
                 </p>
                 <p className="text-xs text-zinc-500 mt-0.5">

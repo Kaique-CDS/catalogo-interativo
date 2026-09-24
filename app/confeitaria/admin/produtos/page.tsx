@@ -63,7 +63,7 @@ export default function ProdutosPage() {
         {products.map((item) => (
           <div key={item.id} className="bg-white p-3.5 rounded-2xl border border-rose-100 shadow-2xs flex gap-3 items-center justify-between">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0 border border-rose-100">
+              <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-rose-50 flex-shrink-0 border border-rose-100 dark:border-rose-900/50">
                 <Image src={item.image} alt={item.name} fill className="object-cover" />
               </div>
               <div className="min-w-0">
@@ -86,7 +86,7 @@ export default function ProdutosPage() {
                   size="icon"
                   variant="ghost"
                   onClick={() => toggleStatus(item.id)}
-                  className="h-7 w-7 text-zinc-400 hover:text-rose-600"
+                  className="h-7 w-7 text-zinc-400 hover:text-rose-600 dark:text-rose-400"
                   title={item.isActive ? "Pausar" : "Publicar"}
                 >
                   {item.isActive ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -95,7 +95,7 @@ export default function ProdutosPage() {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-7 w-7 text-zinc-400 hover:text-rose-600"
+                    className="h-7 w-7 text-zinc-400 hover:text-rose-600 dark:text-rose-400"
                     title="Editar produto"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -119,7 +119,7 @@ export default function ProdutosPage() {
       {/* 2. Visão Desktop: Tabela Tradicional */}
       <div className="hidden md:block bg-white rounded-3xl border border-rose-100 overflow-hidden shadow-xs">
         <Table>
-          <TableHeader className="bg-rose-50/50">
+          <TableHeader className="bg-rose-50 dark:bg-rose-950/30/50">
             <TableRow className="border-rose-100 text-xs">
               <TableHead className="w-16">Foto</TableHead>
               <TableHead>Doce / Bolo</TableHead>
@@ -132,18 +132,18 @@ export default function ProdutosPage() {
           </TableHeader>
           <TableBody className="divide-y divide-rose-50 text-xs">
             {products.map((item) => (
-              <TableRow key={item.id} className="border-rose-50 hover:bg-rose-50/30">
+              <TableRow key={item.id} className="border-rose-50 hover:bg-rose-50 dark:bg-rose-950/30/30">
                 <TableCell>
-                  <div className="relative h-12 w-14 rounded-xl overflow-hidden bg-rose-100 border border-rose-100">
+                  <div className="relative h-12 w-14 rounded-xl overflow-hidden bg-rose-100 border border-rose-100 dark:border-rose-900/50">
                     <Image src={item.image} alt={item.name} fill className="object-cover" />
                   </div>
                 </TableCell>
                 <TableCell>
                   <p className="font-bold text-rose-950 text-xs">{item.name}</p>
                 </TableCell>
-                <TableCell><span className="text-zinc-500">{item.category}</span></TableCell>
-                <TableCell><span className="text-zinc-500">{item.servings}</span></TableCell>
-                <TableCell><span className="font-bold text-rose-950">{formatCurrency(item.price)}</span></TableCell>
+                <TableCell><span className="text-zinc-500 dark:text-zinc-400">{item.category}</span></TableCell>
+                <TableCell><span className="text-zinc-500 dark:text-zinc-400">{item.servings}</span></TableCell>
+                <TableCell><span className="font-bold text-rose-950 dark:text-rose-100">{formatCurrency(item.price)}</span></TableCell>
                 <TableCell>
                   <Badge
                     variant={item.isActive ? 'default' : 'secondary'}
@@ -158,7 +158,7 @@ export default function ProdutosPage() {
                       size="icon"
                       variant="ghost"
                       onClick={() => toggleStatus(item.id)}
-                      className="h-8 w-8 text-zinc-400 hover:text-rose-600"
+                      className="h-8 w-8 text-zinc-400 hover:text-rose-600 dark:text-rose-400"
                       title={item.isActive ? "Pausar" : "Publicar"}
                     >
                       {item.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -167,7 +167,7 @@ export default function ProdutosPage() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8 text-zinc-400 hover:text-rose-600"
+                        className="h-8 w-8 text-zinc-400 hover:text-rose-600 dark:text-rose-400"
                         title="Editar produto"
                       >
                         <Pencil className="h-4 w-4" />

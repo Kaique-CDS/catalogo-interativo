@@ -65,7 +65,7 @@ export default function StatsCards({ totalVehicles, activeVehicles, slug }: Prop
       {/* 1. Métricas de Alto Impacto Comercial (Analytics de Conversão) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {metrics.map((m, idx) => (
-          <Card key={idx} className="border-zinc-200/80 rounded-2xl shadow-2xs bg-white">
+          <Card key={idx} className="border-zinc-200 dark:border-zinc-800/80 rounded-2xl shadow-2xs bg-white dark:bg-zinc-950">
             <CardContent className="p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-zinc-500 truncate">{m.title}</span>
@@ -73,7 +73,7 @@ export default function StatsCards({ totalVehicles, activeVehicles, slug }: Prop
                   <m.icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-zinc-900">{m.value}</p>
+              <p className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-50">{m.value}</p>
               <div className="mt-2 pt-2 border-t border-zinc-100 flex flex-col gap-0.5">
                 <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-0.5">
                   <ArrowUpRight className="h-3 w-3" /> {m.change}
@@ -87,19 +87,19 @@ export default function StatsCards({ totalVehicles, activeVehicles, slug }: Prop
 
       {/* 2. Status Rápido do Estoque */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <Card className="rounded-2xl border-zinc-200/80 bg-white">
+        <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950">
           <CardContent className="p-4 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-xs text-zinc-500 font-medium">Veículos no Estoque</p>
               <p className="text-xl sm:text-2xl font-black text-zinc-900 mt-0.5">{totalVehicles}</p>
             </div>
-            <div className="hidden sm:flex h-9 w-9 rounded-xl bg-zinc-100 items-center justify-center text-zinc-600">
+            <div className="hidden sm:flex h-9 w-9 rounded-xl bg-zinc-100 items-center justify-center text-zinc-600 dark:text-zinc-400">
               <Car className="h-4 w-4" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-zinc-200/80 bg-white">
+        <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950">
           <CardContent className="p-4 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-xs text-zinc-500 font-medium">Anúncios Publicados</p>
@@ -111,7 +111,7 @@ export default function StatsCards({ totalVehicles, activeVehicles, slug }: Prop
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-zinc-200/80 bg-white">
+        <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950">
           <CardContent className="p-4 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-xs text-zinc-500 font-medium">Pausados / Reservados</p>
@@ -125,14 +125,14 @@ export default function StatsCards({ totalVehicles, activeVehicles, slug }: Prop
       </div>
 
       {/* 3. Destaque Comercial: Inteligência de Vendas (Carros Mais Buscados) */}
-      <div className="bg-white rounded-2xl border border-zinc-200/80 p-5 sm:p-6 shadow-xs">
+      <div className="bg-white rounded-2xl border border-zinc-200 dark:border-zinc-800/80 p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
             <h3 className="font-bold text-zinc-900 text-sm sm:text-base flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amber-500" />
               Ranking de Interesse do Cliente (O que mais vende)
             </h3>
-            <p className="text-xs text-zinc-500">Dados baseados em visualizações e taxa de cliques no botão Tenho Interesse.</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Dados baseados em visualizações e taxa de cliques no botão Tenho Interesse.</p>
           </div>
           <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full self-start sm:self-auto">
             Últimos 30 dias
@@ -146,13 +146,13 @@ export default function StatsCards({ totalVehicles, activeVehicles, slug }: Prop
                 <span className="font-black text-zinc-300 text-sm w-4">#{i + 1}</span>
                 <div className="min-w-0">
                   <p className="font-bold text-zinc-900 truncate">{v.title}</p>
-                  <p className="text-[11px] text-zinc-500">{v.year} • {v.price}</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{v.year} • {v.price}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 flex-shrink-0 text-right">
                 <div className="hidden sm:block">
-                  <p className="font-bold text-zinc-900">{v.views}</p>
+                  <p className="font-bold text-zinc-900 dark:text-zinc-50">{v.views}</p>
                   <p className="text-[10px] text-zinc-400">visualizações</p>
                 </div>
                 <div className="bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-xl text-center">

@@ -117,8 +117,8 @@ export default function NovoDocePage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-xl font-black text-rose-950">Cadastrar Novo Doce ou Bolo 🧁</h1>
-          <p className="text-xs text-zinc-500">Detalhes essenciais para o cliente decidir rápido e pedir no WhatsApp.</p>
+          <h1 className="text-xl font-black text-rose-950 dark:text-rose-100">Cadastrar Novo Doce ou Bolo 🧁</h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">Detalhes essenciais para o cliente decidir rápido e pedir no WhatsApp.</p>
         </div>
       </div>
 
@@ -127,9 +127,9 @@ export default function NovoDocePage() {
         <Card className="rounded-2xl border-rose-100 bg-white shadow-xs">
           <CardContent className="p-5 sm:p-6">
             <Label className="text-xs font-bold text-rose-950 block mb-2">Fotos do Produto</Label>
-            <div className="border-2 border-dashed border-rose-200 rounded-2xl p-6 text-center hover:border-rose-400 transition-colors bg-rose-50/20 cursor-pointer">
+            <div className="border-2 border-dashed border-rose-200 rounded-2xl p-6 text-center hover:border-rose-400 transition-colors bg-rose-50 dark:bg-rose-950/30/20 cursor-pointer">
               <Upload className="h-8 w-8 text-rose-400 mx-auto mb-2" />
-              <p className="text-xs font-semibold text-rose-950">Clique para selecionar ou arraste as fotos</p>
+              <p className="text-xs font-semibold text-rose-950 dark:text-rose-100">Clique para selecionar ou arraste as fotos</p>
               <p className="text-[11px] text-zinc-400 mt-1">Imagens de dar água na boca convertem até 3x mais!</p>
             </div>
           </CardContent>
@@ -139,7 +139,7 @@ export default function NovoDocePage() {
         <Card className="rounded-2xl border-rose-100 bg-white shadow-xs">
           <CardContent className="p-5 sm:p-6 space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="name" className="text-xs font-semibold text-zinc-700">Nome do Doce / Bolo *</Label>
+              <Label htmlFor="name" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Nome do Doce / Bolo *</Label>
               <Input
                 id="name"
                 value={name}
@@ -151,7 +151,7 @@ export default function NovoDocePage() {
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-semibold text-zinc-700">Categoria *</Label>
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Categoria *</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="rounded-xl border-rose-200 text-sm">
                   <SelectValue placeholder="Selecione categoria" />
@@ -166,7 +166,7 @@ export default function NovoDocePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="price" className="text-xs font-semibold text-zinc-700">Preço (R$) *</Label>
+                <Label htmlFor="price" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Preço (R$) *</Label>
                 <Input
                   id="price"
                   type="number"
@@ -174,13 +174,13 @@ export default function NovoDocePage() {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Ex: 185.00"
-                  className="rounded-xl border-rose-200 text-sm font-bold text-rose-950"
+                  className="rounded-xl border-rose-200 text-sm font-bold text-rose-950 dark:text-rose-100"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="servings" className="text-xs font-semibold text-zinc-700">Rendimento / Porções</Label>
+                <Label htmlFor="servings" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Rendimento / Porções</Label>
                 <Input
                   id="servings"
                   value={servings}
@@ -191,7 +191,7 @@ export default function NovoDocePage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="prepTime" className="text-xs font-semibold text-zinc-700">Prazo de Encomenda</Label>
+                <Label htmlFor="prepTime" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Prazo de Encomenda</Label>
                 <Input
                   id="prepTime"
                   value={prepTime}
@@ -203,9 +203,9 @@ export default function NovoDocePage() {
             </div>
 
             {/* Balão Moderno de Descrição com Abas (Manual vs I.A) */}
-            <div className="rounded-2xl border border-rose-200/90 bg-gradient-to-b from-rose-50/50 to-white p-4 sm:p-5 shadow-xs space-y-3">
+            <div className="rounded-2xl border border-rose-200 dark:border-rose-800/90 bg-gradient-to-b from-rose-50/50 to-white p-4 sm:p-5 shadow-xs space-y-3">
               {/* Cabeçalho do Balão com Seletor de Modo */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-rose-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-rose-100 dark:border-rose-900/50">
                 <div>
                   <Label htmlFor="description" className="text-sm font-bold text-rose-950 flex items-center gap-1.5">
                     <span>Descrição do Doce ou Bolo</span>
@@ -217,14 +217,14 @@ export default function NovoDocePage() {
                 </div>
 
                 {/* Segmented Switcher (2 opções: Manual ou I.A) */}
-                <div className="inline-flex p-1 bg-rose-100/70 rounded-xl gap-1 self-start sm:self-auto border border-rose-200/60">
+                <div className="inline-flex p-1 bg-rose-100 dark:bg-rose-900/40/70 rounded-xl gap-1 self-start sm:self-auto border border-rose-200 dark:border-rose-800/60">
                   <button
                     type="button"
                     onClick={() => setDescMode('manual')}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                       descMode === 'manual'
                         ? 'bg-white text-rose-950 shadow-xs'
-                        : 'text-zinc-600 hover:text-rose-950'
+                        : 'text-zinc-600 hover:text-rose-950 dark:text-rose-100'
                     }`}
                   >
                     <Edit3 className="h-3.5 w-3.5 text-rose-500" />
@@ -240,8 +240,8 @@ export default function NovoDocePage() {
                           ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-xs'
                           : 'bg-zinc-800 text-zinc-100 shadow-xs'
                         : isFormComplete
-                          ? 'text-rose-700 hover:text-rose-900'
-                          : 'text-zinc-600 hover:text-zinc-800'
+                          ? 'text-rose-700 hover:text-rose-900 dark:text-rose-200'
+                          : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-200'
                     }`}
                   >
                     {isFormComplete ? (
@@ -264,7 +264,7 @@ export default function NovoDocePage() {
                 {descMode === 'manual' ? (
                   /* MODO MANUAL */
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                    <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
                       <span className="flex items-center gap-1.5 text-zinc-600 font-medium">
                         <Edit3 className="h-3.5 w-3.5 text-rose-400" /> Escreva os detalhes de massa, recheio e textura:
                       </span>
@@ -287,7 +287,7 @@ export default function NovoDocePage() {
                   <div className="space-y-3">
                     {!isFormComplete ? (
                       /* ESTADO BLOQUEADO */
-                      <div className="rounded-xl border border-dashed border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-rose-50/40 to-amber-50/60 p-3.5 text-zinc-800">
+                      <div className="rounded-xl border border-dashed border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-rose-50/40 to-amber-50/60 p-3.5 text-zinc-800 dark:text-zinc-200">
                         <div className="flex items-start gap-3">
                           <div className="h-8 w-8 rounded-lg bg-amber-500/15 border border-amber-300/60 flex items-center justify-center shrink-0 text-amber-700 mt-0.5">
                             <Lock className="h-4 w-4" />
@@ -331,34 +331,34 @@ export default function NovoDocePage() {
                       </div>
                     ) : (
                       /* ESTADO DESBLOQUEADO / PRONTO */
-                      <div className="rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50/90 via-pink-50/60 to-rose-50/40 p-3.5 text-zinc-900">
+                      <div className="rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50/90 via-pink-50/60 to-rose-50/40 p-3.5 text-zinc-900 dark:text-zinc-50">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-950 uppercase tracking-wide">
-                                <Sparkles className="h-3.5 w-3.5 text-rose-600" /> I.A Pronta para Gerar
+                                <Sparkles className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" /> I.A Pronta para Gerar
                               </span>
                               <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
                                 ✓ Dados Completos
                               </span>
                             </div>
-                            <p className="text-xs text-zinc-600">
+                            <p className="text-xs text-zinc-600 dark:text-zinc-400">
                               A I.A filtrará apenas os dados preenchidos deste doce para gastar o mínimo de tokens:
                             </p>
                             <div className="flex flex-wrap gap-1.5 pt-0.5 text-[11px]">
-                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-rose-200 text-rose-900 font-medium">
                                 🎂 {name.trim()}
                               </span>
-                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-rose-200 text-rose-900 font-medium">
                                 🏷️ {category}
                               </span>
-                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-rose-200 text-rose-900 font-medium">
                                 💰 R$ {numPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                               </span>
-                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-rose-200 text-rose-900 font-medium">
                                 🍰 {servings.trim()}
                               </span>
-                              <span className="px-2 py-0.5 rounded bg-white/90 border border-rose-200 text-rose-900 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-rose-200 text-rose-900 font-medium">
                                 ⏰ {prepTime.trim()}
                               </span>
                             </div>
@@ -386,7 +386,7 @@ export default function NovoDocePage() {
 
                     {/* Campo de Texto onde a IA insere a descrição */}
                     <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs text-zinc-500">
+                      <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
                         <span className="text-[11px] text-zinc-500 font-medium">
                           Texto da Descrição (gerado pela IA ou ajustado por você):
                         </span>
@@ -431,7 +431,7 @@ export default function NovoDocePage() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Publicar Doce no Cardápio'}
           </Button>
           <Link href="/confeitaria/admin/produtos">
-            <Button variant="outline" type="button" className="rounded-xl border-rose-200 text-sm text-zinc-600">
+            <Button variant="outline" type="button" className="rounded-xl border-rose-200 text-sm text-zinc-600 dark:text-zinc-400">
               Cancelar
             </Button>
           </Link>

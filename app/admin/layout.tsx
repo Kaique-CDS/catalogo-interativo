@@ -90,7 +90,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             <ThemeToggle />
             <Button variant="ghost" size="icon" className="relative rounded-full text-zinc-600 dark:text-zinc-400">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 border-2 border-white dark:border-zinc-950"></span>
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-50 dark:bg-rose-950/300 border-2 border-white dark:border-zinc-950"></span>
             </Button>
           </div>
         </header>
@@ -131,7 +131,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         )}
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950/50 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900/50/50 dark:bg-zinc-950/50 p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto h-full">
             {children}
           </div>

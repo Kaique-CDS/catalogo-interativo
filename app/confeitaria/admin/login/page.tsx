@@ -48,13 +48,13 @@ export default function ConfeitariaLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF9F6] flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-[#FFF9F6] dark:bg-zinc-950 flex items-center justify-center p-4 font-sans">
       <div className="bg-white border border-rose-100 rounded-3xl shadow-xs w-full max-w-sm p-8 text-center">
         <div className="h-16 w-16 mx-auto rounded-3xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-3xl shadow-sm mb-4">
           🎂
         </div>
 
-        <h2 className="text-2xl font-black text-rose-950">Acesso ao Ateliê</h2>
+        <h2 className="text-2xl font-black text-rose-950 dark:text-rose-100">Acesso ao Ateliê</h2>
         <p className="text-xs text-zinc-500 mt-1 mb-2">Gerenciador de Cardápio &amp; Confeitaria</p>
 
         <div className="flex items-center justify-center gap-1.5 mb-6">

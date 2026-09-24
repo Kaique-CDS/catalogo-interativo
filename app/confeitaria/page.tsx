@@ -298,14 +298,14 @@ export default function ConfeitariaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF9F6] text-zinc-800 font-sans pb-12">
+    <div className="min-h-screen bg-[#FFF9F6] dark:bg-zinc-950 text-zinc-800 font-sans pb-12">
       {/* Banner de Aviso Superior */}
-      <div className="bg-rose-500 text-white text-xs font-medium py-2 px-4 text-center tracking-wide flex items-center justify-center gap-1.5">
+      <div className="bg-rose-50 dark:bg-rose-950/300 text-white text-xs font-medium py-2 px-4 text-center tracking-wide flex items-center justify-center gap-1.5">
         <Sparkles className="h-3.5 w-3.5" /> Encomendas especiais para aniversários e eventos com entrega rápida via WhatsApp!
       </div>
 
       {/* Header Confeitaria */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-rose-100 sticky top-0 z-20 shadow-2xs">
+      <header className="bg-white dark:bg-zinc-950/90 backdrop-blur-md border-b border-rose-100 sticky top-0 z-20 shadow-2xs">
         <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3 max-w-7xl">
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white shadow-md shadow-rose-200 flex-shrink-0 text-xl">
@@ -318,7 +318,7 @@ export default function ConfeitariaPage() {
                   Artesanal
                 </Badge>
               </h1>
-              <p className="text-[11px] sm:text-xs text-rose-800/70 flex items-center gap-1 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-xs text-rose-800 dark:text-rose-300/70 flex items-center gap-1 mt-0.5 truncate">
                 <MapPin className="h-3 w-3 flex-shrink-0 text-rose-400" />
                 <span className="truncate">{STORE.address}</span>
               </p>
@@ -328,7 +328,7 @@ export default function ConfeitariaPage() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <Link href="/confeitaria/admin">
               <Button variant="outline" size="sm" className="rounded-xl border-rose-200 text-rose-900 hover:bg-rose-50 text-xs gap-1.5 font-semibold h-9">
-                <LayoutDashboard className="h-3.5 w-3.5 text-rose-600" />
+                <LayoutDashboard className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
                 <span className="hidden sm:inline">Painel</span> Admin
               </Button>
             </Link>
@@ -338,13 +338,13 @@ export default function ConfeitariaPage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 sm:py-10 text-center max-w-2xl">
-        <span className="text-[11px] font-bold tracking-wider text-rose-600 uppercase bg-rose-100/70 px-3 py-1 rounded-full">
+        <span className="text-[11px] font-bold tracking-wider text-rose-600 uppercase bg-rose-100 dark:bg-rose-900/40/70 px-3 py-1 rounded-full">
           Cardápio Oficial & Encomendas
         </span>
         <h2 className="text-2xl sm:text-4xl font-extrabold text-rose-950 mt-3 mb-2 tracking-tight">
           Feito à mão, com ingredientes nobres e muito afeto.
         </h2>
-        <p className="text-xs sm:text-sm text-zinc-600">
+        <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">
           Toque em qualquer doce para ver os detalhes, fotos e pedir direto no WhatsApp!
         </p>
 
@@ -370,7 +370,7 @@ export default function ConfeitariaPage() {
               className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                 selectedCategory === cat
                   ? 'bg-rose-600 text-white shadow-sm shadow-rose-200'
-                  : 'bg-white text-zinc-600 border border-rose-100 hover:bg-rose-50'
+                  : 'bg-white text-zinc-600 border border-rose-100 hover:bg-rose-50 dark:bg-rose-950/30'
               }`}
             >
               {cat}
@@ -396,7 +396,7 @@ export default function ConfeitariaPage() {
                 className="bg-white rounded-3xl border border-rose-100 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group cursor-pointer"
               >
                 {/* Imagem do Produto */}
-                <div className="relative aspect-[16/11] sm:h-60 w-full overflow-hidden bg-rose-50">
+                <div className="relative aspect-[16/11] sm:h-60 w-full overflow-hidden bg-rose-50 dark:bg-rose-950/30">
                   <Image
                     src={product.images[0]}
                     alt={product.name}
@@ -412,7 +412,7 @@ export default function ConfeitariaPage() {
 
                   {/* Dica de Toque */}
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="bg-white/95 text-rose-950 text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+                    <span className="bg-white dark:bg-zinc-950/95 text-rose-950 text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
                       <Eye className="h-3.5 w-3.5" /> Ver Detalhes
                     </span>
                   </div>
@@ -429,9 +429,9 @@ export default function ConfeitariaPage() {
                     </p>
 
                     {/* Detalhes extras */}
-                    <div className="mt-3 pt-2.5 border-t border-rose-50 flex flex-col gap-1 text-[11px] text-zinc-500">
+                    <div className="mt-3 pt-2.5 border-t border-rose-50 flex flex-col gap-1 text-[11px] text-zinc-500 dark:text-zinc-400">
                       {product.servings && (
-                        <span className="flex items-center gap-1.5 font-medium text-rose-900/80">
+                        <span className="flex items-center gap-1.5 font-medium text-rose-900 dark:text-rose-200/80">
                           🍽️ {product.servings}
                         </span>
                       )}
@@ -447,7 +447,7 @@ export default function ConfeitariaPage() {
                   <div className="mt-4 pt-3 border-t border-rose-50 flex items-center justify-between gap-2">
                     <div>
                       <span className="text-[10px] text-zinc-400 uppercase tracking-wider block font-medium">A partir de</span>
-                      <span className="text-xl sm:text-2xl font-black text-rose-950">
+                      <span className="text-xl sm:text-2xl font-black text-rose-950 dark:text-rose-100">
                         {formatCurrency(product.price)}
                       </span>
                     </div>
@@ -532,13 +532,13 @@ export default function ConfeitariaPage() {
             </div>
 
             {/* Informações Ricas */}
-            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-zinc-800">
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-zinc-800 dark:text-zinc-200">
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-rose-950 leading-snug">
                   {activeModalProduct.name}
                 </h2>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-2xl font-black text-rose-950">
+                  <span className="text-2xl font-black text-rose-950 dark:text-rose-100">
                     {formatCurrency(activeModalProduct.price)}
                   </span>
                   <span className="text-xs text-zinc-400 font-medium">por unidade / encomenda</span>
@@ -547,7 +547,7 @@ export default function ConfeitariaPage() {
 
               {/* Informações Técnicas */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-rose-50/60 border border-rose-100 p-3 rounded-2xl">
+                <div className="bg-rose-50 dark:bg-rose-950/30/60 border border-rose-100 p-3 rounded-2xl">
                   <span className="text-[10px] text-zinc-400 uppercase font-bold block flex items-center gap-1">
                     <Utensils className="h-3 w-3 text-rose-400" /> Rendimento
                   </span>
@@ -555,7 +555,7 @@ export default function ConfeitariaPage() {
                     {activeModalProduct.servings || 'Consultar porções'}
                   </span>
                 </div>
-                <div className="bg-rose-50/60 border border-rose-100 p-3 rounded-2xl">
+                <div className="bg-rose-50 dark:bg-rose-950/30/60 border border-rose-100 p-3 rounded-2xl">
                   <span className="text-[10px] text-zinc-400 uppercase font-bold block flex items-center gap-1">
                     <Clock className="h-3 w-3 text-rose-400" /> Prazo
                   </span>
@@ -570,13 +570,13 @@ export default function ConfeitariaPage() {
                 <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1">
                   Sobre esta Criação
                 </h4>
-                <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed bg-zinc-50 p-3.5 rounded-2xl border border-zinc-100">
+                <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed bg-zinc-50 p-3.5 rounded-2xl border border-zinc-100 dark:border-zinc-800">
                   {activeModalProduct.description}
                 </p>
               </div>
 
               {/* Personalização do Pedido (Aniversário, Ingredientes, etc.) */}
-              <div className="bg-rose-50/60 border border-rose-200/80 p-4 rounded-2xl space-y-3">
+              <div className="bg-rose-50 dark:bg-rose-950/30/60 border border-rose-200 dark:border-rose-800/80 p-4 rounded-2xl space-y-3">
                 <div className="flex items-start gap-2.5">
                   <span className="text-xl leading-none">🎈</span>
                   <div>
@@ -604,7 +604,7 @@ export default function ConfeitariaPage() {
                         className={`text-xs px-2.5 py-1.5 rounded-xl font-semibold border transition-all ${
                           isSelected
                             ? 'bg-rose-600 border-rose-600 text-white shadow-xs'
-                            : 'bg-white border-rose-200 text-rose-950 hover:bg-rose-100/60'
+                            : 'bg-white border-rose-200 text-rose-950 hover:bg-rose-100 dark:bg-rose-900/40/60'
                         }`}
                       >
                         {tag}
@@ -635,7 +635,7 @@ export default function ConfeitariaPage() {
             </div>
 
             {/* Footer do Modal */}
-            <div className="p-4 bg-rose-50/40 border-t border-rose-100 flex items-center justify-between gap-3 flex-shrink-0">
+            <div className="p-4 bg-rose-50 dark:bg-rose-950/30/40 border-t border-rose-100 flex items-center justify-between gap-3 flex-shrink-0">
               <div className="hidden sm:block">
                 <span className="text-[10px] text-zinc-400 uppercase font-bold block">Encomendar Agora</span>
                 <span className="text-xs text-zinc-600 font-medium">Atendimento direto com a confeiteira</span>
@@ -655,7 +655,7 @@ export default function ConfeitariaPage() {
 
       {/* Rodapé Confeitaria */}
       <footer className="border-t border-rose-100 bg-white mt-12 py-8 text-center text-xs text-zinc-500 space-y-1.5">
-        <p className="font-semibold text-rose-950">{STORE.name}</p>
+        <p className="font-semibold text-rose-950 dark:text-rose-100">{STORE.name}</p>
         <p>{STORE.address} • {STORE.openingHours}</p>
         <p className="text-[11px] text-zinc-400">Cardápio Interativo SaaS com Checkout direto no WhatsApp</p>
       </footer>

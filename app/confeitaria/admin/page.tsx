@@ -30,7 +30,7 @@ export default function ConfeitariaDashboardPage() {
 
   const stats = [
     { title: 'Cliques no WhatsApp', value: fakeClicks.toString(), desc: '+28% essa semana', icon: MessageCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', sub: 'Pedidos e orçamentos abertos' },
-    { title: 'Taxa de Conversão', value: `${fakeConversion}%`, desc: 'Média do setor: 3.2%', icon: TrendingUp, color: 'text-rose-600', bg: 'bg-rose-50', sub: 'Visitantes que chamaram no whats' },
+    { title: 'Taxa de Conversão', value: `${fakeConversion}%`, desc: 'Média do setor: 3.2%', icon: TrendingUp, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-950/30', sub: 'Visitantes que chamaram no whats' },
     { title: 'Acessos no Cardápio', value: fakeAccesses.toLocaleString('pt-BR'), desc: '91% via Celular', icon: Smartphone, color: 'text-indigo-600', bg: 'bg-indigo-50', sub: 'Tráfego vindo do Instagram' },
     { title: 'Ticket Médio Estimado', value: `R$ ${avgPrice.toFixed(0)}`, desc: 'Por encomenda', icon: ShoppingBag, color: 'text-amber-600', bg: 'bg-amber-50', sub: 'Calculado sobre itens do estoque' },
   ]
@@ -68,17 +68,17 @@ export default function ConfeitariaDashboardPage() {
             <svg className="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
             Armazenamento de Fotos
           </h3>
-          <p className="text-xs text-zinc-500 mt-1 sm:ml-6">Plano Atual: <span className="font-bold text-rose-600">Médio</span></p>
+          <p className="text-xs text-zinc-500 mt-1 sm:ml-6">Plano Atual: <span className="font-bold text-rose-600 dark:text-rose-400">Médio</span></p>
         </div>
         
         <div className="relative z-10 flex-1 w-full max-w-none sm:max-w-sm">
           <div className="flex justify-between text-xs mb-1.5 font-medium">
-            <span className="text-zinc-700">840 MB usados</span>
+            <span className="text-zinc-700 dark:text-zinc-300">840 MB usados</span>
             <span className="text-zinc-400">Total: 5 GB</span>
           </div>
           <div className="h-2 w-full bg-rose-50 rounded-full overflow-hidden">
             <div 
-              className="h-full rounded-full bg-rose-500" 
+              className="h-full rounded-full bg-rose-50 dark:bg-rose-950/300" 
               style={{ width: '16.8%' }}
             ></div>
           </div>
@@ -95,7 +95,7 @@ export default function ConfeitariaDashboardPage() {
       {/* 1. Grid de Métricas Comerciais de Alto Impacto */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map((item, idx) => (
-          <Card key={idx} className="border-rose-100/80 shadow-2xs bg-white rounded-2xl">
+          <Card key={idx} className="border-rose-100 dark:border-rose-900/50/80 shadow-2xs bg-white rounded-2xl">
             <CardContent className="p-4 sm:p-5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-zinc-500 truncate">{item.title}</span>
@@ -103,7 +103,7 @@ export default function ConfeitariaDashboardPage() {
                   <item.icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-rose-950">{item.value}</p>
+              <p className="text-2xl sm:text-3xl font-black text-rose-950 dark:text-rose-100">{item.value}</p>
               <div className="mt-2 pt-2 border-t border-rose-50 flex flex-col gap-0.5">
                 <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-0.5">
                   <ArrowUpRight className="h-3 w-3" /> {item.desc}
@@ -132,7 +132,7 @@ export default function ConfeitariaDashboardPage() {
           {topSellers.map((prod, i) => (
             <div key={i} className="py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="font-black text-rose-900/40 text-sm w-4">#{i + 1}</span>
+                <span className="font-black text-rose-900 dark:text-rose-200/40 text-sm w-4">#{i + 1}</span>
                 <div className="min-w-0">
                   <p className="font-bold text-rose-950 truncate">{prod.name}</p>
                   <span className="text-[11px] text-zinc-400">{prod.category} • {prod.price}</span>
@@ -145,7 +145,7 @@ export default function ConfeitariaDashboardPage() {
                 </span>
                 <div className="bg-rose-50 text-rose-800 px-3 py-1 rounded-xl text-center">
                   <p className="font-black text-xs">{prod.pedidos} pedidos</p>
-                  <p className="text-[9px] font-medium text-rose-600">{prod.conversion} conv.</p>
+                  <p className="text-[9px] font-medium text-rose-600 dark:text-rose-400">{prod.conversion} conv.</p>
                 </div>
               </div>
             </div>
@@ -158,12 +158,12 @@ export default function ConfeitariaDashboardPage() {
         <div className="bg-white rounded-3xl border border-rose-100 p-5 shadow-xs">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="h-4 w-4 text-rose-500" />
-            <h4 className="font-bold text-sm text-rose-950">Horários de Maior Desejo por Doces</h4>
+            <h4 className="font-bold text-sm text-rose-950 dark:text-rose-100">Horários de Maior Desejo por Doces</h4>
           </div>
           <p className="text-xs text-zinc-600 leading-relaxed mb-3">
             O maior volume de cliques para encomendas ocorre entre <strong>14h e 17h30</strong> (horário do café da tarde) e <strong>domingos pela manhã</strong> (comemorações em família).
           </p>
-          <div className="bg-rose-50/70 p-2.5 rounded-xl text-[11px] text-rose-900 font-medium">
+          <div className="bg-rose-50 dark:bg-rose-950/30/70 p-2.5 rounded-xl text-[11px] text-rose-900 font-medium">
             ✨ Dica: Deixe mensagens automáticas ativas no WhatsApp para responder em menos de 5 minutos.
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function ConfeitariaDashboardPage() {
         <div className="bg-white rounded-3xl border border-rose-100 p-5 shadow-xs">
           <div className="flex items-center gap-2 mb-2">
             <Smartphone className="h-4 w-4 text-indigo-500" />
-            <h4 className="font-bold text-sm text-rose-950">Origem dos Pedidos de Encomenda</h4>
+            <h4 className="font-bold text-sm text-rose-950 dark:text-rose-100">Origem dos Pedidos de Encomenda</h4>
           </div>
           <ul className="text-xs text-zinc-600 space-y-2 font-medium">
             <li className="flex justify-between items-center bg-zinc-50 p-2 rounded-xl">

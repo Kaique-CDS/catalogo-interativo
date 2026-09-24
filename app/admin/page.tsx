@@ -67,8 +67,8 @@ export default function SuperAdminDashboard() {
             ))}
           </div>
           <div className="flex gap-4 mt-4 justify-center">
-            <div className="flex items-center gap-2 text-xs text-zinc-500"><div className="w-3 h-3 bg-indigo-500 rounded-sm"></div> Assinantes Pagos</div>
-            <div className="flex items-center gap-2 text-xs text-zinc-500"><div className="w-3 h-3 bg-indigo-200 dark:bg-indigo-800 rounded-sm"></div> Trials Ativos</div>
+            <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400"><div className="w-3 h-3 bg-indigo-500 rounded-sm"></div> Assinantes Pagos</div>
+            <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400"><div className="w-3 h-3 bg-indigo-200 dark:bg-indigo-800 rounded-sm"></div> Trials Ativos</div>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export default function SuperAdminDashboard() {
           <div className="flex-1 space-y-6">
             {[
               { title: 'Novo Assinante Premium', desc: 'Boutique da Moda aderiu ao plano anual.', time: '2h atrás', color: 'bg-emerald-500' },
-              { title: 'Pagamento Recusado', desc: 'Tech Store Brasil falhou na renovação.', time: '5h atrás', color: 'bg-rose-500' },
+              { title: 'Pagamento Recusado', desc: 'Tech Store Brasil falhou na renovação.', time: '5h atrás', color: 'bg-rose-50 dark:bg-rose-950/300' },
               { title: 'Upgrade de Plano', desc: 'Doce Encanto mudou para o Plano Médio.', time: 'Ontem', color: 'bg-indigo-500' },
               { title: 'Novo Trial Iniciado', desc: 'Sapataria XYZ começou os 7 dias.', time: 'Ontem', color: 'bg-amber-500' },
             ].map((act, i) => (

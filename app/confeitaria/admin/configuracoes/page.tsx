@@ -32,7 +32,7 @@ export default function ConfeitariaConfiguracoesPage() {
       </div>
 
       {/* Link da Vitrine */}
-      <Card className="rounded-3xl border-rose-200/80 bg-gradient-to-r from-rose-50 to-pink-50 shadow-xs">
+      <Card className="rounded-3xl border-rose-200 dark:border-rose-800/80 bg-gradient-to-r from-rose-50 to-pink-50 shadow-xs">
         <CardContent className="p-5 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 block">Link Público do seu Cardápio</span>
@@ -50,7 +50,7 @@ export default function ConfeitariaConfiguracoesPage() {
         <Card className="rounded-3xl border-rose-100 bg-white shadow-xs">
           <CardContent className="p-6 space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="name" className="text-xs text-zinc-600">Nome da Confeitaria / Ateliê</Label>
+              <Label htmlFor="name" className="text-xs text-zinc-600 dark:text-zinc-400">Nome da Confeitaria / Ateliê</Label>
               <Input
                 id="name"
                 value={name}
@@ -90,7 +90,7 @@ export default function ConfeitariaConfiguracoesPage() {
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="hours" className="text-xs text-zinc-600">Horários de Atendimento & Retirada</Label>
+              <Label htmlFor="hours" className="text-xs text-zinc-600 dark:text-zinc-400">Horários de Atendimento & Retirada</Label>
               <Input
                 id="hours"
                 value={hours}

@@ -70,7 +70,7 @@ export default function AdminSidebar({ store, slug }: Props) {
       </header>
 
       {/* 2. Bottom Nav Mobile (Fixed Bottom) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-zinc-200/80 py-2 px-4 z-40 flex justify-around items-center shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800/80 py-2 px-4 z-40 flex justify-around items-center shadow-2xl">
         {items.map((item) => {
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           return (
@@ -80,7 +80,7 @@ export default function AdminSidebar({ store, slug }: Props) {
               className={cn(
                 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl transition-all',
                 isActive
-                  ? 'text-zinc-950 font-bold bg-zinc-100'
+                  ? 'text-zinc-950 font-bold bg-zinc-100 dark:bg-zinc-800'
                   : 'text-zinc-500 hover:text-zinc-900 font-medium'
               )}
             >
@@ -92,10 +92,10 @@ export default function AdminSidebar({ store, slug }: Props) {
       </nav>
 
       {/* 3. Sidebar Desktop Clássica */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 bg-white border-r border-zinc-200/80 flex-col justify-between shadow-xs">
+      <aside className="hidden md:flex w-64 flex-shrink-0 bg-white border-r border-zinc-200 dark:border-zinc-800/80 flex-col justify-between shadow-xs">
         <div>
-          <div className="p-6 border-b border-zinc-100">
-            <div className="flex items-center gap-2.5 font-black text-lg text-zinc-900">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center gap-2.5 font-black text-lg text-zinc-900 dark:text-zinc-50">
               <div className="h-9 w-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center shadow-xs">
                 <Car className="h-5 w-5 text-emerald-400" />
               </div>
@@ -115,7 +115,7 @@ export default function AdminSidebar({ store, slug }: Props) {
                     'flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all',
                     isActive
                       ? 'bg-zinc-900 text-white shadow-xs'
-                      : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                      : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-50'
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -128,7 +128,7 @@ export default function AdminSidebar({ store, slug }: Props) {
 
         <div className="p-4 border-t border-zinc-100 space-y-2">
           <Link href={`/${slug}`} target="_blank">
-            <Button variant="outline" size="sm" className="w-full gap-2 text-xs rounded-xl font-semibold text-zinc-700">
+            <Button variant="outline" size="sm" className="w-full gap-2 text-xs rounded-xl font-semibold text-zinc-700 dark:text-zinc-300">
               <ExternalLink className="h-3.5 w-3.5" />
               Ver vitrine da loja
             </Button>

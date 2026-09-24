@@ -47,7 +47,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Estoque</h1>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Estoque</h1>
           <p className="text-zinc-500 text-xs">Gerencie, edite e altere a publicação dos veículos do catálogo.</p>
         </div>
         <Link href={`/${slug}/admin/estoque/novo`}>

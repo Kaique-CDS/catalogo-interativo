@@ -85,7 +85,7 @@ export default function ClientsPage() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {filteredClients.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-zinc-500">
+                  <td colSpan={6} className="px-6 py-10 text-center text-zinc-500 dark:text-zinc-400">
                     Nenhum cliente encontrado.
                   </td>
                 </tr>
@@ -116,7 +116,7 @@ export default function ClientsPage() {
                     <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5">
                       <div 
                         className={`h-1.5 rounded-full ${
-                          (client.dbUsageBytes / client.limitBytes) > 0.8 ? 'bg-rose-500' : 'bg-indigo-500'
+                          (client.dbUsageBytes / client.limitBytes) > 0.8 ? 'bg-rose-50 dark:bg-rose-950/300' : 'bg-indigo-500'
                         }`}
                         style={{ width: `${Math.min((client.dbUsageBytes / client.limitBytes) * 100, 100)}%` }}
                       />
@@ -139,7 +139,7 @@ export default function ClientsPage() {
                           <Unlock className="h-4 w-4" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-rose-600" title="Suspender Conta (Bloquear)" onClick={() => handleToggleBlock(client)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-rose-600 dark:text-rose-400" title="Suspender Conta (Bloquear)" onClick={() => handleToggleBlock(client)}>
                           <Ban className="h-4 w-4" />
                         </Button>
                       )}
@@ -153,7 +153,7 @@ export default function ClientsPage() {
         
         {/* Pagination Fake */}
         <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-          <span className="text-xs text-zinc-500">Mostrando {filteredClients.length} de {clients.length} clientes</span>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">Mostrando {filteredClients.length} de {clients.length} clientes</span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled className="h-8 text-xs rounded-lg">Anterior</Button>
             <Button variant="outline" size="sm" disabled className="h-8 text-xs rounded-lg">Próxima</Button>

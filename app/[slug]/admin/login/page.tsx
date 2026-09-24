@@ -66,8 +66,8 @@ export default function LoginPage() {
           <span className="font-bold text-zinc-200 font-mono">#{slug}</span>
         </p>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-5 border border-zinc-100">
-          <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-2xl border border-zinc-200">
+        <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-5 border border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <ShieldCheck className="h-5 w-5 text-zinc-500 flex-shrink-0" />
             <p className="text-xs text-zinc-600 font-medium">
               Área restrita. Apenas usuários autorizados.
@@ -123,7 +123,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="pt-2 text-center border-t border-zinc-100">
+          <div className="pt-2 text-center border-t border-zinc-100 dark:border-zinc-800">
             <Link href={`/${slug}`} className="text-xs text-zinc-500 hover:text-zinc-900 font-semibold transition-colors">
               &larr; Voltar para a Vitrine
             </Link>

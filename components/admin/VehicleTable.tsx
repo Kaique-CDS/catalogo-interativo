@@ -68,14 +68,14 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
     <div className="space-y-3">
       {/* Toggle view mode */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-zinc-500">{vehicles.length} veículo{vehicles.length !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">{vehicles.length} veículo{vehicles.length !== 1 ? 's' : ''}</p>
         <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-lg">
           <button
             onClick={() => setViewMode('completo')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
               viewMode === 'completo'
                 ? 'bg-white text-zinc-900 shadow-xs'
-                : 'text-zinc-500 hover:text-zinc-700'
+                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-300'
             }`}
           >
             <LayoutList className="h-3.5 w-3.5" />
@@ -86,7 +86,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
               viewMode === 'simples'
                 ? 'bg-white text-zinc-900 shadow-xs'
-                : 'text-zinc-500 hover:text-zinc-700'
+                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-300'
             }`}
           >
             <LayoutGrid className="h-3.5 w-3.5" />
@@ -101,7 +101,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
           {vehicles.map((v) => (
             <div
               key={v.id}
-              className="bg-white border border-zinc-200/80 rounded-2xl overflow-hidden shadow-2xs flex gap-3 p-2.5 items-center"
+              className="bg-white border border-zinc-200 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-2xs flex gap-3 p-2.5 items-center"
             >
               <div className="relative h-14 w-20 rounded-xl overflow-hidden bg-zinc-100 flex-shrink-0">
                 {v.images?.[0] ? (
@@ -124,11 +124,11 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                   {v.is_active ? 'Ativo' : 'Pausado'}
                 </Badge>
                 <div className="flex items-center gap-0.5">
-                  <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500" onClick={() => toggleActive(v)}>
+                  <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 dark:text-zinc-400" onClick={() => toggleActive(v)}>
                     {v.is_active ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                   </Button>
                   <Link href={`/${slug}/admin/estoque/${v.id}`}>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500">
+                    <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 dark:text-zinc-400">
                       <Pencil className="h-3 w-3" />
                     </Button>
                   </Link>
@@ -145,9 +145,9 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {vehicles.map((v) => (
-              <div key={v.id} className="bg-white p-3.5 rounded-2xl border border-zinc-200/80 shadow-2xs flex gap-3 items-center justify-between">
+              <div key={v.id} className="bg-white p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-2xs flex gap-3 items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-100">
+                  <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-100 dark:border-zinc-800">
                     {v.images?.[0] ? (
                       <Image src={v.images[0]} alt={v.title} fill className="object-cover" />
                     ) : (
@@ -159,7 +159,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                       <span className="font-mono text-[9px] font-bold text-blue-600">#{v.sku} · </span>
                     )}
                     <p className="font-bold text-zinc-900 text-xs truncate">{v.title}</p>
-                    <p className="text-[11px] text-zinc-500">{v.brand} • {v.year}</p>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{v.brand} • {v.year}</p>
                     <p className="text-xs font-black text-zinc-900 mt-0.5">{formatCurrency(v.price)}</p>
                   </div>
                 </div>
@@ -168,11 +168,11 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                     {v.is_active ? 'Ativo' : 'Pausado'}
                   </Badge>
                   <div className="flex items-center gap-0.5">
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500" onClick={() => toggleActive(v)}>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500 dark:text-zinc-400" onClick={() => toggleActive(v)}>
                       {v.is_active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </Button>
                     <Link href={`/${slug}/admin/estoque/${v.id}`}>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500">
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500 dark:text-zinc-400">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                     </Link>
@@ -186,9 +186,9 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
           </div>
 
           {/* Desktop table */}
-          <div className="hidden md:block bg-white border border-zinc-200/80 rounded-2xl overflow-hidden shadow-xs">
+          <div className="hidden md:block bg-white border border-zinc-200 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-xs">
             <Table>
-              <TableHeader className="bg-zinc-50/50">
+              <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50/50">
                 <TableRow className="text-xs">
                   <TableHead className="w-16">Foto</TableHead>
                   <TableHead>Veículo</TableHead>
@@ -201,9 +201,9 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
               </TableHeader>
               <TableBody className="divide-y divide-zinc-100 text-xs">
                 {vehicles.map((vehicle) => (
-                  <TableRow key={vehicle.id} className="hover:bg-zinc-50/40">
+                  <TableRow key={vehicle.id} className="hover:bg-zinc-50 dark:bg-zinc-900/50/40">
                     <TableCell>
-                      <div className="relative h-12 w-16 rounded-lg bg-zinc-100 overflow-hidden border border-zinc-100">
+                      <div className="relative h-12 w-16 rounded-lg bg-zinc-100 overflow-hidden border border-zinc-100 dark:border-zinc-800">
                         {vehicle.images?.[0] ? (
                           <Image src={vehicle.images[0]} alt={vehicle.title} fill className="object-cover" />
                         ) : (
@@ -212,8 +212,8 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                       </div>
                     </TableCell>
                     <TableCell>
-                      <p className="font-bold text-zinc-900">{vehicle.title}</p>
-                      <p className="text-[11px] text-zinc-500">{vehicle.brand} {vehicle.model}</p>
+                      <p className="font-bold text-zinc-900 dark:text-zinc-50">{vehicle.title}</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{vehicle.brand} {vehicle.model}</p>
                     </TableCell>
                     <TableCell>
                       {vehicle.sku ? (
@@ -224,11 +224,11 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                         <span className="text-zinc-300">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-zinc-600">
+                    <TableCell className="text-zinc-600 dark:text-zinc-400">
                       <p className="font-medium">{vehicle.year}</p>
                       <p className="text-[11px] text-zinc-400">{formatMileage(vehicle.mileage)}</p>
                     </TableCell>
-                    <TableCell className="font-black text-zinc-900">{formatCurrency(vehicle.price)}</TableCell>
+                    <TableCell className="font-black text-zinc-900 dark:text-zinc-50">{formatCurrency(vehicle.price)}</TableCell>
                     <TableCell>
                       <Badge variant={vehicle.is_active ? 'default' : 'secondary'} className="text-[10px]">
                         {vehicle.is_active ? 'Publicado' : 'Pausado'}
@@ -236,11 +236,11 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900" onClick={() => toggleActive(vehicle)}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50" onClick={() => toggleActive(vehicle)}>
                           {vehicle.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                         <Link href={`/${slug}/admin/estoque/${vehicle.id}`}>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900">
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50">
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </Link>

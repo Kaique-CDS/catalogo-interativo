@@ -175,7 +175,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
             </div>
 
             {/* Custom Hex Picker */}
-            <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+            <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl border border-zinc-200 dark:border-zinc-800">
               <input
                 type="color"
                 value={primaryColor}
@@ -204,7 +204,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           {/* Tipografia */}
           <div>
             <Label className="text-xs font-bold text-zinc-700 flex items-center gap-1.5 mb-2">
-              <Type className="h-4 w-4 text-zinc-500" /> Fonte do Catálogo
+              <Type className="h-4 w-4 text-zinc-500 dark:text-zinc-400" /> Fonte do Catálogo
             </Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {FONT_OPTIONS.map((f) => {
@@ -217,7 +217,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                     className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
                       isSelected
                         ? 'border-zinc-900 bg-zinc-900 text-white shadow-xs'
-                        : 'border-zinc-200 hover:border-zinc-300 bg-white text-zinc-800'
+                        : 'border-zinc-200 hover:border-zinc-300 bg-white text-zinc-800 dark:text-zinc-200'
                     }`}
                   >
                     <div>
@@ -258,7 +258,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
         <CardContent className="space-y-5">
           {/* Logo */}
           <div>
-            <Label className="mb-2 block text-xs font-bold text-zinc-700">Logo da loja</Label>
+            <Label className="mb-2 block text-xs font-bold text-zinc-700 dark:text-zinc-300">Logo da loja</Label>
             <div className="flex items-center gap-4">
               {logoUrl ? (
                 <div className="h-16 w-16 rounded-xl border bg-zinc-50 overflow-hidden flex-shrink-0">
@@ -279,10 +279,10 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           </div>
 
           {/* Banner de Capa */}
-          <div className="pt-3 border-t border-zinc-100">
-            <Label className="mb-2 block text-xs font-bold text-zinc-700">Banner de Capa (Opcional)</Label>
+          <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800">
+            <Label className="mb-2 block text-xs font-bold text-zinc-700 dark:text-zinc-300">Banner de Capa (Opcional)</Label>
             {bannerUrl && (
-              <div className="relative aspect-[21/9] sm:aspect-[24/6] rounded-xl overflow-hidden mb-3 border bg-zinc-100">
+              <div className="relative aspect-[21/9] sm:aspect-[24/6] rounded-xl overflow-hidden mb-3 border bg-zinc-100 dark:bg-zinc-800">
                 <Image src={bannerUrl} alt="Banner" fill className="object-cover" />
               </div>
             )}
@@ -300,7 +300,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       {/* 3. Informações Básicas & Contato */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold text-zinc-700">Informações da Loja</CardTitle>
+          <CardTitle className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Informações da Loja</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
