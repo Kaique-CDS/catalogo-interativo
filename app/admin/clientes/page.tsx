@@ -1,21 +1,43 @@
 'use client'
 
-import React, { useState } from 'react'
-import { HardDrive, CheckCircle2, AlertCircle, Database, Search, Filter, MoreVertical, Edit, Ban, Send, Eye } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { CheckCircle2, AlertCircle, Database, Search, Filter, MoreVertical, Edit, Ban, Send, Eye, Unlock } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
-const CLIENTS = [
-  { id: 1, name: 'Concessionária NAPISTA', plan: 'Premium', dueDate: '2026-10-15', status: 'Ativo', dbUsage: '2.4 GB', limit: '10 GB' },
-  { id: 2, name: 'Doce Encanto Ateliê', plan: 'Médio', dueDate: '2026-09-30', status: 'Pendente', dbUsage: '840 MB', limit: '5 GB' },
-  { id: 3, name: 'Boutique da Moda', plan: 'Básico', dueDate: '2026-11-05', status: 'Ativo', dbUsage: '1.2 GB', limit: '5 GB' },
-  { id: 4, name: 'Tech Store Brasil', plan: 'Básico', dueDate: '2026-08-15', status: 'Inativo', dbUsage: '4.5 GB', limit: '5 GB' },
-  { id: 5, name: 'Artesanato Silva', plan: 'Médio', dueDate: '2026-10-01', status: 'Ativo', dbUsage: '120 MB', limit: '2 GB' },
-  { id: 6, name: 'Venda de Garagem', plan: 'Trial', dueDate: '2026-09-28', status: 'Ativo', dbUsage: '50 MB', limit: '1 GB' },
-]
+import { toast } from 'sonner'
+import { SaaSClient, getClients, updateClientStatus, formatBytes } from '@/lib/clients'
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [clients, setClients] = useState<SaaSClient[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setClients(getClients())
+    setMounted(true)
+  }, [])
+
+  const handleToggleBlock = (client: SaaSClient) => {
+    const isBlocking = !client.blocked
+    const newStatus = isBlocking ? 'Inativo' : 'Ativo'
+    const updated = updateClientStatus(client.id, newStatus, isBlocking)
+    setClients(updated)
+    if (isBlocking) {
+      toast.error(`Conta da loja ${client.name} foi suspensa com sucesso.`)
+    } else {
+      toast.success(`Conta da loja ${client.name} reativada.`)
+    }
+  }
+
+  const handleCobrar = (client: SaaSClient) => {
+    const msg = encodeURIComponent(`Olá, responsável pela ${client.name}. Notamos que sua assinatura do plano ${client.plan} está pendente. Para continuar usando a plataforma VendaZap sem interrupções, por favor regularize o pagamento.`)
+    window.open(`https://wa.me/55${client.phone}?text=${msg}`, '_blank')
+    toast.success('Redirecionando para o WhatsApp com mensagem de cobrança.')
+  }
+
+  if (!mounted) return null
+
+  const filteredClients = clients.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.email.toLowerCase().includes(searchTerm.toLowerCase()))
 
   return (
     <div className="space-y-6">
@@ -61,11 +83,17 @@ export default function ClientsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {CLIENTS.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())).map((client) => (
-                <tr key={client.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors group">
+              {filteredClients.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-zinc-500">
+                    Nenhum cliente encontrado.
+                  </td>
+                </tr>
+              ) : filteredClients.map((client) => (
+                <tr key={client.id} className={`hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors group ${client.blocked ? 'opacity-60 grayscale' : ''}`}>
                   <td className="px-6 py-4">
                     <p className="font-bold text-zinc-900 dark:text-white">{client.name}</p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">ID: {client.id.toString().padStart(4, '0')}</p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">ID: {client.id} | {client.email}</p>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex px-2.5 py-1 rounded-md text-xs font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
@@ -82,32 +110,39 @@ export default function ClientsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-mono font-medium text-zinc-700 dark:text-zinc-300">{client.dbUsage}</span>
-                      <span className="text-zinc-400">{client.limit}</span>
+                      <span className="font-mono font-medium text-zinc-700 dark:text-zinc-300">{formatBytes(client.dbUsageBytes)}</span>
+                      <span className="text-zinc-400">{formatBytes(client.limitBytes, 0)}</span>
                     </div>
                     <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5">
                       <div 
                         className={`h-1.5 rounded-full ${
-                          (parseFloat(client.dbUsage) / parseFloat(client.limit)) > 0.8 ? 'bg-rose-500' : 'bg-indigo-500'
+                          (client.dbUsageBytes / client.limitBytes) > 0.8 ? 'bg-rose-500' : 'bg-indigo-500'
                         }`}
-                        style={{ width: `${Math.min((parseFloat(client.dbUsage) / parseFloat(client.limit)) * 100, 100)}%` }}
+                        style={{ width: `${Math.min((client.dbUsageBytes / client.limitBytes) * 100, 100)}%` }}
                       />
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-indigo-600" title="Acessar como cliente">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-indigo-600" title="Acessar painel (simulação)" onClick={() => toast.success(`Simulando acesso ao painel de ${client.name}...`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-amber-600" title="Cobrar no WhatsApp">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-amber-600" title="Cobrar no WhatsApp" onClick={() => handleCobrar(client)}>
                         <Send className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Editar">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white" title="Editar Limites" onClick={() => toast.info('Modal de edição de limites seria aberto aqui.')}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-rose-600" title="Suspender">
-                        <Ban className="h-4 w-4" />
-                      </Button>
+                      
+                      {client.blocked ? (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500 hover:text-emerald-600" title="Desbloquear Conta" onClick={() => handleToggleBlock(client)}>
+                          <Unlock className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-rose-600" title="Suspender Conta (Bloquear)" onClick={() => handleToggleBlock(client)}>
+                          <Ban className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -118,7 +153,7 @@ export default function ClientsPage() {
         
         {/* Pagination Fake */}
         <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-          <span className="text-xs text-zinc-500">Mostrando {CLIENTS.length} de {CLIENTS.length} clientes</span>
+          <span className="text-xs text-zinc-500">Mostrando {filteredClients.length} de {clients.length} clientes</span>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled className="h-8 text-xs rounded-lg">Anterior</Button>
             <Button variant="outline" size="sm" disabled className="h-8 text-xs rounded-lg">Próxima</Button>
