@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,28 +11,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Loader2, Globe, Phone, Clock, Palette, Type, Sparkles, Check, Image as ImageIcon } from 'lucide-react'
+import { Upload, Loader2, Globe, Phone, Clock, Sparkles, Image as ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Store } from '@/lib/supabase/types'
 
-const COLOR_PRESETS = [
-  { name: 'Grafite Premium', hex: '#18181B' },
-  { name: 'Azul Royal', hex: '#2563EB' },
-  { name: 'Verde Esmeralda', hex: '#059669' },
-  { name: 'Vermelho Racing', hex: '#DC2626' },
-  { name: 'Laranja Motors', hex: '#EA580C' },
-  { name: 'Roxo Titanium', hex: '#7C3AED' },
-  { name: 'Ciano Modern', hex: '#0891B2' },
-  { name: 'Dourado / Âmbar', hex: '#D97706' },
-]
 
-const FONT_OPTIONS = [
-  { name: 'Inter (Padrão & Limpo)', value: 'Inter', sample: 'Aa Bb Cc 123' },
-  { name: 'Roboto (Neutro & Confiável)', value: 'Roboto', sample: 'Aa Bb Cc 123' },
-  { name: 'Poppins (Moderna & Arrojada)', value: 'Poppins', sample: 'Aa Bb Cc 123' },
-  { name: 'Montserrat (Sofisticada & Luxo)', value: 'Montserrat', sample: 'Aa Bb Cc 123' },
-  { name: 'Plus Jakarta Sans (Tech & Minimalista)', value: 'Plus Jakarta Sans', sample: 'Aa Bb Cc 123' },
-]
 
 const settingsSchema = z.object({
   name:                z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
@@ -108,8 +91,6 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       slogan: data.slogan || null,
       logo_url: logoUrl,
       banner_url: bannerUrl,
-      primary_color: primaryColor,
-      font_family: fontFamily,
     }
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
@@ -139,115 +120,6 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           <p className="text-sm text-blue-600 font-mono">{storefrontUrl}</p>
         </CardContent>
       </Card>
-
-      {/* 1. Personalização Visual & Tema */}
-      <Card className="border-zinc-200 shadow-xs">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-            <Palette className="h-4 w-4 text-purple-600" /> Personalização Visual & Identidade
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Cor Principal */}
-          <div>
-            <Label className="text-xs font-bold text-zinc-700 block mb-2">Cor Principal / Destaque do Site</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-              {COLOR_PRESETS.map((preset) => {
-                const isSelected = primaryColor.toLowerCase() === preset.hex.toLowerCase()
-                return (
-                  <button
-                    key={preset.hex}
-                    type="button"
-                    onClick={() => setPrimaryColor(preset.hex)}
-                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-medium transition-all ${
-                      isSelected
-                        ? 'border-zinc-900 bg-zinc-50 shadow-xs font-bold'
-                        : 'border-zinc-200 hover:border-zinc-300'
-                    }`}
-                  >
-                    <span className="h-4 w-4 rounded-full shadow-xs flex-shrink-0 flex items-center justify-center text-white" style={{ backgroundColor: preset.hex }}>
-                      {isSelected && <Check className="h-2.5 w-2.5 stroke-[3]" />}
-                    </span>
-                    <span className="truncate">{preset.name}</span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Custom Hex Picker */}
-            <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl border border-zinc-200 dark:border-zinc-800">
-              <input
-                type="color"
-                value={primaryColor}
-                onChange={(e) => setPrimaryColor(e.target.value)}
-                className="h-8 w-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent"
-              />
-              <div className="flex-1 min-w-0">
-                <span className="text-[11px] text-zinc-500 block">Cor Personalizada (Hex):</span>
-                <input
-                  type="text"
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="text-xs font-mono font-bold text-zinc-900 bg-transparent border-0 p-0 focus:outline-none uppercase"
-                  maxLength={7}
-                />
-              </div>
-              <div
-                className="px-3 py-1 rounded-lg text-white text-xs font-bold shadow-xs"
-                style={{ backgroundColor: primaryColor }}
-              >
-                Prévia do Botão
-              </div>
-            </div>
-          </div>
-
-          {/* Tipografia */}
-          <div>
-            <Label className="text-xs font-bold text-zinc-700 flex items-center gap-1.5 mb-2">
-              <Type className="h-4 w-4 text-zinc-500 dark:text-zinc-400" /> Fonte do Catálogo
-            </Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {FONT_OPTIONS.map((f) => {
-                const isSelected = fontFamily === f.value
-                return (
-                  <button
-                    key={f.value}
-                    type="button"
-                    onClick={() => setFontFamily(f.value)}
-                    className={`flex items-center justify-between p-3 rounded-xl border text-left transition-all ${
-                      isSelected
-                        ? 'border-zinc-900 bg-zinc-900 text-white shadow-xs'
-                        : 'border-zinc-200 hover:border-zinc-300 bg-white text-zinc-800 dark:text-zinc-200'
-                    }`}
-                  >
-                    <div>
-                      <p className="text-xs font-bold">{f.name}</p>
-                      <p className={`text-[11px] mt-0.5 ${isSelected ? 'text-zinc-300' : 'text-zinc-400'}`}>
-                        {f.sample}
-                      </p>
-                    </div>
-                    {isSelected && <Check className="h-4 w-4 flex-shrink-0" />}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Slogan */}
-          <div className="space-y-1.5">
-            <Label htmlFor="slogan" className="text-xs font-bold text-zinc-700 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Slogan / Frase de Destaque da Loja
-            </Label>
-            <Input
-              id="slogan"
-              placeholder="Ex: Os melhores seminovos com laudo aprovado e procedência garantida."
-              {...register('slogan')}
-            />
-            <p className="text-[11px] text-zinc-400">Aparece em destaque no cabeçalho da sua vitrine.</p>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* 2. Logo e Banner de Capa */}
       <Card>
         <CardHeader className="pb-3">
@@ -307,6 +179,17 @@ export default function StoreSettingsForm({ store, slug }: Props) {
             <Label htmlFor="name">Nome da loja *</Label>
             <Input id="name" {...register('name')} />
             {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="slogan" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Slogan / Frase de Destaque da Loja
+            </Label>
+            <Input
+              id="slogan"
+              placeholder="Ex: Os melhores seminovos com laudo aprovado e procedência garantida."
+              {...register('slogan')}
+            />
+            <p className="text-[11px] text-zinc-400">Aparece em destaque no cabeçalho da sua vitrine.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="address">Endereço físico</Label>
