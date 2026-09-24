@@ -66,9 +66,9 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
   }
 
   return (
-    <div className="mb-6">
+    <div className="mb-4 sm:mb-6">
       {brands.length > 0 && (
-        <div className="flex overflow-x-auto gap-3 pb-3 mb-3 scrollbar-hide snap-x">
+        <div className="flex overflow-x-auto gap-2.5 pb-2 mb-2 scrollbar-hide snap-x">
           {brands.map(b => {
             const logo = getBrandLogo(b)
             const isActive = brand === b
@@ -76,17 +76,18 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
               <button
                 key={b}
                 onClick={() => handleBrandClick(b)}
-                className={`snap-center shrink-0 w-20 h-16 sm:w-24 sm:h-20 rounded-2xl flex flex-col items-center justify-center border transition-all ${
+                className={`snap-center shrink-0 w-16 h-12 sm:w-20 sm:h-14 rounded-xl flex items-center justify-center border transition-all p-2 sm:p-2.5 ${
                   isActive 
-                  ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-500 shadow-md scale-105' 
+                  ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-500 shadow-sm scale-105' 
                   : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900'
                 }`}
+                title={b}
               >
                 {logo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={logo} alt={b} className="h-6 sm:h-8 mb-1 sm:mb-2 object-contain grayscale opacity-80" />
+                  <img src={logo} alt={b} className="w-full h-full object-contain grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all" />
                 ) : (
-                  <span className="font-bold text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">{b}</span>
+                  <span className="font-bold text-[10px] sm:text-xs text-zinc-500 dark:text-zinc-400 truncate w-full px-1">{b}</span>
                 )}
               </button>
             )

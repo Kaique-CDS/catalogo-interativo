@@ -10,6 +10,7 @@ import CookieBanner from '@/components/storefront/CookieBanner'
 import { isBusinessOpen, getNextOpenInfo, CONCESSIONARIA_HOURS } from '@/lib/businessHours'
 import { getVehicles } from '@/lib/vehicles'
 import type { Store, Vehicle } from '@/lib/supabase/types'
+import { ShieldCheck, BadgeCheck, BadgePercent, Car } from 'lucide-react'
 
 interface StorefrontClientProps {
   slug: string
@@ -111,21 +112,27 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
         </div>
       )}
 
-      {/* Por que comprar com a gente (Napista / Genérico) */}
-      <section className="container mx-auto px-3 sm:px-4 mt-8 max-w-7xl">
-        <h3 className="text-lg font-bold mb-4 text-zinc-900 dark:text-zinc-100">Por que comprar com a {store.name}?</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          {[
-            { title: 'Laudo Cautelar 100% Aprovado', desc: 'Procedência garantida em todos os nossos carros.' },
-            { title: 'Garantia de 1 Ano', desc: 'Compre tranquilo com motor e câmbio assegurados.' },
-            { title: 'Taxas Imbatíveis', desc: 'Financiamento facilitado com as melhores taxas do mercado.' },
-            { title: 'Avaliação Justa', desc: 'Pagamos o melhor preço no seu usado na troca.' },
-          ].map((item, idx) => (
-            <div key={idx} className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl p-4 shadow-xs">
-              <h4 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 mb-1">{item.title}</h4>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.desc}</p>
-            </div>
-          ))}
+      {/* Por que comprar com a gente (Napista / Genérico) - Minimalista */}
+      <section className="container mx-auto px-3 sm:px-4 mt-6 max-w-7xl">
+        <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-2 py-3 sm:py-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-center justify-between divide-y sm:divide-y-0 sm:divide-x divide-zinc-100 dark:divide-zinc-800">
+            {[
+              { title: 'Laudo 100% Aprovado', desc: 'Procedência garantida', icon: ShieldCheck },
+              { title: 'Garantia de 1 Ano', desc: 'Motor e câmbio', icon: BadgeCheck },
+              { title: 'Taxas Imbatíveis', desc: 'Financiamento fácil', icon: BadgePercent },
+              { title: 'Avaliação Justa', desc: 'Super valorização na troca', icon: Car },
+            ].map((item, idx) => (
+              <div key={idx} className="flex-1 w-full flex items-center gap-3 px-4 py-2 sm:py-0 sm:px-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                <div className="h-8 w-8 rounded-full bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                  <item.icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-[11px] sm:text-xs text-zinc-900 dark:text-white leading-none">{item.title}</h4>
+                  <p className="text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 mt-1">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
