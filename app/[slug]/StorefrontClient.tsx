@@ -83,7 +83,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
 
   return (
     <div
-      className="min-h-screen bg-zinc-50 pb-12"
+      className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-300 pb-12"
       style={{ fontFamily: `'${fontFamily}', sans-serif` }}
     >
       {fontGoogleUrl && (
@@ -98,9 +98,10 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
 
       <StoreHeader store={store} />
 
+      {/* Hero Banner (se configurado) */}
       {store.banner_url && (
         <div className="container mx-auto px-3 sm:px-4 pt-4 max-w-7xl">
-          <div className="relative aspect-[21/9] sm:aspect-[24/5] w-full rounded-2xl overflow-hidden shadow-xs border border-zinc-200">
+          <div className="relative aspect-[21/9] sm:aspect-[24/5] w-full rounded-2xl overflow-hidden shadow-xs border border-zinc-200 dark:border-zinc-800">
             <Image src={store.banner_url} alt={store.name} fill className="object-cover" priority />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-6 text-white">
               <h2 className="text-xl sm:text-3xl font-black">{store.name}</h2>
@@ -109,6 +110,24 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
           </div>
         </div>
       )}
+
+      {/* Por que comprar com a gente (Napista / Genérico) */}
+      <section className="container mx-auto px-3 sm:px-4 mt-8 max-w-7xl">
+        <h3 className="text-lg font-bold mb-4 text-zinc-900 dark:text-zinc-100">Por que comprar com a {store.name}?</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          {[
+            { title: 'Laudo Cautelar 100% Aprovado', desc: 'Procedência garantida em todos os nossos carros.' },
+            { title: 'Garantia de 1 Ano', desc: 'Compre tranquilo com motor e câmbio assegurados.' },
+            { title: 'Taxas Imbatíveis', desc: 'Financiamento facilitado com as melhores taxas do mercado.' },
+            { title: 'Avaliação Justa', desc: 'Pagamos o melhor preço no seu usado na troca.' },
+          ].map((item, idx) => (
+            <div key={idx} className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl p-4 shadow-xs">
+              <h4 className="font-bold text-sm text-zinc-800 dark:text-zinc-200 mb-1">{item.title}</h4>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         <VehicleGrid

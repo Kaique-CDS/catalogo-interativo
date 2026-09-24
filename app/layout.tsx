@@ -11,13 +11,22 @@ export const metadata: Metadata = {
   description: 'Catalogos digitais para lojas de veiculos',
 }
 
+import { ThemeProvider } from '@/components/ThemeProvider'
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
-        <CookieBanner />
-        <Toaster richColors position="top-right" />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <CookieBanner />
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   )

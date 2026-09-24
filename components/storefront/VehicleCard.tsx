@@ -64,67 +64,61 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
           </p>
 
           {/* Grid de Especificações */}
-          <div className="grid grid-cols-2 gap-2 text-xs text-zinc-600 bg-zinc-50 p-2.5 rounded-xl mb-3">
+          <div className="grid grid-cols-2 gap-2 text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-xl mb-3">
             <span className="flex items-center gap-1.5 font-medium">
               <Calendar className="h-3.5 w-3.5 text-zinc-400" />
               {vehicle.year}
             </span>
-            <span className="flex items-center gap-1.5 font-medium">
-              <Gauge className="h-3.5 w-3.5 text-zinc-400" />
-              {formatMileage(vehicle.mileage)}
-            </span>
             {vehicle.transmission && (
-              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 truncate">
+              <span className="flex items-center gap-1.5 text-[11px] truncate font-medium">
                 <Cog className="h-3.5 w-3.5 text-zinc-400" />
                 {vehicle.transmission}
               </span>
             )}
             {vehicle.fuel && (
-              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 truncate">
+              <span className="flex items-center gap-1.5 text-[11px] truncate font-medium">
                 <Fuel className="h-3.5 w-3.5 text-zinc-400" />
                 {vehicle.fuel}
               </span>
             )}
-            {vehicle.plate_end && (
-              <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 col-span-2">
-                <span className="font-mono font-bold text-[10px] bg-zinc-200 text-zinc-700 px-1.5 py-0.2 rounded">
-                  Placa final {vehicle.plate_end}
-                </span>
-              </span>
+          </div>
+
+          {/* Opcionais Destaques & Laudo */}
+          <div className="flex flex-col gap-2 mb-4">
+            {/* Tag de Laudo Cautelar */}
+            {vehicle.features?.some(f => f.toLowerCase().includes('laudo')) ? (
+              <div 
+                className="self-start text-[10px] font-bold px-2 py-1 rounded-md text-white flex items-center gap-1"
+                style={{ backgroundColor: store.primary_color || '#18181B' }}
+              >
+                <Eye className="h-3 w-3" />
+                Laudo Cautelar: Aprovado
+              </div>
+            ) : (
+              <div className="self-start text-[10px] font-medium px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                Laudo Cautelar: Não informado
+              </div>
+            )}
+
+            {vehicle.features && vehicle.features.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {vehicle.features.filter(f => !f.toLowerCase().includes('laudo')).slice(0, 3).map((f) => (
+                  <span key={f} className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded-md font-medium">
+                    {f}
+                  </span>
+                ))}
+                {vehicle.features.filter(f => !f.toLowerCase().includes('laudo')).length > 3 && (
+                  <span className="text-[10px] text-zinc-400 py-0.5">
+                    +{vehicle.features.filter(f => !f.toLowerCase().includes('laudo')).length - 3} mais
+                  </span>
+                )}
+              </div>
             )}
           </div>
-
-          {/* Opcionais Destaques */}
-          {vehicle.features && vehicle.features.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-4">
-              {vehicle.features.slice(0, 3).map((f) => (
-                <span key={f} className="text-[10px] bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-md font-medium">
-                  {f}
-                </span>
-              ))}
-              {vehicle.features.length > 3 && (
-                <span className="text-[10px] text-zinc-400 py-0.5">
-                  +{vehicle.features.length - 3} mais
-                </span>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Preço e Botão Tenho Interesse */}
-        <div className="pt-2.5 border-t border-zinc-100 mt-2">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <span className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider block">Condição comercial</span>
-              <span className="text-sm font-extrabold text-emerald-700 tracking-tight">
-                Consulte no WhatsApp
-              </span>
-            </div>
-            <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2 py-0.5 rounded-md">
-              Sob Consulta
-            </span>
-          </div>
-
+        {/* Botão Tenho Interesse (Sem Preço) */}
+        <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 mt-2">
           <div className="grid grid-cols-2 gap-2">
             <Button
               variant="outline"
@@ -132,12 +126,13 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
                 e.stopPropagation()
                 onSelect?.(vehicle)
               }}
-              className="w-full text-xs font-bold rounded-xl py-2.5 text-zinc-700 hover:bg-zinc-100"
+              className="w-full text-xs font-bold rounded-xl py-2.5 text-zinc-700 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800"
             >
               Ver Detalhes
             </Button>
             <Button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-2.5 font-bold text-xs shadow-xs active:scale-98 transition-transform"
+              className="w-full text-white rounded-xl py-2.5 font-bold text-xs shadow-xs active:scale-98 transition-transform"
+              style={{ backgroundColor: store.primary_color || '#18181B' }}
               onClick={(e) => {
                 e.stopPropagation()
                 onInterest?.(vehicle)
