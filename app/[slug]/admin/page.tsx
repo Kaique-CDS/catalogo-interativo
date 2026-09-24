@@ -72,18 +72,18 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
         <p className="text-zinc-500">Visão geral do seu catálogo</p>
       </div>
       
-      <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
+      <div className="bg-white border border-zinc-200 rounded-xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="w-full sm:w-auto">
           <h3 className="font-bold text-zinc-800 text-sm flex items-center gap-2">
-            <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
-            Espaço de Armazenamento (Imagens e Dados)
+            <svg className="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            Espaço de Armazenamento
           </h3>
-          <p className="text-xs text-zinc-500 mt-1">Plano Atual: <span className="font-bold text-indigo-600">Premium</span></p>
+          <p className="text-xs text-zinc-500 mt-1 sm:ml-6">Plano Atual: <span className="font-bold text-indigo-600">Premium</span></p>
         </div>
         
-        <div className="flex-1 w-full max-w-sm">
+        <div className="flex-1 w-full max-w-none sm:max-w-sm">
           <div className="flex justify-between text-xs mb-1.5 font-medium">
-            <span className="text-zinc-700">{formatBytes(dbUsage)} utilizados</span>
+            <span className="text-zinc-700">{formatBytes(dbUsage)} usados</span>
             <span className="text-zinc-400">Total: {formatBytes(dbLimit)}</span>
           </div>
           <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
@@ -92,12 +92,12 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
               style={{ width: `${usagePercentage}%` }}
             ></div>
           </div>
-          <p className="text-[10px] text-zinc-400 mt-1.5 text-right">
+          <p className="text-[10px] text-zinc-400 mt-1.5">
             Você ainda tem {formatBytes(dbLimit - dbUsage)} disponíveis
           </p>
         </div>
 
-        <button className="shrink-0 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold transition-colors">
+        <button className="w-full sm:w-auto shrink-0 px-4 py-2.5 sm:py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-xs font-bold transition-colors shadow-xs">
           Fazer Upgrade
         </button>
       </div>

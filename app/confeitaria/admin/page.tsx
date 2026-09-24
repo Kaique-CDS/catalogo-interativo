@@ -59,21 +59,21 @@ export default function ConfeitariaDashboardPage() {
       </div>
 
       {/* Uso de Armazenamento - Widget SaaS */}
-      <div className="bg-white border border-rose-100 rounded-xl p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
+      <div className="bg-white border border-rose-100 rounded-xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 relative overflow-hidden">
         {/* Decorative element */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-full blur-3xl -mr-10 -mt-10 opacity-60"></div>
         
-        <div className="relative z-10">
+        <div className="relative z-10 w-full sm:w-auto">
           <h3 className="font-bold text-rose-900 text-sm flex items-center gap-2">
-            <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
-            Espaço de Armazenamento de Fotos
+            <svg className="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            Armazenamento de Fotos
           </h3>
-          <p className="text-xs text-zinc-500 mt-1">Plano Atual: <span className="font-bold text-rose-600">Médio</span></p>
+          <p className="text-xs text-zinc-500 mt-1 sm:ml-6">Plano Atual: <span className="font-bold text-rose-600">Médio</span></p>
         </div>
         
-        <div className="flex-1 w-full max-w-sm relative z-10">
+        <div className="relative z-10 flex-1 w-full max-w-none sm:max-w-sm">
           <div className="flex justify-between text-xs mb-1.5 font-medium">
-            <span className="text-zinc-700">840 MB utilizados</span>
+            <span className="text-zinc-700">840 MB usados</span>
             <span className="text-zinc-400">Total: 5 GB</span>
           </div>
           <div className="h-2 w-full bg-rose-50 rounded-full overflow-hidden">
@@ -82,12 +82,12 @@ export default function ConfeitariaDashboardPage() {
               style={{ width: '16.8%' }}
             ></div>
           </div>
-          <p className="text-[10px] text-zinc-400 mt-1.5 text-right">
+          <p className="text-[10px] text-zinc-400 mt-1.5">
             Você ainda tem aprox. 4.1 GB livres.
           </p>
         </div>
 
-        <button className="relative z-10 shrink-0 px-4 py-2 bg-rose-950 hover:bg-rose-900 text-white rounded-lg text-xs font-bold transition-colors">
+        <button className="relative z-10 w-full sm:w-auto shrink-0 px-4 py-2.5 sm:py-2 bg-rose-950 hover:bg-rose-900 text-white rounded-lg text-xs font-bold transition-colors shadow-xs">
           Fazer Upgrade
         </button>
       </div>
