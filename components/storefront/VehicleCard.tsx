@@ -20,10 +20,10 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
   return (
     <div
       onClick={() => onSelect?.(vehicle)}
-      className="bg-white rounded-2xl border border-zinc-200/80 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group cursor-pointer"
+      className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group cursor-pointer"
     >
       {/* Foto com Badges */}
-      <div className="relative aspect-[16/10] sm:h-52 bg-zinc-100 overflow-hidden">
+      <div className="relative aspect-[16/10] sm:h-52 bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -34,7 +34,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
           />
         ) : (
           <div className="h-full flex items-center justify-center">
-            <Car className="h-16 w-16 text-zinc-300" />
+            <Car className="h-16 w-16 text-zinc-300 dark:text-zinc-600" />
           </div>
         )}
 
@@ -56,28 +56,28 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
       {/* Conteúdo do Card */}
       <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between">
         <div>
-          <h3 className="font-bold text-zinc-900 text-base sm:text-lg leading-snug group-hover:text-zinc-700 transition-colors">
+          <h3 className="font-bold text-zinc-900 dark:text-white text-base sm:text-lg leading-snug group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
             {vehicle.title}
           </h3>
-          <p className="text-xs text-zinc-500 mt-0.5 mb-3 font-medium">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 mb-3 font-medium">
             {vehicle.model}
           </p>
 
           {/* Grid de Especificações */}
-          <div className="grid grid-cols-2 gap-2 text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 p-2.5 rounded-xl mb-3">
+          <div className="grid grid-cols-2 gap-2 text-xs text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/60 p-2.5 rounded-xl mb-3">
             <span className="flex items-center gap-1.5 font-medium">
-              <Calendar className="h-3.5 w-3.5 text-zinc-400" />
+              <Calendar className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
               {vehicle.year}
             </span>
             {vehicle.transmission && (
               <span className="flex items-center gap-1.5 text-[11px] truncate font-medium">
-                <Cog className="h-3.5 w-3.5 text-zinc-400" />
+                <Cog className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
                 {vehicle.transmission}
               </span>
             )}
             {vehicle.fuel && (
               <span className="flex items-center gap-1.5 text-[11px] truncate font-medium">
-                <Fuel className="h-3.5 w-3.5 text-zinc-400" />
+                <Fuel className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
                 {vehicle.fuel}
               </span>
             )}
@@ -87,7 +87,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
           <div className="flex flex-col gap-2 mb-4">
             {/* Tag de Laudo Cautelar */}
             {vehicle.features?.some(f => f.toLowerCase().includes('laudo')) ? (
-              <div 
+              <div
                 className="self-start text-[10px] font-bold px-2 py-1 rounded-md text-white flex items-center gap-1"
                 style={{ backgroundColor: store.primary_color || '#18181B' }}
               >
@@ -95,7 +95,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
                 Laudo Cautelar: Aprovado
               </div>
             ) : (
-              <div className="self-start text-[10px] font-medium px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+              <div className="self-start text-[10px] font-medium px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
                 Laudo Cautelar: Não informado
               </div>
             )}
@@ -108,7 +108,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
                   </span>
                 ))}
                 {vehicle.features.filter(f => !f.toLowerCase().includes('laudo')).length > 3 && (
-                  <span className="text-[10px] text-zinc-400 py-0.5">
+                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 py-0.5">
                     +{vehicle.features.filter(f => !f.toLowerCase().includes('laudo')).length - 3} mais
                   </span>
                 )}
@@ -126,7 +126,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
                 e.stopPropagation()
                 onSelect?.(vehicle)
               }}
-              className="w-full text-xs font-bold rounded-xl py-2.5 text-zinc-700 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800"
+              className="w-full text-xs font-bold rounded-xl py-2.5 text-zinc-700 dark:text-zinc-300 dark:border-zinc-700 dark:hover:bg-zinc-800"
             >
               Ver Detalhes
             </Button>
