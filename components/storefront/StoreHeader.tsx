@@ -24,8 +24,7 @@ export default function StoreHeader({ store }: Props) {
             />
           ) : (
             <div
-              className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center text-white font-black text-lg flex-shrink-0 shadow-xs"
-              style={{ backgroundColor: brandColor }}
+              className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center text-white dark:text-zinc-900 bg-zinc-900 dark:bg-white font-black text-lg flex-shrink-0 shadow-xs"
             >
               {store.name.charAt(0).toUpperCase()}
             </div>

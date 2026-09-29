@@ -88,8 +88,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
             {/* Tag de Laudo Cautelar */}
             {vehicle.features?.some(f => f.toLowerCase().includes('laudo')) ? (
               <div
-                className="self-start text-[10px] font-bold px-2 py-1 rounded-md text-white flex items-center gap-1"
-                style={{ backgroundColor: store.primary_color || '#18181B' }}
+                className="self-start text-[10px] font-bold px-2 py-1 rounded-md text-white bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 flex items-center gap-1"
               >
                 <Eye className="h-3 w-3" />
                 Laudo Cautelar: Aprovado
@@ -131,8 +130,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
               Ver Detalhes
             </Button>
             <Button
-              className="w-full text-white rounded-xl py-2.5 font-bold text-xs shadow-xs active:scale-98 transition-transform"
-              style={{ backgroundColor: store.primary_color || '#18181B' }}
+              className="w-full rounded-xl py-2.5 font-bold text-xs shadow-xs active:scale-98 transition-transform bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
               onClick={(e) => {
                 e.stopPropagation()
                 onInterest?.(vehicle)
