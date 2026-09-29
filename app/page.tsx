@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Car, Cake, MessageCircle, Zap, Sparkles, CheckCircle2, ChevronRight, BarChart3, Users, LayoutDashboard, Shirt, Smile, Utensils, Brush, MonitorSmartphone, Gift, ArrowUpCircle } from 'lucide-react'
+import { Car, MessageCircle, Zap, Sparkles, CheckCircle2, ChevronRight, BarChart3, Users, LayoutDashboard, Shirt, Smile, Utensils, Brush, MonitorSmartphone, Gift, ArrowUpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function LandingPage() {
@@ -149,9 +149,6 @@ export default function LandingPage() {
             <div className="flex gap-4">
               <Link href="/loja-exemplo">
                 <Button className="bg-white text-indigo-600 hover:bg-zinc-100 rounded-xl font-bold">Ver Catálogo de Carros</Button>
-              </Link>
-              <Link href="/confeitaria">
-                <Button variant="outline" className="text-zinc-600 border-white hover:bg-white/10 rounded-xl font-bold">Ver Catálogo de Bolos</Button>
               </Link>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, CreditCard, Settings, LogOut, Bell, Search, Sparkles, Menu, X, Activity } from 'lucide-react'
+import { LayoutDashboard, Users, CreditCard, Settings, LogOut, Bell, Search, Sparkles, Menu, X, Activity, Lightbulb } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     { href: '/admin/financeiro', label: 'Financeiro', icon: CreditCard },
     { href: '/admin/auditoria', label: 'Auditoria de Logs', icon: Activity },
     { href: '/admin/configuracoes', label: 'Configurações', icon: Settings },
+    { href: '/admin/melhorias', label: 'Melhorias', icon: Lightbulb },
   ]
 
   return (

@@ -167,8 +167,22 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? [])
+    let files = Array.from(e.target.files ?? [])
     if (files.length === 0) return
+
+    // Hard limit: already at 10
+    if (images.length >= 10) {
+      toast.error('Limite de 10 fotos por veículo atingido. Remova uma foto para adicionar outra.')
+      e.target.value = ''
+      return
+    }
+
+    // Soft limit: trim files that would exceed 10
+    if (images.length + files.length > 10) {
+      const allowed = 10 - images.length
+      files = files.slice(0, allowed)
+      toast.warning(`Apenas ${allowed} foto(s) adicionada(s) para não ultrapassar o limite de 10.`)
+    }
 
     setUploading(true)
     const newUrls: string[] = []
@@ -188,6 +202,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     }
     setImages(prev => [...prev, ...newUrls])
     setUploading(false)
+    e.target.value = ''
     if (newUrls.length > 0) toast.success('Fotos enviadas com sucesso!')
   }
 
@@ -250,17 +265,38 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 )}
               </div>
             ))}
-            <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-200 hover:border-zinc-400 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50/50 hover:bg-zinc-50 transition-colors">
+            <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
+              images.length >= 10
+                ? 'border-rose-300 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
+                : 'border-zinc-200 hover:border-zinc-400 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-50'
+            }`}>
               {uploading ? (
                 <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
               ) : (
                 <>
-                  <Upload className="h-5 w-5 text-zinc-500 mb-1" />
-                  <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Adicionar fotos</span>
-                  <span className="text-[10px] text-zinc-400">JPG, PNG ou WebP</span>
+                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 10 ? 'text-rose-400' : 'text-zinc-500'}`} />
+                  <span className={`text-xs font-medium ${images.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                    {images.length >= 10 ? 'Limite atingido' : 'Adicionar fotos'}
+                  </span>
+                  <span className={`text-[10px] font-semibold mt-0.5 ${
+                    images.length >= 10
+                      ? 'text-rose-500'
+                      : images.length >= 8
+                      ? 'text-amber-500'
+                      : 'text-zinc-400'
+                  }`}>
+                    {images.length}/10 fotos
+                  </span>
                 </>
               )}
-              <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploading} />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageUpload}
+                disabled={uploading || images.length >= 10}
+              />
             </label>
           </div>
         </CardContent>

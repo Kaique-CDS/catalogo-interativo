@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Menu, X, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Menu, X, Sparkles, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ const navItems = (slug: string) => [
   { href: `/${slug}/admin`,              label: 'Início',        icon: LayoutDashboard, exact: true },
   { href: `/${slug}/admin/estoque`,      label: 'Estoque',       icon: Car },
   { href: `/${slug}/admin/configuracoes`,label: 'Configurações', icon: Settings },
+  { href: `/${slug}/admin/melhorias`,    label: 'Melhorias',     icon: Lightbulb },
 ]
 
 export default function AdminSidebar({ store, slug }: Props) {
