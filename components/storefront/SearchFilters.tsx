@@ -47,7 +47,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
     if (l.includes('porsche')) return 'https://upload.wikimedia.org/wikipedia/en/2/23/Porsche_crest.svg'
     if (l.includes('toyota')) return 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg'
     if (l.includes('honda')) return 'https://upload.wikimedia.org/wikipedia/commons/3/38/Honda.svg'
-    if (l.includes('jeep')) return 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Jeep_logo.svg'
+    if (l.includes('jeep')) return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="48" fill="%23888888">Jeep</text></svg>'
     if (l.includes('volkswagen') || l.includes('vw')) return 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.svg'
     if (l.includes('fiat')) return 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Fiat_Logo_2020.svg'
     if (l.includes('ford')) return 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Ford_Motor_Company_Logo.svg'
