@@ -135,8 +135,16 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="cnh">Número da CNH</Label>
-              <Input id="cnh" placeholder="00000000000" {...register('cnh')} />
+              <Label htmlFor="cnh">Você possui CNH?</Label>
+              <select
+                id="cnh"
+                {...register('cnh')}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="">Selecione</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+              </select>
             </div>
 
             <div className="space-y-1.5">

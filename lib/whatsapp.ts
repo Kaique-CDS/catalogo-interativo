@@ -115,7 +115,7 @@ export function buildFinancingWhatsAppUrl(params: WhatsAppFinancingParams): stri
     `🪪 CPF: ${cpf}`,
   ]
 
-  if (cnh) lines.push(`🚗 CNH: ${cnh}`)
+  if (cnh) lines.push(`🚗 Possui CNH: ${cnh}`)
   if (dataNascimento) lines.push(`📅 Data de Nascimento: ${dataNascimento}`)
   if (rendaMensal) lines.push(`💼 Renda Mensal: R$ ${rendaMensal}`)
   if (valorEntrada) lines.push(`💰 Valor de Entrada: R$ ${valorEntrada}`)
