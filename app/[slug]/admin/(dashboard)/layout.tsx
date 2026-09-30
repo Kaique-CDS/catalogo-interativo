@@ -1,4 +1,4 @@
-﻿import { cookies } from 'next/headers'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import { createClient } from '@/lib/supabase/server'
@@ -47,7 +47,7 @@ export default async function DashboardLayout({
     }
 
     return (
-      <div className="flex flex-col md:flex-row h-screen bg-zinc-50 overflow-hidden font-sans">
+      <div className="flex flex-col md:flex-row h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden font-sans">
         <AdminSidebar store={storeToUse} slug={slug} />
         <main className="flex-1 overflow-y-auto pt-14 pb-16 md:pt-0 md:pb-0">
           <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">{children}</div>
@@ -70,7 +70,7 @@ export default async function DashboardLayout({
           .maybeSingle()
 
         return (
-          <div className="flex flex-col md:flex-row h-screen bg-zinc-50 overflow-hidden font-sans">
+          <div className="flex flex-col md:flex-row h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden font-sans">
             <AdminSidebar store={store || demoStore} slug={slug} />
             <main className="flex-1 overflow-y-auto pt-14 pb-16 md:pt-0 md:pb-0">
               <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">{children}</div>

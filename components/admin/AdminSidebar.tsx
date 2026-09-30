@@ -93,16 +93,16 @@ export default function AdminSidebar({ store, slug }: Props) {
       </nav>
 
       {/* 3. Sidebar Desktop Clássica */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 bg-white border-r border-zinc-200 dark:border-zinc-800/80 flex-col justify-between shadow-xs">
+      <aside className="hidden md:flex w-64 flex-shrink-0 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800/80 flex-col justify-between shadow-xs">
         <div>
           <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2.5 font-black text-lg text-zinc-900 dark:text-zinc-50">
-              <div className="h-9 w-9 rounded-xl bg-zinc-900 text-white flex items-center justify-center shadow-xs">
+              <div className="h-9 w-9 rounded-xl bg-zinc-900 dark:bg-zinc-800 text-white flex items-center justify-center shadow-xs">
                 <Car className="h-5 w-5 text-emerald-400" />
               </div>
               AutoCatálogo
             </div>
-            <p className="text-xs text-zinc-500 mt-2 truncate font-medium">{store.name}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 truncate font-medium">{store.name}</p>
           </div>
 
           <nav className="p-4 space-y-1.5">
@@ -115,8 +115,8 @@ export default function AdminSidebar({ store, slug }: Props) {
                   className={cn(
                     'flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all',
                     isActive
-                      ? 'bg-zinc-900 text-white shadow-xs'
-                      : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-50'
+                      ? 'bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 shadow-xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -127,9 +127,9 @@ export default function AdminSidebar({ store, slug }: Props) {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-zinc-100 space-y-2">
+        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 space-y-2">
           <Link href={`/${slug}`} target="_blank">
-            <Button variant="outline" size="sm" className="w-full gap-2 text-xs rounded-xl font-semibold text-zinc-700 dark:text-zinc-300">
+            <Button variant="outline" size="sm" className="w-full gap-2 text-xs rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800">
               <ExternalLink className="h-3.5 w-3.5" />
               Ver vitrine da loja
             </Button>
@@ -137,7 +137,7 @@ export default function AdminSidebar({ store, slug }: Props) {
           <Button
             variant="ghost"
             size="sm"
-            className="w-full gap-2 text-xs text-zinc-500 hover:text-red-600 rounded-xl"
+            className="w-full gap-2 text-xs text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 dark:hover:bg-zinc-800/50 rounded-xl"
             onClick={handleLogout}
           >
             <LogOut className="h-3.5 w-3.5" />
