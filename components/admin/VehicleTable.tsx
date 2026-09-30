@@ -145,22 +145,22 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {vehicles.map((v) => (
-              <div key={v.id} className="bg-white p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-2xs flex gap-3 items-center justify-between">
+              <div key={v.id} className="bg-white dark:bg-zinc-900 p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 shadow-2xs flex gap-3 items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-100 dark:border-zinc-800">
+                  <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex-shrink-0 border border-zinc-100 dark:border-zinc-700">
                     {v.images?.[0] ? (
                       <Image src={v.images[0]} alt={v.title} fill className="object-cover" />
                     ) : (
-                      <div className="h-full flex items-center justify-center"><Car className="h-5 w-5 text-zinc-300" /></div>
+                      <div className="h-full flex items-center justify-center"><Car className="h-5 w-5 text-zinc-300 dark:text-zinc-600" /></div>
                     )}
                   </div>
                   <div className="min-w-0">
                     {v.sku && (
-                      <span className="font-mono text-[9px] font-bold text-blue-600">#{v.sku} · </span>
+                      <span className="font-mono text-[9px] font-bold text-blue-600 dark:text-blue-400">#{v.sku} • </span>
                     )}
-                    <p className="font-bold text-zinc-900 text-xs truncate">{v.title}</p>
+                    <p className="font-bold text-zinc-900 dark:text-white text-xs truncate">{v.title}</p>
                     <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{v.brand} • {v.year}</p>
-                    <p className="text-xs font-black text-zinc-900 mt-0.5">{formatCurrency(v.price)}</p>
+                    <p className="text-xs font-black text-zinc-900 dark:text-white mt-0.5">{formatCurrency(v.price)}</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
@@ -168,15 +168,15 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                     {v.is_active ? 'Ativo' : 'Pausado'}
                   </Badge>
                   <div className="flex items-center gap-0.5">
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500 dark:text-zinc-400" onClick={() => toggleActive(v)}>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800" onClick={() => toggleActive(v)}>
                       {v.is_active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </Button>
                     <Link href={`/${slug}/admin/estoque/${v.id}`}>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500 dark:text-zinc-400">
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                     </Link>
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-red-500" onClick={() => deleteVehicle(v.id)}>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={() => deleteVehicle(v.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
