@@ -1,4 +1,4 @@
-﻿import { cookies } from 'next/headers'
+import { cookies } from 'next/headers'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import LoginPage from './login/page'
 import { createClient } from '@/lib/supabase/server'
@@ -50,7 +50,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-zinc-50 font-sans">
+    <div className="flex flex-col md:flex-row min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans">
       <AdminSidebar store={storeToUse} slug={slug} />
       <main className="flex-1 overflow-y-auto pt-16 pb-24 md:pt-0 md:pb-8">
         <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">{children}</div>
