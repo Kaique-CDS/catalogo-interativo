@@ -73,28 +73,28 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[95dvh]">
+      <div className="relative w-full sm:max-w-lg bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[95dvh]">
         {/* Handle (mobile) */}
         <div className="w-10 h-1.5 bg-zinc-200 rounded-full mx-auto mt-3 sm:hidden flex-shrink-0" />
 
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b flex-shrink-0">
+        <div className="flex items-center gap-3 px-5 py-4 border-b dark:border-zinc-800 flex-shrink-0">
           <button
             onClick={onBack}
-            className="p-1.5 rounded-xl hover:bg-zinc-100 transition-colors"
+            className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Voltar"
           >
             <ChevronLeft className="h-5 w-5 text-zinc-500" />
           </button>
           <div className="flex-1">
-            <h3 className="font-bold text-zinc-900">Simulação de Financiamento</h3>
+            <h3 className="font-bold text-zinc-900 dark:text-white">Simulação de Financiamento</h3>
             <p className="text-xs text-zinc-500">
               {vehicle.brand} {vehicle.model} ({vehicle.year})
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-zinc-100 transition-colors"
+            className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Fechar"
           >
             <X className="h-5 w-5 text-zinc-500" />
@@ -107,9 +107,9 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
           className="overflow-y-auto flex-1 px-5 py-4 space-y-4"
         >
           {/* Vehicle info box */}
-          <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100 flex items-center justify-between">
+          <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50 flex items-center justify-between">
             <span className="text-xs text-zinc-500 font-medium">Veículo de interesse:</span>
-            <span className="text-xs font-bold text-zinc-800">
+            <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
               {vehicle.brand} {vehicle.model} {vehicle.year}
             </span>
           </div>
@@ -185,7 +185,7 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
 
           {/* Trade-in notice */}
           {hasTradeIn && (
-            <div className="p-3 bg-orange-50 rounded-xl text-sm text-orange-700 font-medium flex items-center gap-2">
+            <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded-xl text-sm text-orange-700 dark:text-orange-400 font-medium flex items-center gap-2">
               🔄 Incluindo veículo usado na troca
             </div>
           )}
