@@ -244,12 +244,12 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl pb-12">
       {/* 1. Fotos */}
-      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
+      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-xs">
         <CardContent className="pt-6">
-          <Label className="text-xs font-bold text-zinc-900 block mb-2">Fotos do Veículo (Capa e Galeria)</Label>
+          <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-50 block mb-2">Fotos do Veículo (Capa e Galeria)</Label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {images.map((url, i) => (
-              <div key={i} className="relative aspect-video rounded-xl bg-zinc-100 overflow-hidden group border border-zinc-200 dark:border-zinc-800/80">
+              <div key={i} className="relative aspect-video rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden group border border-zinc-200 dark:border-zinc-700">
                 <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
                 <button
                   type="button"
@@ -267,14 +267,14 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             ))}
             <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
               images.length >= 10
-                ? 'border-rose-300 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
-                : 'border-zinc-200 hover:border-zinc-400 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-50'
+                ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
+                : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}>
               {uploading ? (
                 <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
               ) : (
                 <>
-                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 10 ? 'text-rose-400' : 'text-zinc-500'}`} />
+                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
                   <span className={`text-xs font-medium ${images.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
                     {images.length >= 10 ? 'Limite atingido' : 'Adicionar fotos'}
                   </span>
@@ -306,19 +306,19 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
         <CardContent className="pt-6 space-y-4">
           {/* SKU read-only */}
-          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-            <Hash className="h-4 w-4 text-blue-500 flex-shrink-0" />
+          <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/50">
+            <Hash className="h-4 w-4 text-blue-500 dark:text-blue-400 flex-shrink-0" />
             <div className="flex-1">
-              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
                 Código SKU (gerado automaticamente)
               </span>
-              <span className="font-mono text-sm font-bold text-blue-800">{sku || '—'}</span>
+              <span className="font-mono text-sm font-bold text-blue-800 dark:text-blue-300">{sku || '—'}</span>
             </div>
             {!isEditing && (
               <button
                 type="button"
                 onClick={() => setSku(generateSKU())}
-                className="text-[10px] text-blue-500 hover:text-blue-700 underline"
+                className="text-[10px] text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline"
               >
                 Gerar novo
               </button>
@@ -400,9 +400,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       </Card>
 
       {/* 3. Opcionais e Diferenciais */}
-      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
+      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-xs">
         <CardContent className="pt-6">
-          <Label className="text-xs font-bold text-zinc-900 block mb-1">Opcionais & Diferenciais Rápidos</Label>
+          <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-50 block mb-1">Opcionais & Diferenciais Rápidos</Label>
           <p className="text-[11px] text-zinc-400 mb-3">Selecione os itens que mais valorizam o veículo</p>
           <div className="flex flex-wrap gap-2">
             {COMMON_FEATURES.map((feature) => {
@@ -414,11 +414,11 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                   onClick={() => toggleFeature(feature)}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                     isSelected
-                      ? 'bg-zinc-900 text-white shadow-xs'
-                      : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                      ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-xs'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                   }`}
                 >
-                  {isSelected && <Check className="h-3 w-3 text-green-400" />}
+                  {isSelected && <Check className="h-3 w-3 text-green-400 dark:text-emerald-600" />}
                   {feature}
                 </button>
               )
@@ -426,28 +426,28 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           </div>
 
           {/* Balão Moderno de Descrição com Abas (Manual vs I.A) */}
-          <div className="mt-6 rounded-2xl border border-zinc-200 dark:border-zinc-800/90 bg-gradient-to-b from-zinc-50/80 to-white p-4 sm:p-5 shadow-xs">
+          <div className="mt-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50/80 to-white dark:from-zinc-900/50 dark:to-zinc-900 p-4 sm:p-5 shadow-xs">
             {/* Cabeçalho do Balão com Seletor de Modo */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-zinc-200 dark:border-zinc-800/70">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-zinc-200 dark:border-zinc-800">
               <div>
-                <Label htmlFor="description" className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
+                <Label htmlFor="description" className="text-sm font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-1.5">
                   <span>Descrição do Veículo</span>
-                  <span className="text-red-500">*</span>
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </Label>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
                   Escolha como deseja compor a legenda do anúncio deste carro:
                 </p>
               </div>
 
               {/* Segmented Switcher (2 opções: Manual ou I.A) */}
-              <div className="inline-flex p-1 bg-zinc-200/70 rounded-xl gap-1 self-start sm:self-auto border border-zinc-200 dark:border-zinc-800">
+              <div className="inline-flex p-1 bg-zinc-200/70 dark:bg-zinc-800/70 rounded-xl gap-1 self-start sm:self-auto border border-zinc-200 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setDescMode('manual')}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     descMode === 'manual'
-                      ? 'bg-white text-zinc-900 shadow-xs'
-                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-50'
+                      ? 'bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
                   }`}
                 >
                   <Edit3 className="h-3.5 w-3.5" />
@@ -461,20 +461,20 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                     descMode === 'ai'
                       ? isFormComplete
                         ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs'
-                        : 'bg-zinc-800 text-zinc-100 shadow-xs'
+                        : 'bg-zinc-800 dark:bg-zinc-700 text-zinc-100 shadow-xs'
                       : isFormComplete
-                        ? 'text-purple-700 hover:text-purple-900'
-                        : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-200'
+                        ? 'text-purple-700 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
                   }`}
                 >
                   {isFormComplete ? (
                     <Sparkles className="h-3.5 w-3.5 text-amber-300" />
                   ) : (
-                    <Lock className="h-3.5 w-3.5 text-zinc-400" />
+                    <Lock className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
                   )}
                   <span>Gerar com I.A</span>
                   {!isFormComplete && (
-                    <span className="text-[9px] px-1.5 py-0.5 bg-zinc-700 text-zinc-200 rounded font-medium ml-0.5">
+                    <span className="text-[9px] px-1.5 py-0.5 bg-zinc-700 dark:bg-zinc-800 text-zinc-200 rounded font-medium ml-0.5">
                       Bloqueado
                     </span>
                   )}
@@ -488,7 +488,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 /* MODO MANUAL */
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                    <span className="flex items-center gap-1.5 text-zinc-600 font-medium">
+                    <span className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300 font-medium">
                       <Edit3 className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" /> Escreva livremente o texto do seu anúncio:
                     </span>
                     <span className="text-[11px] text-zinc-400 font-mono">
@@ -500,7 +500,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                     placeholder="Ex: Carro impecável, único dono, todas as revisões feitas em concessionária, laudo cautelar 100% aprovado, pneus novos e sem detalhes."
                     rows={4}
                     maxLength={500}
-                    className="text-sm rounded-xl bg-white border-zinc-200 focus:border-zinc-900 transition-colors"
+                    className="text-sm rounded-xl bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus:border-zinc-900 dark:focus:border-zinc-50 transition-colors"
                     {...register('description')}
                   />
                 </div>
@@ -509,28 +509,28 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 <div className="space-y-3">
                   {!isFormComplete ? (
                     /* ESTADO BLOQUEADO */
-                    <div className="rounded-xl border border-dashed border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-amber-50/60 p-3.5 text-zinc-800 dark:text-zinc-200">
+                    <div className="rounded-xl border border-dashed border-amber-300/80 dark:border-amber-500/30 bg-gradient-to-r from-amber-50/80 via-orange-50/40 to-amber-50/60 dark:from-amber-950/20 dark:to-amber-900/10 p-3.5 text-zinc-800 dark:text-zinc-200">
                       <div className="flex items-start gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-amber-500/15 border border-amber-300/60 flex items-center justify-center shrink-0 text-amber-700 mt-0.5">
+                        <div className="h-8 w-8 rounded-lg bg-amber-500/15 border border-amber-300/60 dark:border-amber-700/50 flex items-center justify-center shrink-0 text-amber-700 dark:text-amber-500 mt-0.5">
                           <Lock className="h-4 w-4" />
                         </div>
                         <div className="space-y-1.5 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                            <span className="text-xs font-bold text-amber-950 dark:text-amber-400 uppercase tracking-wide">
                               Gerador com I.A Bloqueado
                             </span>
-                            <span className="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-semibold">
+                            <span className="text-[10px] bg-amber-200 dark:bg-amber-900/40 text-amber-900 dark:text-amber-300 px-2 py-0.5 rounded-full font-semibold">
                               Economia de Tokens
                             </span>
                           </div>
-                          <p className="text-xs text-amber-900/80 leading-relaxed">
+                          <p className="text-xs text-amber-900/80 dark:text-amber-200/70 leading-relaxed">
                             Para economizar tokens e gerar uma legenda altamente precisa para este carro, preencha todos os campos obrigatórios primeiro:
                           </p>
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {missingFields.map((f) => (
                               <span
                                 key={f}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-200/70 border border-amber-300/80 text-[11px] font-semibold text-amber-900"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-200/70 dark:bg-amber-900/30 border border-amber-300/80 dark:border-amber-800/50 text-[11px] font-semibold text-amber-900 dark:text-amber-400"
                               >
                                 ⚠️ {f}
                               </span>
@@ -540,11 +540,11 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                       </div>
 
                       {/* Botão de IA Bloqueado dentro do balão */}
-                      <div className="mt-3 pt-3 border-t border-amber-200/60">
+                      <div className="mt-3 pt-3 border-t border-amber-200/60 dark:border-amber-800/30">
                         <button
                           type="button"
                           disabled
-                          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-200/80 text-zinc-400 font-semibold text-xs border border-zinc-300/70 cursor-not-allowed shadow-inner"
+                          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-200/80 dark:bg-zinc-800/50 text-zinc-400 dark:text-zinc-500 font-semibold text-xs border border-zinc-300/70 dark:border-zinc-700/50 cursor-not-allowed shadow-inner dark:shadow-none"
                         >
                           <Lock className="h-3.5 w-3.5" />
                           Preencha os dados acima para desbloquear a geração com I.A
@@ -553,14 +553,14 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                     </div>
                   ) : (
                     /* ESTADO DESBLOQUEADO / PRONTO */
-                    <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50/90 via-indigo-50/60 to-purple-50/40 p-3.5 text-zinc-900 dark:text-zinc-50">
+                    <div className="rounded-xl border border-purple-200 dark:border-purple-800/50 bg-gradient-to-r from-purple-50/90 via-indigo-50/60 to-purple-50/40 dark:from-purple-950/30 dark:to-indigo-950/20 p-3.5 text-zinc-900 dark:text-zinc-50">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-950 uppercase tracking-wide">
-                              <Sparkles className="h-3.5 w-3.5 text-purple-600" /> I.A Pronta para Gerar
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-950 dark:text-purple-300 uppercase tracking-wide">
+                              <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /> I.A Pronta para Gerar
                             </span>
-                            <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
+                            <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full font-semibold">
                               ✓ Especificações Completas
                             </span>
                           </div>
@@ -568,23 +568,23 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                             A I.A filtrará apenas os dados preenchidos deste veículo para gastar o mínimo de tokens:
                           </p>
                           <div className="flex flex-wrap gap-1.5 pt-0.5 text-[11px]">
-                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
                               🚗 {brandVal} {modelVal}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
                               📅 {yearVal}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
                               🛣️ {Number(mileageVal).toLocaleString('pt-BR')} km
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
                               💰 R$ {Number(priceVal).toLocaleString('pt-BR')}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
+                            <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
                               🎨 {colorVal}
                             </span>
                             {selectedFeatures.length > 0 && (
-                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 text-purple-900 font-medium">
+                              <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
                                 ⚙️ {selectedFeatures.length} opcionais
                               </span>
                             )}
@@ -614,7 +614,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                   {/* Campo de Texto onde a IA insere a descrição */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                      <span className="text-[11px] text-zinc-500 font-medium">
+                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
                         Texto da Legenda (gerado pela IA ou ajustado por você):
                       </span>
                       <span className="text-[11px] text-zinc-400 font-mono">
@@ -630,7 +630,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                       }
                       rows={4}
                       maxLength={500}
-                      className="text-sm rounded-xl bg-white border-zinc-200 focus:border-purple-500 transition-colors"
+                      className="text-sm rounded-xl bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus:border-purple-500 transition-colors"
                       {...register('description')}
                     />
                   </div>
@@ -654,12 +654,12 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       </Card>
 
       {/* 4. Status de Publicação */}
-      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800/80 shadow-xs">
+      <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-xs">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center gap-3.5">
               <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-colors ${
-                isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-500 dark:text-zinc-400'
+                isActive ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
               }`}>
                 {isActive ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
               </div>
@@ -667,7 +667,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
                   {isActive ? 'Veículo Publicado no Catálogo' : 'Veículo Pausado / Oculto'}
                 </p>
-                <p className="text-xs text-zinc-500 mt-0.5">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                   {isActive
                     ? 'Disponível e visível para todos os visitantes da sua vitrine.'
                     : 'Oculto do catálogo online. Não aparece para os compradores.'}
@@ -678,7 +678,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               type="button"
               onClick={() => setIsActive(!isActive)}
               className={`relative inline-flex h-7 w-13 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                isActive ? 'bg-emerald-600' : 'bg-zinc-300'
+                isActive ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'
               }`}
             >
               <span
@@ -693,7 +693,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
       {/* Ações */}
       <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" disabled={saving} className="flex-1 sm:flex-none px-8 py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-sm font-semibold shadow-sm">
+        <Button type="submit" disabled={saving} className="flex-1 sm:flex-none px-8 py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-xl text-sm font-semibold shadow-sm">
           {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           {isEditing ? 'Salvar Alterações' : 'Publicar Veículo no Catálogo'}
         </Button>
@@ -701,7 +701,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           type="button"
           variant="outline"
           onClick={() => router.push(`/${slug}/admin/estoque`)}
-          className="rounded-xl text-sm"
+          className="rounded-xl text-sm dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
           Cancelar
         </Button>
