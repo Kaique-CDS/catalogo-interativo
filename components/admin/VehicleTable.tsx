@@ -69,13 +69,13 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
       {/* Toggle view mode */}
       <div className="flex items-center justify-between">
         <p className="text-xs text-zinc-500 dark:text-zinc-400">{vehicles.length} veículo{vehicles.length !== 1 ? 's' : ''}</p>
-        <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-lg">
+        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg">
           <button
             onClick={() => setViewMode('completo')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
               viewMode === 'completo'
-                ? 'bg-white text-zinc-900 shadow-xs'
-                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-300'
+                ? 'bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
             }`}
           >
             <LayoutList className="h-3.5 w-3.5" />
@@ -85,8 +85,8 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
             onClick={() => setViewMode('simples')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
               viewMode === 'simples'
-                ? 'bg-white text-zinc-900 shadow-xs'
-                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-300'
+                ? 'bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 shadow-xs'
+                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
             }`}
           >
             <LayoutGrid className="h-3.5 w-3.5" />
@@ -186,10 +186,10 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
           </div>
 
           {/* Desktop table */}
-          <div className="hidden md:block bg-white border border-zinc-200 dark:border-zinc-800/80 rounded-2xl overflow-hidden shadow-xs">
+          <div className="hidden md:block bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-xs">
             <Table>
-              <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50/50">
-                <TableRow className="text-xs">
+              <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50">
+                <TableRow className="text-xs border-zinc-200 dark:border-zinc-800">
                   <TableHead className="w-16">Foto</TableHead>
                   <TableHead>Veículo</TableHead>
                   <TableHead>SKU</TableHead>
@@ -199,15 +199,15 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-zinc-100 text-xs">
+              <TableBody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs">
                 {vehicles.map((vehicle) => (
-                  <TableRow key={vehicle.id} className="hover:bg-zinc-50 dark:bg-zinc-900/50/40">
+                  <TableRow key={vehicle.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800">
                     <TableCell>
-                      <div className="relative h-12 w-16 rounded-lg bg-zinc-100 overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                      <div className="relative h-12 w-16 rounded-lg bg-zinc-100 dark:bg-zinc-800 overflow-hidden border border-zinc-100 dark:border-zinc-800">
                         {vehicle.images?.[0] ? (
                           <Image src={vehicle.images[0]} alt={vehicle.title} fill className="object-cover" />
                         ) : (
-                          <div className="h-full flex items-center justify-center"><Car className="h-5 w-5 text-zinc-300" /></div>
+                          <div className="h-full flex items-center justify-center"><Car className="h-5 w-5 text-zinc-300 dark:text-zinc-600" /></div>
                         )}
                       </div>
                     </TableCell>
@@ -217,16 +217,16 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                     </TableCell>
                     <TableCell>
                       {vehicle.sku ? (
-                        <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                        <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">
                           #{vehicle.sku}
                         </span>
                       ) : (
-                        <span className="text-zinc-300">—</span>
+                        <span className="text-zinc-300 dark:text-zinc-600">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-zinc-600 dark:text-zinc-400">
                       <p className="font-medium">{vehicle.year}</p>
-                      <p className="text-[11px] text-zinc-400">{formatMileage(vehicle.mileage)}</p>
+                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{formatMileage(vehicle.mileage)}</p>
                     </TableCell>
                     <TableCell className="font-black text-zinc-900 dark:text-zinc-50">{formatCurrency(vehicle.price)}</TableCell>
                     <TableCell>
@@ -236,15 +236,15 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50" onClick={() => toggleActive(vehicle)}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50" onClick={() => toggleActive(vehicle)}>
                           {vehicle.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                         <Link href={`/${slug}/admin/estoque/${vehicle.id}`}>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-50">
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={() => deleteVehicle(vehicle.id)}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600 dark:hover:text-red-400" onClick={() => deleteVehicle(vehicle.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

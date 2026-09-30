@@ -70,7 +70,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
             </Button>
           ) : (
             <Link href={`/${slug}/admin/estoque/novo`}>
-              <Button className="gap-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold">
+              <Button className="gap-2 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-xl text-xs font-bold shadow-xs">
                 <Plus className="h-4 w-4" />Novo Veículo
               </Button>
             </Link>
