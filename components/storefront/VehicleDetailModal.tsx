@@ -93,7 +93,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
         onClick={onClose}
       >
         <div
-          className="bg-white w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
+          className="bg-white dark:bg-zinc-950 w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Photo with overlay */}
@@ -133,22 +133,22 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
 
             {/* Badges */}
             <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between">
-              <Badge className="bg-white/95 text-zinc-900 font-black text-xs shadow-md">
+              <Badge className="bg-white/95 dark:bg-zinc-900/95 text-zinc-900 dark:text-white font-black text-xs shadow-md">
                 {vehicle.brand}
               </Badge>
             </div>
           </div>
 
           {/* Scrollable content */}
-          <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-zinc-800">
+          <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-zinc-800 dark:text-zinc-200">
             <div>
               <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{vehicle.model}</span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-900 leading-snug">{vehicle.title}</h2>
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white leading-snug">{vehicle.title}</h2>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-xl sm:text-2xl font-black text-emerald-700">
+                <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-500">
                   Preço sob consulta
                 </span>
-                <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/30 px-2.5 py-0.5 rounded-full">
                   Direto no WhatsApp
                 </span>
               </div>
@@ -156,40 +156,40 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
 
             {/* Spec grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
                 <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
                   <Calendar className="h-3 w-3" /> Ano
                 </span>
-                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{vehicle.year}</span>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{vehicle.year}</span>
               </div>
 
-              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
                 <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
                   <Gauge className="h-3 w-3" /> Km
                 </span>
-                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{formatMileage(vehicle.mileage)}</span>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{formatMileage(vehicle.mileage)}</span>
               </div>
 
-              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
                 <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
                   <Cog className="h-3 w-3" /> Câmbio
                 </span>
-                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{vehicle.transmission || 'Automático'}</span>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{vehicle.transmission || 'Automático'}</span>
               </div>
 
-              <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl">
+              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
                 <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
                   <Fuel className="h-3 w-3" /> Combustível
                 </span>
-                <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate">{vehicle.fuel || 'Flex'}</span>
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{vehicle.fuel || 'Flex'}</span>
               </div>
 
               {vehicle.plate_end && (
-                <div className="bg-zinc-50 border border-zinc-100 p-2.5 rounded-xl col-span-2 sm:col-span-1">
+                <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl col-span-2 sm:col-span-1">
                   <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
                     Placa
                   </span>
-                  <span className="text-sm font-bold text-zinc-900 mt-0.5 block truncate font-mono">
+                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate font-mono">
                     Final {vehicle.plate_end}
                   </span>
                 </div>
@@ -199,13 +199,13 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             {/* Features */}
             {vehicle.features && vehicle.features.length > 0 && (
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-emerald-600" />
                   Opcionais & Equipamentos
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-zinc-600">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-zinc-600 dark:text-zinc-400">
                   {vehicle.features.map((feat) => (
-                    <div key={feat} className="flex items-center gap-2 bg-zinc-50 px-3 py-2 rounded-xl">
+                    <div key={feat} className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900/50 px-3 py-2 rounded-xl">
                       <Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
                       <span>{feat}</span>
                     </div>
@@ -217,21 +217,21 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             {/* Description */}
             {vehicle.description && (
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-wider mb-1.5">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-1.5">
                   Sobre este Veículo
                 </h4>
-                <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed whitespace-pre-line bg-zinc-50/50 p-3.5 rounded-xl border border-zinc-100">
+                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line bg-zinc-50/50 dark:bg-zinc-900/50 p-3.5 rounded-xl border border-zinc-100 dark:border-zinc-800">
                   {vehicle.description}
                 </p>
               </div>
             )}
 
             {/* Store info */}
-            <div className="space-y-2 pt-2 border-t border-zinc-100">
+            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               {store.address && (
                 <div className="text-xs text-zinc-500 flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-zinc-400 flex-shrink-0" />
-                  <span>Disponível para visitação em: <strong>{store.address}</strong></span>
+                  <span>Disponível para visitação em: <strong className="dark:text-zinc-300">{store.address}</strong></span>
                 </div>
               )}
               {store.opening_hours && (
@@ -244,10 +244,10 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           </div>
 
           {/* Fixed CTA footer */}
-          <div className="p-4 pt-3 pb-8 sm:p-4 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between gap-3 flex-shrink-0">
+          <div className="p-4 pt-3 pb-8 sm:p-4 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-3 flex-shrink-0">
             <div className="hidden sm:block">
               <span className="text-[10px] text-zinc-400 uppercase font-bold block">Interessado?</span>
-              <span className="text-xs text-zinc-600 font-medium">Escolha como prosseguir</span>
+              <span className="text-xs text-zinc-600 dark:text-zinc-300 font-medium">Escolha como prosseguir</span>
             </div>
 
             <Button
