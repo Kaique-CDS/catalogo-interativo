@@ -91,12 +91,6 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
         <link rel="stylesheet" href={fontGoogleUrl} />
       )}
 
-      {isDemoMode && (
-        <div className="bg-amber-500 text-white text-xs font-semibold py-2 px-4 text-center">
-          ⚡ Modo Local Ativo — Alterações são salvas apenas neste navegador.
-        </div>
-      )}
-
       <StoreHeader store={store} />
 
       {/* Hero Banner (se configurado) */}

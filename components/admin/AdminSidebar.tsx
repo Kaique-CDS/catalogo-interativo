@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useState } from 'react'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface Props {
   store: { id: string; name: string; slug: string }
@@ -52,6 +53,7 @@ export default function AdminSidebar({ store, slug }: Props) {
         </div>
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
+          <ThemeToggle />
           <Link href={`/${slug}`} target="_blank">
             <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800 gap-1 rounded-xl">
               <ExternalLink className="h-3.5 w-3.5" />
@@ -134,15 +136,18 @@ export default function AdminSidebar({ store, slug }: Props) {
               Ver vitrine da loja
             </Button>
           </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full gap-2 text-xs text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 dark:hover:bg-zinc-800/50 rounded-xl"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            Sair do Painel
-          </Button>
+          <div className="flex gap-2">
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1 gap-2 text-xs text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 dark:hover:bg-zinc-800/50 rounded-xl"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sair do Painel
+            </Button>
+          </div>
         </div>
       </aside>
     </>
