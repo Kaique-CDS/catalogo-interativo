@@ -20,8 +20,12 @@ const anton = Anton({
 })
 
 export const metadata: Metadata = {
-  title: 'Catalogo Interativo',
-  description: 'Catalogos digitais para lojas de veiculos',
+  title: 'Milhaticar - Certeza de bons negócios',
+  description: 'Catálogo digital de seminovos da Milhaticar',
+  icons: {
+    icon: '/logo-milhaticar.png',
+    apple: '/logo-milhaticar.png',
+  }
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

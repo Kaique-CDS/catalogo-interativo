@@ -117,9 +117,19 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
           {/* Coluna 1 — Marca */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 bg-brand rounded-[10px] flex items-center justify-center font-heading text-white text-2xl select-none">
-                M
-              </div>
+              {store.logo_url ? (
+                <Image
+                  src={store.logo_url}
+                  alt={store.name}
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 object-contain flex-shrink-0"
+                />
+              ) : (
+                <div className="h-10 w-10 bg-brand rounded-[10px] flex items-center justify-center font-heading text-white text-2xl select-none">
+                  {store.name.charAt(0).toUpperCase()}
+                </div>
+              )}
               <span className="font-heading text-white text-xl uppercase tracking-wide">{store.name}</span>
             </div>
             {store.slogan && <p className="text-muted-foreground text-sm mb-4">{store.slogan}</p>}
