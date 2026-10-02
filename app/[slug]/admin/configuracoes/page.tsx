@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import StoreSettingsForm from '@/components/admin/StoreSettingsForm'
 import type { Store } from '@/lib/supabase/types'
 
@@ -32,8 +32,8 @@ export default async function ConfiguracoesPage({ params }: { params: Promise<{ 
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-900 mb-1">Configurações da Loja</h1>
-      <p className="text-zinc-500 mb-6 text-xs">Personalize o tema visual, cores, fontes, WhatsApp e dados da concessionária.</p>
+      <h1 className="text-2xl sm:text-3xl font-heading text-white mb-2 uppercase tracking-wide">Configurações da Loja</h1>
+      <p className="text-muted-foreground mb-8 text-sm">Personalize o tema visual, cores, fontes, WhatsApp e dados da concessionária.</p>
       <StoreSettingsForm store={store} slug={slug} />
     </div>
   )

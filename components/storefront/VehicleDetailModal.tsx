@@ -89,11 +89,11 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
     <>
       {/* Main Detail Modal */}
       <div
-        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto animate-in fade-in-0 duration-200"
+        className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto animate-in fade-in-0 duration-200"
         onClick={onClose}
       >
         <div
-          className="bg-white dark:bg-zinc-950 w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
+          className="bg-surface-0 border border-surface w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Photo with overlay */}
@@ -140,56 +140,56 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           </div>
 
           {/* Scrollable content */}
-          <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-zinc-800 dark:text-zinc-200">
+          <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-zinc-800 dark:text-zinc-200">
             <div>
-              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{vehicle.model}</span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white leading-snug">{vehicle.title}</h2>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-500">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{vehicle.model}</span>
+              <h2 className="font-heading text-xl sm:text-2xl text-zinc-900 dark:text-white uppercase leading-snug tracking-wide">{vehicle.brand} {vehicle.title.replace(`${vehicle.brand} `, '')}</h2>
+              <div className="flex items-center gap-3 mt-3">
+                <span className="font-heading text-2xl sm:text-3xl text-zinc-900 dark:text-white">
                   Preço sob consulta
                 </span>
-                <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/30 px-2.5 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-muted-foreground bg-surface-1 border border-surface px-2.5 py-1 rounded-md uppercase tracking-wider">
                   Direto no WhatsApp
                 </span>
               </div>
             </div>
 
             {/* Spec grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
-                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
-                  <Calendar className="h-3 w-3" /> Ano
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              <div className="bg-surface-1 border border-surface p-3 rounded-xl flex flex-col justify-center h-[76px]">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
+                  <Calendar className="h-3.5 w-3.5 text-brand" /> Ano
                 </span>
-                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{vehicle.year}</span>
+                <span className="text-sm font-bold text-white block">{vehicle.year}</span>
               </div>
 
-              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
-                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
-                  <Gauge className="h-3 w-3" /> Km
+              <div className="bg-surface-1 border border-surface p-3 rounded-xl flex flex-col justify-center h-[76px]">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
+                  <Gauge className="h-3.5 w-3.5 text-brand" /> Km
                 </span>
-                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{formatMileage(vehicle.mileage)}</span>
+                <span className="text-sm font-bold text-white block">{formatMileage(vehicle.mileage)}</span>
               </div>
 
-              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
-                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
-                  <Cog className="h-3 w-3" /> Câmbio
+              <div className="bg-surface-1 border border-surface p-3 rounded-xl flex flex-col justify-center h-[76px]">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
+                  <Cog className="h-3.5 w-3.5 text-brand" /> Câmbio
                 </span>
-                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{vehicle.transmission || 'Automático'}</span>
+                <span className="text-[13px] font-bold text-white block leading-tight">{vehicle.transmission || 'Automático'}</span>
               </div>
 
-              <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl">
-                <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
-                  <Fuel className="h-3 w-3" /> Combustível
+              <div className="bg-surface-1 border border-surface p-3 rounded-xl flex flex-col justify-center h-[76px]">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
+                  <Fuel className="h-3.5 w-3.5 text-brand" /> Combustível
                 </span>
-                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate">{vehicle.fuel || 'Flex'}</span>
+                <span className="text-[13px] font-bold text-white block leading-tight">{vehicle.fuel || 'Flex'}</span>
               </div>
 
               {vehicle.plate_end && (
-                <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-2.5 rounded-xl col-span-2 sm:col-span-1">
-                  <span className="text-[10px] text-zinc-400 uppercase font-bold flex items-center gap-1">
+                <div className="bg-surface-1 border border-surface p-3 rounded-xl col-span-2 sm:col-span-1 flex flex-col justify-center h-[76px]">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
                     Placa
                   </span>
-                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 block truncate font-mono">
+                  <span className="text-sm font-bold text-white block font-mono">
                     Final {vehicle.plate_end}
                   </span>
                 </div>
@@ -199,15 +199,15 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             {/* Features */}
             {vehicle.features && vehicle.features.length > 0 && (
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4 text-brand" />
                   Opcionais & Equipamentos
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-zinc-300">
                   {vehicle.features.map((feat) => (
-                    <div key={feat} className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900/50 px-3 py-2 rounded-xl">
-                      <Check className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
-                      <span>{feat}</span>
+                    <div key={feat} className="flex items-center gap-2.5 bg-surface-1 border border-surface/50 px-3 py-2.5 rounded-xl">
+                      <Check className="h-4 w-4 text-brand flex-shrink-0" />
+                      <span className="font-medium">{feat}</span>
                     </div>
                   ))}
                 </div>
@@ -217,26 +217,26 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             {/* Description */}
             {vehicle.description && (
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-1.5">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">
                   Sobre este Veículo
                 </h4>
-                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line bg-zinc-50/50 dark:bg-zinc-900/50 p-3.5 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line bg-surface-1 p-4 rounded-xl border border-surface">
                   {vehicle.description}
                 </p>
               </div>
             )}
 
             {/* Store info */}
-            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="space-y-3 pt-3 border-t border-surface">
               {store.address && (
-                <div className="text-xs text-zinc-500 flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-zinc-400 flex-shrink-0" />
-                  <span>Disponível para visitação em: <strong className="dark:text-zinc-300">{store.address}</strong></span>
+                <div className="text-xs text-muted-foreground flex items-center gap-2.5">
+                  <MapPin className="h-4 w-4 text-brand flex-shrink-0" />
+                  <span>Disponível para visitação em: <strong className="text-white">{store.address}</strong></span>
                 </div>
               )}
               {store.opening_hours && (
-                <div className="text-xs text-zinc-500 flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-zinc-400 flex-shrink-0" />
+                <div className="text-xs text-muted-foreground flex items-center gap-2.5">
+                  <Clock className="h-4 w-4 text-brand flex-shrink-0" />
                   <span>{store.opening_hours}</span>
                 </div>
               )}
@@ -244,15 +244,15 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           </div>
 
           {/* Fixed CTA footer */}
-          <div className="p-4 pt-3 pb-8 sm:p-4 bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-3 flex-shrink-0">
+          <div className="p-4 sm:p-5 bg-surface-1 border-t border-surface flex items-center justify-between gap-4 flex-shrink-0">
             <div className="hidden sm:block">
-              <span className="text-[10px] text-zinc-400 uppercase font-bold block">Interessado?</span>
-              <span className="text-xs text-zinc-600 dark:text-zinc-300 font-medium">Escolha como prosseguir</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold block mb-0.5">Interessado?</span>
+              <span className="text-sm text-white font-medium">Escolha como prosseguir</span>
             </div>
 
             <Button
               onClick={() => setStep('interest')}
-              className="w-full sm:w-auto flex-1 sm:flex-none px-6 h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-base shadow-md gap-2 active:scale-98 transition-transform"
+              className="w-full sm:w-auto flex-1 sm:flex-none px-8 h-12 bg-brand hover:bg-brand/90 text-white rounded-[10px] font-bold text-base gap-2 transition-colors"
             >
               Tenho Interesse
               <ChevronDown className="h-4 w-4" />

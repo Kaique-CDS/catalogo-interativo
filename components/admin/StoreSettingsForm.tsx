@@ -112,38 +112,39 @@ export default function StoreSettingsForm({ store, slug }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl">
       {/* Vitrine URL */}
-      <Card className="border-blue-100 bg-blue-50">
+      <Card className="border-surface bg-surface-1">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-2 text-sm font-medium text-blue-800 mb-1">
-            <Globe className="h-4 w-4" />URL da sua vitrine
+          <div className="flex items-center gap-2 text-sm font-medium text-white mb-1.5">
+            <Globe className="h-4 w-4 text-brand" />URL da sua vitrine
           </div>
-          <p className="text-sm text-blue-600 font-mono">{storefrontUrl}</p>
+          <p className="text-sm text-brand font-mono font-medium opacity-90">{storefrontUrl}</p>
         </CardContent>
       </Card>
+
       {/* 2. Logo e Banner de Capa */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-            <ImageIcon className="h-4 w-4 text-blue-600" /> Imagens da Loja
+      <Card className="border-surface bg-surface-1">
+        <CardHeader className="pb-3 border-b border-surface">
+          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+            <ImageIcon className="h-4 w-4 text-brand" /> Imagens da Loja
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-5 pt-5">
           {/* Logo */}
           <div>
-            <Label className="mb-2 block text-xs font-bold text-zinc-700 dark:text-zinc-300">Logo da loja</Label>
+            <Label className="mb-2 block text-xs font-bold text-muted-foreground uppercase tracking-wider">Logo da loja</Label>
             <div className="flex items-center gap-4">
               {logoUrl ? (
-                <div className="h-16 w-16 rounded-xl border bg-zinc-50 overflow-hidden flex-shrink-0">
+                <div className="h-16 w-16 rounded-xl border border-surface bg-surface-2 overflow-hidden flex-shrink-0">
                   <Image src={logoUrl} alt="Logo" width={64} height={64} className="h-full w-full object-contain p-1" />
                 </div>
               ) : (
-                <div className="h-16 w-16 rounded-xl border bg-zinc-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xl font-bold text-zinc-400">{store.name.charAt(0)}</span>
+                <div className="h-16 w-16 rounded-xl border border-surface bg-surface-2 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xl font-bold text-muted-foreground">{store.name.charAt(0)}</span>
                 </div>
               )}
               <label className="cursor-pointer">
-                <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border rounded-xl hover:bg-zinc-50 transition-colors">
-                  {uploadingLogo ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Enviando...</> : <><Upload className="h-3.5 w-3.5" />Trocar logo</>}
+                <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border border-surface rounded-xl hover:bg-surface-2 transition-colors text-white bg-surface-1">
+                  {uploadingLogo ? <><Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />Enviando...</> : <><Upload className="h-3.5 w-3.5 text-brand" />Trocar logo</>}
                 </div>
                 <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
               </label>
@@ -151,89 +152,93 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           </div>
 
           {/* Banner de Capa */}
-          <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Label className="mb-2 block text-xs font-bold text-zinc-700 dark:text-zinc-300">Banner de Capa (Opcional)</Label>
+          <div className="pt-4 border-t border-surface">
+            <Label className="mb-2 block text-xs font-bold text-muted-foreground uppercase tracking-wider">Banner de Capa (Opcional)</Label>
             {bannerUrl && (
-              <div className="relative aspect-[21/9] sm:aspect-[24/6] rounded-xl overflow-hidden mb-3 border bg-zinc-100 dark:bg-zinc-800">
+              <div className="relative aspect-[21/9] sm:aspect-[24/6] rounded-xl overflow-hidden mb-3 border border-surface bg-surface-2">
                 <Image src={bannerUrl} alt="Banner" fill className="object-cover" />
               </div>
             )}
             <label className="cursor-pointer">
-              <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border rounded-xl hover:bg-zinc-50 transition-colors">
-                {uploadingBanner ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Enviando...</> : <><Upload className="h-3.5 w-3.5" />{bannerUrl ? 'Trocar banner' : 'Enviar banner de capa'}</>}
+              <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border border-surface rounded-xl hover:bg-surface-2 transition-colors text-white bg-surface-1">
+                {uploadingBanner ? <><Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />Enviando...</> : <><Upload className="h-3.5 w-3.5 text-brand" />{bannerUrl ? 'Trocar banner' : 'Enviar banner de capa'}</>}
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
             </label>
-            <p className="text-[11px] text-zinc-400 mt-1">Recomendado: 1200x300px. Fica no topo da vitrine.</p>
+            <p className="text-[11px] text-muted-foreground mt-1.5">Recomendado: 2560x1097px. Fica no topo da vitrine.</p>
           </div>
         </CardContent>
       </Card>
 
       {/* 3. Informações Básicas & Contato */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Informações da Loja</CardTitle>
+      <Card className="border-surface bg-surface-1">
+        <CardHeader className="pb-3 border-b border-surface">
+          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+             <Globe className="h-4 w-4 text-brand" /> Informações da Loja
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-5">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Nome da loja *</Label>
-            <Input id="name" {...register('name')} />
-            {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            <Label htmlFor="name" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nome da loja *</Label>
+            <Input id="name" {...register('name')} className="bg-surface-2 border-surface text-white focus-visible:ring-brand" />
+            {errors.name && <p className="text-xs text-brand">{errors.name.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="slogan" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Slogan / Frase de Destaque da Loja
+            <Label htmlFor="slogan" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              Slogan / Frase de Destaque
             </Label>
             <Input
               id="slogan"
               placeholder="Ex: Os melhores seminovos com laudo aprovado e procedência garantida."
               {...register('slogan')}
+              className="bg-surface-2 border-surface text-white focus-visible:ring-brand"
             />
-            <p className="text-[11px] text-zinc-400">Aparece em destaque no cabeçalho da sua vitrine.</p>
+            <p className="text-[11px] text-muted-foreground">Aparece em destaque no cabeçalho da sua vitrine.</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="address">Endereço físico</Label>
-            <Input id="address" placeholder="Av. das Nações, 1500 - São Paulo, SP" {...register('address')} />
+            <Label htmlFor="address" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Endereço físico</Label>
+            <Input id="address" placeholder="Av. das Nações, 1500 - São Paulo, SP" {...register('address')} className="bg-surface-2 border-surface text-white focus-visible:ring-brand" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="opening_hours" className="flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-zinc-400" />
+            <Label htmlFor="opening_hours" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               Horário de Funcionamento
             </Label>
             <Input
               id="opening_hours"
               placeholder="Ex: Seg a Sex: 09h às 18h | Sáb: 09h às 13h"
               {...register('opening_hours')}
+              className="bg-surface-2 border-surface text-white focus-visible:ring-brand"
             />
-            <p className="text-xs text-zinc-400">Aparece no rodapé da vitrine e no modal do veículo.</p>
+            <p className="text-[11px] text-muted-foreground">Aparece no rodapé da vitrine e no modal do veículo.</p>
           </div>
         </CardContent>
       </Card>
 
       {/* 4. WhatsApp por Setor */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold text-zinc-700 flex items-center gap-2">
-            <Phone className="h-4 w-4" /> WhatsApp por Setor
+      <Card className="border-surface bg-surface-1">
+        <CardHeader className="pb-3 border-b border-surface">
+          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+            <Phone className="h-4 w-4 text-brand" /> WhatsApp por Setor
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-5">
           <div className="space-y-1.5">
-            <Label htmlFor="whatsapp">WhatsApp — Vendas * <span className="text-[10px] text-zinc-400">(número principal)</span></Label>
-            <Input id="whatsapp" placeholder="5511993270543" {...register('whatsapp')} />
-            <p className="text-xs text-zinc-400">Somente números com DDI (ex: 5511993270543)</p>
-            {errors.whatsapp && <p className="text-xs text-red-500">{errors.whatsapp.message}</p>}
+            <Label htmlFor="whatsapp" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">WhatsApp — Vendas * <span className="text-[10px] opacity-70">(número principal)</span></Label>
+            <Input id="whatsapp" placeholder="5511993270543" {...register('whatsapp')} className="bg-surface-2 border-surface text-white focus-visible:ring-brand" />
+            <p className="text-[11px] text-muted-foreground">Somente números com DDI (ex: 5511993270543)</p>
+            {errors.whatsapp && <p className="text-xs text-brand">{errors.whatsapp.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="whatsapp_financeiro">
-              WhatsApp — Financeiro <span className="text-[10px] text-zinc-400">(opcional)</span>
+            <Label htmlFor="whatsapp_financeiro" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              WhatsApp — Financeiro <span className="text-[10px] opacity-70">(opcional)</span>
             </Label>
             <Input
               id="whatsapp_financeiro"
               placeholder="5511993270543"
               {...register('whatsapp_financeiro')}
+              className="bg-surface-2 border-surface text-white focus-visible:ring-brand"
             />
-            <p className="text-xs text-zinc-400">
+            <p className="text-[11px] text-muted-foreground">
               Clientes que solicitam simulação de financiamento serão direcionados para este número.
               Se não preenchido, usará o número de Vendas.
             </p>
@@ -241,8 +246,8 @@ export default function StoreSettingsForm({ store, slug }: Props) {
         </CardContent>
       </Card>
 
-      <Button type="submit" disabled={saving} className="gap-2 px-8 h-11 rounded-xl font-bold bg-zinc-900 hover:bg-zinc-800 text-white">
-        {saving && <Loader2 className="h-4 w-4 animate-spin" />}Salvar Configurações
+      <Button type="submit" disabled={saving} className="btn-brand gap-2 px-8 h-12 rounded-xl text-sm w-full sm:w-auto">
+        {saving && <Loader2 className="h-4 w-4 animate-spin" />} Salvar Configurações
       </Button>
     </form>
   )

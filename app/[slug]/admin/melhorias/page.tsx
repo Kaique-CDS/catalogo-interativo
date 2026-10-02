@@ -22,10 +22,10 @@ const categoryConfig: Record<
   Note['category'],
   { label: string; className: string; icon: React.ElementType }
 > = {
-  Urgente:  { label: 'Urgente',  className: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400',   icon: AlertCircle },
-  Melhoria: { label: 'Melhoria', className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400', icon: Wrench },
-  Ideia:    { label: 'Ideia',    className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',  icon: Lightbulb },
-  Bug:      { label: 'Bug',      className: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',         icon: Bug },
+  Urgente:  { label: 'Urgente',  className: 'bg-surface-2 text-muted-foreground', icon: AlertCircle },
+  Melhoria: { label: 'Melhoria', className: 'bg-surface-2 text-muted-foreground', icon: Wrench },
+  Ideia:    { label: 'Ideia',    className: 'bg-surface-2 text-muted-foreground', icon: Lightbulb },
+  Bug:      { label: 'Bug',      className: 'bg-surface-2 text-muted-foreground', icon: Bug },
 }
 
 function formatDate(iso: string) {
@@ -92,17 +92,17 @@ export default function MelhoriasPage() {
     <div className="space-y-6 pb-24 md:pb-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-heading text-white uppercase tracking-wide">
           Melhorias &amp; Anotações Internas
         </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Registre pendências, ideias e atualizações do seu catálogo.
         </p>
       </div>
 
       {/* Add Note Form */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xs">
-        <h2 className="text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-4">Nova anotação</h2>
+      <div className="bg-surface-1 border border-surface rounded-xl p-4 sm:p-6 shadow-xs">
+        <h2 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Nova anotação</h2>
         <form onSubmit={handleAdd} className="space-y-3">
           {/* Category select */}
           <div className="flex flex-wrap gap-2">
@@ -116,8 +116,8 @@ export default function MelhoriasPage() {
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all',
                     category === cat
-                      ? cn(cfg.className, 'border-transparent ring-2 ring-offset-1 ring-zinc-400/40')
-                      : 'border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                      ? 'border-brand bg-brand text-white'
+                      : 'border-surface text-muted-foreground bg-surface-2 hover:bg-surface-3'
                   )}
                 >
                   <cfg.icon className="h-3.5 w-3.5" />
@@ -132,7 +132,7 @@ export default function MelhoriasPage() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Título da anotação *"
             required
-            className="bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 rounded-xl text-sm"
+            className="input-brand text-sm"
           />
 
           <Textarea
@@ -140,13 +140,13 @@ export default function MelhoriasPage() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descrição ou detalhes (opcional)"
             rows={3}
-            className="bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 rounded-xl text-sm resize-none"
+            className="input-brand text-sm resize-none"
           />
 
           <Button
             type="submit"
             disabled={isSubmitting || !title.trim()}
-            className="w-full sm:w-auto gap-2 rounded-xl bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-200 text-sm font-semibold"
+            className="w-full sm:w-auto btn-brand gap-2 rounded-xl text-sm font-semibold h-11 px-6"
           >
             <Plus className="h-4 w-4" />
             Adicionar anotação
@@ -157,12 +157,12 @@ export default function MelhoriasPage() {
       {/* Notes List */}
       <div className="space-y-3">
         {notes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs">
-            <div className="h-14 w-14 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-4">
-              <Lightbulb className="h-7 w-7 text-amber-500" />
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-surface-1 border border-surface rounded-xl shadow-xs">
+            <div className="h-14 w-14 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-4">
+              <Lightbulb className="h-7 w-7 text-brand" />
             </div>
-            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Nenhuma anotação ainda</p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-xs">
+            <p className="text-sm font-bold text-white">Nenhuma anotação ainda</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-xs">
               Use o formulário acima para registrar ideias, melhorias ou pendências do seu catálogo.
             </p>
           </div>
@@ -173,28 +173,28 @@ export default function MelhoriasPage() {
             return (
               <div
                 key={note.id}
-                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-5 shadow-xs flex gap-4 group"
+                className="bg-surface-1 border border-surface rounded-xl p-4 sm:p-5 shadow-xs flex gap-4 group hover:bg-surface-2 transition-colors"
               >
                 <div className="flex-1 min-w-0 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={cn(
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold',
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider font-bold border border-surface',
                         cfg.className
                       )}
                     >
                       <Icon className="h-3 w-3" />
                       {cfg.label}
                     </span>
-                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                    <span className="text-[11px] text-muted-foreground font-medium">
                       {formatDate(note.createdAt)}
                     </span>
                   </div>
-                  <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 truncate">
+                  <p className="text-sm font-bold text-white truncate">
                     {note.title}
                   </p>
                   {note.description && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
                       {note.description}
                     </p>
                   )}
@@ -203,7 +203,7 @@ export default function MelhoriasPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(note.id)}
-                  className="h-8 w-8 flex-shrink-0 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-white hover:bg-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                   title="Excluir anotação"
                 >
                   <Trash2 className="h-4 w-4" />

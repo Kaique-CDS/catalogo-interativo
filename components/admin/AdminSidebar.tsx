@@ -41,21 +41,20 @@ export default function AdminSidebar({ store, slug }: Props) {
   return (
     <>
       {/* 1. Top Bar Mobile (Sticky) */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-zinc-900 text-white fixed top-0 left-0 right-0 z-40 shadow-md">
+      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-surface-1 text-white fixed top-0 left-0 right-0 z-40 border-b border-surface">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+          <div className="h-8 w-8 rounded-xl bg-brand flex items-center justify-center text-white font-bold flex-shrink-0">
             <Car className="h-4 w-4" />
           </div>
           <div className="min-w-0">
             <p className="font-bold text-xs leading-tight truncate">{store.name}</p>
-            <span className="text-[10px] text-zinc-400 font-medium">Painel Administrativo</span>
+            <span className="text-[10px] text-muted-foreground font-medium">Painel Administrativo</span>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <ThemeToggle />
           <Link href={`/${slug}`} target="_blank">
-            <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800 gap-1 rounded-xl">
+            <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-muted-foreground hover:text-white hover:bg-surface-2 gap-1 rounded-xl">
               <ExternalLink className="h-3.5 w-3.5" />
               <span className="text-[11px] font-semibold">Vitrine</span>
             </Button>
@@ -64,7 +63,7 @@ export default function AdminSidebar({ store, slug }: Props) {
             size="sm"
             variant="ghost"
             onClick={handleLogout}
-            className="h-8 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/40 rounded-xl"
+            className="h-8 px-2 text-xs text-red-500 hover:text-red-400 hover:bg-red-950/40 rounded-xl"
             title="Sair"
           >
             <LogOut className="h-4 w-4" />
@@ -73,7 +72,7 @@ export default function AdminSidebar({ store, slug }: Props) {
       </header>
 
       {/* 2. Bottom Nav Mobile (Fixed Bottom) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800/80 py-2 px-4 z-40 flex justify-around items-center shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface py-2 px-4 z-40 flex justify-around items-center shadow-2xl">
         {items.map((item) => {
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           return (
@@ -83,11 +82,11 @@ export default function AdminSidebar({ store, slug }: Props) {
               className={cn(
                 'flex flex-col items-center gap-1 py-1 px-4 rounded-xl transition-all',
                 isActive
-                  ? 'text-zinc-950 font-bold bg-zinc-100 dark:bg-zinc-800'
-                  : 'text-zinc-500 hover:text-zinc-900 font-medium'
+                  ? 'text-white font-bold'
+                  : 'text-muted-foreground hover:text-white font-medium'
               )}
             >
-              <item.icon className={cn('h-5 w-5', isActive ? 'text-zinc-950 stroke-[2.5]' : 'text-zinc-400')} />
+              <item.icon className={cn('h-5 w-5', isActive ? 'text-brand' : 'text-muted-foreground')} />
               <span className="text-[11px]">{item.label}</span>
             </Link>
           )
@@ -95,16 +94,16 @@ export default function AdminSidebar({ store, slug }: Props) {
       </nav>
 
       {/* 3. Sidebar Desktop Clássica */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800/80 flex-col justify-between shadow-xs">
+      <aside className="hidden md:flex w-64 flex-shrink-0 bg-surface-1 border-r border-surface flex-col justify-between">
         <div>
-          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
-            <div className="flex items-center gap-2.5 font-black text-lg text-zinc-900 dark:text-zinc-50">
-              <div className="h-9 w-9 rounded-xl bg-zinc-900 dark:bg-zinc-800 text-white flex items-center justify-center shadow-xs">
-                <Car className="h-5 w-5 text-emerald-400" />
+          <div className="p-6 border-b border-surface">
+            <div className="flex items-center gap-2.5 font-heading uppercase text-lg text-white tracking-wide">
+              <div className="h-9 w-9 rounded-xl bg-brand text-white flex items-center justify-center shadow-xs">
+                <Car className="h-5 w-5" />
               </div>
               AutoCatálogo
             </div>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 truncate font-medium">{store.name}</p>
+            <p className="text-xs text-muted-foreground mt-2 truncate font-medium">{store.name}</p>
           </div>
 
           <nav className="p-4 space-y-1.5">
@@ -115,10 +114,10 @@ export default function AdminSidebar({ store, slug }: Props) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all',
+                    'flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all relative',
                     isActive
-                      ? 'bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 shadow-xs'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
+                      ? 'bg-brand text-white'
+                      : 'text-muted-foreground hover:bg-surface-2 hover:text-white'
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -129,22 +128,21 @@ export default function AdminSidebar({ store, slug }: Props) {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 space-y-2">
+        <div className="p-4 border-t border-surface space-y-2">
           <Link href={`/${slug}`} target="_blank">
-            <Button variant="outline" size="sm" className="w-full gap-2 text-xs rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800">
-              <ExternalLink className="h-3.5 w-3.5" />
+            <Button variant="outline" size="sm" className="w-full gap-2 text-xs rounded-[10px] font-semibold border-brand text-white hover:bg-brand/10 hover:text-white transition-colors">
+              <ExternalLink className="h-3.5 w-3.5 text-brand" />
               Ver vitrine da loja
             </Button>
           </Link>
           <div className="flex gap-2">
-            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
-              className="flex-1 gap-2 text-xs text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 dark:hover:bg-zinc-800/50 rounded-xl"
+              className="flex-1 gap-2 text-xs text-muted-foreground hover:text-white hover:bg-surface-2 rounded-[10px]"
               onClick={handleLogout}
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-3.5 w-3.5 text-red-500" />
               Sair do Painel
             </Button>
           </div>

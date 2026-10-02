@@ -75,10 +75,10 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
               <button
                 key={b}
                 onClick={() => handleBrandClick(b)}
-                className={`snap-center shrink-0 h-12 w-16 sm:h-14 sm:w-20 rounded-xl flex items-center justify-center border p-2 transition-all duration-150
+                className={`snap-center shrink-0 min-h-[44px] h-12 w-16 sm:h-14 sm:w-20 rounded-xl flex items-center justify-center border p-2 transition-all duration-150
                   ${isActive
-                    ? 'chip-active shadow-[0_0_0_2px_var(--brand-red)]'
-                    : 'bg-surface-2 border-surface text-muted-foreground hover:border-white/20'
+                    ? 'bg-brand border-brand shadow-[0_0_0_2px_var(--brand-red)]'
+                    : 'bg-surface-2 border-surface text-muted-foreground hover:border-white/30 hover:bg-surface-3'
                   }`}
                 title={b}
               >
@@ -87,7 +87,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
                   <img
                     src={logo}
                     alt={b}
-                    className={`w-full h-full object-contain transition-all ${isActive ? 'brightness-0 invert' : 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100'}`}
+                    className={`w-full h-full object-contain transition-all brightness-0 invert ${isActive ? 'opacity-100' : 'opacity-70 hover:opacity-100'}`}
                   />
                 ) : (
                   <span className={`font-bold text-[10px] sm:text-xs truncate w-full text-center ${isActive ? 'text-white' : ''}`}>
@@ -107,21 +107,20 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               placeholder="Buscar modelo, versão, ano..."
-              className="input-brand w-full pl-10 pr-3 h-11 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 border border-surface"
+              className="w-full pl-10 pr-3 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand border border-surface rounded-[10px] bg-surface-1 text-white placeholder:text-muted-foreground transition-all"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-              style={{ borderRadius: '10px', backgroundColor: 'var(--brand-surface-2)', color: '#fff' }}
             />
           </div>
 
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`h-11 px-3 rounded-[10px] border font-semibold text-sm flex items-center gap-1.5 flex-shrink-0 transition-colors
+            className={`h-12 px-4 rounded-[10px] border font-semibold text-sm flex items-center gap-2 flex-shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-brand
               ${showAdvanced || hasFilters
                 ? 'border-brand text-brand bg-brand/10'
-                : 'border-surface text-muted-foreground hover:border-white/20 hover:text-white'
+                : 'border-surface text-muted-foreground hover:border-white/30 hover:text-white bg-surface-1'
               }`}
           >
             <SlidersHorizontal className="h-4 w-4" />
@@ -133,7 +132,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="h-11 px-3 rounded-[10px] border border-surface text-muted-foreground hover:text-brand hover:border-brand transition-colors flex items-center gap-1"
+              className="h-12 px-3 rounded-[10px] border border-surface text-muted-foreground hover:text-brand hover:border-brand transition-colors flex items-center gap-1 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-brand"
             >
               <X className="h-4 w-4" />
               <span className="hidden sm:inline text-sm">Limpar</span>

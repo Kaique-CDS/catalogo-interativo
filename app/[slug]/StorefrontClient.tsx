@@ -11,6 +11,7 @@ import { isBusinessOpen, getNextOpenInfo, CONCESSIONARIA_HOURS } from '@/lib/bus
 import { getVehicles } from '@/lib/vehicles'
 import type { Store, Vehicle } from '@/lib/supabase/types'
 import { ShieldCheck, BadgeCheck, BadgePercent, Car } from 'lucide-react'
+import BrandBanner from '@/components/storefront/BrandBanner'
 
 interface StorefrontClientProps {
   slug: string
@@ -93,58 +94,13 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
 
       <StoreHeader store={store} />
 
-      {/* ── Hero Banner (se configurado) ── */}
-      {store.banner_url && (
-        <div className="container mx-auto px-3 sm:px-4 pt-4 max-w-7xl">
-          <div className="relative aspect-[21/9] sm:aspect-[24/5] w-full rounded-xl overflow-hidden border border-surface">
-            <Image src={store.banner_url} alt={store.name} fill className="object-cover" priority />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-4 sm:p-8">
-              <h2 className="font-heading text-white text-2xl sm:text-5xl uppercase tracking-wide">{store.name}</h2>
-              {store.slogan && <p className="text-sm sm:text-base text-white/70 mt-1">{store.slogan}</p>}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Hero título quando NÃO tem banner ── */}
-      {!store.banner_url && (
-        <section className="container mx-auto px-3 sm:px-6 pt-8 sm:pt-12 max-w-7xl">
-          <h2 className="font-heading text-white text-3xl sm:text-5xl uppercase leading-none tracking-wide">
-            Estoque{' '}
-            <span className="text-brand">Disponível</span>
-          </h2>
-          {store.slogan && (
-            <p className="text-muted-foreground text-sm sm:text-base mt-2 max-w-xl">{store.slogan}</p>
-          )}
-        </section>
-      )}
-
-      {/* ── Trust Bar ── */}
-      <section className="container mx-auto px-3 sm:px-6 mt-6 max-w-7xl">
-        <div className="bg-surface-1 border border-surface rounded-xl px-2 py-3 sm:py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between divide-y sm:divide-y-0 sm:divide-x divide-white/5">
-            {[
-              { title: 'Laudo 100% Aprovado', desc: 'Procedência garantida', icon: ShieldCheck },
-              { title: 'Garantia de 1 Ano',   desc: 'Motor e câmbio',        icon: BadgeCheck  },
-              { title: 'Taxas Imbatíveis',    desc: 'Financiamento fácil',   icon: BadgePercent},
-              { title: 'Avaliação Justa',     desc: 'Super valorização',     icon: Car         },
-            ].map((item, idx) => (
-              <div key={idx} className="flex-1 w-full flex items-center gap-3 px-4 py-2 sm:py-0 sm:px-5">
-                <div className="h-8 w-8 rounded-full bg-brand/10 flex items-center justify-center text-brand shrink-0">
-                  <item.icon className="h-4 w-4" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[11px] sm:text-xs text-white leading-none">{item.title}</h4>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* ── Brand Banner ── */}
+      <section className="container mx-auto px-3 sm:px-4 mt-6 max-w-7xl">
+        <BrandBanner altText={`Bem-vindo à ${store.name}`} />
       </section>
 
       {/* ── Grid Principal ── */}
-      <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-10 max-w-7xl">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-7xl">
         <VehicleGrid
           vehicles={vehicles}
           store={store}
