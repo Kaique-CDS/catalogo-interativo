@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface Props {
-  store: { id: string; name: string; slug: string }
+  store: { id: string; name: string; slug: string; logo_url?: string | null }
   slug: string
 }
 
@@ -43,9 +43,17 @@ export default function AdminSidebar({ store, slug }: Props) {
       {/* 1. Top Bar Mobile (Sticky) */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 bg-surface-1 text-white fixed top-0 left-0 right-0 z-40 border-b border-surface">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 rounded-xl bg-brand flex items-center justify-center text-white font-bold flex-shrink-0">
-            <Car className="h-4 w-4" />
-          </div>
+          {store.logo_url ? (
+            <img
+              src={store.logo_url}
+              alt={store.name}
+              className="h-8 w-8 object-contain flex-shrink-0"
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-xl bg-brand flex items-center justify-center text-white font-bold flex-shrink-0">
+              <Car className="h-4 w-4" />
+            </div>
+          )}
           <div className="min-w-0">
             <p className="font-bold text-xs leading-tight truncate">{store.name}</p>
             <span className="text-[10px] text-muted-foreground font-medium">Painel Administrativo</span>
@@ -97,13 +105,23 @@ export default function AdminSidebar({ store, slug }: Props) {
       <aside className="hidden md:flex w-64 flex-shrink-0 bg-surface-1 border-r border-surface flex-col justify-between">
         <div>
           <div className="p-6 border-b border-surface">
-            <div className="flex items-center gap-2.5 font-heading uppercase text-lg text-white tracking-wide">
-              <div className="h-9 w-9 rounded-xl bg-brand text-white flex items-center justify-center shadow-xs">
-                <Car className="h-5 w-5" />
+            <div className="flex items-center gap-3 mb-2">
+              {store.logo_url ? (
+                <img
+                  src={store.logo_url}
+                  alt={store.name}
+                  className="h-10 w-10 object-contain flex-shrink-0"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center shadow-xs">
+                  <Car className="h-5 w-5" />
+                </div>
+              )}
+              <div className="font-heading uppercase text-lg text-white tracking-wide truncate">
+                {store.name}
               </div>
-              AutoCatálogo
             </div>
-            <p className="text-xs text-muted-foreground mt-2 truncate font-medium">{store.name}</p>
+            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Painel Administrativo</p>
           </div>
 
           <nav className="p-4 space-y-1.5">

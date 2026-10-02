@@ -22,17 +22,17 @@ export default async function AdminLayout({
 
   const demoStore: Store = {
     id: 'demo-store-id',
-    name: 'AutoCenter Motors Premium',
+    name: 'Milhaticar',
     slug,
-    logo_url: null,
+    logo_url: '/logo-milhaticar.png',
     banner_url: null,
-    address: 'Av. das Nações, 1500 - São Paulo, SP',
-    whatsapp: '5511993270543',
-    whatsapp_financeiro: '5511993270543',
+    address: 'Av. Gov. Adhemar de Barros, 2618 – Braz Cubas – Mogi das Cruzes/SP',
+    whatsapp: '5511994942661',
+    whatsapp_financeiro: '5511994942661',
     opening_hours: 'Seg a Sex: 09h às 18h | Sáb: 09h às 13h',
     primary_color: '#18181B',
     font_family: 'Inter',
-    slogan: 'Os melhores veículos seminovos com laudo 100% aprovado.',
+    slogan: 'Certeza de bons negócios',
     owner_id: 'demo-owner',
     created_at: new Date().toISOString(),
   }
