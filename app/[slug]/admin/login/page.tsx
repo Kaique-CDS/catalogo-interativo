@@ -52,30 +52,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-surface-0 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex items-center justify-center h-16 w-16 rounded-3xl bg-zinc-800 border border-zinc-700 text-white mx-auto mb-4 shadow-xl">
-          <Car className="h-8 w-8 text-emerald-400" />
+        <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-brand text-white mx-auto mb-4 shadow-xl">
+          <Car className="h-8 w-8" />
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-black text-white text-center tracking-tight">
-          Painel de Controle
+        <h1 className="text-2xl sm:text-3xl font-heading uppercase text-white text-center tracking-wide">
+          Painel Administrativo
         </h1>
-        <p className="text-xs text-zinc-400 text-center mt-1.5 mb-6">
+        <p className="text-xs text-muted-foreground text-center mt-1.5 mb-6">
           Acesso restrito da concessionária{' '}
-          <span className="font-bold text-zinc-200 font-mono">#{slug}</span>
+          <span className="font-bold text-white font-mono">#{slug}</span>
         </p>
 
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-5 border border-zinc-100 dark:border-zinc-800">
-          <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-            <ShieldCheck className="h-5 w-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
-            <p className="text-xs text-zinc-600 dark:text-zinc-300 font-medium">
+        <div className="bg-surface-1 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-5 border border-surface">
+          <div className="flex items-center gap-2 p-3 bg-surface-2 rounded-xl border border-surface">
+            <ShieldCheck className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <p className="text-xs text-white font-medium tracking-wide uppercase">
               Área restrita. Apenas usuários autorizados.
             </p>
           </div>
 
           {errorMsg && (
-            <div className="flex items-center gap-2 p-3.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 rounded-2xl text-xs font-semibold animate-in fade-in-0 duration-200">
+            <div className="flex items-center gap-2 p-3.5 bg-red-950/40 border border-red-900 text-red-400 rounded-xl text-xs font-semibold animate-in fade-in-0 duration-200">
               <span className="text-base flex-shrink-0">❌</span>
               <span>{errorMsg}</span>
             </div>
@@ -83,36 +83,36 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="username" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" /> Usuário
+              <Label htmlFor="username" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5" /> Usuário
               </Label>
               <Input
                 id="username"
                 name="username"
                 type="text"
                 placeholder="Digite seu usuário"
-                className="rounded-xl h-11 text-sm border-zinc-200 dark:border-zinc-800 dark:bg-zinc-950 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-300"
+                className="input-brand text-sm"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <Lock className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" /> Senha
+              <Label htmlFor="password" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5" /> Senha
               </Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
                 placeholder="Digite sua senha"
-                className="rounded-xl h-11 text-sm border-zinc-200 dark:border-zinc-800 dark:bg-zinc-950 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-300"
+                className="input-brand text-sm"
                 required
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold rounded-xl h-12 text-sm shadow-md gap-2 active:scale-98 transition-transform cursor-pointer"
+              className="w-full btn-brand rounded-xl h-12 text-sm shadow-md gap-2"
               disabled={pending}
             >
               {pending ? (
@@ -123,8 +123,8 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="pt-2 text-center border-t border-zinc-100 dark:border-zinc-800">
-            <Link href={`/${slug}`} className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white font-semibold transition-colors">
+          <div className="pt-4 text-center border-t border-surface">
+            <Link href={`/${slug}`} className="text-xs text-muted-foreground hover:text-brand font-semibold transition-colors uppercase tracking-wider">
               &larr; Voltar para a Vitrine
             </Link>
           </div>
