@@ -1,26 +1,38 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Montserrat, Anton } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import CookieBanner from '@/components/storefront/CookieBanner'
+import { ThemeProvider } from '@/components/ThemeProvider'
 
-const inter = Inter({ subsets: ['latin'] })
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const anton = Anton({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-heading',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Catalogo Interativo',
   description: 'Catalogos digitais para lojas de veiculos',
 }
 
-import { ThemeProvider } from '@/components/ThemeProvider'
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="pt-BR" suppressHydrationWarning className="dark">
+      <body className={`${montserrat.variable} ${anton.variable} font-sans antialiased`}
+            style={{ fontFamily: 'var(--font-body, Montserrat, sans-serif)' }}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}

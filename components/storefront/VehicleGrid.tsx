@@ -69,21 +69,28 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
       <SearchFilters brands={brands} years={years} searchParams={searchParams} />
 
       {vehicles.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-8 max-w-md mx-auto">
-          <Car className="h-14 w-14 text-zinc-300 dark:text-zinc-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-zinc-800 dark:text-zinc-100 mb-1">Nenhum veículo encontrado</h3>
-          <p className="text-zinc-400 dark:text-zinc-500 text-xs">Tente alterar os filtros ou limpar a pesquisa para ver mais opções.</p>
+        <div className="text-center py-20 bg-surface-1 rounded-2xl border border-surface p-8 max-w-md mx-auto">
+          <Car className="h-14 w-14 text-muted-foreground/30 mx-auto mb-4" />
+          <h3 className="font-heading text-white text-xl uppercase tracking-wide mb-2">
+            Nenhum Veículo Encontrado
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            Tente alterar os filtros ou limpar a pesquisa para ver mais opções.
+          </p>
         </div>
       ) : (
         <>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-              {vehicles.length} veículo{vehicles.length !== 1 ? 's' : ''} disponíve{vehicles.length !== 1 ? 'is' : 'l'}
+            <p className="text-sm font-semibold text-muted-foreground">
+              <span className="text-brand font-bold">{vehicles.length}</span>{' '}
+              veículo{vehicles.length !== 1 ? 's' : ''} disponíve{vehicles.length !== 1 ? 'is' : 'l'}
             </p>
-            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 hidden sm:inline">Clique no veículo para ver fotos e ficha técnica</span>
+            <span className="text-[11px] text-muted-foreground/60 hidden sm:inline">
+              Clique no veículo para ver fotos e ficha técnica
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {vehicles.map((vehicle) => (
               <VehicleCard
                 key={vehicle.id}
