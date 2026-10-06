@@ -1,15 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone, MessageCircle, Sparkles } from 'lucide-react'
+import { MapPin, Phone, Sparkles } from 'lucide-react'
 import type { Store } from '@/lib/supabase/types'
 
 interface Props { store: Store }
 
 export default function StoreHeader({ store }: Props) {
-  const whatsappHref = store.whatsapp
-    ? `https://wa.me/${store.whatsapp}?text=${encodeURIComponent(`Olá! Estou no catálogo ${store.name} e gostaria de informações.`)}`
-    : '#'
-
   return (
     <header className="bg-surface-0 border-b border-surface sticky top-0 z-40 backdrop-blur-sm">
       <div className="container mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-3 max-w-7xl">
@@ -77,19 +73,6 @@ export default function StoreHeader({ store }: Props) {
             >
               <Phone className="h-3.5 w-3.5 text-brand" />
               (11) 4729-4937
-            </a>
-          )}
-
-          {/* WhatsApp CTA */}
-          {store.whatsapp && (
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-whatsapp flex items-center gap-1.5 h-9 px-3 sm:px-4 text-xs sm:text-sm font-bold min-w-[44px]"
-            >
-              <MessageCircle className="h-4 w-4 flex-shrink-0" />
-              <span className="hidden sm:inline">WhatsApp</span>
             </a>
           )}
         </div>
