@@ -186,21 +186,21 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
             </ul>
           </div>
 
-          {/* Coluna 3 — Links */}
+          {/* Coluna 3 — Institucional */}
           <div>
-            <h4 className="font-heading text-white text-lg uppercase tracking-wide mb-4">Links Rápidos</h4>
+            <h4 className="font-heading text-white text-lg uppercase tracking-wide mb-4">Institucional</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-brand transition-colors">Nosso Estoque</a></li>
-              <li><a href="#" className="hover:text-brand transition-colors">Quem Somos</a></li>
-              <li><a href="#" className="hover:text-brand transition-colors">Termos e Condições</a></li>
-              <li><a href="#" className="hover:text-brand transition-colors">Política de Privacidade</a></li>
+              <li><a href={`/${slug}`} className="hover:text-brand transition-colors">Nosso Estoque</a></li>
+              <li><a href={`/${slug}/quem-somos`} className="hover:text-brand transition-colors">Quem Somos</a></li>
+              <li><a href={`/${slug}/termos`} className="hover:text-brand transition-colors">Termos e Condições</a></li>
+              <li><a href={`/${slug}/privacidade`} className="hover:text-brand transition-colors">Política de Privacidade</a></li>
             </ul>
           </div>
         </div>
 
         <div className="container mx-auto px-4 max-w-7xl mt-10 pt-6 border-t border-surface text-center flex flex-col md:flex-row justify-between items-center gap-3">
           <p className="text-xs text-muted-foreground/60">
-            © {new Date().getFullYear()} {store.name}. Todos os direitos reservados.
+            © DESDE 2019 - {new Date().getFullYear()} MILHATICAR. Todos os direitos reservados.
           </p>
           <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
             Desenvolvido por{' '}

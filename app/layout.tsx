@@ -20,7 +20,7 @@ const anton = Anton({
 })
 
 export const metadata: Metadata = {
-  title: 'Milhaticar - Certeza de bons negócios',
+  title: 'Milhaticar - Veículos novos e seminovos, nacionais e importados',
   description: 'Catálogo digital de seminovos da Milhaticar',
   icons: {
     icon: '/logo-milhaticar.png',

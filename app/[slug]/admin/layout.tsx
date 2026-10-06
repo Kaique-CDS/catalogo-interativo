@@ -32,7 +32,7 @@ export default async function AdminLayout({
     opening_hours: 'Seg a Sex: 09h às 18h | Sáb: 09h às 13h',
     primary_color: '#18181B',
     font_family: 'Inter',
-    slogan: 'Certeza de bons negócios',
+    slogan: 'VEÍCULOS NOVOS E SEMINOVOS, NACIONAIS E IMPORTADOS!',
     owner_id: 'demo-owner',
     created_at: new Date().toISOString(),
   }
