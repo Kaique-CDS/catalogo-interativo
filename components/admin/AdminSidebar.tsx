@@ -102,68 +102,61 @@ export default function AdminSidebar({ store, slug }: Props) {
       </nav>
 
       {/* 3. Sidebar Desktop Clássica */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 bg-surface-1 border-r border-surface flex-col justify-between">
+      <aside className="hidden md:flex w-20 flex-shrink-0 bg-surface-1 border-r border-surface flex-col justify-between">
         <div>
-          <div className="p-6 border-b border-surface">
-            <div className="flex items-center gap-3 mb-2">
-              {store.logo_url ? (
-                <img
-                  src={store.logo_url}
-                  alt={store.name}
-                  className="h-10 w-10 object-contain flex-shrink-0"
-                />
-              ) : (
-                <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center shadow-xs">
-                  <Car className="h-5 w-5" />
-                </div>
-              )}
-              <div className="font-heading uppercase text-lg text-white tracking-wide truncate">
-                {store.name}
+          <div className="py-5 border-b border-surface flex justify-center" title={`${store.name} - Painel Administrativo`}>
+            {store.logo_url ? (
+              <img
+                src={store.logo_url}
+                alt={store.name}
+                className="h-10 w-10 object-contain flex-shrink-0"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center shadow-xs">
+                <Car className="h-5 w-5" />
               </div>
-            </div>
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Painel Administrativo</p>
+            )}
           </div>
 
-          <nav className="p-4 space-y-1.5">
+          <nav className="p-3 space-y-1.5 flex flex-col items-center">
             {items.map((item) => {
               const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  title={item.label}
+                  aria-label={item.label}
                   className={cn(
-                    'flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all relative',
+                    'flex items-center justify-center h-11 w-11 rounded-xl transition-all relative',
                     isActive
                       ? 'bg-brand text-white'
                       : 'text-muted-foreground hover:bg-surface-2 hover:text-white'
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <item.icon className="h-5 w-5" />
                 </Link>
               )
             })}
           </nav>
         </div>
 
-        <div className="p-4 border-t border-surface space-y-2">
-          <Link href={`/${slug}`} target="_blank">
-            <Button variant="outline" size="sm" className="w-full gap-2 text-xs rounded-[10px] font-semibold border-brand text-white hover:bg-brand/10 hover:text-white transition-colors">
-              <ExternalLink className="h-3.5 w-3.5 text-brand" />
-              Ver vitrine da loja
+        <div className="p-3 border-t border-surface space-y-2 flex flex-col items-center">
+          <Link href={`/${slug}`} target="_blank" title="Ver vitrine da loja" aria-label="Ver vitrine da loja">
+            <Button variant="outline" size="icon" className="h-10 w-10 rounded-[10px] border-brand text-white hover:bg-brand/10 hover:text-white transition-colors">
+              <ExternalLink className="h-4 w-4 text-brand" />
             </Button>
           </Link>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex-1 gap-2 text-xs text-muted-foreground hover:text-white hover:bg-surface-2 rounded-[10px]"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-3.5 w-3.5 text-red-500" />
-              Sair do Painel
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 text-muted-foreground hover:text-white hover:bg-surface-2 rounded-[10px]"
+            onClick={handleLogout}
+            title="Sair do Painel"
+            aria-label="Sair do Painel"
+          >
+            <LogOut className="h-4 w-4 text-red-500" />
+          </Button>
         </div>
       </aside>
     </>
