@@ -27,31 +27,30 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
 
   const toggleActive = async (vehicle: Vehicle) => {
     const nextState = !vehicle.is_active
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-      const updated = { ...vehicle, is_active: nextState }
-      setVehicles(prev => prev.map(v => v.id === vehicle.id ? updated : v))
-      import('@/lib/vehicles').then(({ saveVehicle }) => saveVehicle(updated))
+    try {
+      const res = await fetch(`/api/vehicles/${vehicle.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: nextState })
+      })
+      if (!res.ok) throw new Error()
+      setVehicles(prev => prev.map(v => v.id === vehicle.id ? { ...v, is_active: nextState } : v))
       toast.success(nextState ? 'Veículo publicado!' : 'Veículo pausado!')
-      return
+    } catch {
+      toast.error('Erro ao atualizar o veículo')
     }
-    const { error } = await supabase.from('vehicles').update({ is_active: nextState }).eq('id', vehicle.id)
-    if (error) { toast.error('Erro ao atualizar o veículo'); return }
-    setVehicles(prev => prev.map(v => v.id === vehicle.id ? { ...v, is_active: nextState } : v))
-    toast.success(nextState ? 'Veículo publicado!' : 'Veículo pausado!')
   }
 
   const deleteVehicle = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir este veículo?')) return
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+    try {
+      const res = await fetch(`/api/vehicles/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
       setVehicles(prev => prev.filter(v => v.id !== id))
-      import('@/lib/vehicles').then(({ deleteVehicle: delVeh }) => delVeh(id))
-      toast.success('Veículo excluído (Modo Local)')
-      return
+      toast.success('Veículo excluído com sucesso')
+    } catch {
+      toast.error('Erro ao excluir o veículo')
     }
-    const { error } = await supabase.from('vehicles').delete().eq('id', id)
-    if (error) { toast.error('Erro ao excluir o veículo'); return }
-    setVehicles(prev => prev.filter(v => v.id !== id))
-    toast.success('Veículo excluído com sucesso')
   }
 
   if (vehicles.length === 0) {

@@ -216,29 +216,34 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       is_active: isActive,
       badge: null,
       features: selectedFeatures,
-      store_id: storeId,
+      store_id: storeId || 'demo-store-id',
       images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'],
     }
 
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-      const { saveVehicle } = await import('@/lib/vehicles')
-      saveVehicle(payload as Vehicle)
-      toast.success(isEditing ? 'Veículo atualizado localmente!' : 'Veículo cadastrado localmente!')
+    try {
+      if (isEditing) {
+        const res = await fetch(`/api/vehicles/${vehicle.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error('Erro ao salvar alterações')
+        toast.success('Veículo atualizado com sucesso!')
+      } else {
+        const res = await fetch('/api/vehicles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) throw new Error('Erro ao cadastrar o veículo')
+        toast.success('Veículo adicionado ao catálogo!')
+      }
       router.push(`/${slug}/admin/estoque`)
-      return
+      router.refresh()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro inesperado')
+      setSaving(false)
     }
-
-    if (isEditing) {
-      const { error } = await supabase.from('vehicles').update(payload).eq('id', vehicle.id)
-      if (error) { toast.error('Erro ao salvar alterações'); setSaving(false); return }
-      toast.success('Veículo atualizado com sucesso!')
-    } else {
-      const { error } = await supabase.from('vehicles').insert(payload)
-      if (error) { toast.error('Erro ao cadastrar o veículo'); setSaving(false); return }
-      toast.success('Veículo adicionado ao catálogo!')
-    }
-    router.push(`/${slug}/admin/estoque`)
-    router.refresh()
   }
 
   return (

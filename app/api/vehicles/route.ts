@@ -52,3 +52,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 })
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const store_id = searchParams.get('store_id')
+
+    if (!store_id) {
+      return NextResponse.json({ error: 'store_id é obrigatório' }, { status: 400 })
+    }
+
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('store_id', store_id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Supabase error fetching vehicles:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json(data, { status: 200 })
+  } catch (err: any) {
+    console.error('Error in GET /api/vehicles:', err)
+    return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 })
+  }
+}

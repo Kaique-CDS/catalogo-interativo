@@ -33,8 +33,14 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
   
   useEffect(() => {
     if (slug) {
-      setVehicles(getVehicles())
-      
+      // Fetch vehicles
+      fetch(`/api/vehicles?store_id=demo-store-id`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.length > 0) setVehicles(data)
+          else setVehicles(getVehicles()) // Fallback
+        })
+        .catch(() => setVehicles(getVehicles()))
       // Fetch analytics
       // Precisaríamos do store_id real. Como o app usa o slug para tudo no frontend por enquanto,
       // e os mocks de vehicles não tem store_id vinculado fácil aqui, 

@@ -23,22 +23,24 @@ export default function EditarVeiculoPage({ params }: { params: Promise<{ slug: 
 
   useEffect(() => {
     async function loadVehicle() {
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        try {
-          const supabase = createClient()
-          const { data: store } = await supabase.from('stores').select('id').eq('slug', slug).maybeSingle()
-          if (store) {
-            setStoreId(store.id)
-            const { data: v } = await supabase.from('vehicles').select('*').eq('id', id).eq('store_id', store.id).single()
-            if (v) setVehicle(v)
+      try {
+        const res = await fetch(`/api/vehicles?store_id=demo-store-id`)
+        if (res.ok) {
+          const data = await res.json()
+          const v = data.find((veh: Vehicle) => veh.id === id)
+          if (v) {
+            setVehicle(v)
+            setLoading(false)
+            return
           }
-        } catch (e) {
-          console.error(e)
         }
-      } else {
-        const v = getVehicles().find(v => v.id === id)
-        if (v) setVehicle(v)
+      } catch (e) {
+        console.error('Falha ao buscar veículo da API:', e)
       }
+      
+      // Fallback local
+      const v = getVehicles().find(v => v.id === id)
+      if (v) setVehicle(v)
       setLoading(false)
     }
 

@@ -19,21 +19,23 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
 
   useEffect(() => {
     async function loadVehicles() {
-      let vData = getVehicles()
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        try {
-          const supabase = createClient()
-          const { data: store } = await supabase.from('stores').select('id').eq('slug', slug).maybeSingle()
-          if (store) {
-            const { data: remoteData } = await supabase
-              .from('vehicles').select('*').eq('store_id', store.id).order('created_at', { ascending: false })
-            if (remoteData && remoteData.length > 0) vData = remoteData
+      // Usar a rota da API com o identificador 'demo-store-id' (simulando a loja atual)
+      // Em produção, isso viria dinamicamente de uma query de 'store' real
+      try {
+        const res = await fetch(`/api/vehicles?store_id=demo-store-id`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data && data.length > 0) {
+            setVehicles(data)
+            return
           }
-        } catch (e) {
-          console.error(e)
         }
+      } catch (e) {
+        console.error('Falha ao buscar veículos da API:', e)
       }
-      setVehicles(vData)
+      
+      // Fallback local se a API não retornar nada
+      setVehicles(getVehicles())
     }
     
     if (slug) {
