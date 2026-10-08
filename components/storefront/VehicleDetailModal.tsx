@@ -27,21 +27,57 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
   const [step, setStep]           = useState<ModalStep>(initialStep)
   const [hasTradeIn, setHasTradeIn] = useState(false)
 
+  // Trava o scroll da página de trás enquanto o modal está aberto.
+  // overflow:hidden sozinho não funciona no iOS Safari, então fixamos o body
+  // na posição atual e restauramos o scroll exato ao fechar.
+  const isOpen = !!vehicle
   useEffect(() => {
+    if (!isOpen) return
+    const scrollY = window.scrollY
+    const body = document.body
+    const html = document.documentElement
+    const prev = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+      htmlOverflow: html.style.overflow,
+      overscroll: html.style.overscrollBehavior,
+    }
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    body.style.width = '100%'
+    body.style.overflow = 'hidden'
+    html.style.overflow = 'hidden'
+    html.style.overscrollBehavior = 'none'
+
+    return () => {
+      body.style.position = prev.position
+      body.style.top = prev.top
+      body.style.left = prev.left
+      body.style.right = prev.right
+      body.style.width = prev.width
+      body.style.overflow = prev.overflow
+      html.style.overflow = prev.htmlOverflow
+      html.style.overscrollBehavior = prev.overscroll
+      window.scrollTo(0, scrollY)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!vehicle) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (step !== 'detail') setStep('detail')
         else onClose()
       }
     }
-    if (vehicle) {
-      document.body.style.overflow = 'hidden'
-      window.addEventListener('keydown', handleKeyDown)
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-      window.removeEventListener('keydown', handleKeyDown)
-    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [vehicle, onClose, step])
 
   // Reset step when modal changes vehicle or initialStep changes
@@ -89,11 +125,11 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
     <>
       {/* Main Detail Modal */}
       <div
-        className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto animate-in fade-in-0 duration-200"
+        className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden overscroll-none animate-in fade-in-0 duration-200"
         onClick={onClose}
       >
         <div
-          className="bg-surface-0 border border-surface w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
+          className="bg-surface-0 border border-surface w-full max-w-2xl max-h-[92dvh] sm:max-h-[88dvh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Photo with overlay */}
@@ -140,7 +176,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           </div>
 
           {/* Scrollable content */}
-          <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-zinc-800 dark:text-zinc-200">
+          <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] space-y-6 text-zinc-800 dark:text-zinc-200">
             <div>
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{vehicle.model}</span>
               <h2 className="font-heading text-xl sm:text-2xl text-zinc-900 dark:text-white uppercase leading-snug tracking-wide">{vehicle.brand} {vehicle.title.replace(`${vehicle.brand} `, '')}</h2>
