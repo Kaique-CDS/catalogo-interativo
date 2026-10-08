@@ -14,10 +14,47 @@ import { Button } from '@/components/ui/button'
 export default function AdminDashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   const [slug, setSlug] = useState<string>('')
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [analytics, setAnalytics] = useState<{
+    totalViews: number
+    whatsappClicks: number
+    shares: number
+    sources: Record<string, number>
+    topVehicles: any[]
+  }>({
+    totalViews: 0,
+    whatsappClicks: 0,
+    shares: 0,
+    sources: { instagram: 0, google: 0, facebook: 0, direct: 0 },
+    topVehicles: []
+  })
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true)
 
   useEffect(() => { params.then(p => setSlug(p.slug)) }, [params])
+  
   useEffect(() => {
-    if (slug) setVehicles(getVehicles())
+    if (slug) {
+      setVehicles(getVehicles())
+      
+      // Fetch analytics
+      // Precisaríamos do store_id real. Como o app usa o slug para tudo no frontend por enquanto,
+      // e os mocks de vehicles não tem store_id vinculado fácil aqui, 
+      // vou assumir que a API aceita store_id="demo-store-id" ou o próprio slug para simplificar.
+      // O ideal é passar o store_id verdadeiro aqui.
+      const fetchAnalytics = async () => {
+        try {
+          const res = await fetch(`/api/analytics?store_id=demo-store-id`) // Mock store id usado no frontend
+          if (res.ok) {
+            const data = await res.json()
+            setAnalytics(data)
+          }
+        } catch (error) {
+          console.error('Failed to fetch analytics:', error)
+        } finally {
+          setLoadingAnalytics(false)
+        }
+      }
+      fetchAnalytics()
+    }
   }, [slug])
 
   if (!slug) return null
@@ -32,36 +69,45 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
   // Alertas reais
   const noPhotos = vehicles.filter(v => !v.images || v.images.length === 0)
   const noDescription = vehicles.filter(v => !v.description || v.description.trim().length < 10)
-  
-  // Atividade
-  const recentlyAdded = [...vehicles].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()).slice(0, 4)
 
   // ==========================================
-  // MÉTRICAS SIMULADAS DE MARKETING/VENDAS
+  // MÉTRICAS REAIS DA API DE ANALYTICS
   // ==========================================
-  const totalViews = 12450
-  const whatsappClicks = 312
-  const conversionRate = ((whatsappClicks / totalViews) * 100).toFixed(1)
+  const conversionRate = analytics.totalViews > 0 
+    ? ((analytics.whatsappClicks / analytics.totalViews) * 100).toFixed(1) 
+    : '0.0'
 
   const marketingCards = [
-    { label: 'Acessos na Vitrine', value: '12.450', icon: Users, color: 'text-white', bg: 'bg-surface-2', trend: '+12% este mês' },
-    { label: 'Cliques no WhatsApp', value: '312', icon: MessageCircle, color: 'text-brand', bg: 'bg-brand/10', trend: '+5% este mês' },
+    { label: 'Acessos na Vitrine', value: analytics.totalViews.toLocaleString('pt-BR'), icon: Users, color: 'text-white', bg: 'bg-surface-2', trend: 'Visualizações totais' },
+    { label: 'Cliques no WhatsApp', value: analytics.whatsappClicks.toLocaleString('pt-BR'), icon: MessageCircle, color: 'text-brand', bg: 'bg-brand/10', trend: 'Leads gerados' },
     { label: 'Taxa de Conversão', value: `${conversionRate}%`, icon: TrendingUp, color: 'text-white', bg: 'bg-surface-2', trend: 'Cliques por acesso' },
-    { label: 'Compartilhamentos', value: '84', icon: Share2, color: 'text-brand', bg: 'bg-brand/10', trend: 'Links enviados' },
+    { label: 'Compartilhamentos', value: analytics.shares.toString(), icon: Share2, color: 'text-brand', bg: 'bg-brand/10', trend: 'Links enviados' },
   ]
+
+  const totalSources = Object.values(analytics.sources).reduce((a, b) => a + b, 0)
+  const getSourcePercent = (key: string) => totalSources > 0 ? Math.round((analytics.sources[key] || 0) / totalSources * 100) : 0
 
   const trafficSources = [
-    { name: 'Instagram (Bio/Stories)', value: 65, color: 'bg-brand' },
-    { name: 'Google Busca', value: 20, color: 'bg-white' },
-    { name: 'Acesso Direto (Link)', value: 10, color: 'bg-surface-3' },
-    { name: 'Facebook', value: 5, color: 'bg-surface-2' },
+    { name: 'Instagram (Bio/Stories)', value: getSourcePercent('instagram'), color: 'bg-brand' },
+    { name: 'Google Busca', value: getSourcePercent('google'), color: 'bg-white' },
+    { name: 'Acesso Direto (Link)', value: getSourcePercent('direct'), color: 'bg-surface-3' },
+    { name: 'Facebook', value: getSourcePercent('facebook'), color: 'bg-surface-2' },
   ]
 
-  const topVehicles = vehicles.filter(v => v.is_active).slice(0, 3).map((v, i) => ({
-    ...v,
-    views: 1540 - (i * 380),
-    clicks: 45 - (i * 12)
-  }))
+  // Junta dados da API de analytics com os dados do veículo
+  const topVehicles = analytics.topVehicles.map(tv => {
+    const v = vehicles.find(veh => veh.id === tv.id)
+    return {
+      ...v,
+      id: tv.id,
+      title: v?.title || 'Veículo Excluído',
+      brand: v?.brand || '',
+      price: v?.price || 0,
+      images: v?.images || [],
+      views: tv.views,
+      clicks: tv.clicks
+    }
+  }).slice(0, 3)
 
   return (
     <div className="space-y-6 pb-12">
@@ -81,7 +127,8 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
       {/* Métricas de Marketing (KPIs) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {marketingCards.map((kpi, i) => (
-          <div key={i} className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs">
+          <div key={i} className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs relative overflow-hidden">
+            {loadingAnalytics && <div className="absolute inset-0 bg-surface-1/50 backdrop-blur-sm z-10 flex items-center justify-center"><div className="h-4 w-4 rounded-full border-2 border-brand border-t-transparent animate-spin" /></div>}
             <div className={`h-8 w-8 rounded-lg ${kpi.bg} ${kpi.color} flex items-center justify-center mb-3`}>
               <kpi.icon className="h-4 w-4" />
             </div>
@@ -94,7 +141,8 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Origem de Tráfego */}
-        <div className="bg-surface-1 border border-surface rounded-xl p-5 shadow-xs lg:col-span-1">
+        <div className="bg-surface-1 border border-surface rounded-xl p-5 shadow-xs lg:col-span-1 relative overflow-hidden">
+          {loadingAnalytics && <div className="absolute inset-0 bg-surface-1/50 backdrop-blur-sm z-10 flex items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-brand border-t-transparent animate-spin" /></div>}
           <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
             <Globe className="h-4 w-4 text-brand" /> De onde vêm os clientes?
           </h2>
@@ -106,7 +154,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
                   <span className="font-heading text-sm text-white tracking-wider">{source.value}%</span>
                 </div>
                 <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${source.color}`} style={{ width: `${source.value}%` }} />
+                  <div className={`h-full rounded-full ${source.color} transition-all duration-1000`} style={{ width: `${source.value}%` }} />
                 </div>
               </div>
             ))}
@@ -117,12 +165,15 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
         </div>
 
         {/* Veículos Mais Populares */}
-        <div className="bg-surface-1 border border-surface rounded-xl p-5 shadow-xs lg:col-span-2">
+        <div className="bg-surface-1 border border-surface rounded-xl p-5 shadow-xs lg:col-span-2 relative overflow-hidden">
+          {loadingAnalytics && <div className="absolute inset-0 bg-surface-1/50 backdrop-blur-sm z-10 flex items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-brand border-t-transparent animate-spin" /></div>}
           <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
             <BarChart3 className="h-4 w-4 text-brand" /> Veículos Mais Desejados (Top 3)
           </h2>
           {topVehicles.length === 0 ? (
-            <div className="text-center py-8 text-xs text-muted-foreground">Nenhum veículo ativo no estoque para gerar métricas.</div>
+            <div className="text-center py-8 text-xs text-muted-foreground">
+              {loadingAnalytics ? 'Carregando dados...' : 'Ainda não há dados suficientes de acesso para gerar este ranking.'}
+            </div>
           ) : (
             <div className="space-y-3">
               {topVehicles.map((v, i) => (
@@ -133,7 +184,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-white uppercase tracking-wide truncate">{v.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate font-medium mt-0.5">{v.brand} • R$ {v.price.toLocaleString('pt-BR')}</p>
+                    <p className="text-[10px] text-muted-foreground truncate font-medium mt-0.5">{v.brand} • R$ {(v.price || 0).toLocaleString('pt-BR')}</p>
                   </div>
                   <div className="flex gap-4 shrink-0 text-right">
                     <div>

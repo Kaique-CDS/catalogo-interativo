@@ -21,6 +21,18 @@ export default function InterestOptionsSheet({ vehicle, store, onClose, onOpenFi
   const [hasTradeIn, setHasTradeIn] = useState(false)
 
   const handleAVista = () => {
+    // Track WhatsApp click
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        store_id: vehicle.store_id || 'demo-store-id',
+        vehicle_id: vehicle.id,
+        event_type: 'whatsapp_click',
+        source: 'direct'
+      })
+    }).catch(console.error)
+
     const url = buildWhatsAppUrl({
       whatsapp: store.whatsapp,
       whatsappFinanceiro: store.whatsapp_financeiro,
@@ -37,6 +49,9 @@ export default function InterestOptionsSheet({ vehicle, store, onClose, onOpenFi
   }
 
   const handleFinanciamento = () => {
+    // Note: The actual redirect to whatsapp happens inside FinancingModal, 
+    // but it's a click expressing intent. We can track it there or here. 
+    // Let's track it in FinancingModal as well, but for now we'll do it where the final button is clicked.
     onOpenFinancing(hasTradeIn)
   }
 

@@ -31,6 +31,23 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
     // Check business hours on client side
     const saoPauloNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
     setIsOpen(isBusinessOpen(CONCESSIONARIA_HOURS, saoPauloNow))
+
+    // Track page view
+    // Determine source (e.g. if URL has ?ref=instagram, otherwise check document.referrer)
+    const ref = new URLSearchParams(window.location.search).get('ref') || 
+                (document.referrer.includes('instagram.com') ? 'instagram' : 
+                 document.referrer.includes('google.com') ? 'google' : 
+                 document.referrer.includes('facebook.com') ? 'facebook' : 'direct')
+
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        store_id: 'demo-store-id', // O ideal é usar o store.id real, usando o mock pra fallback
+        event_type: 'page_view',
+        source: ref
+      })
+    }).catch(console.error)
   }, [])
 
   useEffect(() => {

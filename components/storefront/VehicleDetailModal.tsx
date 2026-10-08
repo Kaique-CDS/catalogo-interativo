@@ -77,6 +77,19 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
       }
     }
     window.addEventListener('keydown', handleKeyDown)
+
+    // Track vehicle view
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        store_id: vehicle.store_id || 'demo-store-id',
+        vehicle_id: vehicle.id,
+        event_type: 'page_view',
+        source: 'direct' // It's internal navigation, so direct or we could try to inherit
+      })
+    }).catch(console.error)
+
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [vehicle, onClose, step])
 
@@ -89,6 +102,18 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
   if (!vehicle) return null
 
   const handleShare = async () => {
+    // Track Share
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        store_id: vehicle.store_id || 'demo-store-id',
+        vehicle_id: vehicle.id,
+        event_type: 'share',
+        source: 'direct'
+      })
+    }).catch(console.error)
+
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const shareUrl = `${origin}/${store.slug}?v=${vehicle.id}`
     const shareTitle = `${vehicle.title} (${vehicle.year}) - ${store.name}`

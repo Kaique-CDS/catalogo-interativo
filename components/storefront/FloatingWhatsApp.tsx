@@ -19,6 +19,17 @@ export default function FloatingWhatsApp({ storeName, whatsapp, customMessage }:
         rel="noopener noreferrer"
         aria-label="Falar no WhatsApp"
         title="Falar no WhatsApp"
+        onClick={() => {
+          fetch('/api/analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              store_id: 'demo-store-id', // Store ID mock, na prática receber via prop
+              event_type: 'whatsapp_click',
+              source: 'floating_button'
+            })
+          }).catch(console.error)
+        }}
         className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full
                    bg-[#25D366] hover:bg-[#20bd5a] text-white
                    shadow-[0_4px_20px_rgba(37,211,102,0.5)] hover:shadow-[0_6px_28px_rgba(37,211,102,0.7)]

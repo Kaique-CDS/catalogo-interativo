@@ -51,6 +51,19 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
 
   const onSubmit = (data: FormData) => {
     setSending(true)
+
+    // Track WhatsApp click
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        store_id: vehicle.store_id || 'demo-store-id',
+        vehicle_id: vehicle.id,
+        event_type: 'whatsapp_click',
+        source: 'direct'
+      })
+    }).catch(console.error)
+
     const url = buildFinancingWhatsAppUrl({
       whatsappFinanceiro: store.whatsapp_financeiro,
       whatsapp: store.whatsapp,
