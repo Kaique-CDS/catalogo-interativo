@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Upload } from 'lucide-react'
 import VehicleTable from '@/components/admin/VehicleTable'
+import BulkUploadModal from '@/components/admin/BulkUploadModal'
 import type { Vehicle } from '@/lib/supabase/types'
 import { getVehicles } from '@/lib/vehicles'
 
 export default function EstoquePage({ params }: { params: Promise<{ slug: string }> }) {
   const [slug, setSlug] = useState<string>('')
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [showBulkUpload, setShowBulkUpload] = useState(false)
 
   useEffect(() => {
     params.then(p => setSlug(p.slug))
@@ -62,7 +64,15 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
             {vehicles.length}/40 carros
           </span>
         </div>
-        <div className="relative group">
+        <div className="relative group flex items-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-2 border-surface bg-surface-1 rounded-[10px] text-xs font-bold shadow-xs h-10 px-4"
+            onClick={() => setShowBulkUpload(true)}
+          >
+            <Upload className="h-4 w-4" /> Importar Planilha
+          </Button>
+          
           {isAtLimit ? (
             <Button
               disabled
@@ -85,6 +95,17 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
         </div>
       </div>
       <p className="text-muted-foreground text-sm mb-4">Gerencie, edite e altere a publicação dos veículos do catálogo.</p>
+
+      {showBulkUpload && (
+        <BulkUploadModal
+          storeId="demo-store-id"
+          onClose={() => setShowBulkUpload(false)}
+          onSuccess={() => {
+            setShowBulkUpload(false)
+            window.location.reload()
+          }}
+        />
+      )}
 
       {/* Progress bar */}
       <div className="mt-2 mb-6">

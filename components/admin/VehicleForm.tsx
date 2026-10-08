@@ -170,34 +170,52 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     let files = Array.from(e.target.files ?? [])
     if (files.length === 0) return
 
-    // Hard limit: already at 10
-    if (images.length >= 10) {
-      toast.error('Limite de 10 fotos por veículo atingido. Remova uma foto para adicionar outra.')
+    // Hard limit: 5
+    if (images.length >= 5) {
+      toast.error('Limite de 5 fotos por veículo atingido. Remova uma foto para adicionar outra.')
       e.target.value = ''
       return
     }
 
-    // Soft limit: trim files that would exceed 10
-    if (images.length + files.length > 10) {
-      const allowed = 10 - images.length
+    // Soft limit: trim files that would exceed 5
+    if (images.length + files.length > 5) {
+      const allowed = 5 - images.length
       files = files.slice(0, allowed)
-      toast.warning(`Apenas ${allowed} foto(s) adicionada(s) para não ultrapassar o limite de 10.`)
+      toast.warning(`Apenas ${allowed} foto(s) adicionada(s) para não ultrapassar o limite de 5.`)
     }
 
     setUploading(true)
     const newUrls: string[] = []
 
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo'
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || 'catalogo_interativo'
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`
+
     for (const file of files) {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+      if (cloudName === 'demo') {
         newUrls.push(URL.createObjectURL(file))
         continue
       }
-      const ext = file.name.split('.').pop()
-      const path = `${storeId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-      const { error } = await supabase.storage.from('vehicles').upload(path, file)
-      if (!error) {
-        const { data } = supabase.storage.from('vehicles').getPublicUrl(path)
-        newUrls.push(data.publicUrl)
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('upload_preset', uploadPreset)
+
+      try {
+        const res = await fetch(cloudinaryUrl, {
+          method: 'POST',
+          body: formData
+        })
+        if (res.ok) {
+          const data = await res.json()
+          newUrls.push(data.secure_url)
+        } else {
+          console.error('Falha no upload para Cloudinary')
+          toast.error('Erro ao enviar imagem.')
+        }
+      } catch (err) {
+        console.error('Erro de rede no upload:', err)
+        toast.error('Falha de conexão no upload.')
       }
     }
     setImages(prev => [...prev, ...newUrls])
@@ -271,7 +289,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               </div>
             ))}
             <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
-              images.length >= 10
+              images.length >= 5
                 ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
                 : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}>
@@ -279,18 +297,18 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
               ) : (
                 <>
-                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
-                  <span className={`text-xs font-medium ${images.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                    {images.length >= 10 ? 'Limite atingido' : 'Adicionar fotos'}
+                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 5 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
+                  <span className={`text-xs font-medium ${images.length >= 5 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                    {images.length >= 5 ? 'Limite atingido' : 'Adicionar fotos'}
                   </span>
                   <span className={`text-[10px] font-semibold mt-0.5 ${
-                    images.length >= 10
+                    images.length >= 5
                       ? 'text-rose-500'
-                      : images.length >= 8
+                      : images.length >= 4
                       ? 'text-amber-500'
                       : 'text-zinc-400'
                   }`}>
-                    {images.length}/10 fotos
+                    {images.length}/5 fotos
                   </span>
                 </>
               )}
@@ -300,7 +318,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 multiple
                 className="hidden"
                 onChange={handleImageUpload}
-                disabled={uploading || images.length >= 10}
+                disabled={uploading || images.length >= 5}
               />
             </label>
           </div>

@@ -1,0 +1,4 @@
+marca,modelo,versao,ano,quilometragem,preco,combustivel,cambio,cor,placa_final,opcionais,descricao,fotos,ativo
+Honda,Civic,Touring 1.5 Turbo,2023,12000,165000,Gasolina,Automático CVT,Branco Pérola,7,Teto Solar;Bancos em Couro;Painel Digital TFT,Único dono e revisões na autorizada.,https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?auto=format&fit=crop&w=800&q=80,S
+Toyota,Corolla,XEi 2.0,2022,25000,135900,Flex,Automático CVT,Prata,3,Central Multimídia;Câmera de Ré;Garantia de Fábrica,Veículo impecável com laudo cautelar aprovado.,https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80,S
+Volkswagen,Nivus,Highline 1.0 TSI,2024,5000,129900,Flex,Automático,Azul Biscay,9,Painel 100% Digital;Chave Presencial;Faróis de LED,Praticamente zero km.,https://images.unsplash.com/photo-1621007947382-bb3c3994e3fd?auto=format&fit=crop&w=800&q=80,N
