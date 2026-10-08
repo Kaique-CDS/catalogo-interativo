@@ -80,22 +80,23 @@ export default function AdminSidebar({ store, slug }: Props) {
       </header>
 
       {/* 2. Bottom Nav Mobile (Fixed Bottom) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface py-2 px-4 z-40 flex justify-around items-center shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface py-2 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-40 flex justify-around items-center shadow-2xl">
         {items.map((item) => {
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-label={item.label}
+              title={item.label}
               className={cn(
-                'flex flex-col items-center gap-1 py-1 px-4 rounded-xl transition-all',
+                'flex items-center justify-center h-11 w-11 rounded-xl transition-all',
                 isActive
-                  ? 'text-white font-bold'
-                  : 'text-muted-foreground hover:text-white font-medium'
+                  ? 'bg-brand/10 text-brand'
+                  : 'text-muted-foreground hover:text-white hover:bg-surface-2'
               )}
             >
-              <item.icon className={cn('h-5 w-5', isActive ? 'text-brand' : 'text-muted-foreground')} />
-              <span className="text-[11px]">{item.label}</span>
+              <item.icon className="h-5 w-5" />
             </Link>
           )
         })}
