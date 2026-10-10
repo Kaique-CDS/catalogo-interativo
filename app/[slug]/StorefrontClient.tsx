@@ -53,8 +53,8 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
   useEffect(() => {
     let currentVehicles = initialVehicles || []
     
-    // Fallback to local storage if no server data was found (demo mode)
-    if (!initialVehicles || initialVehicles.length === 0) {
+    // Fallback to local storage if NO server data was attempted (demo mode / no DB)
+    if (initialVehicles === null) {
       setIsDemoMode(true)
       currentVehicles = getVehicles().filter(v => v.is_active)
     }

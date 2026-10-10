@@ -35,10 +35,13 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
     if (slug) {
       // Fetch vehicles
       fetch(`/api/vehicles?store_id=demo-store-id`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.length > 0) setVehicles(data)
-          else setVehicles(getVehicles()) // Fallback
+        .then(async res => {
+          if (res.ok) {
+            const data = await res.json()
+            setVehicles(data || [])
+          } else {
+            setVehicles(getVehicles()) // Fallback
+          }
         })
         .catch(() => setVehicles(getVehicles()))
       // Fetch analytics

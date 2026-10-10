@@ -21,22 +21,20 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
 
   useEffect(() => {
     async function loadVehicles() {
-      // Usar a rota da API com o identificador 'demo-store-id' (simulando a loja atual)
-      // Em produção, isso viria dinamicamente de uma query de 'store' real
       try {
         const res = await fetch(`/api/vehicles?store_id=demo-store-id`)
         if (res.ok) {
           const data = await res.json()
-          if (data && data.length > 0) {
-            setVehicles(data)
-            return
-          }
+          // Se a API respondeu 200 OK, assumimos que o banco está funcionando.
+          // Mesmo se vier vazio ([]), devemos exibir vazio, e não os mocks.
+          setVehicles(data || [])
+          return
         }
       } catch (e) {
         console.error('Falha ao buscar veículos da API:', e)
       }
       
-      // Fallback local se a API não retornar nada
+      // Fallback local só em caso de erro na rede ou API (Supabase não configurado)
       setVehicles(getVehicles())
     }
     
