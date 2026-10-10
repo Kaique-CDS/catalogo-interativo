@@ -37,11 +37,20 @@ export default function BulkUploadModal({ storeId, onClose, onSuccess }: Props) 
           }
 
           let successCount = 0
+          let errorCount = 0
+
           for (let i = 0; i < rows.length; i++) {
             const row = rows[i]
             
-            // Basic validation
-            if (!row.marca || !row.modelo || !row.ano || !row.preco) continue
+            // Basic validation - apenas o mínimo necessário
+            if (!row.marca || !row.modelo || !row.ano) {
+              // Verifica se a linha não está completamente vazia antes de contar como erro
+              if (Object.values(row).some(v => v !== '')) errorCount++
+              continue
+            }
+
+            const precoStr = String(row.preco || '0')
+            const price = parseFloat(precoStr.replace(/\./g, '').replace(',', '.'))
 
             const payload = {
               store_id: storeId,
@@ -50,15 +59,15 @@ export default function BulkUploadModal({ storeId, onClose, onSuccess }: Props) 
               model: row.modelo,
               year: parseInt(row.ano, 10),
               mileage: parseInt(row.quilometragem || '0', 10),
-              price: parseFloat(row.preco.replace(',', '.')),
+              price: isNaN(price) ? 0 : price,
               fuel: row.combustivel || 'Flex',
               transmission: row.cambio || 'Automático',
               color: row.cor || '',
               plate_end: row.placa_final || '',
-              features: row.opcionais ? row.opcionais.split(';').map((f: string) => f.trim()) : [],
+              features: row.opcionais ? String(row.opcionais).split(/[,;]/).map((f: string) => f.trim()).filter(Boolean) : [],
               description: row.descricao || 'Veículo em excelente estado.',
-              images: row.fotos ? row.fotos.split(';').map((f: string) => f.trim()).filter((url: string) => url.startsWith('http')) : [],
-              is_active: row.ativo === 'N' ? false : true,
+              images: row.fotos ? String(row.fotos).split(/[,;]/).map((f: string) => f.trim()).filter((url: string) => url.startsWith('http')) : [],
+              is_active: String(row.ativo).toUpperCase() === 'N' ? false : true,
               sku: `BLK${Date.now().toString().slice(-4)}${i}`
             }
 
@@ -69,15 +78,25 @@ export default function BulkUploadModal({ storeId, onClose, onSuccess }: Props) 
               body: JSON.stringify(payload)
             })
 
-            if (res.ok) successCount++
+            if (res.ok) {
+              successCount++
+            } else {
+              errorCount++
+              const errData = await res.json().catch(() => ({}))
+              console.error(`Erro ao importar linha ${i + 2}:`, errData)
+            }
             setProgress(10 + Math.floor(((i + 1) / rows.length) * 90))
           }
 
           if (successCount > 0) {
-            toast.success(`${successCount} veículos importados com sucesso!`)
+            if (errorCount > 0) {
+              toast.warning(`${successCount} importados, ${errorCount} com erro. Verifique os dados.`, { duration: 5000 })
+            } else {
+              toast.success(`${successCount} veículos importados com sucesso!`)
+            }
             onSuccess()
           } else {
-            toast.error('Nenhum veículo válido encontrado na planilha.')
+            toast.error('Nenhum veículo válido pôde ser importado. Verifique a planilha.')
           }
         } catch (err) {
           console.error(err)
