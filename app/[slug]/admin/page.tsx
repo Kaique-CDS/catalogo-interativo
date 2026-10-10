@@ -219,7 +219,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs">
           <div className="h-8 w-8 rounded-lg bg-surface-2 text-white flex items-center justify-center mb-2"><Car className="h-4 w-4" /></div>
-          <p className="font-heading text-2xl sm:text-3xl text-white tracking-wide">{totalVehicles}/40</p>
+          <p className="font-heading text-2xl sm:text-3xl text-white tracking-wide">{totalVehicles}/50</p>
           <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-1">Carros Cadastrados</p>
         </div>
         <div className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs">

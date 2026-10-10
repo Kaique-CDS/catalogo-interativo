@@ -45,7 +45,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
 
   if (!slug) return null
 
-  const isAtLimit = vehicles.length >= 40
+  const isAtLimit = vehicles.length >= 50
 
   return (
     <div>
@@ -55,11 +55,11 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
             isAtLimit
               ? 'bg-brand/10 text-brand border-brand/20'
-              : vehicles.length >= 32
+              : vehicles.length >= 40
               ? 'bg-amber-900/30 text-amber-400 border-amber-800'
               : 'bg-surface-2 text-muted-foreground border-surface'
           }`}>
-            {vehicles.length}/40 carros
+            {vehicles.length}/50 carros
           </span>
         </div>
         <div className="relative group flex items-center gap-2">
@@ -87,7 +87,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
           )}
           {isAtLimit && (
             <div className="absolute right-0 top-full mt-1.5 z-10 hidden group-hover:block w-64 p-2.5 bg-surface-2 border border-surface text-white text-xs rounded-xl shadow-lg">
-              Limite de 40 veículos atingido. Exclua um para adicionar outro.
+              Limite de 50 veículos atingido. Exclua um para adicionar outro.
             </div>
           )}
         </div>
@@ -108,17 +108,17 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
       {/* Progress bar */}
       <div className="mt-2 mb-6">
         <div className="flex justify-between text-xs text-muted-foreground mb-1.5 font-medium">
-          <span>{vehicles.length} de 40 veículos cadastrados</span>
-          <span className={vehicles.length >= 40 ? 'text-brand font-bold' : 'text-muted-foreground'}>
-            {vehicles.length >= 40 ? '⚠ Limite atingido' : `${40 - vehicles.length} vagas disponíveis`}
+          <span>{vehicles.length} de 50 veículos cadastrados</span>
+          <span className={vehicles.length >= 50 ? 'text-brand font-bold' : 'text-muted-foreground'}>
+            {vehicles.length >= 50 ? '⚠ Limite atingido' : `${50 - vehicles.length} vagas disponíveis`}
           </span>
         </div>
         <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all ${
-              vehicles.length >= 40 ? 'bg-brand' : vehicles.length >= 32 ? 'bg-amber-500' : 'bg-brand/70'
+              vehicles.length >= 50 ? 'bg-brand' : vehicles.length >= 40 ? 'bg-amber-500' : 'bg-brand/70'
             }`}
-            style={{ width: `${Math.min((vehicles.length / 40) * 100, 100)}%` }}
+            style={{ width: `${Math.min((vehicles.length / 50) * 100, 100)}%` }}
           />
         </div>
       </div>
