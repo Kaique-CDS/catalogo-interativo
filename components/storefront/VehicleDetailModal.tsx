@@ -26,6 +26,15 @@ type ModalStep = 'detail' | 'interest' | 'financing'
 export default function VehicleDetailModal({ vehicle, store, onClose, initialStep = 'detail' }: Props) {
   const [step, setStep]           = useState<ModalStep>(initialStep)
   const [hasTradeIn, setHasTradeIn] = useState(false)
+  const [activePhoto, setActivePhoto] = useState(0)
+
+  const handlePhotoScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const scrollLeft = e.currentTarget.scrollLeft
+    const width = e.currentTarget.clientWidth
+    if (width > 0) {
+      setActivePhoto(Math.round(scrollLeft / width))
+    }
+  }
 
   // Trava o scroll da página de trás enquanto o modal está aberto.
   // overflow:hidden sozinho não funciona no iOS Safari, então fixamos o body
@@ -157,25 +166,46 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           className="bg-surface-0 border border-surface w-full max-w-2xl max-h-[92dvh] sm:max-h-[88dvh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Photo with overlay */}
-          <div className="relative aspect-[16/10] sm:aspect-video w-full bg-zinc-900 flex-shrink-0">
-            {vehicle.images?.[0] ? (
-              <Image
-                src={vehicle.images[0]}
-                alt={vehicle.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 672px"
-                priority
-              />
+          {/* Photos Carousel */}
+          <div className="relative aspect-[16/10] sm:aspect-video w-full bg-zinc-900 flex-shrink-0 overflow-hidden group">
+            {vehicle.images && vehicle.images.length > 0 ? (
+              <div 
+                className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+                onScroll={handlePhotoScroll}
+              >
+                {vehicle.images.map((img, idx) => (
+                  <div key={idx} className="relative min-w-full h-full snap-center shrink-0">
+                    <Image
+                      src={img}
+                      alt={`${vehicle.title} - Foto ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 672px"
+                      priority={idx === 0}
+                    />
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="h-full flex items-center justify-center text-zinc-500">Sem fotos</div>
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+
+            {/* Dots */}
+            {vehicle.images && vehicle.images.length > 1 && (
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-1.5 z-10 pointer-events-none">
+                {vehicle.images.map((_, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`h-1.5 rounded-full transition-all duration-300 ${idx === activePhoto ? 'w-4 bg-white' : 'w-1.5 bg-white/40'}`} 
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Top actions */}
-            <div className="absolute top-3.5 right-3.5 flex items-center gap-2">
+            <div className="absolute top-3.5 right-3.5 flex items-center gap-2 z-10 pointer-events-auto">
               <button
                 onClick={handleShare}
                 className="h-9 w-9 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center backdrop-blur-md transition-colors"
