@@ -39,19 +39,14 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
           if (res.ok) {
             const data = await res.json()
             setVehicles(data || [])
-          } else {
-            setVehicles(getVehicles()) // Fallback
           }
         })
-        .catch(() => setVehicles(getVehicles()))
+        .catch(console.error)
+        
       // Fetch analytics
-      // Precisaríamos do store_id real. Como o app usa o slug para tudo no frontend por enquanto,
-      // e os mocks de vehicles não tem store_id vinculado fácil aqui, 
-      // vou assumir que a API aceita store_id="demo-store-id" ou o próprio slug para simplificar.
-      // O ideal é passar o store_id verdadeiro aqui.
       const fetchAnalytics = async () => {
         try {
-          const res = await fetch(`/api/analytics?store_id=demo-store-id`) // Mock store id usado no frontend
+          const res = await fetch(`/api/analytics?slug=${slug}`) 
           if (res.ok) {
             const data = await res.json()
             setAnalytics(data)

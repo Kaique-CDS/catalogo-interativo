@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, resolveStoreId } from '@/lib/supabase/admin'
 
-// Registrar um novo evento de analytics
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const body = await req.json()
     const { store_id, vehicle_id, event_type, source } = body
 
     if (!store_id || !event_type) {
-      return NextResponse.json({ error: 'store_id e event_type são obrigatórios' }, { status: 400 })
+      return NextResponse.json({ error: 'store_id e event_type sao obrigatorios' }, { status: 400 })
     }
 
     const { error } = await supabase
@@ -18,8 +17,8 @@ export async function POST(req: NextRequest) {
         {
           store_id,
           vehicle_id: vehicle_id || null,
-          event_type, // 'page_view', 'whatsapp_click', 'share'
-          source: source || 'direct', // 'instagram', 'google', 'facebook', 'direct'
+          event_type,
+          source: source || 'direct',
         }
       ])
 
@@ -35,32 +34,33 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Buscar métricas agregadas para o painel
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const store_id = searchParams.get('store_id')
+    const slug = searchParams.get('slug')
 
-    if (!store_id) {
-      return NextResponse.json({ error: 'store_id é obrigatório' }, { status: 400 })
+    if (!store_id && !slug) {
+      return NextResponse.json({ error: 'store_id ou slug e obrigatorio' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
-    // Como o Supabase não tem um endpoint "groupBy" na API REST padrão fácil sem RPC,
-    // e o volume inicial é gerenciável, podemos buscar os eventos dos últimos 30 dias.
-    // Para escalar, o ideal seria criar uma VIEW no banco.
+    let finalStoreId = store_id
+    if (!finalStoreId && slug) {
+      finalStoreId = await resolveStoreId(supabase, slug)
+    }
+
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
     const { data: events, error } = await supabase
       .from('analytics_events')
       .select('event_type, source, vehicle_id, created_at')
-      .eq('store_id', store_id)
+      .eq('store_id', finalStoreId)
       .gte('created_at', thirtyDaysAgo.toISOString())
 
     if (error) {
-      // Se a tabela ainda não existir, retornamos dados zerados para não quebrar a UI
       if (error.code === '42P01') { 
         return NextResponse.json({
           totalViews: 0,
