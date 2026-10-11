@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, resolveStoreId } from '@/lib/supabase/admin'
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const body = await req.json()
     
     const { 
-      store_id, title, brand, model, year, mileage, price, fuel, transmission, 
+      slug, store_id, title, brand, model, year, mileage, price, fuel, transmission, 
       color, plate_end, features, badge, description, images, is_active 
     } = body
 
-    if (!store_id || !title || !brand || !model || !year) {
+    if ((!slug && !store_id) || !title || !brand || !model || !year) {
       return NextResponse.json(
         { error: 'Campos obrigatórios ausentes' },
         { status: 400 }
       )
     }
 
+    // Resolve o store_id se não foi passado diretamente, mas o slug foi
+    const finalStoreId = store_id || await resolveStoreId(supabase, slug)
+
     const { data, error } = await supabase
       .from('vehicles')
       .insert([{
-          store_id,
+          store_id: finalStoreId,
           title,
           brand,
           model,
@@ -57,16 +60,19 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const store_id = searchParams.get('store_id')
+    const slug = searchParams.get('slug')
 
-    if (!store_id) {
-      return NextResponse.json({ error: 'store_id é obrigatório' }, { status: 400 })
+    if (!store_id && !slug) {
+      return NextResponse.json({ error: 'store_id ou slug é obrigatório' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
+    const finalStoreId = store_id || await resolveStoreId(supabase, slug!)
+
     const { data, error } = await supabase
       .from('vehicles')
       .select('*')
-      .eq('store_id', store_id)
+      .eq('store_id', finalStoreId)
       .order('created_at', { ascending: false })
 
     if (error) {

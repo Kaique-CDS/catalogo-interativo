@@ -22,7 +22,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
   useEffect(() => {
     async function loadVehicles() {
       try {
-        const res = await fetch(`/api/vehicles?store_id=demo-store-id`)
+        const res = await fetch(`/api/vehicles?slug=${slug}`)
         if (res.ok) {
           const data = await res.json()
           // Se a API respondeu 200 OK, assumimos que o banco está funcionando.
@@ -96,7 +96,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
 
       {showBulkUpload && (
         <BulkUploadModal
-          storeId="demo-store-id"
+          slug={slug}
           onClose={() => setShowBulkUpload(false)}
           onSuccess={() => {
             setShowBulkUpload(false)

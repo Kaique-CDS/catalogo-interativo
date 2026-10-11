@@ -34,7 +34,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
   useEffect(() => {
     if (slug) {
       // Fetch vehicles
-      fetch(`/api/vehicles?store_id=demo-store-id`)
+      fetch(`/api/vehicles?slug=${slug}`)
         .then(async res => {
           if (res.ok) {
             const data = await res.json()

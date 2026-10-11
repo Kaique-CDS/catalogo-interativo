@@ -8,12 +8,12 @@ import { toast } from 'sonner'
 import Papa from 'papaparse'
 
 interface Props {
-  storeId: string
+  slug: string
   onClose: () => void
   onSuccess: () => void
 }
 
-export default function BulkUploadModal({ storeId, onClose, onSuccess }: Props) {
+export default function BulkUploadModal({ slug, onClose, onSuccess }: Props) {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
 
@@ -53,7 +53,7 @@ export default function BulkUploadModal({ storeId, onClose, onSuccess }: Props) 
             const price = parseFloat(precoStr.replace(/\./g, '').replace(',', '.'))
 
             const payload = {
-              store_id: storeId,
+              slug,
               title: `${row.marca} ${row.modelo} ${row.versao || ''}`.trim(),
               brand: row.marca,
               model: row.modelo,

@@ -234,7 +234,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       is_active: isActive,
       badge: null,
       features: selectedFeatures,
-      store_id: storeId || 'demo-store-id',
+      slug,
       images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'],
     }
 

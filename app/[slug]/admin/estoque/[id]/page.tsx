@@ -24,7 +24,7 @@ export default function EditarVeiculoPage({ params }: { params: Promise<{ slug: 
   useEffect(() => {
     async function loadVehicle() {
       try {
-        const res = await fetch(`/api/vehicles?store_id=demo-store-id`)
+        const res = await fetch(`/api/vehicles?slug=${slug}`)
         if (res.ok) {
           const data = await res.json()
           const v = data.find((veh: Vehicle) => veh.id === id)
