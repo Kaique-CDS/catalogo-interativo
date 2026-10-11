@@ -1,14 +1,14 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================================
-   TEMA MILHATICAR — Centralize aqui para trocar de cliente
+   TEMA MILHATICAR â€” Centralize aqui para trocar de cliente
    Troque apenas este bloco e as fontes em layout.tsx
    ============================================================ */
 @layer base {
   :root {
-    /* Superfícies */
+    /* SuperfÃ­cies */
     --background:    0 0% 4%;        /* #0A0A0A */
     --foreground:    0 0% 100%;      /* #FFFFFF */
     --card:          0 0% 8%;        /* #141414 */
@@ -16,11 +16,11 @@
     --popover:       0 0% 8%;
     --popover-foreground: 0 0% 100%;
 
-    /* Primária — Vermelho Milhaticar */
+    /* PrimÃ¡ria â€” Vermelho Milhaticar */
     --primary:        8 100% 53%;    /* #FF2D0F  */
     --primary-foreground: 0 0% 100%;
 
-    /* Secundária — cinza escuro */
+    /* SecundÃ¡ria â€” cinza escuro */
     --secondary:      0 0% 11%;      /* #1C1C1C */
     --secondary-foreground: 0 0% 100%;
 
@@ -44,7 +44,7 @@
     /* Raio */
     --radius: 0.75rem; /* 12px */
 
-    /* Extras (tokens não-shadcn para uso interno) */
+    /* Extras (tokens nÃ£o-shadcn para uso interno) */
     --brand-red:      #FF2D0F;
     --brand-red-dark: #D81F06;
     --brand-surface-0: #000000;
@@ -54,7 +54,7 @@
     --brand-whatsapp: #25D366;
   }
 
-  /* dark = mesmo tema (a vitrine é 100% dark by default) */
+  /* dark = mesmo tema (a vitrine Ã© 100% dark by default) */
   .dark {
     --background:    0 0% 4%;
     --foreground:    0 0% 100%;
@@ -89,7 +89,7 @@
 }
 
 /* ============================================================
-   UTILITÁRIOS SEMÂNTICOS DA MARCA
+   UTILITÃRIOS SEMÃ‚NTICOS DA MARCA
    ============================================================ */
 @layer utilities {
   /* Texto */
@@ -109,7 +109,7 @@
   .border-brand        { border-color: var(--brand-red); }
   .border-surface      { border-color: rgba(255,255,255,0.08); }
 
-  /* Botão primário */
+  /* BotÃ£o primÃ¡rio */
   .btn-brand {
     background-color: var(--brand-red);
     color: #fff;
@@ -124,7 +124,7 @@
   .btn-brand:active  { transform: scale(0.98); }
   .btn-brand:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 2px; }
 
-  /* Botão WhatsApp */
+  /* BotÃ£o WhatsApp */
   .btn-whatsapp {
     background-color: var(--brand-whatsapp);
     color: #fff;
@@ -170,13 +170,25 @@
     color: #fff !important;
   }
 
-  /* Fonte de título (Anton/Bebas) */
+  /* Fonte de tÃ­tulo (Anton/Bebas) */
   .font-heading { font-family: var(--font-heading, 'Anton', sans-serif); }
 
-  /* Redução de movimento */
+  /* ReduÃ§Ã£o de movimento */
   @media (prefers-reduced-motion: reduce) {
     .card-vehicle,
     .btn-brand,
     .btn-whatsapp { transition: none; }
   }
 }
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+

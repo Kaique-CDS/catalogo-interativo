@@ -41,20 +41,6 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
         {/* Gradiente inferior */}
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
 
-        {/* Selo NOVO / SEMINOVO */}
-        <div className="absolute top-2.5 left-2.5">
-          <span className="bg-brand text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px] uppercase tracking-wide">
-            {isNew ? 'Novo' : 'Seminovo'}
-          </span>
-        </div>
-
-        {/* Marca no topo direito */}
-        <div className="absolute top-2.5 right-2.5">
-          <span className="bg-black/60 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-0.5 rounded-[4px]">
-            {vehicle.brand}
-          </span>
-        </div>
-
         {/* Overlay hover */}
         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
           <span className="bg-white/95 text-zinc-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
