@@ -49,17 +49,17 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
   }
 
   const getBrandLogo = (b: string) => {
-    const l = b.toLowerCase()
-    if (l.includes('audi'))       return 'https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg'
-    if (l.includes('bmw'))        return 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'
-    if (l.includes('toyota'))     return 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.svg'
-    if (l.includes('honda'))      return 'https://upload.wikimedia.org/wikipedia/commons/3/38/Honda.svg'
-    if (l.includes('volkswagen') || l.includes('vw')) return 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.svg'
-    if (l.includes('fiat'))       return 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Fiat_Logo_2020.svg'
-    if (l.includes('ford'))       return 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Ford_Motor_Company_Logo.svg'
-    if (l.includes('chevrolet'))  return 'https://upload.wikimedia.org/wikipedia/commons/1/1e/Chevrolet-logo.png'
-    if (l.includes('jeep'))       return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="900" font-size="48" fill="%23888">Jeep</text></svg>`
-    return null
+    const l = b.toLowerCase().trim()
+    let slug = l
+    if (l === 'mercedes' || l === 'mercedes benz') slug = 'mercedes-benz'
+    if (l === 'vw' || l === 'volks') slug = 'volkswagen'
+    if (l === 'land rover') slug = 'land-rover'
+    if (l === 'aston martin') slug = 'aston-martin'
+    if (l === 'alfa romeo') slug = 'alfa-romeo'
+    
+    // As imagens da carlogos.org tem padrão de nomenclatura:
+    // https://www.carlogos.org/car-logos/{slug}-logo.png
+    return `https://www.carlogos.org/car-logos/${slug}-logo.png`
   }
 
   return (
@@ -83,12 +83,22 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
                 title={b}
               >
                 {logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={logo}
-                    alt={b}
-                    className={`w-full h-full object-contain transition-all brightness-0 invert ${isActive ? 'opacity-100' : 'opacity-70 hover:opacity-100'}`}
-                  />
+                  <div className="w-full h-full relative flex items-center justify-center group-icon">
+                    <img
+                      src={logo}
+                      alt={b}
+                      className={`w-full h-full object-contain transition-all brightness-0 invert ${isActive ? 'opacity-100' : 'opacity-70 hover:opacity-100'}`}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        if (e.currentTarget.nextElementSibling) {
+                          (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
+                        }
+                      }}
+                    />
+                    <span className={`hidden font-bold text-[10px] sm:text-xs truncate w-full text-center ${isActive ? 'text-white' : ''}`}>
+                      {b}
+                    </span>
+                  </div>
                 ) : (
                   <span className={`font-bold text-[10px] sm:text-xs truncate w-full text-center ${isActive ? 'text-white' : ''}`}>
                     {b}
