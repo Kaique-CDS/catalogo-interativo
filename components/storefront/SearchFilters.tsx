@@ -2,11 +2,11 @@
 
 import { useRouter, usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
-import { Search, X, SlidersHorizontal } from 'lucide-react'
+import { Search, X, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef } from 'react'
 
 interface Props {
   brands: string[]
@@ -22,6 +22,14 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
   const [brand, setBrand] = useState(searchParams.brand ?? 'all')
   const [year,  setYear]  = useState(searchParams.year  ?? 'all')
   const [showAdvanced, setShowAdvanced] = useState(false)
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollBrands = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 200
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
+    }
+  }
 
   const applyFilters = useCallback(() => {
     const params = new URLSearchParams()
@@ -67,46 +75,62 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
 
       {/* ── Filtro rápido por marca ── */}
       {brands.length > 0 && (
-        <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide snap-x">
-          {brands.map(b => {
-            const logo     = getBrandLogo(b)
-            const isActive = brand === b
-            return (
-              <button
-                key={b}
-                onClick={() => handleBrandClick(b)}
-                className={`snap-center shrink-0 min-h-[44px] h-12 w-16 sm:h-14 sm:w-20 rounded-xl flex items-center justify-center border p-2 transition-all duration-150
-                  ${isActive
-                    ? 'bg-brand border-brand shadow-[0_0_0_2px_var(--brand-red)]'
-                    : 'bg-surface-2 border-surface text-muted-foreground hover:border-white/30 hover:bg-surface-3'
-                  }`}
-                title={b}
-              >
-                {logo ? (
-                  <div className="w-full h-full relative flex items-center justify-center group-icon">
-                    <img
-                      src={logo}
-                      alt={b}
-                      className={`w-full h-full object-contain transition-all ${isActive ? 'opacity-100 scale-110' : 'opacity-80 hover:opacity-100 hover:scale-105'}`}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        if (e.currentTarget.nextElementSibling) {
-                          (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
-                        }
-                      }}
-                    />
-                    <span className={`hidden font-bold text-[10px] sm:text-xs truncate w-full text-center ${isActive ? 'text-white' : ''}`}>
+        <div className="relative group/brands">
+          <button 
+            onClick={() => scrollBrands('left')}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-7 w-7 items-center justify-center rounded-full bg-zinc-900 text-white border border-surface shadow-md -ml-3 opacity-0 group-hover/brands:opacity-100 transition-opacity hover:bg-zinc-800"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          <div ref={scrollRef} className="flex overflow-x-auto gap-2 pb-1 scrollbar-hide snap-x relative">
+            {brands.map(b => {
+              const logo     = getBrandLogo(b)
+              const isActive = brand === b
+              return (
+                <button
+                  key={b}
+                  onClick={() => handleBrandClick(b)}
+                  className={`snap-center shrink-0 min-h-[44px] h-12 w-16 sm:h-14 sm:w-20 rounded-xl flex items-center justify-center border p-2 transition-all duration-150
+                    ${isActive
+                      ? 'bg-brand border-brand shadow-[0_0_0_2px_var(--brand-red)]'
+                      : 'bg-surface-2 border-surface text-muted-foreground hover:border-white/30 hover:bg-surface-3'
+                    }`}
+                  title={b}
+                >
+                  {logo ? (
+                    <div className="w-full h-full relative flex items-center justify-center group-icon">
+                      <img
+                        src={logo}
+                        alt={b}
+                        className={`w-full h-full object-contain transition-all ${isActive ? 'opacity-100 scale-110' : 'opacity-80 hover:opacity-100 hover:scale-105'}`}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          if (e.currentTarget.nextElementSibling) {
+                            (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'block';
+                          }
+                        }}
+                      />
+                      <span className={`hidden font-bold text-[10px] sm:text-xs truncate w-full text-center ${isActive ? 'text-white' : ''}`}>
+                        {b}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className={`font-bold text-[10px] sm:text-xs truncate w-full text-center ${isActive ? 'text-white' : ''}`}>
                       {b}
                     </span>
-                  </div>
-                ) : (
-                  <span className={`font-bold text-[10px] sm:text-xs truncate w-full text-center ${isActive ? 'text-white' : ''}`}>
-                    {b}
-                  </span>
-                )}
-              </button>
-            )
-          })}
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          <button 
+            onClick={() => scrollBrands('right')}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-7 w-7 items-center justify-center rounded-full bg-zinc-900 text-white border border-surface shadow-md -mr-3 opacity-0 group-hover/brands:opacity-100 transition-opacity hover:bg-zinc-800"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       )}
 

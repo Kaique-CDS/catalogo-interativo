@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import {
   X, Calendar, Gauge, Fuel, Cog, Check, ShieldCheck, MapPin,
-  Share2, ChevronDown, Clock,
+  Share2, ChevronDown, Clock, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,11 +28,20 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
   const [hasTradeIn, setHasTradeIn] = useState(false)
   const [activePhoto, setActivePhoto] = useState(0)
 
+  const photoScrollRef = React.useRef<HTMLDivElement>(null)
+
   const handlePhotoScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollLeft = e.currentTarget.scrollLeft
     const width = e.currentTarget.clientWidth
     if (width > 0) {
       setActivePhoto(Math.round(scrollLeft / width))
+    }
+  }
+
+  const scrollPhotos = (direction: 'left' | 'right') => {
+    if (photoScrollRef.current) {
+      const width = photoScrollRef.current.clientWidth
+      photoScrollRef.current.scrollBy({ left: direction === 'left' ? -width : width, behavior: 'smooth' })
     }
   }
 
@@ -167,25 +176,42 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           onClick={(e) => e.stopPropagation()}
         >
           {/* Photos Carousel */}
-          <div className="relative aspect-[16/10] sm:aspect-video w-full bg-zinc-900 flex-shrink-0 overflow-hidden group">
+          <div className="relative aspect-[16/10] sm:aspect-video w-full bg-zinc-900 flex-shrink-0 overflow-hidden group/photos">
             {vehicle.images && vehicle.images.length > 0 ? (
-              <div 
-                className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-                onScroll={handlePhotoScroll}
-              >
-                {vehicle.images.map((img, idx) => (
-                  <div key={idx} className="relative min-w-full h-full snap-center shrink-0">
-                    <Image
-                      src={img}
-                      alt={`${vehicle.title} - Foto ${idx + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 672px"
-                      priority={idx === 0}
-                    />
-                  </div>
-                ))}
-              </div>
+              <>
+                <button 
+                  onClick={() => scrollPhotos('left')}
+                  className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/photos:opacity-100 transition-opacity hover:bg-black/60"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+
+                <div 
+                  ref={photoScrollRef}
+                  className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+                  onScroll={handlePhotoScroll}
+                >
+                  {vehicle.images.map((img, idx) => (
+                    <div key={idx} className="relative min-w-full h-full snap-center shrink-0">
+                      <Image
+                        src={img}
+                        alt={`${vehicle.title} - Foto ${idx + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 672px"
+                        priority={idx === 0}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <button 
+                  onClick={() => scrollPhotos('right')}
+                  className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover/photos:opacity-100 transition-opacity hover:bg-black/60"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              </>
             ) : (
               <div className="h-full flex items-center justify-center text-zinc-500">Sem fotos</div>
             )}
