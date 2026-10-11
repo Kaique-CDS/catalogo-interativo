@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Pencil, Trash2, Eye, EyeOff, Car, LayoutList, LayoutGrid } from 'lucide-react'
+import { Pencil, Trash2, Eye, EyeOff, Car, LayoutList, LayoutGrid, Search, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { createClient } from '@/lib/supabase/client'
@@ -19,11 +20,26 @@ type ViewMode = 'completo' | 'simples'
 export default function VehicleTable({ vehicles: initialVehicles, slug }: Props) {
   const [vehicles, setVehicles] = useState(initialVehicles)
   const [viewMode, setViewMode] = useState<ViewMode>('completo')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [visibleCount, setVisibleCount] = useState(9)
   const supabase = createClient()
 
   useEffect(() => {
     setVehicles(initialVehicles)
   }, [initialVehicles])
+
+  const filteredVehicles = vehicles.filter(v => {
+    if (!searchTerm) return true
+    const term = searchTerm.toLowerCase().trim()
+    return (
+      v.title.toLowerCase().includes(term) ||
+      v.brand.toLowerCase().includes(term) ||
+      v.model.toLowerCase().includes(term) ||
+      (v.sku && v.sku.toLowerCase().includes(term))
+    )
+  })
+
+  const displayedVehicles = filteredVehicles.slice(0, visibleCount)
 
   const toggleActive = async (vehicle: Vehicle) => {
     const nextState = !vehicle.is_active
@@ -64,10 +80,27 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* Search by SKU, model, brand */}
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por SKU, modelo ou marca..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value)
+            setVisibleCount(9)
+          }}
+          className="pl-10 h-11 bg-surface-1 border-surface text-white placeholder:text-muted-foreground/60 rounded-xl"
+        />
+      </div>
+
       {/* Toggle view mode */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">{vehicles.length} veículo{vehicles.length !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-muted-foreground">
+          Exibindo {Math.min(visibleCount, filteredVehicles.length)} de {filteredVehicles.length} veículo{filteredVehicles.length !== 1 ? 's' : ''}
+          {searchTerm && <span className="text-brand font-medium ml-1">(filtrado)</span>}
+        </p>
         <div className="flex items-center gap-1 bg-surface-1 border border-surface p-0.5 rounded-lg">
           <button
             onClick={() => setViewMode('completo')}
@@ -97,7 +130,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
       {/* SIMPLES mode: compact grid cards */}
       {viewMode === 'simples' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          {vehicles.map((v) => (
+          {displayedVehicles.map((v) => (
             <div
               key={v.id}
               className="bg-surface-1 border border-surface hover:bg-surface-2 transition-colors rounded-2xl overflow-hidden shadow-2xs flex gap-3 p-2.5 items-center"
@@ -143,7 +176,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
         <>
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
-            {vehicles.map((v) => (
+            {displayedVehicles.map((v) => (
               <div key={v.id} className="bg-surface-1 p-3.5 rounded-2xl border border-surface shadow-2xs flex gap-3 items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-surface-2 flex-shrink-0 border border-surface">
@@ -199,7 +232,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-surface text-xs">
-                {vehicles.map((vehicle) => (
+                {displayedVehicles.map((vehicle) => (
                   <TableRow key={vehicle.id} className="hover:bg-surface-2 border-surface transition-colors">
                     <TableCell>
                       <div className="relative h-12 w-16 rounded-lg bg-surface-2 overflow-hidden border border-surface">
@@ -253,6 +286,22 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
               </TableBody>
             </Table>
           </div>
+
+          {filteredVehicles.length > visibleCount && (
+            <div className="pt-4 pb-2 text-center">
+              <Button
+                onClick={() => setVisibleCount((c) => c + 9)}
+                variant="outline"
+                className="h-11 px-8 rounded-xl border-surface bg-surface-1 hover:bg-surface-2 text-white font-bold gap-2 text-xs shadow-xs transition-all hover:border-brand"
+              >
+                <span>Ver mais veículos</span>
+                <ChevronDown className="h-4 w-4 text-brand" />
+                <span className="text-muted-foreground font-normal">
+                  ({filteredVehicles.length - visibleCount} restantes)
+                </span>
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>

@@ -65,7 +65,12 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
     }
     if (searchParams.q) {
       const q = searchParams.q.toLowerCase()
-      currentVehicles = currentVehicles.filter(v => v.title.toLowerCase().includes(q) || v.model.toLowerCase().includes(q) || v.brand.toLowerCase().includes(q))
+      currentVehicles = currentVehicles.filter(v => 
+        v.title.toLowerCase().includes(q) || 
+        v.model.toLowerCase().includes(q) || 
+        v.brand.toLowerCase().includes(q) ||
+        (v.sku && v.sku.toLowerCase().includes(q))
+      )
     }
     if (searchParams.minPrice) {
       currentVehicles = currentVehicles.filter(v => v.price >= Number(searchParams.minPrice))

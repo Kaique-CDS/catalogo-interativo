@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react'
 import VehicleCard from './VehicleCard'
 import SearchFilters from './SearchFilters'
 import VehicleDetailModal from './VehicleDetailModal'
-import { Car } from 'lucide-react'
+import { Car, ChevronDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 
 interface Props {
@@ -18,6 +19,11 @@ interface Props {
 export default function VehicleGrid({ vehicles, store, brands, years, searchParams }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [modalStep, setModalStep] = useState<'detail' | 'interest'>('detail')
+  const [visibleCount, setVisibleCount] = useState(3)
+
+  useEffect(() => {
+    setVisibleCount(3)
+  }, [searchParams])
 
   // Auto-open vehicle modal if ?v=ID or ?veiculo=ID is present in URL
   useEffect(() => {
@@ -91,7 +97,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
-            {vehicles.map((vehicle) => (
+            {vehicles.slice(0, visibleCount).map((vehicle) => (
               <VehicleCard
                 key={vehicle.id}
                 vehicle={vehicle}
@@ -101,6 +107,22 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
               />
             ))}
           </div>
+
+          {vehicles.length > visibleCount && (
+            <div className="mt-8 mb-4 text-center">
+              <Button
+                onClick={() => setVisibleCount((prev) => prev + 3)}
+                variant="outline"
+                className="h-11 px-6 rounded-full border-surface bg-surface-2 hover:bg-surface-3 text-white text-xs sm:text-sm font-bold gap-2 shadow-sm transition-all hover:border-brand"
+              >
+                <span>Ver mais veículos</span>
+                <ChevronDown className="h-4 w-4 text-brand" />
+                <span className="text-muted-foreground font-normal text-xs">
+                  ({vehicles.length - visibleCount} restantes)
+                </span>
+              </Button>
+            </div>
+          )}
         </>
       )}
 

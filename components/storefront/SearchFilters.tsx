@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
@@ -65,7 +65,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
     if (l === 'aston martin') slug = 'aston-martin'
     if (l === 'alfa romeo') slug = 'alfa-romeo'
     
-    // As imagens da carlogos.org tem padrão de nomenclatura:
+    // As imagens da carlogos.org tem padrÃ£o de nomenclatura:
     // https://www.carlogos.org/car-logos/{slug}-logo.png
     return `https://www.carlogos.org/car-logos/${slug}-logo.png`
   }
@@ -73,7 +73,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
   return (
     <div className="mb-4 sm:mb-6 space-y-3">
 
-      {/* ── Filtro rápido por marca ── */}
+      {/* â”€â”€ Filtro rÃ¡pido por marca â”€â”€ */}
       {brands.length > 0 && (
         <div className="relative group/brands">
           <button 
@@ -134,13 +134,13 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
         </div>
       )}
 
-      {/* ── Barra de busca ── */}
+      {/* â”€â”€ Barra de busca â”€â”€ */}
       <div className="bg-surface-2 border border-surface rounded-xl p-3 sm:p-4 space-y-3">
         <div className="flex gap-2 items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
-              placeholder="Buscar modelo, versão, ano..."
+              placeholder="Buscar por modelo, marca ou SKU..."
               className="w-full pl-10 pr-3 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand border border-surface rounded-[10px] bg-surface-1 text-white placeholder:text-muted-foreground transition-all"
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -174,7 +174,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
           )}
         </div>
 
-        {/* ── Filtros avançados ── */}
+        {/* â”€â”€ Filtros avanÃ§ados â”€â”€ */}
         {showAdvanced && (
           <div className="pt-3 border-t border-surface grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
