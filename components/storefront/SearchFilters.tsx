@@ -87,7 +87,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
                     <img
                       src={logo}
                       alt={b}
-                      className={`w-full h-full object-contain transition-all brightness-0 invert ${isActive ? 'opacity-100' : 'opacity-70 hover:opacity-100'}`}
+                      className={`w-full h-full object-contain transition-all ${isActive ? 'opacity-100 scale-110' : 'opacity-80 hover:opacity-100 hover:scale-105'}`}
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                         if (e.currentTarget.nextElementSibling) {
