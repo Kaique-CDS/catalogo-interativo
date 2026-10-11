@@ -25,12 +25,14 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
         const res = await fetch(`/api/vehicles?slug=${slug}`)
         if (res.ok) {
           const data = await res.json()
-          // Se a API respondeu 200 OK, assumimos que o banco está funcionando.
-          // Mesmo se vier vazio ([]), devemos exibir vazio, e não os mocks.
           setVehicles(data || [])
           return
+        } else {
+          const errData = await res.json()
+          console.error("API GET Error:", errData)
+          // throw new Error(errData.error || 'Erro desconhecido')
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error('Falha ao buscar veículos da API:', e)
       }
       
