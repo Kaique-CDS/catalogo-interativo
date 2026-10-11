@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Upload, X, FileSpreadsheet, Loader2, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import Papa from 'papaparse'
+import { generateSKU } from '@/lib/sku'
 
 interface Props {
   slug: string
@@ -68,7 +69,7 @@ export default function BulkUploadModal({ slug, onClose, onSuccess }: Props) {
               description: row.descricao || 'Veículo em excelente estado.',
               images: row.fotos ? String(row.fotos).split(/[,;]/).map((f: string) => f.trim()).filter((url: string) => url.startsWith('http')) : [],
               is_active: String(row.ativo).toUpperCase() === 'N' ? false : true,
-              sku: `BLK${Date.now().toString().slice(-4)}${i}`
+              sku: row.sku ? String(row.sku).trim() : generateSKU()
             }
 
             // Post to API

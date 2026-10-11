@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     
     const { 
       slug, store_id, title, brand, model, year, mileage, price, fuel, transmission, 
-      color, plate_end, features, badge, description, images, is_active 
+      color, plate_end, features, badge, description, images, is_active, sku
     } = body
 
     if ((!slug && !store_id) || !title || !brand || !model || !year) {
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
           description,
           images: images || [],
           is_active: is_active ?? true,
+          sku: sku || `MHC-${Math.floor(1000 + Math.random() * 9000)}`, // Fallback
       }])
       .select()
       .single()
