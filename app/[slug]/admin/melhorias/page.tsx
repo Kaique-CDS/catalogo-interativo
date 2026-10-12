@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { Lightbulb, Plus, Trash2, AlertCircle, Wrench, Zap, Bug, MessageCircle, Loader2 } from 'lucide-react'
+import { Lightbulb, Plus, Trash2, AlertCircle, Wrench, Bug, MessageCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -21,12 +21,19 @@ const CATEGORIES = ['Urgente', 'Melhoria', 'Ideia', 'Bug'] as const
 
 const categoryConfig: Record<
   Note['category'],
-  { label: string; className: string; icon: React.ElementType }
+  { label: string; className: string; icon: React.ElementType; dbTipo: 'urgente' | 'feature' | 'analise' | 'bug' }
 > = {
-  Urgente:  { label: 'Urgente',  className: 'bg-surface-2 text-muted-foreground', icon: AlertCircle },
-  Melhoria: { label: 'Melhoria', className: 'bg-surface-2 text-muted-foreground', icon: Wrench },
-  Ideia:    { label: 'Ideia',    className: 'bg-surface-2 text-muted-foreground', icon: Lightbulb },
-  Bug:      { label: 'Bug',      className: 'bg-surface-2 text-muted-foreground', icon: Bug },
+  Urgente:  { label: 'Urgente',  className: 'bg-surface-2 text-muted-foreground', icon: AlertCircle, dbTipo: 'urgente' },
+  Melhoria: { label: 'Melhoria', className: 'bg-surface-2 text-muted-foreground', icon: Wrench, dbTipo: 'feature' },
+  Ideia:    { label: 'Ideia',    className: 'bg-surface-2 text-muted-foreground', icon: Lightbulb, dbTipo: 'analise' },
+  Bug:      { label: 'Bug',      className: 'bg-surface-2 text-muted-foreground', icon: Bug, dbTipo: 'bug' },
+}
+
+const dbTipoToCategory: Record<string, Note['category']> = {
+  urgente: 'Urgente',
+  feature: 'Melhoria',
+  analise: 'Ideia',
+  bug: 'Bug',
 }
 
 function formatDate(iso: string) {
@@ -52,9 +59,28 @@ export default function MelhoriasPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState<string | null>(null)
 
-  // Load from localStorage
-  useEffect(() => {
+  const loadNotes = useCallback(async () => {
     if (!slug) return
+    try {
+      const res = await fetch('/api/admin/melhorias', { cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data.melhorias)) {
+          const mapped: Note[] = data.melhorias.map((m: any) => ({
+            id: m.id,
+            title: m.titulo,
+            description: m.descricao || '',
+            category: dbTipoToCategory[m.tipo] || 'Melhoria',
+            createdAt: m.created_at,
+          }))
+          setNotes(mapped)
+          localStorage.setItem(storageKey, JSON.stringify(mapped))
+          return
+        }
+      }
+    } catch {
+      // fallback to localStorage
+    }
     try {
       const stored = localStorage.getItem(storageKey)
       if (stored) setNotes(JSON.parse(stored))
@@ -62,6 +88,10 @@ export default function MelhoriasPage() {
       setNotes([])
     }
   }, [slug, storageKey])
+
+  useEffect(() => {
+    loadNotes()
+  }, [loadNotes])
 
   const persist = (updated: Note[]) => {
     setNotes(updated)
@@ -79,25 +109,36 @@ export default function MelhoriasPage() {
     setIsSubmitting(true)
     setFallbackWhatsappUrl(null)
 
-    // 1. Mantém a lista local funcionando normalmente
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      title: currentTitle,
-      description: currentDescription,
-      category: currentCategory,
-      createdAt: new Date().toISOString(),
-    }
-    persist([newNote, ...notes])
     setTitle('')
     setDescription('')
     setCategory('Melhoria')
 
-    // 2. Prepara o link do WhatsApp com encodeURIComponent
     const whatsappMessage = `[Ticket - ${currentCategory}]\nTítulo: ${currentTitle}\nDescrição: ${currentDescription || 'Sem descrição informada'}`
     const whatsappUrl = `https://wa.me/5511993270543?text=${encodeURIComponent(whatsappMessage)}`
 
-    // 3. Dispara o envio de e-mail via API route (/api/send-ticket)
     try {
+      // 1. Salva na tabela melhorias no Supabase
+      const dbRes = await fetch('/api/admin/melhorias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo: categoryConfig[currentCategory].dbTipo,
+          titulo: currentTitle,
+          descricao: currentDescription || null,
+        }),
+      })
+      const dbData = await dbRes.json().catch(() => ({}))
+
+      const newNote: Note = {
+        id: dbData?.melhoria?.id || crypto.randomUUID(),
+        title: currentTitle,
+        description: currentDescription,
+        category: currentCategory,
+        createdAt: dbData?.melhoria?.created_at || new Date().toISOString(),
+      }
+      persist([newNote, ...notes])
+
+      // 2. Dispara o envio de e-mail via API route (/api/send-ticket)
       const res = await fetch('/api/send-ticket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -114,9 +155,9 @@ export default function MelhoriasPage() {
         throw new Error(data.error || 'Falha ao enviar notificação por e-mail.')
       }
 
-      toast.success('Anotação adicionada e ticket enviado por e-mail!')
+      toast.success('Anotação salva no Supabase e ticket enviado por e-mail!')
 
-      // 4. Abre o WhatsApp automaticamente após sucesso do e-mail se o navegador estiver em primeiro plano
+      // 3. Abre o WhatsApp automaticamente após sucesso do e-mail se o navegador estiver em primeiro plano
       const isForeground =
         typeof document !== 'undefined' &&
         document.visibilityState === 'visible' &&
@@ -132,15 +173,20 @@ export default function MelhoriasPage() {
         setFallbackWhatsappUrl(whatsappUrl)
       }
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao enviar e-mail do ticket. A anotação foi salva localmente.')
+      toast.error(err?.message || 'Erro ao enviar e-mail do ticket. A anotação foi salva.')
       setFallbackWhatsappUrl(whatsappUrl)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     persist(notes.filter((n) => n.id !== id))
+    try {
+      await fetch(`/api/admin/melhorias?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+    } catch {
+      // ignore
+    }
   }
 
   return (
@@ -249,7 +295,7 @@ export default function MelhoriasPage() {
           </div>
         ) : (
           notes.map((note) => {
-            const cfg = categoryConfig[note.category]
+            const cfg = categoryConfig[note.category] || categoryConfig.Melhoria
             const Icon = cfg.icon
             return (
               <div

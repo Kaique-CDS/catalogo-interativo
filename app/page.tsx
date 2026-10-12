@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { Car, MessageCircle, Zap, Sparkles, CheckCircle2, ChevronRight, BarChart3, Users, LayoutDashboard, Shirt, Smile, Utensils, Brush, MonitorSmartphone, Gift, ArrowUpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ThemeProvider } from '@/components/ThemeProvider'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default function LandingPage() {
   const [showDemoModal, setShowDemoModal] = useState(false)
@@ -18,6 +20,7 @@ export default function LandingPage() {
   }
 
   return (
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 font-sans transition-colors duration-300 relative">
       
       {/* Botão flutuante Voltar ao Topo */}
@@ -47,8 +50,9 @@ export default function LandingPage() {
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/loja-exemplo">
-              <Button variant="ghost" size="sm" className="hidden sm:flex">Home / Demo</Button>
+              <Button variant="ghost" size="sm" className="hidden sm:flex text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">Home / Demo</Button>
             </Link>
+            <ThemeToggle />
             <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs text-xs sm:text-sm px-3 sm:px-4" onClick={() => setShowDemoModal(true)}>
               Assinar Agora
             </Button>
@@ -352,5 +356,6 @@ export default function LandingPage() {
       )}
 
     </div>
+    </ThemeProvider>
   )
 }

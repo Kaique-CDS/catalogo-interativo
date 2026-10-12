@@ -3,7 +3,6 @@ import { Montserrat, Anton } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import CookieBanner from '@/components/storefront/CookieBanner'
-import { ThemeProvider } from '@/components/ThemeProvider'
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -38,20 +37,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning className="dark">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${montserrat.variable} ${anton.variable} font-sans antialiased`}
             style={{ fontFamily: 'var(--font-body, Montserrat, sans-serif)' }}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          forcedTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          {children}
-          <CookieBanner />
-          <Toaster richColors position="top-right" />
-        </ThemeProvider>
+        {children}
+        <CookieBanner />
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   )

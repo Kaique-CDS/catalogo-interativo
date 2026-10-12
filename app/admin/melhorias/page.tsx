@@ -1,33 +1,52 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Lightbulb, Plus, Trash2, AlertCircle, Sparkles, Bug, BarChart2 } from 'lucide-react'
+import React, { useState, useEffect, useCallback } from 'react'
+import {
+  Lightbulb,
+  Plus,
+  Trash2,
+  AlertCircle,
+  Sparkles,
+  Bug,
+  BarChart2,
+  MessageCircle,
+  Loader2,
+  RefreshCw,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+import type { ErpMelhoria, MelhoriaTipo } from '@/lib/supabase/erp-db'
 
-interface Note {
-  id: string
-  title: string
-  description: string
-  category: 'Urgente' | 'Feature' | 'Bug' | 'Análise'
-  createdAt: string
-}
-
-const CATEGORIES = ['Urgente', 'Feature', 'Bug', 'Análise'] as const
+const CATEGORIES: MelhoriaTipo[] = ['urgente', 'feature', 'bug', 'analise']
 
 const categoryConfig: Record<
-  Note['category'],
+  MelhoriaTipo,
   { label: string; className: string; icon: React.ElementType }
 > = {
-  Urgente: { label: 'Urgente',  className: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400',     icon: AlertCircle },
-  Feature: { label: 'Feature',  className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400', icon: Sparkles },
-  Bug:     { label: 'Bug',      className: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',           icon: Bug },
-  Análise: { label: 'Análise',  className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',   icon: BarChart2 },
+  urgente: {
+    label: 'Urgente',
+    className: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400',
+    icon: AlertCircle,
+  },
+  feature: {
+    label: 'Feature',
+    className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400',
+    icon: Sparkles,
+  },
+  bug: {
+    label: 'Bug',
+    className: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
+    icon: Bug,
+  },
+  analise: {
+    label: 'Análise',
+    className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+    icon: BarChart2,
+  },
 }
-
-const STORAGE_KEY = 'vendazap_admin_notes'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('pt-BR', {
@@ -40,64 +59,156 @@ function formatDate(iso: string) {
 }
 
 export default function SuperAdminMelhoriasPage() {
-  const [notes, setNotes] = useState<Note[]>([])
+  const [notes, setNotes] = useState<ErpMelhoria[]>([])
+  const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState<Note['category']>('Feature')
+  const [category, setCategory] = useState<MelhoriaTipo>('feature')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState<string | null>(null)
 
-  // Load from localStorage
-  useEffect(() => {
+  const loadMelhorias = useCallback(async () => {
+    setLoading(true)
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) setNotes(JSON.parse(stored))
+      const res = await fetch('/api/admin/melhorias', { cache: 'no-store' })
+      if (!res.ok) throw new Error('Falha ao carregar melhorias')
+      const data = await res.json()
+      setNotes(data.melhorias || [])
     } catch {
-      setNotes([])
+      toast.error('Erro ao carregar anotações do banco.')
+    } finally {
+      setLoading(false)
     }
   }, [])
 
-  const persist = (updated: Note[]) => {
-    setNotes(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-  }
+  useEffect(() => {
+    loadMelhorias()
+  }, [loadMelhorias])
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return
+    if (!title.trim() || isSubmitting) return
+
+    const currentTitle = title.trim()
+    const currentDescription = description.trim()
+    const currentCategory = category
+    const categoryLabel = categoryConfig[currentCategory].label
+
     setIsSubmitting(true)
-    const newNote: Note = {
-      id: crypto.randomUUID(),
-      title: title.trim(),
-      description: description.trim(),
-      category,
-      createdAt: new Date().toISOString(),
+    setFallbackWhatsappUrl(null)
+
+    const whatsappMessage = `[Ticket - ${categoryLabel}]\nTítulo: ${currentTitle}\nDescrição: ${currentDescription || 'Sem descrição informada'}`
+    const whatsappUrl = `https://wa.me/5511993270543?text=${encodeURIComponent(whatsappMessage)}`
+
+    try {
+      // 1. Salva no Supabase na tabela melhorias
+      const dbRes = await fetch('/api/admin/melhorias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo: currentCategory,
+          titulo: currentTitle,
+          descricao: currentDescription || null,
+        }),
+      })
+      const dbData = await dbRes.json()
+      if (!dbRes.ok) {
+        throw new Error(dbData.error || 'Erro ao salvar anotação no banco.')
+      }
+
+      if (dbData.melhoria) {
+        setNotes((prev) => [dbData.melhoria, ...prev])
+      } else {
+        loadMelhorias()
+      }
+
+      setTitle('')
+      setDescription('')
+      setCategory('feature')
+
+      // 2. Envia notificação por e-mail via Resend (/api/send-ticket)
+      const emailRes = await fetch('/api/send-ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo: categoryLabel,
+          titulo: currentTitle,
+          descricao: currentDescription,
+        }),
+      })
+
+      if (!emailRes.ok) {
+        const errData = await emailRes.json().catch(() => ({}))
+        toast.warning(errData.error || 'Salvo no banco, mas houve falha no disparo de e-mail.')
+        setFallbackWhatsappUrl(whatsappUrl)
+        return
+      }
+
+      toast.success('Anotação salva no Supabase e ticket enviado por e-mail!')
+
+      // 3. Abre WhatsApp automaticamente se o navegador estiver em primeiro plano
+      const isForeground =
+        typeof document !== 'undefined' &&
+        document.visibilityState === 'visible' &&
+        document.hasFocus()
+
+      if (isForeground) {
+        const popup = window.open(whatsappUrl, '_blank')
+        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+          setFallbackWhatsappUrl(whatsappUrl)
+          toast.info('Janela automática bloqueada. Clique em "Abrir WhatsApp" abaixo.')
+        }
+      } else {
+        setFallbackWhatsappUrl(whatsappUrl)
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao registrar anotação.')
+      setFallbackWhatsappUrl(whatsappUrl)
+    } finally {
+      setIsSubmitting(false)
     }
-    persist([newNote, ...notes])
-    setTitle('')
-    setDescription('')
-    setCategory('Feature')
-    setIsSubmitting(false)
   }
 
-  const handleDelete = (id: string) => {
-    persist(notes.filter((n) => n.id !== id))
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/melhorias?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Falha ao excluir')
+      setNotes((prev) => prev.filter((n) => n.id !== id))
+      toast.success('Anotação removida do banco.')
+    } catch {
+      toast.error('Erro ao excluir anotação.')
+    }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">
-          Melhorias da Plataforma
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          Anotações internas da equipe VendaZap.
-        </p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight">
+            Melhorias &amp; Tickets da Plataforma
+          </h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            Salvo em tempo real no Supabase com disparo via Resend e WhatsApp.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={loadMelhorias}
+          disabled={loading}
+          className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl"
+          title="Recarregar anotações"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
 
       {/* Add Note Form */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 sm:p-6 shadow-xs">
-        <h2 className="text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-4">Nova anotação</h2>
+        <h2 className="text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-4">Nova anotação / Ticket</h2>
         <form onSubmit={handleAdd} className="space-y-3">
           {/* Category toggle pills */}
           <div className="flex flex-wrap gap-2">
@@ -112,7 +223,7 @@ export default function SuperAdminMelhoriasPage() {
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all',
                     category === cat
                       ? cn(cfg.className, 'border-transparent ring-2 ring-offset-1 ring-indigo-400/40')
-                      : 'border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                      : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 bg-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   )}
                 >
                   <cfg.icon className="h-3.5 w-3.5" />
@@ -127,7 +238,7 @@ export default function SuperAdminMelhoriasPage() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Título da anotação *"
             required
-            className="bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 rounded-xl text-sm"
+            className="bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white rounded-xl text-sm"
           />
 
           <Textarea
@@ -135,35 +246,65 @@ export default function SuperAdminMelhoriasPage() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descrição ou detalhes (opcional)"
             rows={3}
-            className="bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 rounded-xl text-sm resize-none"
+            className="bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white rounded-xl text-sm resize-none"
           />
 
-          <Button
-            type="submit"
-            disabled={isSubmitting || !title.trim()}
-            className="w-full sm:w-auto gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold"
-          >
-            <Plus className="h-4 w-4" />
-            Adicionar anotação
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !title.trim()}
+              className="w-full sm:w-auto gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold h-11 px-6"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Salvando &amp; Enviando...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Adicionar anotação
+                </>
+              )}
+            </Button>
+
+            {fallbackWhatsappUrl && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  window.open(fallbackWhatsappUrl, '_blank')
+                  setFallbackWhatsappUrl(null)
+                }}
+                className="w-full sm:w-auto gap-2 rounded-xl text-sm font-semibold h-11 px-5 border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Abrir WhatsApp
+              </Button>
+            )}
+          </div>
         </form>
       </div>
 
       {/* Notes List */}
       <div className="space-y-3">
-        {notes.length === 0 ? (
+        {loading ? (
+          <div className="py-12 text-center text-xs text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+            Carregando anotações do Supabase...
+          </div>
+        ) : notes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs">
             <div className="h-14 w-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-4">
               <Lightbulb className="h-7 w-7 text-indigo-500" />
             </div>
-            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Nenhuma anotação ainda</p>
+            <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Nenhuma anotação cadastrada</p>
             <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-xs">
-              Use o formulário acima para registrar features, bugs ou análises da plataforma.
+              Use o formulário acima para registrar tickets, melhorias ou bugs no Supabase.
             </p>
           </div>
         ) : (
           notes.map((note) => {
-            const cfg = categoryConfig[note.category]
+            const cfg = categoryConfig[note.tipo] || categoryConfig.feature
             const Icon = cfg.icon
             return (
               <div
@@ -182,15 +323,15 @@ export default function SuperAdminMelhoriasPage() {
                       {cfg.label}
                     </span>
                     <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
-                      {formatDate(note.createdAt)}
+                      {formatDate(note.created_at)}
                     </span>
                   </div>
                   <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 truncate">
-                    {note.title}
+                    {note.titulo}
                   </p>
-                  {note.description && (
+                  {note.descricao && (
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">
-                      {note.description}
+                      {note.descricao}
                     </p>
                   )}
                 </div>
@@ -198,7 +339,7 @@ export default function SuperAdminMelhoriasPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(note.id)}
-                  className="h-8 w-8 flex-shrink-0 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  className="h-8 w-8 flex-shrink-0 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
                   title="Excluir anotação"
                 >
                   <Trash2 className="h-4 w-4" />
