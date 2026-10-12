@@ -25,11 +25,13 @@ export async function PUT(
       badge,
       description,
       images,
+      fotos,
+      fotos_urls,
+      foto_capa_url,
       is_active,
       sku,
     } = body
 
-    // Monta apenas colunas válidas da tabela vehicles (ignora slug, id, store_id, created_at)
     const updatePayload: Record<string, any> = {}
     if (title !== undefined) updatePayload.title = title
     if (brand !== undefined) updatePayload.brand = brand
@@ -44,16 +46,52 @@ export async function PUT(
     if (features !== undefined) updatePayload.features = features
     if (badge !== undefined) updatePayload.badge = badge
     if (description !== undefined) updatePayload.description = description
-    if (images !== undefined) updatePayload.images = images
     if (is_active !== undefined) updatePayload.is_active = is_active
     if (sku !== undefined) updatePayload.sku = sku
 
-    const { data, error } = await supabase
+    if (images !== undefined || fotos_urls !== undefined) {
+      const rawUrls: string[] = Array.isArray(fotos_urls) && fotos_urls.length > 0
+        ? fotos_urls
+        : Array.isArray(images)
+        ? images
+        : []
+      const capaFromFotos = Array.isArray(fotos)
+        ? fotos.find((f: any) => f?.is_capa && f?.url)?.url
+        : undefined
+      const chosenCapa: string | undefined = foto_capa_url || capaFromFotos || rawUrls[0]
+      const orderedImages = chosenCapa
+        ? [chosenCapa, ...rawUrls.filter((u) => u !== chosenCapa)]
+        : rawUrls
+      updatePayload.images = orderedImages
+    }
+
+    const extendedPayload: Record<string, any> = { ...updatePayload }
+    if (updatePayload.images !== undefined) {
+      const orderedImages: string[] = updatePayload.images
+      extendedPayload.fotos_urls = orderedImages
+      extendedPayload.foto_capa_url = orderedImages[0] || null
+      extendedPayload.fotos = Array.isArray(fotos) && fotos.length > 0
+        ? fotos
+        : orderedImages.map((url, idx) => ({ url, is_capa: idx === 0 }))
+    }
+
+    let { data, error } = await supabase
       .from('vehicles')
-      .update(updatePayload)
+      .update(extendedPayload)
       .eq('id', id)
       .select()
       .single()
+
+    if (error && (error.message?.includes('column') || error.code === 'PGRST204' || error.code === '42703')) {
+      const retry = await supabase
+        .from('vehicles')
+        .update(updatePayload)
+        .eq('id', id)
+        .select()
+        .single()
+      data = retry.data
+      error = retry.error
+    }
 
     if (error) {
       console.error('Supabase error updating vehicle:', error)

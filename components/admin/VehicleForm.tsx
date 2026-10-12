@@ -13,11 +13,23 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles, Lock, Edit3 } from 'lucide-react'
+import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles, Lock, Edit3, Star } from 'lucide-react'
 import { toast } from 'sonner'
+import imageCompression from 'browser-image-compression'
 import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
 import { generateWithGemini, buildVehicleDescriptionPrompt, getGeminiApiKey } from '@/lib/gemini'
+
+interface UploadingPhoto {
+  id: string
+  previewUrl: string
+  progress: number
+  stage: 'compressing' | 'uploading'
+  name: string
+}
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_ORIGINAL_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 const COMMON_FEATURES = [
   'Ar-condicionado',
@@ -61,7 +73,10 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const supabase = createClient()
   const isEditing = !!vehicle
 
+  const [vehicleId] = useState<string>(() => vehicle?.id || crypto.randomUUID())
   const [images, setImages] = useState<string[]>(vehicle?.images ?? [])
+  const [uploadingPhotos, setUploadingPhotos] = useState<UploadingPhoto[]>([])
+  const [isDragging, setIsDragging] = useState(false)
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(vehicle?.features ?? [])
   const [fuel, setFuel] = useState<string>(vehicle?.fuel ?? 'Flex')
   const [transmission, setTransmission] = useState<string>(vehicle?.transmission ?? 'Automático')
@@ -166,68 +181,208 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    let files = Array.from(e.target.files ?? [])
-    if (files.length === 0) return
+  const updateUploadItem = (
+    itemId: string,
+    patch: Partial<Pick<UploadingPhoto, 'progress' | 'stage'>>
+  ) => {
+    setUploadingPhotos((prev) =>
+      prev.map((item) => (item.id === itemId ? { ...item, ...patch } : item))
+    )
+  }
 
-    // Hard limit: 10
-    if (images.length >= 10) {
-      toast.error('Limite de 10 fotos por veículo atingido. Remova uma foto para adicionar outra.')
-      e.target.value = ''
-      return
-    }
+  const uploadToServerWithProgress = (
+    fileToSend: File,
+    marca: string,
+    idVeiculo: string,
+    onProgress: (pct: number) => void
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', '/api/upload-foto')
 
-    // Soft limit: trim files that would exceed 10
-    if (images.length + files.length > 10) {
-      const allowed = 10 - images.length
-      files = files.slice(0, allowed)
-      toast.warning(`Apenas ${allowed} foto(s) adicionada(s) para não ultrapassar o limite de 10.`)
-    }
+      xhr.upload.onprogress = (ev) => {
+        if (ev.lengthComputable && ev.total > 0) {
+          const pct = Math.round((ev.loaded / ev.total) * 100)
+          onProgress(pct)
+        }
+      }
 
-    setUploading(true)
-    const newUrls: string[] = []
+      xhr.onload = () => {
+        try {
+          const data = JSON.parse(xhr.responseText || '{}')
+          if (xhr.status >= 200 && xhr.status < 300 && data.secure_url) {
+            resolve(data.secure_url)
+          } else {
+            reject(new Error(data.error || 'Falha ao enviar imagem para o Cloudinary.'))
+          }
+        } catch {
+          reject(new Error('Resposta inválida do servidor de upload.'))
+        }
+      }
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo'
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || 'catalogo_interativo'
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`
-
-    for (const file of files) {
-      if (cloudName === 'demo') {
-        newUrls.push(URL.createObjectURL(file))
-        continue
+      xhr.onerror = () => {
+        reject(new Error('Falha de conexão durante o upload da foto.'))
       }
 
       const formData = new FormData()
-      formData.append('file', file)
-      formData.append('upload_preset', uploadPreset)
+      formData.append('file', fileToSend)
+      formData.append('marca', marca)
+      formData.append('id_veiculo', idVeiculo)
+      xhr.send(formData)
+    })
+  }
 
-      try {
-        const res = await fetch(cloudinaryUrl, {
-          method: 'POST',
-          body: formData
-        })
-        if (res.ok) {
-          const data = await res.json()
-          newUrls.push(data.secure_url)
-        } else {
-          console.error('Falha no upload para Cloudinary')
-          toast.error('Erro ao enviar imagem.')
-        }
-      } catch (err) {
-        console.error('Erro de rede no upload:', err)
-        toast.error('Falha de conexão no upload.')
-      }
+  const processSelectedFiles = async (rawFiles: File[]) => {
+    if (rawFiles.length === 0) return
+
+    const currentTotal = images.length + uploadingPhotos.length
+    if (currentTotal >= 10) {
+      toast.error('Limite de 10 fotos por veículo atingido. Remova uma foto para adicionar outra.')
+      return
     }
-    setImages(prev => [...prev, ...newUrls])
+
+    // Filtra tipos válidos e tamanho máximo de 5MB antes da compressão
+    const validFiles: File[] = []
+    for (const file of rawFiles) {
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        toast.error(`Arquivo "${file.name}" recusado: envie apenas JPG, PNG ou WEBP.`)
+        continue
+      }
+      if (file.size > MAX_ORIGINAL_FILE_SIZE) {
+        toast.error(`Arquivo "${file.name}" excede o limite máximo de 5MB.`)
+        continue
+      }
+      validFiles.push(file)
+    }
+
+    if (validFiles.length === 0) return
+
+    let filesToProcess = validFiles
+    if (currentTotal + filesToProcess.length > 10) {
+      const allowed = 10 - currentTotal
+      filesToProcess = filesToProcess.slice(0, allowed)
+      toast.warning(`Apenas ${allowed} foto(s) adicionada(s) para não ultrapassar o limite de 10.`)
+    }
+
+    const newUploadItems: UploadingPhoto[] = filesToProcess.map((f) => ({
+      id: crypto.randomUUID(),
+      previewUrl: URL.createObjectURL(f),
+      progress: 5,
+      stage: 'compressing',
+      name: f.name,
+    }))
+
+    setUploadingPhotos((prev) => [...prev, ...newUploadItems])
+    setUploading(true)
+
+    const currentBrand = (brandVal || getValues('brand') || 'sem-marca').trim()
+    let successCount = 0
+
+    await Promise.all(
+      filesToProcess.map(async (file, idx) => {
+        const item = newUploadItems[idx]
+        try {
+          // 1. Compressão no client (máx 1920px, qualidade ~0.8, alvo ~300KB)
+          const compressedBlob = await imageCompression(file, {
+            maxSizeMB: 0.3,
+            maxWidthOrHeight: 1920,
+            initialQuality: 0.8,
+            useWebWorker: true,
+            onProgress: (p: number) => {
+              updateUploadItem(item.id, {
+                progress: Math.max(5, Math.min(50, Math.round(p * 0.5))),
+                stage: 'compressing',
+              })
+            },
+          })
+
+          const compressedFile = new File([compressedBlob], file.name, {
+            type: compressedBlob.type || file.type,
+            lastModified: Date.now(),
+          })
+
+          // 2. Upload assinado via API route (/api/upload-foto)
+          updateUploadItem(item.id, { progress: 55, stage: 'uploading' })
+
+          const secureUrl = await uploadToServerWithProgress(
+            compressedFile,
+            currentBrand,
+            vehicleId,
+            (uploadPct) => {
+              const combined = 50 + Math.round(uploadPct * 0.5)
+              updateUploadItem(item.id, {
+                progress: Math.min(99, combined),
+                stage: 'uploading',
+              })
+            }
+          )
+
+          setImages((prev) => (prev.length < 10 ? [...prev, secureUrl] : prev))
+          successCount += 1
+        } catch (err: any) {
+          console.error('Erro no upload da foto:', err)
+          toast.error(err?.message || `Falha ao enviar "${file.name}".`)
+        } finally {
+          URL.revokeObjectURL(item.previewUrl)
+          setUploadingPhotos((prev) => prev.filter((u) => u.id !== item.id))
+        }
+      })
+    )
+
     setUploading(false)
+    if (successCount > 0) {
+      toast.success(
+        successCount === 1
+          ? 'Foto comprimida e enviada com sucesso!'
+          : `${successCount} fotos comprimidas e enviadas com sucesso!`
+      )
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? [])
     e.target.value = ''
-    if (newUrls.length > 0) toast.success('Fotos enviadas com sucesso!')
+    await processSelectedFiles(files)
+  }
+
+  const handleDropFiles = async (e: React.DragEvent<HTMLElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    const files = Array.from(e.dataTransfer?.files ?? [])
+    await processSelectedFiles(files)
+  }
+
+  const handleSetCover = (index: number) => {
+    if (index === 0) return
+    setImages((prev) => {
+      const selected = prev[index]
+      if (!selected) return prev
+      return [selected, ...prev.filter((_, i) => i !== index)]
+    })
+    toast.success('Foto definida como capa do veículo!')
   }
 
   const onSubmit = async (data: VehicleFormData) => {
+    if (uploading || uploadingPhotos.length > 0) {
+      toast.warning('Aguarde o término do envio das fotos antes de salvar.')
+      return
+    }
+
     setSaving(true)
+    const finalImages =
+      images.length > 0
+        ? images
+        : ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80']
+
+    const fotosPayload = finalImages.map((url, idx) => ({
+      url,
+      is_capa: idx === 0,
+    }))
+
     const payload = {
       ...data,
+      id: vehicleId,
       sku: sku || generateSKU(),
       fuel,
       transmission,
@@ -235,7 +390,10 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       badge: null,
       features: selectedFeatures,
       slug,
-      images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'],
+      images: finalImages,
+      fotos: fotosPayload,
+      fotos_urls: finalImages,
+      foto_capa_url: finalImages[0] || null,
     }
 
     try {
@@ -280,38 +438,116 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       {/* 1. Fotos */}
       <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-xs">
         <CardContent className="pt-6">
-          <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-50 block mb-2">Fotos do Veículo (Capa e Galeria)</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-50 block">
+              Fotos do Veículo (Capa e Galeria)
+            </Label>
+            <span className={`text-[11px] font-bold ${
+              images.length >= 10
+                ? 'text-rose-500'
+                : images.length >= 8
+                ? 'text-amber-500'
+                : 'text-zinc-400'
+            }`}>
+              {images.length}/10 fotos
+            </span>
+          </div>
+
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              if (images.length < 10) setIsDragging(true)
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsDragging(false)
+            }}
+            onDrop={handleDropFiles}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+          >
             {images.map((url, i) => (
-              <div key={i} className="relative aspect-video rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden group border border-zinc-200 dark:border-zinc-700">
-                <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
+              <div
+                key={`${url}-${i}`}
+                className={`relative aspect-video rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden group border transition-all ${
+                  i === 0
+                    ? 'border-amber-500 ring-2 ring-amber-500/30'
+                    : 'border-zinc-200 dark:border-zinc-700'
+                }`}
+              >
+                <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" sizes="(max-width: 640px) 50vw, 25vw" />
                 <button
                   type="button"
                   onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
-                  className="absolute top-1.5 right-1.5 h-7 w-7 flex items-center justify-center bg-black/75 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shadow-md"
+                  className="absolute top-1.5 right-1.5 h-7 w-7 flex items-center justify-center bg-black/75 hover:bg-red-600 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shadow-md"
                   aria-label="Remover foto"
+                  title="Remover foto"
                 >
                   <X className="h-4 w-4" />
                 </button>
-                {i === 0 && (
-                  <span className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                    Foto Principal
+
+                {i === 0 ? (
+                  <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 bg-amber-500 text-zinc-950 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
+                    <Star className="h-3 w-3 fill-zinc-950" /> Capa
                   </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleSetCover(i)}
+                    className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 bg-black/75 hover:bg-amber-500 hover:text-zinc-950 text-white text-[10px] font-bold px-2 py-0.5 rounded-md opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shadow-xs"
+                    title="Definir como foto de capa"
+                  >
+                    <Star className="h-3 w-3" /> Definir Capa
+                  </button>
                 )}
               </div>
             ))}
+
+            {/* Previews em andamento com barra de progresso individual */}
+            {uploadingPhotos.map((item) => (
+              <div
+                key={item.id}
+                className="relative aspect-video rounded-xl bg-zinc-900 overflow-hidden border border-indigo-500/50"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.previewUrl}
+                  alt={item.name}
+                  className="w-full h-full object-cover opacity-45"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 bg-black/50">
+                  <Loader2 className="h-5 w-5 text-white animate-spin mb-1.5" />
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                    {item.stage === 'compressing' ? 'Comprimindo...' : 'Enviando...'} {item.progress}%
+                  </span>
+                  <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden mt-1.5">
+                    <div
+                      className="h-full bg-indigo-500 transition-all duration-200 rounded-full"
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+
             <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
               images.length >= 10
                 ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
+                : isDragging
+                ? 'border-indigo-500 bg-indigo-500/10 cursor-pointer'
                 : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}>
               {uploading ? (
-                <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
+                <div className="flex flex-col items-center">
+                  <Loader2 className="h-5 w-5 text-zinc-400 animate-spin mb-1" />
+                  <span className="text-[10px] font-semibold text-zinc-400">Processando...</span>
+                </div>
               ) : (
                 <>
                   <Upload className={`h-5 w-5 mb-1 ${images.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
-                  <span className={`text-xs font-medium ${images.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                    {images.length >= 10 ? 'Limite atingido' : 'Adicionar fotos'}
+                  <span className={`text-xs font-medium text-center px-2 ${images.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                    {images.length >= 10 ? 'Limite atingido' : 'Adicionar ou arrastar fotos'}
                   </span>
                   <span className={`text-[10px] font-semibold mt-0.5 ${
                     images.length >= 10
@@ -326,11 +562,11 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               )}
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 multiple
                 className="hidden"
                 onChange={handleImageUpload}
-                disabled={uploading || images.length >= 10}
+                disabled={images.length >= 10}
               />
             </label>
           </div>
