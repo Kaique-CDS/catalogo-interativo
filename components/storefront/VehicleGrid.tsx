@@ -19,10 +19,10 @@ interface Props {
 export default function VehicleGrid({ vehicles, store, brands, years, searchParams }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [modalStep, setModalStep] = useState<'detail' | 'interest'>('detail')
-  const [visibleCount, setVisibleCount] = useState(3)
+  const [visibleCount, setVisibleCount] = useState(4)
 
   useEffect(() => {
-    setVisibleCount(3)
+    setVisibleCount(4)
   }, [searchParams])
 
   // Auto-open vehicle modal if ?v=ID or ?veiculo=ID is present in URL
@@ -111,7 +111,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
           {vehicles.length > visibleCount && (
             <div className="mt-8 mb-4 text-center">
               <Button
-                onClick={() => setVisibleCount((prev) => prev + 3)}
+                onClick={() => setVisibleCount((prev) => prev + 4)}
                 variant="outline"
                 className="h-11 px-6 rounded-full border-surface bg-surface-2 hover:bg-surface-3 text-white text-xs sm:text-sm font-bold gap-2 shadow-sm transition-all hover:border-brand"
               >
