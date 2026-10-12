@@ -10,11 +10,47 @@ export async function PUT(
     const supabase = createAdminClient()
     const body = await req.json()
 
-    // Omit fields that shouldn't be updated directly via payload if needed, 
-    // but here we just pass the body as is for simplicity.
+    const {
+      title,
+      brand,
+      model,
+      year,
+      mileage,
+      price,
+      fuel,
+      transmission,
+      color,
+      plate_end,
+      features,
+      badge,
+      description,
+      images,
+      is_active,
+      sku,
+    } = body
+
+    // Monta apenas colunas válidas da tabela vehicles (ignora slug, id, store_id, created_at)
+    const updatePayload: Record<string, any> = {}
+    if (title !== undefined) updatePayload.title = title
+    if (brand !== undefined) updatePayload.brand = brand
+    if (model !== undefined) updatePayload.model = model
+    if (year !== undefined) updatePayload.year = parseInt(String(year), 10)
+    if (mileage !== undefined) updatePayload.mileage = parseInt(String(mileage || 0), 10)
+    if (price !== undefined) updatePayload.price = parseFloat(String(price || 0))
+    if (fuel !== undefined) updatePayload.fuel = fuel
+    if (transmission !== undefined) updatePayload.transmission = transmission
+    if (color !== undefined) updatePayload.color = color
+    if (plate_end !== undefined) updatePayload.plate_end = plate_end
+    if (features !== undefined) updatePayload.features = features
+    if (badge !== undefined) updatePayload.badge = badge
+    if (description !== undefined) updatePayload.description = description
+    if (images !== undefined) updatePayload.images = images
+    if (is_active !== undefined) updatePayload.is_active = is_active
+    if (sku !== undefined) updatePayload.sku = sku
+
     const { data, error } = await supabase
       .from('vehicles')
-      .update(body)
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single()
@@ -26,7 +62,7 @@ export async function PUT(
 
     return NextResponse.json(data, { status: 200 })
   } catch (err: any) {
-    console.error(`Error in PUT /api/vehicles/[id]:`, err)
+    console.error('Error in PUT /api/vehicles/[id]:', err)
     return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 })
   }
 }
@@ -51,7 +87,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true }, { status: 200 })
   } catch (err: any) {
-    console.error(`Error in DELETE /api/vehicles/[id]:`, err)
+    console.error('Error in DELETE /api/vehicles/[id]:', err)
     return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 })
   }
 }

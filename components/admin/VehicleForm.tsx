@@ -42,13 +42,13 @@ const vehicleSchema = z.object({
   title: z.string().min(3, 'Título deve ter ao menos 3 caracteres'),
   brand: z.string().min(1, 'Marca é obrigatória'),
   model: z.string().min(1, 'Modelo é obrigatório'),
-  year: z.coerce.number().min(1950).max(new Date().getFullYear() + 2),
-  mileage: z.coerce.number().min(0),
-  price: z.coerce.number().min(0.01, 'Preço deve ser maior que zero'),
-  fuel: z.string().optional(),
-  transmission: z.string().optional(),
-  color: z.string().optional(),
-  plate_end: z.string().max(2).optional(),
+  year: z.coerce.number().min(1950, 'Ano inválido').max(2030, 'Ano inválido'),
+  mileage: z.coerce.number().min(0, 'Quilometragem inválida'),
+  price: z.coerce.number().min(0, 'Preço inválido'),
+  fuel: z.string().optional().nullable(),
+  transmission: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
+  plate_end: z.string().max(4).optional().nullable(),
   description: z.string().min(10, 'Descrição é obrigatória (mín. 10 caracteres)').max(500, 'Descrição deve ter no máximo 500 caracteres'),
 })
 
@@ -170,18 +170,18 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     let files = Array.from(e.target.files ?? [])
     if (files.length === 0) return
 
-    // Hard limit: 5
-    if (images.length >= 5) {
-      toast.error('Limite de 5 fotos por veículo atingido. Remova uma foto para adicionar outra.')
+    // Hard limit: 10
+    if (images.length >= 10) {
+      toast.error('Limite de 10 fotos por veículo atingido. Remova uma foto para adicionar outra.')
       e.target.value = ''
       return
     }
 
-    // Soft limit: trim files that would exceed 5
-    if (images.length + files.length > 5) {
-      const allowed = 5 - images.length
+    // Soft limit: trim files that would exceed 10
+    if (images.length + files.length > 10) {
+      const allowed = 10 - images.length
       files = files.slice(0, allowed)
-      toast.warning(`Apenas ${allowed} foto(s) adicionada(s) para não ultrapassar o limite de 5.`)
+      toast.warning(`Apenas ${allowed} foto(s) adicionada(s) para não ultrapassar o limite de 10.`)
     }
 
     setUploading(true)
@@ -245,7 +245,10 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
-        if (!res.ok) throw new Error('Erro ao salvar alterações')
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.error || 'Erro ao salvar alterações')
+        }
         toast.success('Veículo atualizado com sucesso!')
       } else {
         const res = await fetch('/api/vehicles', {
@@ -253,7 +256,10 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
-        if (!res.ok) throw new Error('Erro ao cadastrar o veículo')
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.error || 'Erro ao cadastrar o veículo')
+        }
         toast.success('Veículo adicionado ao catálogo!')
       }
       router.push(`/${slug}/admin/estoque`)
@@ -264,8 +270,13 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     }
   }
 
+  const onInvalid = (formErrors: Record<string, any>) => {
+    const firstError = Object.values(formErrors)[0]?.message
+    toast.error(firstError ? String(firstError) : 'Verifique os campos obrigatórios do formulário.')
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl pb-12">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6 max-w-3xl pb-12">
       {/* 1. Fotos */}
       <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-xs">
         <CardContent className="pt-6">
@@ -290,7 +301,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               </div>
             ))}
             <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
-              images.length >= 5
+              images.length >= 10
                 ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
                 : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}>
@@ -298,18 +309,18 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
               ) : (
                 <>
-                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 5 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
-                  <span className={`text-xs font-medium ${images.length >= 5 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                    {images.length >= 5 ? 'Limite atingido' : 'Adicionar fotos'}
+                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
+                  <span className={`text-xs font-medium ${images.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                    {images.length >= 10 ? 'Limite atingido' : 'Adicionar fotos'}
                   </span>
                   <span className={`text-[10px] font-semibold mt-0.5 ${
-                    images.length >= 5
+                    images.length >= 10
                       ? 'text-rose-500'
-                      : images.length >= 4
+                      : images.length >= 8
                       ? 'text-amber-500'
                       : 'text-zinc-400'
                   }`}>
-                    {images.length}/5 fotos
+                    {images.length}/10 fotos
                   </span>
                 </>
               )}
@@ -319,7 +330,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 multiple
                 className="hidden"
                 onChange={handleImageUpload}
-                disabled={uploading || images.length >= 5}
+                disabled={uploading || images.length >= 10}
               />
             </label>
           </div>
