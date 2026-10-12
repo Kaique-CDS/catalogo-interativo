@@ -114,11 +114,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const supabase = await createClient()
     const { data: store } = await supabase
-      .from('stores').select('name, slogan').eq('slug', slug).maybeSingle()
+      .from('stores').select('name, slogan, logo_url').eq('slug', slug).maybeSingle()
     if (store) {
+      const iconUrl = store.logo_url || '/logo-milhaticar.png'
       return {
         title: `${store.name} - Catálogo de Veículos`,
         description: store.slogan || `Confira os veículos disponíveis na ${store.name}`,
+        icons: {
+          icon: iconUrl,
+          apple: iconUrl,
+        },
       }
     }
   } catch (e) {}
@@ -126,6 +131,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${DEMO_STORE.name} - Catálogo de Veículos`,
     description: DEMO_STORE.slogan || `Confira o catálogo de seminovos da ${DEMO_STORE.name}`,
+    icons: {
+      icon: '/logo-milhaticar.png',
+      apple: '/logo-milhaticar.png',
+    },
   }
 }
 

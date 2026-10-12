@@ -28,12 +28,12 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Milhaticar - Veículos novos e seminovos, nacionais e importados',
-  description: 'Catálogo digital de seminovos da Milhaticar',
+  title: 'VendaZap - Catálogos Interativos que Vendem no WhatsApp',
+  description: 'Crie catálogos digitais rápidos e modernos com fechamento direto no WhatsApp.',
   icons: {
-    icon: '/logo-milhaticar.png',
-    apple: '/logo-milhaticar.png',
-  }
+    icon: '/vendazap-icon.svg',
+    apple: '/vendazap-icon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

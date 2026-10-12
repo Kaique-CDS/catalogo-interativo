@@ -31,21 +31,25 @@ export default function LandingPage() {
 
       {/* HEADER */}
       <header className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-2 font-black text-2xl tracking-tighter cursor-pointer" onClick={scrollToTop}>
-            <Sparkles className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-            Venda<span className="text-indigo-600 dark:text-indigo-400">Zap</span>
+        <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2.5 font-black text-xl sm:text-2xl tracking-tight cursor-pointer shrink-0" onClick={scrollToTop}>
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <span>
+              Venda<span className="text-indigo-600 dark:text-indigo-400">Zap</span>
+            </span>
           </div>
           <nav className="hidden md:flex gap-6 font-medium text-sm text-zinc-600 dark:text-zinc-400">
             <a href="#proposta" className="hover:text-zinc-900 dark:hover:text-white transition">Por que nós?</a>
             <a href="#planos" className="hover:text-zinc-900 dark:hover:text-white transition">Planos</a>
             <a href="#segmentos" className="hover:text-zinc-900 dark:hover:text-white transition">Segmentos</a>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/loja-exemplo">
               <Button variant="ghost" size="sm" className="hidden sm:flex">Home / Demo</Button>
             </Link>
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs" onClick={() => setShowDemoModal(true)}>
+            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs text-xs sm:text-sm px-3 sm:px-4" onClick={() => setShowDemoModal(true)}>
               Assinar Agora
             </Button>
           </div>
@@ -290,11 +294,15 @@ export default function LandingPage() {
 
       {/* FOOTER & FEEDBACK */}
       <footer className="bg-zinc-950 text-zinc-400 py-12 border-t border-zinc-900">
-        <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12">
           <div>
-            <div className="flex items-center gap-2 font-black text-2xl tracking-tighter text-white mb-6">
-              <Sparkles className="h-6 w-6 text-indigo-500" />
-              VendaZap
+            <div className="flex items-center gap-2.5 font-black text-2xl tracking-tight text-white mb-6">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <span>
+                Venda<span className="text-indigo-400">Zap</span>
+              </span>
             </div>
             <p className="text-sm max-w-sm mb-6">
               A plataforma definitiva para criar catálogos que focam no que importa: fechar a venda de forma humana e rápida no WhatsApp.
