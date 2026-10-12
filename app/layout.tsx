@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Montserrat, Anton } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
@@ -18,6 +18,14 @@ const anton = Anton({
   variable: '--font-heading',
   display: 'swap',
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#000000',
+}
 
 export const metadata: Metadata = {
   title: 'Milhaticar - Veículos novos e seminovos, nacionais e importados',

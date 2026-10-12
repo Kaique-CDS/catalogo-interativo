@@ -284,7 +284,7 @@ export default function MelhoriasPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(note.id)}
-                  className="h-8 w-8 flex-shrink-0 text-muted-foreground hover:text-white hover:bg-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  className="h-9 w-9 flex-shrink-0 text-muted-foreground hover:text-white hover:bg-red-500 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
                   title="Excluir anotação"
                 >
                   <Trash2 className="h-4 w-4" />

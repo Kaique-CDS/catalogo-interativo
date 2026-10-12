@@ -64,9 +64,9 @@ export default function InterestOptionsSheet({ vehicle, store, onClose, onOpenFi
       />
 
       {/* Sheet */}
-      <div className="relative w-full sm:max-w-md bg-white dark:bg-zinc-950 rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 space-y-5 pb-8 sm:pb-6">
+      <div className="relative w-full sm:max-w-md bg-white dark:bg-zinc-950 rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 space-y-5 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pb-6">
         {/* Handle */}
-        <div className="w-10 h-1.5 bg-zinc-200 rounded-full mx-auto sm:hidden" />
+        <div className="w-10 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full mx-auto sm:hidden" />
 
         {/* Header */}
         <div className="flex items-start justify-between">

@@ -209,7 +209,7 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
             conforme a LGPD. Seus dados não serão usados para outros fins.
           </p>
 
-          <div className="pb-2">
+          <div className="pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-2">
             <Button type="submit" disabled={sending} className="w-full h-12 text-base gap-2 rounded-xl">
               {sending ? (
                 <><Loader2 className="h-5 w-5 animate-spin" />Abrindo WhatsApp...</>

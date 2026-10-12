@@ -41,7 +41,7 @@ export default function AdminSidebar({ store, slug }: Props) {
   return (
     <>
       {/* 1. Top Bar Mobile (Sticky) */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-surface-1 text-white fixed top-0 left-0 right-0 z-40 border-b border-surface">
+      <header className="md:hidden flex items-center justify-between px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] bg-surface-1/95 backdrop-blur-md text-white fixed top-0 left-0 right-0 z-40 border-b border-surface">
         <div className="flex items-center gap-2.5 min-w-0">
           {store.logo_url ? (
             <img
@@ -56,22 +56,22 @@ export default function AdminSidebar({ store, slug }: Props) {
           )}
           <div className="min-w-0">
             <p className="font-bold text-xs leading-tight truncate">{store.name}</p>
-            <span className="text-[10px] text-muted-foreground font-medium">Painel Administrativo</span>
+            <span className="text-[10px] text-muted-foreground font-medium block truncate">Painel Administrativo</span>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <Link href={`/${slug}`} target="_blank">
-            <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs text-muted-foreground hover:text-white hover:bg-surface-2 gap-1 rounded-xl">
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span className="text-[11px] font-semibold">Vitrine</span>
+            <Button size="sm" variant="ghost" className="h-9 px-3 text-xs text-muted-foreground hover:text-white bg-surface-2/60 hover:bg-surface-2 gap-1.5 rounded-xl border border-surface">
+              <ExternalLink className="h-3.5 w-3.5 text-brand" />
+              <span className="text-[11px] font-semibold text-white">Vitrine</span>
             </Button>
           </Link>
           <Button
             size="sm"
             variant="ghost"
             onClick={handleLogout}
-            className="h-8 px-2 text-xs text-red-500 hover:text-red-400 hover:bg-red-950/40 rounded-xl"
+            className="h-9 w-9 p-0 text-xs text-red-500 hover:text-red-400 hover:bg-red-950/40 rounded-xl"
             title="Sair"
           >
             <LogOut className="h-4 w-4" />
@@ -79,8 +79,8 @@ export default function AdminSidebar({ store, slug }: Props) {
         </div>
       </header>
 
-      {/* 2. Bottom Nav Mobile (Fixed Bottom) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface py-2 px-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-40 flex justify-around items-center shadow-2xl">
+      {/* 2. Bottom Nav Mobile (Fixed Bottom — iOS & Android Native Tab Bar) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface pt-1.5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-40 grid grid-cols-4 gap-1 shadow-2xl">
         {items.map((item) => {
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           return (
@@ -90,13 +90,16 @@ export default function AdminSidebar({ store, slug }: Props) {
               aria-label={item.label}
               title={item.label}
               className={cn(
-                'flex items-center justify-center h-11 w-11 rounded-xl transition-all',
+                'flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95',
                 isActive
-                  ? 'bg-brand/10 text-brand'
-                  : 'text-muted-foreground hover:text-white hover:bg-surface-2'
+                  ? 'bg-brand/15 text-brand font-bold'
+                  : 'text-muted-foreground hover:text-white hover:bg-surface-2 font-medium'
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 mb-0.5" />
+              <span className="text-[10px] leading-tight truncate max-w-full">
+                {item.label === 'Configurações' ? 'Ajustes' : item.label}
+              </span>
             </Link>
           )
         })}

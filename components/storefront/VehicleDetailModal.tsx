@@ -361,7 +361,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           </div>
 
           {/* Fixed CTA footer */}
-          <div className="p-4 sm:p-5 bg-surface-1 border-t border-surface flex items-center justify-between gap-4 flex-shrink-0">
+          <div className="p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))] bg-surface-1 border-t border-surface flex items-center justify-between gap-4 flex-shrink-0">
             <div className="hidden sm:block">
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold block mb-0.5">Interessado?</span>
               <span className="text-sm text-white font-medium">Escolha como prosseguir</span>

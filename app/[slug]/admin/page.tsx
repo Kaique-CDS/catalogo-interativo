@@ -114,16 +114,20 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
   }).slice(0, 3)
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-heading text-white tracking-wide uppercase">Painel de Inteligência</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Métricas de tráfego e comportamento dos clientes nos últimos 30 dias.</p>
+          <h1 className="text-2xl sm:text-3xl font-heading text-white tracking-wide uppercase leading-none">
+            Painel de Inteligência
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            Métricas de tráfego e comportamento dos clientes nos últimos 30 dias.
+          </p>
         </div>
-        <Link href={`/${slug}/admin/estoque/novo`}>
-          <Button size="sm" className="btn-brand text-xs font-bold rounded-xl gap-1.5 h-10 px-4">
-            <Plus className="h-3.5 w-3.5" /> Adicionar Carro
+        <Link href={`/${slug}/admin/estoque/novo`} className="w-full sm:w-auto">
+          <Button size="sm" className="w-full sm:w-auto justify-center btn-brand text-xs font-bold rounded-xl gap-1.5 h-11 px-4">
+            <Plus className="h-4 w-4" /> Adicionar Carro
           </Button>
         </Link>
       </div>
@@ -131,24 +135,24 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
       {/* Métricas de Marketing (KPIs) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {marketingCards.map((kpi, i) => (
-          <div key={i} className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs relative overflow-hidden">
+          <div key={i} className="bg-surface-1 border border-surface rounded-xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden">
             {loadingAnalytics && <div className="absolute inset-0 bg-surface-1/50 backdrop-blur-sm z-10 flex items-center justify-center"><div className="h-4 w-4 rounded-full border-2 border-brand border-t-transparent animate-spin" /></div>}
-            <div className={`h-8 w-8 rounded-lg ${kpi.bg} ${kpi.color} flex items-center justify-center mb-3`}>
+            <div className={`h-8 w-8 rounded-lg ${kpi.bg} ${kpi.color} flex items-center justify-center mb-2.5`}>
               <kpi.icon className="h-4 w-4" />
             </div>
-            <p className="font-heading text-3xl sm:text-4xl text-white tracking-wide">{kpi.value}</p>
-            <p className="text-xs font-medium text-muted-foreground mt-1">{kpi.label}</p>
-            <p className="text-[10px] text-muted-foreground/70 mt-1">{kpi.trend}</p>
+            <p className="font-heading text-2xl sm:text-4xl text-white tracking-wide leading-none">{kpi.value}</p>
+            <p className="text-xs font-semibold text-white/90 mt-1.5 leading-snug">{kpi.label}</p>
+            <p className="text-[10px] text-muted-foreground/70 mt-0.5">{kpi.trend}</p>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Origem de Tráfego */}
-        <div className="bg-surface-1 border border-surface rounded-xl p-5 shadow-xs lg:col-span-1 relative overflow-hidden">
+        <div className="bg-surface-1 border border-surface rounded-xl p-4 sm:p-5 shadow-xs lg:col-span-1 relative overflow-hidden">
           {loadingAnalytics && <div className="absolute inset-0 bg-surface-1/50 backdrop-blur-sm z-10 flex items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-brand border-t-transparent animate-spin" /></div>}
-          <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
-            <Globe className="h-4 w-4 text-brand" /> De onde vêm os clientes?
+          <h2 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <Globe className="h-4 w-4 text-brand shrink-0" /> De onde vêm os clientes?
           </h2>
           <div className="space-y-4">
             {trafficSources.map((source, i) => (
@@ -169,10 +173,10 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
         </div>
 
         {/* Veículos Mais Populares */}
-        <div className="bg-surface-1 border border-surface rounded-xl p-5 shadow-xs lg:col-span-2 relative overflow-hidden">
+        <div className="bg-surface-1 border border-surface rounded-xl p-4 sm:p-5 shadow-xs lg:col-span-2 relative overflow-hidden">
           {loadingAnalytics && <div className="absolute inset-0 bg-surface-1/50 backdrop-blur-sm z-10 flex items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-brand border-t-transparent animate-spin" /></div>}
-          <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
-            <BarChart3 className="h-4 w-4 text-brand" /> Veículos Mais Desejados (Top 3)
+          <h2 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2 mb-4 uppercase tracking-wider">
+            <BarChart3 className="h-4 w-4 text-brand shrink-0" /> Veículos Mais Desejados (Top 3)
           </h2>
           {topVehicles.length === 0 ? (
             <div className="text-center py-8 text-xs text-muted-foreground">
@@ -181,23 +185,27 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
           ) : (
             <div className="space-y-3">
               {topVehicles.map((v, i) => (
-                <Link key={v.id} href={`/${slug}/admin/estoque/${v.id}`} className="flex items-center gap-4 p-3 rounded-xl border border-surface hover:bg-surface-2 transition-colors">
-                  <div className="h-10 w-14 rounded-lg bg-surface-2 flex-shrink-0 relative overflow-hidden border border-surface">
-                    {v.images?.[0] ? <img src={v.images[0]} className="w-full h-full object-cover" alt="Car" /> : <Car className="h-4 w-4 absolute top-3 left-5 text-muted-foreground" />}
-                    <div className="absolute top-0 left-0 bg-brand text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-lg">{i + 1}º</div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-white uppercase tracking-wide truncate">{v.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate font-medium mt-0.5">{v.brand} • R$ {(v.price || 0).toLocaleString('pt-BR')}</p>
-                  </div>
-                  <div className="flex gap-4 shrink-0 text-right">
-                    <div>
-                      <p className="font-heading text-lg sm:text-xl text-white tracking-wide">{v.views}</p>
-                      <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider mt-0.5">Acessos</p>
+                <Link key={v.id} href={`/${slug}/admin/estoque/${v.id}`} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border border-surface hover:bg-surface-2 transition-colors">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-12 w-16 rounded-lg bg-surface-2 flex-shrink-0 relative overflow-hidden border border-surface">
+                      {v.images?.[0] ? <img src={v.images[0]} className="w-full h-full object-cover" alt="Car" /> : <Car className="h-4 w-4 absolute top-4 left-6 text-muted-foreground" />}
+                      <div className="absolute top-0 left-0 bg-brand text-white text-[9px] font-black px-1.5 py-0.5 rounded-br-lg">{i + 1}º</div>
                     </div>
-                    <div>
-                      <p className="font-heading text-lg sm:text-xl text-brand tracking-wide">{v.clicks}</p>
-                      <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider mt-0.5">WhatsApp</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white uppercase tracking-wide line-clamp-1">{v.title}</p>
+                      <p className="text-[11px] text-muted-foreground truncate font-medium mt-0.5">
+                        {v.brand} • {v.price && v.price > 0 ? `R$ ${v.price.toLocaleString('pt-BR')}` : 'Sob consulta'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-surface text-right">
+                    <div className="flex sm:block items-center gap-1.5">
+                      <p className="font-heading text-base sm:text-xl text-white tracking-wide leading-none">{v.views}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider sm:mt-0.5">Acessos</p>
+                    </div>
+                    <div className="flex sm:block items-center gap-1.5">
+                      <p className="font-heading text-base sm:text-xl text-brand tracking-wide leading-none">{v.clicks}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider sm:mt-0.5">WhatsApp</p>
                     </div>
                   </div>
                 </Link>
@@ -208,7 +216,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
       </div>
 
       {/* Operacional & Estoque Geral */}
-      <h2 className="text-sm font-bold text-white pt-2 border-t border-surface uppercase tracking-wider">
+      <h2 className="text-xs sm:text-sm font-bold text-white pt-2 border-t border-surface uppercase tracking-wider">
         Visão Geral do Estoque & Alertas
       </h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -225,18 +233,18 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
         <div className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs col-span-2 flex flex-col justify-center">
           {noPhotos.length === 0 && noDescription.length === 0 ? (
             <div className="flex items-center gap-2 text-white text-sm font-semibold bg-surface-2 border border-surface/50 p-3 rounded-xl">
-              <CheckCircle2 className="h-5 w-5 text-brand" /> Vitrine 100% Otimizada!
+              <CheckCircle2 className="h-5 w-5 text-brand shrink-0" /> Vitrine 100% Otimizada!
             </div>
           ) : (
             <div className="space-y-2">
               {noPhotos.length > 0 && (
                 <div className="flex items-center gap-2 text-xs text-brand font-medium bg-brand/10 border border-brand/20 p-2.5 rounded-lg">
-                  <ImageOff className="h-3.5 w-3.5" /> {noPhotos.length} veículo(s) sem foto
+                  <ImageOff className="h-4 w-4 shrink-0" /> {noPhotos.length} veículo(s) sem foto
                 </div>
               )}
               {noDescription.length > 0 && (
                 <div className="flex items-center gap-2 text-xs text-brand font-medium bg-brand/10 border border-brand/20 p-2.5 rounded-lg">
-                  <FileText className="h-3.5 w-3.5" /> {noDescription.length} veículo(s) sem descrição
+                  <FileText className="h-4 w-4 shrink-0" /> {noDescription.length} veículo(s) sem descrição
                 </div>
               )}
             </div>

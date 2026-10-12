@@ -50,51 +50,68 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
   const isAtLimit = vehicles.length >= 50
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-heading text-white tracking-wide uppercase">Estoque</h1>
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-            isAtLimit
-              ? 'bg-brand/10 text-brand border-brand/20'
-              : vehicles.length >= 40
-              ? 'bg-amber-900/30 text-amber-400 border-amber-800'
-              : 'bg-surface-2 text-muted-foreground border-surface'
-          }`}>
-            {vehicles.length}/50 carros
-          </span>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-heading text-white tracking-wide uppercase leading-none">
+              Estoque
+            </h1>
+            <span
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border whitespace-nowrap shrink-0 ${
+                isAtLimit
+                  ? 'bg-brand/10 text-brand border-brand/20'
+                  : vehicles.length >= 40
+                  ? 'bg-amber-900/30 text-amber-400 border-amber-800'
+                  : 'bg-surface-2 text-muted-foreground border-surface'
+              }`}
+            >
+              {vehicles.length}/50 carros
+            </span>
+          </div>
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1.5">
+            Gerencie, edite e altere a publicação dos veículos do catálogo.
+          </p>
         </div>
-        <div className="relative group flex items-center gap-2">
+
+        <div className="relative group grid grid-cols-2 sm:flex items-center gap-2.5 w-full sm:w-auto">
           <Button
             variant="outline"
-            className="gap-2 border-surface bg-surface-1 rounded-[10px] text-xs font-bold shadow-xs h-10 px-4"
+            className="w-full sm:w-auto justify-center gap-2 border-surface bg-surface-1 hover:bg-surface-2 text-white rounded-xl text-xs font-bold shadow-xs h-11 px-3.5"
             onClick={() => setShowBulkUpload(true)}
           >
-            <Upload className="h-4 w-4" /> Importar Planilha
+            <Upload className="h-4 w-4 shrink-0" />
+            <span className="truncate">Importar Planilha</span>
           </Button>
-          
+
           {isAtLimit ? (
             <Button
               disabled
-              className="gap-2 bg-surface-2 text-muted-foreground rounded-[10px] text-xs font-bold cursor-not-allowed h-10 px-4"
+              className="w-full sm:w-auto justify-center gap-2 bg-surface-2 text-muted-foreground rounded-xl text-xs font-bold cursor-not-allowed h-11 px-3.5"
             >
-              <Plus className="h-4 w-4" />Novo Veículo
+              <Plus className="h-4 w-4 shrink-0" />
+              <span className="truncate">Novo Veículo</span>
             </Button>
           ) : (
-            <Link href={`/${slug}/admin/estoque/novo`}>
-              <Button className="btn-brand gap-2 rounded-[10px] text-xs font-bold shadow-xs h-10 px-4">
-                <Plus className="h-4 w-4" />Novo Veículo
+            <Link href={`/${slug}/admin/estoque/novo`} className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto justify-center btn-brand gap-2 rounded-xl text-xs font-bold shadow-xs h-11 px-4">
+                <Plus className="h-4 w-4 shrink-0" />
+                <span className="truncate">Novo Veículo</span>
               </Button>
             </Link>
           )}
           {isAtLimit && (
-            <div className="absolute right-0 top-full mt-1.5 z-10 hidden group-hover:block w-64 p-2.5 bg-surface-2 border border-surface text-white text-xs rounded-xl shadow-lg">
+            <div className="col-span-2 sm:hidden text-[11px] text-brand font-medium">
+              Limite de 50 veículos atingido. Exclua um para adicionar outro.
+            </div>
+          )}
+          {isAtLimit && (
+            <div className="absolute right-0 top-full mt-1.5 z-10 hidden sm:group-hover:block w-64 p-2.5 bg-surface-2 border border-surface text-white text-xs rounded-xl shadow-lg">
               Limite de 50 veículos atingido. Exclua um para adicionar outro.
             </div>
           )}
         </div>
       </div>
-      <p className="text-muted-foreground text-sm mb-4">Gerencie, edite e altere a publicação dos veículos do catálogo.</p>
 
       {showBulkUpload && (
         <BulkUploadModal

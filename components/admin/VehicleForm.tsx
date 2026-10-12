@@ -277,9 +277,10 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 <button
                   type="button"
                   onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
-                  className="absolute top-1.5 right-1.5 p-1 bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1.5 right-1.5 h-7 w-7 flex items-center justify-center bg-black/75 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shadow-md"
+                  aria-label="Remover foto"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-4 w-4" />
                 </button>
                 {i === 0 && (
                   <span className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">

@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -81,10 +81,24 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground antialiased;
     background-color: var(--brand-surface-0);
+  }
+  /* Evita auto-zoom do iOS Safari ao focar em campos de formulário */
+  @media (max-width: 640px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
   }
 }
 

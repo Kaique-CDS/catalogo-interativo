@@ -79,6 +79,11 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
     )
   }
 
+  const renderPrice = (price?: number | null) => {
+    if (!price || price <= 0) return 'Sob consulta'
+    return formatCurrency(price)
+  }
+
   return (
     <div className="space-y-4">
       {/* Search by SKU, model, brand */}
@@ -91,20 +96,22 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
             setSearchTerm(e.target.value)
             setVisibleCount(9)
           }}
-          className="pl-10 h-11 bg-surface-1 border-surface text-white placeholder:text-muted-foreground/60 rounded-xl"
+          className="pl-10 h-12 bg-surface-1 border-surface text-white placeholder:text-muted-foreground/60 rounded-xl text-base sm:text-sm"
         />
       </div>
 
       {/* Toggle view mode */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">
-          Exibindo {Math.min(visibleCount, filteredVehicles.length)} de {filteredVehicles.length} veículo{filteredVehicles.length !== 1 ? 's' : ''}
+          Exibindo <strong className="text-white">{Math.min(visibleCount, filteredVehicles.length)}</strong> de{' '}
+          <strong className="text-white">{filteredVehicles.length}</strong> veículo{filteredVehicles.length !== 1 ? 's' : ''}
           {searchTerm && <span className="text-brand font-medium ml-1">(filtrado)</span>}
         </p>
-        <div className="flex items-center gap-1 bg-surface-1 border border-surface p-0.5 rounded-lg">
+        <div className="flex items-center gap-1 bg-surface-1 border border-surface p-1 rounded-xl">
           <button
+            type="button"
             onClick={() => setViewMode('completo')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               viewMode === 'completo'
                 ? 'bg-surface-2 text-white shadow-xs'
                 : 'text-muted-foreground hover:text-white hover:bg-surface-2/50'
@@ -114,8 +121,9 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
             Completo
           </button>
           <button
+            type="button"
             onClick={() => setViewMode('simples')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               viewMode === 'simples'
                 ? 'bg-surface-2 text-white shadow-xs'
                 : 'text-muted-foreground hover:text-white hover:bg-surface-2/50'
@@ -129,13 +137,13 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
 
       {/* SIMPLES mode: compact grid cards */}
       {viewMode === 'simples' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {displayedVehicles.map((v) => (
             <div
               key={v.id}
-              className="bg-surface-1 border border-surface hover:bg-surface-2 transition-colors rounded-2xl overflow-hidden shadow-2xs flex gap-3 p-2.5 items-center"
+              className="bg-surface-1 border border-surface hover:bg-surface-2 transition-colors rounded-2xl overflow-hidden shadow-2xs flex gap-3 p-3 items-center"
             >
-              <div className="relative h-14 w-20 rounded-xl overflow-hidden bg-surface-2 border border-surface flex-shrink-0">
+              <div className="relative h-16 w-20 rounded-xl overflow-hidden bg-surface-2 border border-surface flex-shrink-0">
                 {v.images?.[0] ? (
                   <Image src={v.images[0]} alt={v.title} fill className="object-cover" />
                 ) : (
@@ -143,28 +151,28 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                {v.sku && (
-                  <span className="font-mono text-[9px] font-bold text-brand bg-brand/10 px-1.5 py-0.5 rounded">
-                    #{v.sku}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {v.sku && (
+                    <span className="font-mono text-[10px] font-bold text-brand bg-brand/10 px-1.5 py-0.5 rounded">
+                      #{v.sku}
+                    </span>
+                  )}
+                  <span className={cn('text-[9px] px-2 py-0.5 rounded-full font-semibold border', v.is_active ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50' : 'bg-surface-2 text-muted-foreground border-surface')}>
+                    {v.is_active ? 'Publicado' : 'Oculto'}
                   </span>
-                )}
-                <p className="font-bold text-white text-xs truncate mt-0.5">{v.brand} {v.model}</p>
-                <p className="text-xs font-black text-white mt-0.5">{formatCurrency(v.price)}</p>
-              </div>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <span className={cn('text-[9px] px-2 py-0.5 rounded-full font-semibold border', v.is_active ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50' : 'bg-surface-2 text-muted-foreground border-surface')}>
-                  {v.is_active ? 'Publicado' : 'Oculto'}
-                </span>
-                <div className="flex items-center gap-0.5">
-                  <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-white" onClick={() => toggleActive(v)}>
-                    {v.is_active ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  </Button>
-                  <Link href={`/${slug}/admin/estoque/${v.id}`}>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-white">
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                  </Link>
                 </div>
+                <p className="font-bold text-white text-xs truncate mt-1">{v.title}</p>
+                <p className="text-xs font-black text-white mt-0.5">{renderPrice(v.price)}</p>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-muted-foreground hover:text-white hover:bg-surface-3" onClick={() => toggleActive(v)}>
+                  {v.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                <Link href={`/${slug}/admin/estoque/${v.id}`}>
+                  <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-muted-foreground hover:text-white hover:bg-surface-3">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           ))}
@@ -174,44 +182,96 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
       {/* COMPLETO mode */}
       {viewMode === 'completo' && (
         <>
-          {/* Mobile cards */}
+          {/* Mobile cards — Mobile-First ergonomic layout for iOS & Android */}
           <div className="md:hidden space-y-3">
             {displayedVehicles.map((v) => (
-              <div key={v.id} className="bg-surface-1 p-3.5 rounded-2xl border border-surface shadow-2xs flex gap-3 items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative h-14 w-16 rounded-xl overflow-hidden bg-surface-2 flex-shrink-0 border border-surface">
+              <div
+                key={v.id}
+                className="bg-surface-1 p-3.5 rounded-2xl border border-surface shadow-2xs space-y-3"
+              >
+                <div className="flex gap-3 items-start">
+                  <div className="relative h-20 w-24 rounded-xl overflow-hidden bg-surface-2 flex-shrink-0 border border-surface">
                     {v.images?.[0] ? (
                       <Image src={v.images[0]} alt={v.title} fill className="object-cover" />
                     ) : (
-                      <div className="h-full flex items-center justify-center"><Car className="h-5 w-5 text-muted-foreground" /></div>
+                      <div className="h-full flex items-center justify-center">
+                        <Car className="h-6 w-6 text-muted-foreground" />
+                      </div>
                     )}
                   </div>
-                  <div className="min-w-0">
-                    {v.sku && (
-                      <span className="font-mono text-[9px] font-bold text-brand">#{v.sku} • </span>
-                    )}
-                    <p className="font-bold text-white text-xs truncate">{v.title}</p>
-                    <p className="text-[11px] text-muted-foreground">{v.brand} • {v.year}</p>
-                    <p className="text-xs font-black text-white mt-0.5">{formatCurrency(v.price)}</p>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      {v.sku ? (
+                        <span className="font-mono text-[10px] font-bold text-brand bg-brand/10 px-2 py-0.5 rounded-md">
+                          #{v.sku}
+                        </span>
+                      ) : (
+                        <span />
+                      )}
+                      <span
+                        className={cn(
+                          'text-[10px] px-2.5 py-0.5 rounded-full font-semibold border shrink-0',
+                          v.is_active
+                            ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50'
+                            : 'bg-surface-2 text-muted-foreground border-surface'
+                        )}
+                      >
+                        {v.is_active ? 'Publicado' : 'Oculto'}
+                      </span>
+                    </div>
+
+                    <p className="font-bold text-white text-sm leading-snug line-clamp-2">
+                      {v.title}
+                    </p>
+
+                    <div className="flex items-center justify-between gap-2 mt-1.5">
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {v.brand} • {v.year} • {formatMileage(v.mileage)}
+                      </p>
+                      <p className="text-xs font-black text-white shrink-0">
+                        {renderPrice(v.price)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                  <span className={cn('text-[9px] px-2 py-0.5 rounded-full font-semibold border', v.is_active ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50' : 'bg-surface-2 text-muted-foreground border-surface')}>
-                    {v.is_active ? 'Publicado' : 'Oculto'}
-                  </span>
-                  <div className="flex items-center gap-0.5">
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:bg-surface-2 hover:text-white" onClick={() => toggleActive(v)}>
-                      {v.is_active ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                    </Button>
-                    <Link href={`/${slug}/admin/estoque/${v.id}`}>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:bg-surface-2 hover:text-white">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </Link>
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-red-500 hover:bg-red-950/30 hover:text-red-400" onClick={() => deleteVehicle(v.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+
+                {/* Touch-friendly action bar (40px height per button) */}
+                <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-surface">
+                  <button
+                    type="button"
+                    onClick={() => toggleActive(v)}
+                    className="h-10 rounded-xl bg-surface-2 hover:bg-surface-3 active:scale-[0.98] text-xs font-semibold text-muted-foreground hover:text-white flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    {v.is_active ? (
+                      <>
+                        <EyeOff className="h-3.5 w-3.5" />
+                        <span>Pausar</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-3.5 w-3.5 text-emerald-400" />
+                        <span>Publicar</span>
+                      </>
+                    )}
+                  </button>
+
+                  <Link
+                    href={`/${slug}/admin/estoque/${v.id}`}
+                    className="h-10 rounded-xl bg-surface-2 hover:bg-surface-3 active:scale-[0.98] text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    <span>Editar</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => deleteVehicle(v.id)}
+                    className="h-10 rounded-xl bg-red-950/25 hover:bg-red-950/40 active:scale-[0.98] border border-red-900/30 text-xs font-semibold text-red-400 flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Excluir</span>
+                  </button>
                 </div>
               </div>
             ))}
@@ -260,7 +320,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                       <p className="font-medium text-white">{vehicle.year}</p>
                       <p className="text-[11px] opacity-80">{formatMileage(vehicle.mileage)}</p>
                     </TableCell>
-                    <TableCell className="font-black text-white">{formatCurrency(vehicle.price)}</TableCell>
+                    <TableCell className="font-black text-white">{renderPrice(vehicle.price)}</TableCell>
                     <TableCell>
                       <span className={cn('text-[10px] px-2 py-1 rounded-full font-semibold border inline-flex', vehicle.is_active ? 'bg-emerald-900/30 text-emerald-400 border-emerald-800/50' : 'bg-surface-2 text-muted-foreground border-surface')}>
                         {vehicle.is_active ? 'Publicado' : 'Oculto'}
@@ -286,23 +346,23 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
               </TableBody>
             </Table>
           </div>
-
-          {filteredVehicles.length > visibleCount && (
-            <div className="pt-4 pb-2 text-center">
-              <Button
-                onClick={() => setVisibleCount((c) => c + 9)}
-                variant="outline"
-                className="h-11 px-8 rounded-xl border-surface bg-surface-1 hover:bg-surface-2 text-white font-bold gap-2 text-xs shadow-xs transition-all hover:border-brand"
-              >
-                <span>Ver mais veículos</span>
-                <ChevronDown className="h-4 w-4 text-brand" />
-                <span className="text-muted-foreground font-normal">
-                  ({filteredVehicles.length - visibleCount} restantes)
-                </span>
-              </Button>
-            </div>
-          )}
         </>
+      )}
+
+      {filteredVehicles.length > visibleCount && (
+        <div className="pt-3 pb-2 text-center">
+          <Button
+            onClick={() => setVisibleCount((c) => c + 9)}
+            variant="outline"
+            className="w-full sm:w-auto h-12 px-8 rounded-xl border-surface bg-surface-1 hover:bg-surface-2 text-white font-bold gap-2 text-xs sm:text-sm shadow-xs transition-all hover:border-brand"
+          >
+            <span>Ver mais veículos</span>
+            <ChevronDown className="h-4 w-4 text-brand" />
+            <span className="text-muted-foreground font-normal">
+              ({filteredVehicles.length - visibleCount} restantes)
+            </span>
+          </Button>
+        </div>
       )}
     </div>
   )
