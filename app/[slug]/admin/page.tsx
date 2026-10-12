@@ -7,12 +7,14 @@ import type { Vehicle } from '@/lib/supabase/types'
 import { 
   Car, CheckCircle2, EyeOff, Plus, AlertTriangle, ImageOff, FileText, 
   Clock, Database, ArrowRight, Camera, MousePointerClick, TrendingUp, 
-  Users, Share2, MessageCircle, BarChart3, Smartphone, Globe
+  Users, Share2, MessageCircle, BarChart3, Smartphone, Globe, Copy, Check
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 export default function AdminDashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   const [slug, setSlug] = useState<string>('')
+  const [copiedSource, setCopiedSource] = useState<string | null>(null)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [analytics, setAnalytics] = useState<{
     totalViews: number
@@ -46,7 +48,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
       // Fetch analytics
       const fetchAnalytics = async () => {
         try {
-          const res = await fetch(`/api/analytics?slug=${slug}`) 
+          const res = await fetch(`/api/analytics?slug=${slug}`, { cache: 'no-store' }) 
           if (res.ok) {
             const data = await res.json()
             setAnalytics(data)
@@ -89,14 +91,29 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
   ]
 
   const totalSources = Object.values(analytics.sources).reduce((a, b) => a + b, 0)
-  const getSourcePercent = (key: string) => totalSources > 0 ? Math.round((analytics.sources[key] || 0) / totalSources * 100) : 0
+  const getSourcePercent = (key: string) => totalSources > 0 ? Math.round(((analytics.sources[key] || 0) / totalSources) * 100) : 0
+  const getSourceCount = (key: string) => analytics.sources[key] || 0
 
   const trafficSources = [
-    { name: 'Instagram (Bio/Stories)', value: getSourcePercent('instagram'), color: 'bg-brand' },
-    { name: 'Google Busca', value: getSourcePercent('google'), color: 'bg-white' },
-    { name: 'Acesso Direto (Link)', value: getSourcePercent('direct'), color: 'bg-surface-3' },
-    { name: 'Facebook', value: getSourcePercent('facebook'), color: 'bg-surface-2' },
+    { key: 'instagram', name: 'Instagram (Bio/Stories)', count: getSourceCount('instagram'), value: getSourcePercent('instagram'), color: 'bg-brand' },
+    { key: 'google', name: 'Google Busca', count: getSourceCount('google'), value: getSourcePercent('google'), color: 'bg-emerald-400' },
+    { key: 'direct', name: 'Acesso Direto (Link)', count: getSourceCount('direct'), value: getSourcePercent('direct'), color: 'bg-zinc-400' },
+    { key: 'facebook', name: 'Facebook', count: getSourceCount('facebook'), value: getSourcePercent('facebook'), color: 'bg-blue-500' },
   ]
+
+  const leadingSource = [...trafficSources].sort((a, b) => b.count - a.count)[0]
+
+  const copyTrackingLink = (refKey: string, label: string) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const link = `${origin}/${slug}?ref=${refKey}`
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedSource(refKey)
+      toast.success(`Link de ${label} copiado!`, { description: link })
+      setTimeout(() => setCopiedSource(null), 2000)
+    }).catch(() => {
+      toast.error('Não foi possível copiar o link.')
+    })
+  }
 
   // Junta dados da API de analytics com os dados do veículo
   const topVehicles = analytics.topVehicles.map(tv => {
@@ -155,20 +172,63 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
             <Globe className="h-4 w-4 text-brand shrink-0" /> De onde vêm os clientes?
           </h2>
           <div className="space-y-4">
-            {trafficSources.map((source, i) => (
-              <div key={i}>
-                <div className="flex justify-between text-xs mb-1.5">
+            {trafficSources.map((source) => (
+              <div key={source.key}>
+                <div className="flex justify-between items-baseline text-xs mb-1.5">
                   <span className="font-medium text-muted-foreground">{source.name}</span>
-                  <span className="font-heading text-sm text-white tracking-wider">{source.value}%</span>
+                  <span className="font-heading text-sm text-white tracking-wider">
+                    <span className="text-[11px] font-sans font-normal text-muted-foreground mr-1.5">({source.count})</span>
+                    {source.value}%
+                  </span>
                 </div>
                 <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${source.color} transition-all duration-1000`} style={{ width: `${source.value}%` }} />
+                  <div
+                    className={`h-full rounded-full ${source.color} transition-all duration-1000`}
+                    style={{ width: `${source.value}%` }}
+                  />
                 </div>
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-muted-foreground mt-5 leading-relaxed bg-surface-2 p-3 rounded-xl border border-surface">
-            A maior parte do seu público chega pelo <strong className="text-white">Instagram</strong>. Recomendamos continuar postando o link da sua vitrine nos Stories.
+
+          {/* Links rápidos de rastreamento para Bio/Campanhas */}
+          <div className="mt-4 pt-3.5 border-t border-surface">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+              Links para Bio & Campanhas (1 toque para copiar)
+            </p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { key: 'instagram', label: 'Instagram' },
+                { key: 'facebook', label: 'Facebook' },
+                { key: 'google', label: 'Google' },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => copyTrackingLink(item.key, item.label)}
+                  className="flex items-center justify-center gap-1 px-2 py-2 rounded-lg bg-surface-2 hover:bg-surface-3 border border-surface text-[11px] font-semibold text-white/90 active:scale-95 transition-all"
+                >
+                  {copiedSource === item.key ? (
+                    <Check className="h-3 w-3 text-emerald-400 shrink-0" />
+                  ) : (
+                    <Copy className="h-3 w-3 text-brand shrink-0" />
+                  )}
+                  <span className="truncate">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-[11px] text-muted-foreground mt-3.5 leading-relaxed bg-surface-2 p-3 rounded-xl border border-surface">
+            {totalSources > 0 && leadingSource ? (
+              <>
+                A maior parte do seu público chega por <strong className="text-white">{leadingSource.name}</strong> ({leadingSource.value}%). Continue divulgando o link nos Stories e na Bio!
+              </>
+            ) : (
+              <>
+                O sistema detecta automaticamente acessos vindos do <strong className="text-white">Instagram, Google e Facebook</strong> (inclusive pelos navegadores internos do iOS e Android).
+              </>
+            )}
           </p>
         </div>
 

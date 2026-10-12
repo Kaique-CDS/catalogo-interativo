@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button'
 import { X, Banknote, CreditCard, RefreshCw } from 'lucide-react'
 import type { Vehicle } from '@/lib/supabase/types'
 import { buildWhatsAppUrl } from '@/lib/whatsapp'
+import { getTrafficSource } from '@/lib/analytics-source'
 
 interface Props {
   vehicle: Vehicle
   store: {
+    id?: string
+    slug?: string
     name: string
     whatsapp: string
     whatsapp_financeiro?: string | null
@@ -26,10 +29,11 @@ export default function InterestOptionsSheet({ vehicle, store, onClose, onOpenFi
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        store_id: vehicle.store_id || 'demo-store-id',
+        store_id: vehicle.store_id || store.id,
+        slug: store.slug,
         vehicle_id: vehicle.id,
         event_type: 'whatsapp_click',
-        source: 'direct'
+        source: getTrafficSource(),
       })
     }).catch(console.error)
 

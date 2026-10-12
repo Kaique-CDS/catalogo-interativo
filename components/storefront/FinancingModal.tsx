@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { buildFinancingWhatsAppUrl } from '@/lib/whatsapp'
 import type { Vehicle } from '@/lib/supabase/types'
+import { getTrafficSource } from '@/lib/analytics-source'
 
 const BANKS = [
   'Banco do Brasil', 'Bradesco', 'Caixa Econômica Federal', 'Itaú', 'Santander',
@@ -33,6 +34,8 @@ type FormData = z.infer<typeof schema>
 interface Props {
   vehicle: Vehicle
   store: {
+    id?: string
+    slug?: string
     name: string
     whatsapp: string
     whatsapp_financeiro?: string | null
@@ -57,10 +60,11 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        store_id: vehicle.store_id || 'demo-store-id',
+        store_id: vehicle.store_id || store.id,
+        slug: store.slug,
         vehicle_id: vehicle.id,
         event_type: 'whatsapp_click',
-        source: 'direct'
+        source: getTrafficSource(),
       })
     }).catch(console.error)
 

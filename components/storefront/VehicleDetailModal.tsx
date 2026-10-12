@@ -13,6 +13,7 @@ import type { Vehicle, Store } from '@/lib/supabase/types'
 import { toast } from 'sonner'
 import InterestOptionsSheet from './InterestOptionsSheet'
 import FinancingModal from './FinancingModal'
+import { getTrafficSource } from '@/lib/analytics-source'
 
 interface Props {
   vehicle: Vehicle | null
@@ -95,21 +96,24 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
       }
     }
     window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [vehicle, onClose, step])
 
-    // Track vehicle view
+  useEffect(() => {
+    if (!vehicle) return
+    // Track vehicle view once per vehicle open, preserving session traffic source
     fetch('/api/analytics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        store_id: vehicle.store_id || 'demo-store-id',
+        store_id: vehicle.store_id || store.id,
+        slug: store.slug,
         vehicle_id: vehicle.id,
         event_type: 'page_view',
-        source: 'direct' // It's internal navigation, so direct or we could try to inherit
-      })
+        source: getTrafficSource(),
+      }),
     }).catch(console.error)
-
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [vehicle, onClose, step])
+  }, [vehicle?.id, store.id, store.slug])
 
   // Reset step when modal changes vehicle or initialStep changes
   useEffect(() => {
@@ -125,10 +129,11 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        store_id: vehicle.store_id || 'demo-store-id',
+        store_id: vehicle.store_id || store.id,
+        slug: store.slug,
         vehicle_id: vehicle.id,
         event_type: 'share',
-        source: 'direct'
+        source: getTrafficSource(),
       })
     }).catch(console.error)
 
@@ -159,6 +164,8 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
   }
 
   const storeForModals = {
+    id: store.id,
+    slug: store.slug,
     name: store.name,
     whatsapp: store.whatsapp,
     whatsapp_financeiro: store.whatsapp_financeiro,

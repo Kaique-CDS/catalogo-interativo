@@ -1,12 +1,16 @@
 'use client'
 
+import { getTrafficSource } from '@/lib/analytics-source'
+
 interface Props {
+  storeId?: string
+  slug?: string
   storeName: string
   whatsapp: string
   customMessage?: string
 }
 
-export default function FloatingWhatsApp({ storeName, whatsapp, customMessage }: Props) {
+export default function FloatingWhatsApp({ storeId, slug, storeName, whatsapp, customMessage }: Props) {
   const cleanPhone = whatsapp.replace(/\D/g, '')
   const message = customMessage || `Olá, *${storeName}*! 👋\nGostaria de tirar algumas dúvidas sobre os veículos disponíveis no catálogo.`
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
@@ -24,9 +28,10 @@ export default function FloatingWhatsApp({ storeName, whatsapp, customMessage }:
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              store_id: 'demo-store-id', // Store ID mock, na prática receber via prop
+              store_id: storeId,
+              slug,
               event_type: 'whatsapp_click',
-              source: 'floating_button'
+              source: getTrafficSource(),
             })
           }).catch(console.error)
         }}

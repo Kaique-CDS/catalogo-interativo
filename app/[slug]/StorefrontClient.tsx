@@ -12,6 +12,7 @@ import { getVehicles } from '@/lib/vehicles'
 import type { Store, Vehicle } from '@/lib/supabase/types'
 import { ShieldCheck, BadgeCheck, BadgePercent, Car } from 'lucide-react'
 import BrandBanner from '@/components/storefront/BrandBanner'
+import { getTrafficSource } from '@/lib/analytics-source'
 
 interface StorefrontClientProps {
   slug: string
@@ -32,23 +33,20 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
     const saoPauloNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
     setIsOpen(isBusinessOpen(CONCESSIONARIA_HOURS, saoPauloNow))
 
-    // Track page view
-    // Determine source (e.g. if URL has ?ref=instagram, otherwise check document.referrer)
-    const ref = new URLSearchParams(window.location.search).get('ref') || 
-                (document.referrer.includes('instagram.com') ? 'instagram' : 
-                 document.referrer.includes('google.com') ? 'google' : 
-                 document.referrer.includes('facebook.com') ? 'facebook' : 'direct')
+    // Track page view with accurate source detection (URL params, In-App Browser UA, Referrer, sessionStorage)
+    const source = getTrafficSource()
 
     fetch('/api/analytics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        store_id: 'demo-store-id', // O ideal é usar o store.id real, usando o mock pra fallback
+        store_id: store.id,
+        slug,
         event_type: 'page_view',
-        source: ref
-      })
+        source,
+      }),
     }).catch(console.error)
-  }, [])
+  }, [slug, store.id])
 
   useEffect(() => {
     let currentVehicles = initialVehicles || []
@@ -232,6 +230,8 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
       </footer>
 
       <FloatingWhatsApp
+        storeId={store.id}
+        slug={slug}
         storeName={store.name}
         whatsapp={store.whatsapp}
         customMessage={`Olá! Estou no catálogo *${store.name}* e gostaria de informações.`}
