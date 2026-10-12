@@ -1,14 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Menu, X, Sparkles, Lightbulb } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { useState } from 'react'
-import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface Props {
   store: { id: string; name: string; slug: string; logo_url?: string | null }
@@ -16,17 +13,16 @@ interface Props {
 }
 
 const navItems = (slug: string) => [
-  { href: `/${slug}/admin`,              label: 'Início',        icon: LayoutDashboard, exact: true },
-  { href: `/${slug}/admin/estoque`,      label: 'Estoque',       icon: Car },
-  { href: `/${slug}/admin/configuracoes`,label: 'Configurações', icon: Settings },
-  { href: `/${slug}/admin/melhorias`,    label: 'Melhorias',     icon: Lightbulb },
+  { href: `/${slug}/admin`,               label: 'Início',        icon: LayoutDashboard, exact: true },
+  { href: `/${slug}/admin/estoque`,       label: 'Estoque',       icon: Car },
+  { href: `/${slug}/admin/configuracoes`, label: 'Configurações', icon: Settings },
+  { href: `/${slug}/admin/melhorias`,     label: 'Melhorias',     icon: Lightbulb },
 ]
 
 export default function AdminSidebar({ store, slug }: Props) {
   const pathname = usePathname()
-  const router = useRouter()
-  const supabase = createClient()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const storeName = store?.name || 'Milhaticar'
+  const storeLogo = store?.logo_url || '/logo-milhaticar.png'
 
   const handleLogout = async () => {
     document.cookie = 'admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
@@ -43,11 +39,11 @@ export default function AdminSidebar({ store, slug }: Props) {
       {/* 1. Top Bar Mobile (Sticky) */}
       <header className="md:hidden flex items-center justify-between px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] bg-surface-1/95 backdrop-blur-md text-white fixed top-0 left-0 right-0 z-40 border-b border-surface">
         <div className="flex items-center gap-2.5 min-w-0">
-          {store.logo_url ? (
+          {storeLogo ? (
             <img
-              src={store.logo_url}
-              alt={store.name}
-              className="h-8 w-8 object-contain flex-shrink-0"
+              src={storeLogo}
+              alt={storeName}
+              className="h-8 w-8 object-contain flex-shrink-0 rounded-lg"
             />
           ) : (
             <div className="h-8 w-8 rounded-xl bg-brand flex items-center justify-center text-white font-bold flex-shrink-0">
@@ -55,8 +51,8 @@ export default function AdminSidebar({ store, slug }: Props) {
             </div>
           )}
           <div className="min-w-0">
-            <p className="font-bold text-xs leading-tight truncate">{store.name}</p>
-            <span className="text-[10px] text-muted-foreground font-medium block truncate">Painel Administrativo</span>
+            <p className="font-bold text-xs leading-tight truncate text-white">{storeName}</p>
+            <span className="text-[10px] text-muted-foreground font-medium block truncate">Painel da Loja</span>
           </div>
         </div>
 
@@ -105,24 +101,28 @@ export default function AdminSidebar({ store, slug }: Props) {
         })}
       </nav>
 
-      {/* 3. Sidebar Desktop Clássica */}
-      <aside className="hidden md:flex w-20 flex-shrink-0 bg-surface-1 border-r border-surface flex-col justify-between">
+      {/* 3. Sidebar Desktop com Logo + Nome da Loja */}
+      <aside className="hidden md:flex w-60 flex-shrink-0 bg-surface-1 border-r border-surface flex-col justify-between">
         <div>
-          <div className="py-5 border-b border-surface flex justify-center" title={`${store.name} - Painel Administrativo`}>
-            {store.logo_url ? (
+          <div className="px-5 py-5 border-b border-surface flex items-center gap-3" title={`${storeName} - Painel Administrativo`}>
+            {storeLogo ? (
               <img
-                src={store.logo_url}
-                alt={store.name}
-                className="h-10 w-10 object-contain flex-shrink-0"
+                src={storeLogo}
+                alt={storeName}
+                className="h-10 w-10 object-contain flex-shrink-0 rounded-lg"
               />
             ) : (
-              <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center shadow-xs">
+              <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center shadow-xs shrink-0">
                 <Car className="h-5 w-5" />
               </div>
             )}
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-sm text-white truncate leading-tight">{storeName}</p>
+              <span className="text-[11px] text-muted-foreground font-medium block truncate">Painel da Loja</span>
+            </div>
           </div>
 
-          <nav className="p-3 space-y-1.5 flex flex-col items-center">
+          <nav className="p-3 space-y-1.5 flex flex-col">
             {items.map((item) => {
               const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
               return (
@@ -132,34 +132,36 @@ export default function AdminSidebar({ store, slug }: Props) {
                   title={item.label}
                   aria-label={item.label}
                   className={cn(
-                    'flex items-center justify-center h-11 w-11 rounded-xl transition-all relative',
+                    'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all',
                     isActive
-                      ? 'bg-brand text-white'
+                      ? 'bg-brand text-white shadow-xs'
                       : 'text-muted-foreground hover:bg-surface-2 hover:text-white'
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               )
             })}
           </nav>
         </div>
 
-        <div className="p-3 border-t border-surface space-y-2 flex flex-col items-center">
+        <div className="p-3 border-t border-surface space-y-2 flex flex-col">
           <Link href={`/${slug}`} target="_blank" title="Ver vitrine da loja" aria-label="Ver vitrine da loja">
-            <Button variant="outline" size="icon" className="h-10 w-10 rounded-[10px] border-brand text-white hover:bg-brand/10 hover:text-white transition-colors">
-              <ExternalLink className="h-4 w-4 text-brand" />
+            <Button variant="outline" className="w-full justify-start gap-2.5 h-10 rounded-xl border-brand/40 bg-brand/5 text-white hover:bg-brand/15 hover:text-white transition-colors text-xs font-semibold">
+              <ExternalLink className="h-4 w-4 text-brand shrink-0" />
+              <span className="truncate">Ver Vitrine</span>
             </Button>
           </Link>
           <Button
             variant="ghost"
-            size="icon"
-            className="h-10 w-10 text-muted-foreground hover:text-white hover:bg-surface-2 rounded-[10px]"
+            className="w-full justify-start gap-2.5 h-10 text-muted-foreground hover:text-white hover:bg-surface-2 rounded-xl text-xs font-semibold"
             onClick={handleLogout}
             title="Sair do Painel"
             aria-label="Sair do Painel"
           >
-            <LogOut className="h-4 w-4 text-red-500" />
+            <LogOut className="h-4 w-4 text-red-500 shrink-0" />
+            <span>Sair do Painel</span>
           </Button>
         </div>
       </aside>

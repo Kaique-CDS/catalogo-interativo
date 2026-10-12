@@ -1,25 +1,11 @@
 import { cookies } from 'next/headers'
+import type { Metadata } from 'next'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import LoginPage from './login/page'
 import { createClient } from '@/lib/supabase/server'
 import type { Store } from '@/lib/supabase/types'
 
-export default async function AdminLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode
-  params: Promise<{ slug: string }>
-}) {
-  const { slug } = await params
-  const cookieStore = await cookies()
-  const isAuthCookie = cookieStore.get('admin_auth')?.value === 'true'
-
-  // Se não estiver logado, exibe a tela de login diretamente sem loops de redirect
-  if (!isAuthCookie) {
-    return <LoginPage />
-  }
-
+async function getStoreBySlug(slug: string): Promise<Store> {
   const demoStore: Store = {
     id: 'demo-store-id',
     name: 'Milhaticar',
@@ -37,16 +23,61 @@ export default async function AdminLayout({
     created_at: new Date().toISOString(),
   }
 
-  let storeToUse = demoStore
-
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
     try {
       const supabase = await createClient()
       const { data: dbStore } = await supabase.from('stores').select('*').eq('slug', slug).maybeSingle()
-      if (dbStore) storeToUse = dbStore
+      if (dbStore) {
+        return {
+          ...demoStore,
+          ...dbStore,
+          logo_url: dbStore.logo_url || demoStore.logo_url,
+          name: dbStore.name || demoStore.name,
+        }
+      }
     } catch (e) {
       console.error(e)
     }
+  }
+
+  return demoStore
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const store = await getStoreBySlug(slug)
+  const iconUrl = store.logo_url || '/logo-milhaticar.png'
+
+  return {
+    title: `${store.name} - Painel Administrativo`,
+    description: `Gerenciamento de estoque e catálogo da ${store.name}`,
+    icons: {
+      icon: iconUrl,
+      shortcut: iconUrl,
+      apple: iconUrl,
+    },
+  }
+}
+
+export default async function AdminLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const cookieStore = await cookies()
+  const isAuthCookie = cookieStore.get('admin_auth')?.value === 'true'
+  const storeToUse = await getStoreBySlug(slug)
+
+  // Se não estiver logado, exibe a tela de login diretamente com logo e nome da loja
+  if (!isAuthCookie) {
+    return <LoginPage store={storeToUse} />
   }
 
   return (

@@ -10,9 +10,13 @@ import { Car, Loader2, Lock, User, ArrowRight, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { carAdminLoginAction } from './actions'
 
-export default function LoginPage() {
+export default function LoginPage(props: any = {}) {
+  const store = props?.store
   const params = useParams()
-  const slug = (params?.slug as string) || 'loja-exemplo'
+  const slug = store?.slug || (params?.slug as string) || 'loja-exemplo'
+  const storeName = store?.name || 'Milhaticar'
+  const storeLogo = store?.logo_url || '/logo-milhaticar.png'
+
   const [pending, setPending] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -54,16 +58,19 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-surface-0 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex items-center justify-center h-16 w-16 rounded-2xl bg-brand text-white mx-auto mb-4 shadow-xl">
-          <Car className="h-8 w-8" />
+        <div className="flex items-center justify-center h-20 w-20 rounded-2xl bg-surface-1 border border-surface mx-auto mb-4 shadow-xl p-2.5">
+          {storeLogo ? (
+            <img src={storeLogo} alt={storeName} className="h-full w-full object-contain" />
+          ) : (
+            <Car className="h-8 w-8 text-brand" />
+          )}
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-heading uppercase text-white text-center tracking-wide">
-          Painel Administrativo
+          {storeName}
         </h1>
         <p className="text-xs text-muted-foreground text-center mt-1.5 mb-6">
-          Acesso restrito da concessionária{' '}
-          <span className="font-bold text-white font-mono">#{slug}</span>
+          Painel Administrativo da Loja
         </p>
 
         <div className="bg-surface-1 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-5 border border-surface">
