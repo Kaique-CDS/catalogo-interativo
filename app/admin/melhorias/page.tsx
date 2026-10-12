@@ -32,7 +32,7 @@ const categoryConfig: Record<
     icon: AlertCircle,
   },
   feature: {
-    label: 'Feature',
+    label: 'Melhoria / Feature',
     className: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400',
     icon: Sparkles,
   },
@@ -42,7 +42,7 @@ const categoryConfig: Record<
     icon: Bug,
   },
   analise: {
-    label: 'Análise',
+    label: 'Ideia / Análise',
     className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
     icon: BarChart2,
   },
@@ -67,22 +67,47 @@ export default function SuperAdminMelhoriasPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState<string | null>(null)
 
-  const loadMelhorias = useCallback(async () => {
-    setLoading(true)
+  const loadMelhorias = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
-      const res = await fetch('/api/admin/melhorias', { cache: 'no-store' })
+      const res = await fetch(`/api/admin/melhorias?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      })
       if (!res.ok) throw new Error('Falha ao carregar melhorias')
       const data = await res.json()
-      setNotes(data.melhorias || [])
+      const list = Array.isArray(data) ? data : Array.isArray(data?.melhorias) ? data.melhorias : []
+      setNotes(list)
     } catch {
-      toast.error('Erro ao carregar anotações do banco.')
+      if (!silent) toast.error('Erro ao carregar anotações do banco.')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    loadMelhorias()
+    loadMelhorias(false)
+
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        loadMelhorias(true)
+      }
+    }, 4000)
+
+    const onFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadMelhorias(true)
+      }
+    }
+
+    window.addEventListener('focus', onFocusOrVisible)
+    document.addEventListener('visibilitychange', onFocusOrVisible)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocusOrVisible)
+      document.removeEventListener('visibilitychange', onFocusOrVisible)
+    }
   }, [loadMelhorias])
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -116,11 +141,11 @@ export default function SuperAdminMelhoriasPage() {
         throw new Error(dbData.error || 'Erro ao salvar anotação no banco.')
       }
 
-      if (dbData.melhoria) {
-        setNotes((prev) => [dbData.melhoria, ...prev])
-      } else {
-        loadMelhorias()
+      const createdItem = dbData.melhoria || dbData
+      if (createdItem?.id) {
+        setNotes((prev) => [createdItem, ...prev])
       }
+      loadMelhorias(true)
 
       setTitle('')
       setDescription('')
@@ -191,13 +216,13 @@ export default function SuperAdminMelhoriasPage() {
             Melhorias &amp; Tickets da Plataforma
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Salvo em tempo real no Supabase com disparo via Resend e WhatsApp.
+            Sincronizado em tempo real entre celular e PC via Supabase.
           </p>
         </div>
         <Button
           variant="outline"
           size="icon"
-          onClick={loadMelhorias}
+          onClick={() => loadMelhorias(false)}
           disabled={loading}
           className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl"
           title="Recarregar anotações"

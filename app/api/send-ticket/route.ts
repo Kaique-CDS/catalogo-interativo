@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { listMelhorias, createMelhoria, type MelhoriaTipo } from '@/lib/supabase/erp-db'
+
+function mapCategoryToDbTipo(raw: string): MelhoriaTipo {
+  const norm = String(raw || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+
+  if (norm.includes('urgent')) return 'urgente'
+  if (norm.includes('bug')) return 'bug'
+  if (norm.includes('ideia') || norm.includes('analise')) return 'analise'
+  return 'feature'
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +25,27 @@ export async function POST(req: NextRequest) {
         { error: 'Tipo e título são obrigatórios.' },
         { status: 400 }
       )
+    }
+
+    // Garante que o ticket seja persistido no Supabase mesmo se o cliente vier de aba/cache antigo no celular
+    try {
+      const existing = await listMelhorias()
+      const cleanTitle = String(titulo).trim().toLowerCase()
+      const nowMs = Date.now()
+      const alreadySavedRecently = existing.some(
+        (m) =>
+          String(m.titulo || '').trim().toLowerCase() === cleanTitle &&
+          nowMs - new Date(m.created_at).getTime() < 60_000
+      )
+      if (!alreadySavedRecently) {
+        await createMelhoria({
+          tipo: mapCategoryToDbTipo(String(tipo)),
+          titulo: String(titulo).trim(),
+          descricao: descricao ? String(descricao).trim() : null,
+        })
+      }
+    } catch (dbErr) {
+      console.error('Erro ao garantir persistência do ticket no Supabase:', dbErr)
     }
 
     const apiKey =

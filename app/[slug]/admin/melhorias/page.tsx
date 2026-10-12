@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { Lightbulb, Plus, Trash2, AlertCircle, Wrench, Bug, MessageCircle, Loader2 } from 'lucide-react'
+import { Lightbulb, Plus, Trash2, AlertCircle, Wrench, Bug, MessageCircle, Loader2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -53,44 +53,108 @@ export default function MelhoriasPage() {
   const storageKey = `vendazap_notes_${slug}`
 
   const [notes, setNotes] = useState<Note[]>([])
+  const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<Note['category']>('Melhoria')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState<string | null>(null)
+  const hasMigratedLocalRef = useRef(false)
 
-  const loadNotes = useCallback(async () => {
+  const loadNotes = useCallback(async (silent = false) => {
     if (!slug) return
+    if (!silent) setLoading(true)
     try {
-      const res = await fetch('/api/admin/melhorias', { cache: 'no-store' })
+      const res = await fetch(`/api/admin/melhorias?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      })
       if (res.ok) {
         const data = await res.json()
-        if (Array.isArray(data.melhorias)) {
-          const mapped: Note[] = data.melhorias.map((m: any) => ({
-            id: m.id,
-            title: m.titulo,
-            description: m.descricao || '',
-            category: dbTipoToCategory[m.tipo] || 'Melhoria',
-            createdAt: m.created_at,
-          }))
-          setNotes(mapped)
-          localStorage.setItem(storageKey, JSON.stringify(mapped))
-          return
+        const rawList = Array.isArray(data) ? data : Array.isArray(data?.melhorias) ? data.melhorias : []
+
+        // Se este dispositivo (ex: celular) tinha anotações salvas apenas no localStorage antes da integração,
+        // sincroniza automaticamente para o Supabase uma única vez para que apareçam no PC.
+        if (!hasMigratedLocalRef.current) {
+          hasMigratedLocalRef.current = true
+          try {
+            const localRaw = localStorage.getItem(storageKey)
+            if (localRaw) {
+              const localNotes: Note[] = JSON.parse(localRaw)
+              const remoteKeys = new Set(
+                rawList.map((m: any) => `${String(m.titulo || '').trim().toLowerCase()}::${String(m.descricao || '').trim().toLowerCase()}`)
+              )
+              const unsynced = localNotes.filter((ln) => {
+                const key = `${String(ln.title || '').trim().toLowerCase()}::${String(ln.description || '').trim().toLowerCase()}`
+                return ln.title && !remoteKeys.has(key)
+              })
+              if (unsynced.length > 0) {
+                for (const ln of unsynced) {
+                  const cfg = categoryConfig[ln.category] || categoryConfig.Melhoria
+                  const createRes = await fetch('/api/admin/melhorias', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      tipo: cfg.dbTipo,
+                      titulo: ln.title,
+                      descricao: ln.description || null,
+                    }),
+                  })
+                  const createdJson = await createRes.json().catch(() => ({}))
+                  if (createdJson?.melhoria) {
+                    rawList.unshift(createdJson.melhoria)
+                  }
+                }
+              }
+            }
+          } catch {
+            // ignore migration error
+          }
         }
+
+        const mapped: Note[] = rawList.map((m: any) => ({
+          id: m.id,
+          title: m.titulo,
+          description: m.descricao || '',
+          category: dbTipoToCategory[m.tipo] || 'Melhoria',
+          createdAt: m.created_at,
+        }))
+
+        setNotes(mapped)
+        localStorage.setItem(storageKey, JSON.stringify(mapped))
+        return
       }
     } catch {
-      // fallback to localStorage
-    }
-    try {
-      const stored = localStorage.getItem(storageKey)
-      if (stored) setNotes(JSON.parse(stored))
-    } catch {
-      setNotes([])
+      // fallback to localStorage if offline
+    } finally {
+      if (!silent) setLoading(false)
     }
   }, [slug, storageKey])
 
+  // Carrega ao abrir e mantém sincronizado em tempo real entre Celular e PC
   useEffect(() => {
-    loadNotes()
+    loadNotes(false)
+
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        loadNotes(true)
+      }
+    }, 4000)
+
+    const onFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadNotes(true)
+      }
+    }
+
+    window.addEventListener('focus', onFocusOrVisible)
+    document.addEventListener('visibilitychange', onFocusOrVisible)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocusOrVisible)
+      document.removeEventListener('visibilitychange', onFocusOrVisible)
+    }
   }, [loadNotes])
 
   const persist = (updated: Note[]) => {
@@ -117,7 +181,7 @@ export default function MelhoriasPage() {
     const whatsappUrl = `https://wa.me/5511993270543?text=${encodeURIComponent(whatsappMessage)}`
 
     try {
-      // 1. Salva na tabela melhorias no Supabase
+      // 1. Salva no Supabase para sincronizar entre Celular e PC
       const dbRes = await fetch('/api/admin/melhorias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,15 +192,19 @@ export default function MelhoriasPage() {
         }),
       })
       const dbData = await dbRes.json().catch(() => ({}))
+      const savedRow = dbData?.melhoria || dbData
 
       const newNote: Note = {
-        id: dbData?.melhoria?.id || crypto.randomUUID(),
+        id: savedRow?.id || crypto.randomUUID(),
         title: currentTitle,
         description: currentDescription,
         category: currentCategory,
-        createdAt: dbData?.melhoria?.created_at || new Date().toISOString(),
+        createdAt: savedRow?.created_at || new Date().toISOString(),
       }
       persist([newNote, ...notes])
+
+      // Recarrega do servidor para garantir lista idêntica em todos os dispositivos
+      loadNotes(true)
 
       // 2. Dispara o envio de e-mail via API route (/api/send-ticket)
       const res = await fetch('/api/send-ticket', {
@@ -155,7 +223,7 @@ export default function MelhoriasPage() {
         throw new Error(data.error || 'Falha ao enviar notificação por e-mail.')
       }
 
-      toast.success('Anotação salva no Supabase e ticket enviado por e-mail!')
+      toast.success('Anotação sincronizada na nuvem e ticket enviado por e-mail!')
 
       // 3. Abre o WhatsApp automaticamente após sucesso do e-mail se o navegador estiver em primeiro plano
       const isForeground =
@@ -173,7 +241,7 @@ export default function MelhoriasPage() {
         setFallbackWhatsappUrl(whatsappUrl)
       }
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao enviar e-mail do ticket. A anotação foi salva.')
+      toast.error(err?.message || 'Erro ao enviar e-mail do ticket. A anotação foi salva na nuvem.')
       setFallbackWhatsappUrl(whatsappUrl)
     } finally {
       setIsSubmitting(false)
@@ -184,21 +252,34 @@ export default function MelhoriasPage() {
     persist(notes.filter((n) => n.id !== id))
     try {
       await fetch(`/api/admin/melhorias?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      toast.success('Anotação removida.')
     } catch {
-      // ignore
+      toast.error('Erro ao remover anotação do servidor.')
     }
   }
 
   return (
     <div className="space-y-6 pb-24 md:pb-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-heading text-white uppercase tracking-wide">
-          Melhorias &amp; Anotações Internas
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Registre pendências, ideias e atualizações do seu catálogo.
-        </p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-heading text-white uppercase tracking-wide">
+            Melhorias &amp; Anotações Internas
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Registre pendências, ideias e atualizações do seu catálogo (sincronizado entre celular e PC).
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => loadNotes(false)}
+          disabled={loading}
+          className="border-surface bg-surface-1 text-muted-foreground hover:text-white rounded-xl shrink-0"
+          title="Sincronizar agora"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
 
       {/* Add Note Form */}

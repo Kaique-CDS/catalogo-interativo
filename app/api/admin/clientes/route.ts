@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { listClientes, createCliente, type PlanoTipo, type ClienteStatus } from '@/lib/supabase/erp-db'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 function getRequestIp(req: NextRequest): string {
   return (
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -17,7 +20,13 @@ export async function GET(req: NextRequest) {
     const plano = searchParams.get('plano') || undefined
 
     const clientes = await listClientes({ q, status, plano })
-    return NextResponse.json(clientes, { status: 200 })
+    return NextResponse.json(
+      { clientes },
+      {
+        status: 200,
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
+      }
+    )
   } catch (err: any) {
     console.error('Error in GET /api/admin/clientes:', err)
     return NextResponse.json({ error: err.message || 'Erro ao buscar clientes' }, { status: 500 })
@@ -49,7 +58,7 @@ export async function POST(req: NextRequest) {
       getRequestIp(req)
     )
 
-    return NextResponse.json(created, { status: 201 })
+    return NextResponse.json({ cliente: created, ...created }, { status: 201 })
   } catch (err: any) {
     console.error('Error in POST /api/admin/clientes:', err)
     return NextResponse.json({ error: err.message || 'Erro ao criar cliente' }, { status: 500 })

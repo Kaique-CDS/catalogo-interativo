@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { listClientes, syncAndListFaturas, listAuditLogs } from '@/lib/supabase/erp-db'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const MONTH_NAMES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
 export async function GET() {
@@ -65,23 +68,6 @@ export async function GET() {
       }
     })
 
-    // Dados para o CSV de relatório
-    const reportRows = clientes.map((c) => {
-      const faturasDoCliente = faturas.filter((f) => f.cliente_id === c.id)
-      const faturaAtual = faturasDoCliente[0]
-      return {
-        id: c.id,
-        nome_loja: c.nome_loja,
-        email: c.email,
-        cnpj: c.cnpj || '',
-        plano: c.plano,
-        status_cliente: c.status,
-        data_vencimento: c.data_vencimento,
-        valor_fatura: faturaAtual ? Number(faturaAtual.valor) : 0,
-        status_fatura: faturaAtual ? faturaAtual.status : 'sem_fatura',
-      }
-    })
-
     return NextResponse.json(
       {
         mrr,
@@ -89,10 +75,15 @@ export async function GET() {
         faturasVencidas,
         churnRate,
         chartData,
+        chartMonths: chartData,
         recentLogs: audit.logs,
-        reportRows,
+        clientes,
+        faturas,
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
+      }
     )
   } catch (err: any) {
     console.error('Error in GET /api/admin/dashboard:', err)
