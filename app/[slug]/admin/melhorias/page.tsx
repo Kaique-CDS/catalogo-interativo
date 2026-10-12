@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { Lightbulb, Plus, Trash2, AlertCircle, Wrench, Zap, Bug } from 'lucide-react'
+import { Lightbulb, Plus, Trash2, AlertCircle, Wrench, Zap, Bug, MessageCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface Note {
   id: string
@@ -49,6 +50,7 @@ export default function MelhoriasPage() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<Note['category']>('Melhoria')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState<string | null>(null)
 
   // Load from localStorage
   useEffect(() => {
@@ -66,22 +68,75 @@ export default function MelhoriasPage() {
     localStorage.setItem(storageKey, JSON.stringify(updated))
   }
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim()) return
+    if (!title.trim() || isSubmitting) return
+
+    const currentTitle = title.trim()
+    const currentDescription = description.trim()
+    const currentCategory = category
+
     setIsSubmitting(true)
+    setFallbackWhatsappUrl(null)
+
+    // 1. Mantém a lista local funcionando normalmente
     const newNote: Note = {
       id: crypto.randomUUID(),
-      title: title.trim(),
-      description: description.trim(),
-      category,
+      title: currentTitle,
+      description: currentDescription,
+      category: currentCategory,
       createdAt: new Date().toISOString(),
     }
     persist([newNote, ...notes])
     setTitle('')
     setDescription('')
     setCategory('Melhoria')
-    setIsSubmitting(false)
+
+    // 2. Prepara o link do WhatsApp com encodeURIComponent
+    const whatsappMessage = `[Ticket - ${currentCategory}]\nTítulo: ${currentTitle}\nDescrição: ${currentDescription || 'Sem descrição informada'}`
+    const whatsappUrl = `https://wa.me/5511993270543?text=${encodeURIComponent(whatsappMessage)}`
+
+    // 3. Dispara o envio de e-mail via API route (/api/send-ticket)
+    try {
+      const res = await fetch('/api/send-ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo: currentCategory,
+          titulo: currentTitle,
+          descricao: currentDescription,
+        }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Falha ao enviar notificação por e-mail.')
+      }
+
+      toast.success('Anotação adicionada e ticket enviado por e-mail!')
+
+      // 4. Abre o WhatsApp automaticamente após sucesso do e-mail se o navegador estiver em primeiro plano
+      const isForeground =
+        typeof document !== 'undefined' &&
+        document.visibilityState === 'visible' &&
+        document.hasFocus()
+
+      if (isForeground) {
+        const popup = window.open(whatsappUrl, '_blank')
+        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+          setFallbackWhatsappUrl(whatsappUrl)
+          toast.info('O navegador bloqueou a janela automática. Clique em "Abrir WhatsApp" abaixo.')
+        }
+      } else {
+        setFallbackWhatsappUrl(whatsappUrl)
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao enviar e-mail do ticket. A anotação foi salva localmente.')
+      setFallbackWhatsappUrl(whatsappUrl)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleDelete = (id: string) => {
@@ -143,14 +198,40 @@ export default function MelhoriasPage() {
             className="input-brand text-sm resize-none"
           />
 
-          <Button
-            type="submit"
-            disabled={isSubmitting || !title.trim()}
-            className="w-full sm:w-auto btn-brand gap-2 rounded-xl text-sm font-semibold h-11 px-6"
-          >
-            <Plus className="h-4 w-4" />
-            Adicionar anotação
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !title.trim()}
+              className="w-full sm:w-auto btn-brand gap-2 rounded-xl text-sm font-semibold h-11 px-6"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Enviando ticket...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Adicionar anotação
+                </>
+              )}
+            </Button>
+
+            {fallbackWhatsappUrl && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  window.open(fallbackWhatsappUrl, '_blank')
+                  setFallbackWhatsappUrl(null)
+                }}
+                className="w-full sm:w-auto gap-2 rounded-xl text-sm font-semibold h-11 px-5 border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Abrir WhatsApp
+              </Button>
+            )}
+          </div>
         </form>
       </div>
 
