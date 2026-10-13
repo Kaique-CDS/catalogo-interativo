@@ -59,8 +59,12 @@ export async function POST(req: NextRequest) {
       : rawUrls
 
     const fotosJson = Array.isArray(fotos) && fotos.length > 0
-      ? fotos
-      : orderedImages.map((url, idx) => ({ url, is_capa: idx === 0 }))
+      ? fotos.map((f: any, idx: number) => ({
+          url: typeof f === 'string' ? f : f?.url,
+          public_id: typeof f === 'object' && f?.public_id ? String(f.public_id) : null,
+          is_capa: typeof f === 'object' && typeof f?.is_capa === 'boolean' ? f.is_capa : idx === 0,
+        }))
+      : orderedImages.map((url, idx) => ({ url, public_id: null, is_capa: idx === 0 }))
 
     const baseRow: Record<string, any> = {
       store_id: finalStoreId,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Pencil, Trash2, Eye, EyeOff, Car, LayoutList, LayoutGrid, Search, ChevronDown } from 'lucide-react'
+import { Pencil, Trash2, Eye, EyeOff, Car, LayoutList, LayoutGrid, Search, ChevronDown, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +22,8 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
   const [viewMode, setViewMode] = useState<ViewMode>('completo')
   const [searchTerm, setSearchTerm] = useState('')
   const [visibleCount, setVisibleCount] = useState(9)
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -57,15 +59,22 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
     }
   }
 
-  const deleteVehicle = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este veículo?')) return
+  const confirmDeleteVehicle = async () => {
+    if (!vehicleToDelete) return
+    setDeleting(true)
     try {
-      const res = await fetch(`/api/vehicles/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error()
-      setVehicles(prev => prev.filter(v => v.id !== id))
-      toast.success('Veículo excluído com sucesso')
-    } catch {
-      toast.error('Erro ao excluir o veículo')
+      const res = await fetch(`/api/vehicles/${vehicleToDelete.id}`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(data.error || 'Falha ao excluir veículo')
+      }
+      setVehicles(prev => prev.filter(v => v.id !== vehicleToDelete.id))
+      toast.success('Veículo e fotos excluídos com sucesso!')
+      setVehicleToDelete(null)
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao excluir o veículo')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -266,7 +275,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
 
                   <button
                     type="button"
-                    onClick={() => deleteVehicle(v.id)}
+                    onClick={() => setVehicleToDelete(v)}
                     className="h-10 rounded-xl bg-red-950/25 hover:bg-red-950/40 active:scale-[0.98] border border-red-900/30 text-xs font-semibold text-red-400 flex items-center justify-center gap-1.5 transition-all"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -336,7 +345,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:bg-red-950/30 hover:text-red-400" onClick={() => deleteVehicle(vehicle.id)}>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:bg-red-950/30 hover:text-red-400" onClick={() => setVehicleToDelete(vehicle)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -362,6 +371,67 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
               ({filteredVehicles.length - visibleCount} restantes)
             </span>
           </Button>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Exclusão Irreversível */}
+      {vehicleToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+            onClick={!deleting ? () => setVehicleToDelete(null) : undefined}
+          />
+          <div className="relative w-full max-w-md bg-surface-1 border border-surface rounded-2xl shadow-2xl p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-3.5 mb-4">
+              <div className="h-11 w-11 rounded-xl bg-red-950/40 border border-red-900/40 flex items-center justify-center shrink-0">
+                <Trash2 className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-white leading-tight">
+                  Excluir Veículo
+                </h3>
+                <p className="text-xs text-red-400 font-medium mt-0.5">
+                  Ação irreversível
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-6">
+              Tem certeza? Isso vai remover o veículo{' '}
+              <strong className="text-white font-bold">{vehicleToDelete.title}</strong>{' '}
+              e todas as suas fotos permanentemente.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deleting}
+                onClick={() => setVehicleToDelete(null)}
+                className="rounded-xl border-surface bg-surface-2 hover:bg-surface-3 text-white text-xs font-semibold h-10 px-4"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={deleting}
+                onClick={confirmDeleteVehicle}
+                className="rounded-xl bg-red-600 hover:bg-red-700 active:scale-[0.98] text-white text-xs font-bold h-10 px-4 gap-2 transition-all shadow-md shadow-red-900/30"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Excluindo fotos...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    <span>Confirmar Exclusão</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-﻿export type Database = {
+export type Database = {
   public: {
     Tables: {
       stores: {
@@ -70,6 +70,9 @@
           badge?: string | null
           description: string | null
           images: string[]
+          fotos?: Array<{ url: string; public_id?: string | null; is_capa?: boolean }> | null
+          fotos_urls?: string[] | null
+          foto_capa_url?: string | null
           is_active: boolean
           created_at: string
         }
@@ -91,6 +94,9 @@
           badge?: string | null
           description?: string | null
           images?: string[]
+          fotos?: Array<{ url: string; public_id?: string | null; is_capa?: boolean }> | null
+          fotos_urls?: string[] | null
+          foto_capa_url?: string | null
           is_active?: boolean
           created_at?: string
         }
@@ -112,6 +118,9 @@
           badge?: string | null
           description?: string | null
           images?: string[]
+          fotos?: Array<{ url: string; public_id?: string | null; is_capa?: boolean }> | null
+          fotos_urls?: string[] | null
+          foto_capa_url?: string | null
           is_active?: boolean
           created_at?: string
         }

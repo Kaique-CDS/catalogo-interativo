@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { deleteVehicleWithPhotos } from '@/lib/vehicle-service'
 
 export async function PUT(
   req: NextRequest,
@@ -66,13 +67,17 @@ export async function PUT(
     }
 
     const extendedPayload: Record<string, any> = { ...updatePayload }
-    if (updatePayload.images !== undefined) {
-      const orderedImages: string[] = updatePayload.images
+    if (updatePayload.images !== undefined || fotos !== undefined) {
+      const orderedImages: string[] = updatePayload.images || []
       extendedPayload.fotos_urls = orderedImages
       extendedPayload.foto_capa_url = orderedImages[0] || null
       extendedPayload.fotos = Array.isArray(fotos) && fotos.length > 0
-        ? fotos
-        : orderedImages.map((url, idx) => ({ url, is_capa: idx === 0 }))
+        ? fotos.map((f: any, idx: number) => ({
+            url: typeof f === 'string' ? f : f?.url,
+            public_id: typeof f === 'object' && f?.public_id ? String(f.public_id) : null,
+            is_capa: typeof f === 'object' && typeof f?.is_capa === 'boolean' ? f.is_capa : idx === 0,
+          }))
+        : orderedImages.map((url, idx) => ({ url, public_id: null, is_capa: idx === 0 }))
     }
 
     let { data, error } = await supabase
@@ -109,23 +114,6 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params
-    const supabase = createAdminClient()
-
-    const { error } = await supabase
-      .from('vehicles')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Supabase error deleting vehicle:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true }, { status: 200 })
-  } catch (err: any) {
-    console.error('Error in DELETE /api/vehicles/[id]:', err)
-    return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 })
-  }
+  const { id } = await params
+  return deleteVehicleWithPhotos(id, req)
 }

@@ -20,6 +20,12 @@ import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
 import { generateWithGemini, buildVehicleDescriptionPrompt, getGeminiApiKey } from '@/lib/gemini'
 
+export interface VehiclePhotoItem {
+  url: string
+  public_id?: string | null
+  is_capa?: boolean
+}
+
 interface UploadingPhoto {
   id: string
   previewUrl: string
@@ -120,7 +126,27 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const isEditing = !!vehicle
 
   const [vehicleId] = useState<string>(() => vehicle?.id || crypto.randomUUID())
-  const [images, setImages] = useState<string[]>(vehicle?.images ?? [])
+  const [photos, setPhotos] = useState<VehiclePhotoItem[]>(() => {
+    if (!vehicle) return []
+    const rawFotos = (vehicle as any).fotos
+    if (Array.isArray(rawFotos) && rawFotos.length > 0) {
+      return rawFotos
+        .map((f: any, idx: number) => ({
+          url: typeof f === 'string' ? f : f?.url || '',
+          public_id: typeof f === 'object' && f?.public_id ? String(f.public_id) : null,
+          is_capa: typeof f === 'object' && typeof f?.is_capa === 'boolean' ? f.is_capa : idx === 0,
+        }))
+        .filter((item: VehiclePhotoItem) => Boolean(item.url))
+    }
+    if (Array.isArray(vehicle.images)) {
+      return vehicle.images.map((url, idx) => ({
+        url,
+        public_id: null,
+        is_capa: idx === 0,
+      }))
+    }
+    return []
+  })
   const [uploadingPhotos, setUploadingPhotos] = useState<UploadingPhoto[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(vehicle?.features ?? [])
@@ -241,7 +267,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     marca: string,
     idVeiculo: string,
     onProgress: (pct: number) => void
-  ): Promise<string> => {
+  ): Promise<{ secure_url: string; public_id?: string }> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.open('POST', '/api/upload-foto')
@@ -257,7 +283,10 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
         try {
           const data = JSON.parse(xhr.responseText || '{}')
           if (xhr.status >= 200 && xhr.status < 300 && data.secure_url) {
-            resolve(data.secure_url)
+            resolve({
+              secure_url: data.secure_url,
+              public_id: data.public_id,
+            })
           } else {
             reject(new Error(data.error || 'Falha ao enviar imagem para o Cloudinary.'))
           }
@@ -281,7 +310,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const processSelectedFiles = async (rawFiles: File[]) => {
     if (rawFiles.length === 0) return
 
-    const currentTotal = images.length + uploadingPhotos.length
+    const currentTotal = photos.length + uploadingPhotos.length
     if (currentTotal >= 10) {
       toast.error('Limite de 10 fotos por veículo atingido. Remova uma foto para adicionar outra.')
       return
@@ -351,7 +380,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           // 3. Upload assinado via API route (/api/upload-foto)
           updateUploadItem(item.id, { progress: 55, stage: 'uploading' })
 
-          const secureUrl = await uploadToServerWithProgress(
+          const uploadResult = await uploadToServerWithProgress(
             compressedFile,
             currentBrand,
             vehicleId,
@@ -364,7 +393,18 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             }
           )
 
-          setImages((prev) => (prev.length < 10 ? [...prev, secureUrl] : prev))
+          setPhotos((prev) =>
+            prev.length < 10
+              ? [
+                  ...prev,
+                  {
+                    url: uploadResult.secure_url,
+                    public_id: uploadResult.public_id || null,
+                    is_capa: prev.length === 0,
+                  },
+                ]
+              : prev
+          )
           successCount += 1
         } catch (err: any) {
           console.error('Erro no processamento/upload da foto:', err)
@@ -402,10 +442,14 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
   const handleSetCover = (index: number) => {
     if (index === 0) return
-    setImages((prev) => {
+    setPhotos((prev) => {
       const selected = prev[index]
       if (!selected) return prev
-      return [selected, ...prev.filter((_, i) => i !== index)]
+      const rest = prev.filter((_, i) => i !== index)
+      return [
+        { ...selected, is_capa: true },
+        ...rest.map((p) => ({ ...p, is_capa: false })),
+      ]
     })
     toast.success('Foto definida como capa do veículo!')
   }
@@ -417,13 +461,21 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     }
 
     setSaving(true)
-    const finalImages =
-      images.length > 0
-        ? images
-        : ['https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80']
+    const finalPhotos =
+      photos.length > 0
+        ? photos
+        : [
+            {
+              url: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80',
+              public_id: null,
+              is_capa: true,
+            },
+          ]
 
-    const fotosPayload = finalImages.map((url, idx) => ({
-      url,
+    const finalImages = finalPhotos.map((p) => p.url)
+    const fotosPayload = finalPhotos.map((p, idx) => ({
+      url: p.url,
+      public_id: p.public_id || null,
       is_capa: idx === 0,
     }))
 
@@ -490,13 +542,13 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               Fotos do Veículo (Capa e Galeria)
             </Label>
             <span className={`text-[11px] font-bold ${
-              images.length >= 10
+              photos.length >= 10
                 ? 'text-rose-500'
-                : images.length >= 8
+                : photos.length >= 8
                 ? 'text-amber-500'
                 : 'text-zinc-400'
             }`}>
-              {images.length}/10 fotos
+              {photos.length}/10 fotos
             </span>
           </div>
 
@@ -504,7 +556,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             onDragOver={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              if (images.length < 10) setIsDragging(true)
+              if (photos.length < 10) setIsDragging(true)
             }}
             onDragLeave={(e) => {
               e.preventDefault()
@@ -514,19 +566,19 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             onDrop={handleDropFiles}
             className="grid grid-cols-2 sm:grid-cols-4 gap-3"
           >
-            {images.map((url, i) => (
+            {photos.map((photo, i) => (
               <div
-                key={`${url}-${i}`}
+                key={`${photo.url}-${i}`}
                 className={`relative aspect-video rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden group border transition-all ${
                   i === 0
                     ? 'border-amber-500 ring-2 ring-amber-500/30'
                     : 'border-zinc-200 dark:border-zinc-700'
                 }`}
               >
-                <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" sizes="(max-width: 640px) 50vw, 25vw" />
+                <Image src={photo.url} alt={`Foto ${i + 1}`} fill className="object-cover" sizes="(max-width: 640px) 50vw, 25vw" />
                 <button
                   type="button"
-                  onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
+                  onClick={() => setPhotos(prev => prev.filter((_, idx) => idx !== i))}
                   className="absolute top-1.5 right-1.5 h-7 w-7 flex items-center justify-center bg-black/75 hover:bg-red-600 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shadow-md"
                   aria-label="Remover foto"
                   title="Remover foto"
@@ -579,7 +631,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             ))}
 
             <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
-              images.length >= 10
+              photos.length >= 10
                 ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
                 : isDragging
                 ? 'border-indigo-500 bg-indigo-500/10 cursor-pointer'
@@ -592,18 +644,18 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 </div>
               ) : (
                 <>
-                  <Upload className={`h-5 w-5 mb-1 ${images.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
-                  <span className={`text-xs font-medium text-center px-2 ${images.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                    {images.length >= 10 ? 'Limite atingido' : 'Adicionar ou arrastar fotos'}
+                  <Upload className={`h-5 w-5 mb-1 ${photos.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
+                  <span className={`text-xs font-medium text-center px-2 ${photos.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                    {photos.length >= 10 ? 'Limite atingido' : 'Adicionar ou arrastar fotos'}
                   </span>
                   <span className={`text-[10px] font-semibold mt-0.5 ${
-                    images.length >= 10
+                    photos.length >= 10
                       ? 'text-rose-500'
-                      : images.length >= 8
+                      : photos.length >= 8
                       ? 'text-amber-500'
                       : 'text-zinc-400'
                   }`}>
-                    {images.length}/10 fotos
+                    {photos.length}/10 fotos
                   </span>
                 </>
               )}
@@ -613,7 +665,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 multiple
                 className="hidden"
                 onChange={handleImageUpload}
-                disabled={images.length >= 10}
+                disabled={photos.length >= 10}
               />
             </label>
           </div>
