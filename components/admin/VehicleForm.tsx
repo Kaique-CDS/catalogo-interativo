@@ -24,12 +24,58 @@ interface UploadingPhoto {
   id: string
   previewUrl: string
   progress: number
-  stage: 'compressing' | 'uploading'
+  stage: 'optimizing' | 'uploading'
   name: string
 }
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_ORIGINAL_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+function isValidImageFile(file: File): boolean {
+  const type = (file.type || '').toLowerCase()
+  const name = (file.name || '').toLowerCase()
+  return (
+    type === 'image/jpeg' ||
+    type === 'image/jpg' ||
+    type === 'image/png' ||
+    type === 'image/webp' ||
+    type === 'image/heic' ||
+    type === 'image/heif' ||
+    type.startsWith('image/') ||
+    name.endsWith('.jpg') ||
+    name.endsWith('.jpeg') ||
+    name.endsWith('.png') ||
+    name.endsWith('.webp') ||
+    name.endsWith('.heic') ||
+    name.endsWith('.heif')
+  )
+}
+
+function isHeicFile(file: File): boolean {
+  const type = (file.type || '').toLowerCase()
+  const name = (file.name || '').toLowerCase()
+  return (
+    type === 'image/heic' ||
+    type === 'image/heif' ||
+    name.endsWith('.heic') ||
+    name.endsWith('.heif')
+  )
+}
+
+async function prepareImageForCompression(file: File): Promise<File> {
+  if (!isHeicFile(file)) return file
+  try {
+    const heic2any = (await import('heic2any')).default
+    const converted = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.85,
+    })
+    const blob = Array.isArray(converted) ? converted[0] : converted
+    const newName = file.name.replace(/\.(heic|heif)$/i, '') + '.jpg'
+    return new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() })
+  } catch (err) {
+    console.warn('Fallback heic2any não executado; tentando browser-image-compression diretamente:', err)
+    return file
+  }
+}
 
 const COMMON_FEATURES = [
   'Ar-condicionado',
@@ -241,15 +287,11 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       return
     }
 
-    // Filtra tipos válidos e tamanho máximo de 5MB antes da compressão
+    // Aceita qualquer tamanho de arquivo de imagem, validando os formatos permitidos
     const validFiles: File[] = []
     for (const file of rawFiles) {
-      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-        toast.error(`Arquivo "${file.name}" recusado: envie apenas JPG, PNG ou WEBP.`)
-        continue
-      }
-      if (file.size > MAX_ORIGINAL_FILE_SIZE) {
-        toast.error(`Arquivo "${file.name}" excede o limite máximo de 5MB.`)
+      if (!isValidImageFile(file)) {
+        toast.error(`Arquivo "${file.name}" recusado: envie imagens em JPG, PNG, WEBP ou HEIC/HEIF.`)
         continue
       }
       validFiles.push(file)
@@ -268,7 +310,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       id: crypto.randomUUID(),
       previewUrl: URL.createObjectURL(f),
       progress: 5,
-      stage: 'compressing',
+      stage: 'optimizing',
       name: f.name,
     }))
 
@@ -282,26 +324,31 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       filesToProcess.map(async (file, idx) => {
         const item = newUploadItems[idx]
         try {
-          // 1. Compressão no client (máx 1920px, qualidade ~0.8, alvo ~300KB)
-          const compressedBlob = await imageCompression(file, {
+          // 1. Converter HEIC/HEIF se necessário (ex: fotos de iPhone)
+          const readyFile = await prepareImageForCompression(file)
+
+          // 2. Compressão robusta no client via Web Worker (máx 1920px, qualidade ~0.8, meta ~300KB)
+          const compressedBlob = await imageCompression(readyFile, {
             maxSizeMB: 0.3,
             maxWidthOrHeight: 1920,
             initialQuality: 0.8,
             useWebWorker: true,
+            fileType: 'image/jpeg',
             onProgress: (p: number) => {
               updateUploadItem(item.id, {
                 progress: Math.max(5, Math.min(50, Math.round(p * 0.5))),
-                stage: 'compressing',
+                stage: 'optimizing',
               })
             },
           })
 
-          const compressedFile = new File([compressedBlob], file.name, {
-            type: compressedBlob.type || file.type,
+          const cleanName = (readyFile.name || 'foto.jpg').replace(/\.[^.]+$/, '') + '.jpg'
+          const compressedFile = new File([compressedBlob], cleanName, {
+            type: 'image/jpeg',
             lastModified: Date.now(),
           })
 
-          // 2. Upload assinado via API route (/api/upload-foto)
+          // 3. Upload assinado via API route (/api/upload-foto)
           updateUploadItem(item.id, { progress: 55, stage: 'uploading' })
 
           const secureUrl = await uploadToServerWithProgress(
@@ -320,8 +367,8 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           setImages((prev) => (prev.length < 10 ? [...prev, secureUrl] : prev))
           successCount += 1
         } catch (err: any) {
-          console.error('Erro no upload da foto:', err)
-          toast.error(err?.message || `Falha ao enviar "${file.name}".`)
+          console.error('Erro no processamento/upload da foto:', err)
+          toast.error(err?.message || `Falha ao processar "${file.name}".`)
         } finally {
           URL.revokeObjectURL(item.previewUrl)
           setUploadingPhotos((prev) => prev.filter((u) => u.id !== item.id))
@@ -333,8 +380,8 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     if (successCount > 0) {
       toast.success(
         successCount === 1
-          ? 'Foto comprimida e enviada com sucesso!'
-          : `${successCount} fotos comprimidas e enviadas com sucesso!`
+          ? 'Foto otimizada e enviada com sucesso!'
+          : `${successCount} fotos otimizadas e enviadas com sucesso!`
       )
     }
   }
@@ -519,7 +566,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-3 bg-black/50">
                   <Loader2 className="h-5 w-5 text-white animate-spin mb-1.5" />
                   <span className="text-[10px] font-bold text-white uppercase tracking-wider">
-                    {item.stage === 'compressing' ? 'Comprimindo...' : 'Enviando...'} {item.progress}%
+                    {item.stage === 'optimizing' ? 'Otimizando imagem...' : 'Enviando...'} {item.progress}%
                   </span>
                   <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden mt-1.5">
                     <div
@@ -562,7 +609,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               )}
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,.jpg,.jpeg,.png,.webp"
                 multiple
                 className="hidden"
                 onChange={handleImageUpload}

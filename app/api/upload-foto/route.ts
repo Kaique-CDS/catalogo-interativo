@@ -3,8 +3,15 @@ import { v2 as cloudinary } from 'cloudinary'
 
 export const dynamic = 'force-dynamic'
 
-const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+])
+const MAX_FILE_SIZE_BYTES = 35 * 1024 * 1024 // 35MB (aceita arquivos grandes sem barrar no upload)
 
 function slugifyMarca(raw: string): string {
   const cleaned = String(raw || '')
@@ -59,16 +66,28 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!ALLOWED_MIME_TYPES.has(file.type)) {
+    const fileType = (file.type || '').toLowerCase()
+    const fileName = (file.name || '').toLowerCase()
+    const isImage =
+      ALLOWED_MIME_TYPES.has(fileType) ||
+      fileType.startsWith('image/') ||
+      fileName.endsWith('.jpg') ||
+      fileName.endsWith('.jpeg') ||
+      fileName.endsWith('.png') ||
+      fileName.endsWith('.webp') ||
+      fileName.endsWith('.heic') ||
+      fileName.endsWith('.heif')
+
+    if (!isImage) {
       return NextResponse.json(
-        { error: `Formato inválido (${file.type || 'desconhecido'}). Envie apenas JPG, PNG ou WEBP.` },
+        { error: `Formato inválido (${file.type || 'desconhecido'}). Envie apenas JPG, PNG, WEBP ou HEIC.` },
         { status: 400 }
       )
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
       return NextResponse.json(
-        { error: 'O arquivo excede o tamanho máximo permitido de 5MB.' },
+        { error: 'O arquivo excede o limite máximo permitido.' },
         { status: 400 }
       )
     }
