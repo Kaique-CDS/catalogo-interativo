@@ -13,17 +13,119 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles, Lock, Edit3, Star } from 'lucide-react'
+import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles, Lock, Edit3, Star, GripHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import imageCompression from 'browser-image-compression'
 import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
 import { generateWithGemini, buildVehicleDescriptionPrompt, getGeminiApiKey } from '@/lib/gemini'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragStartEvent,
+  DragEndEvent,
+  DragOverlay,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 export interface VehiclePhotoItem {
+  id: string
   url: string
   public_id?: string | null
   is_capa?: boolean
+}
+
+interface SortablePhotoItemProps {
+  id: string
+  photo: VehiclePhotoItem
+  index: number
+  isCover: boolean
+  isAnyDragging: boolean
+  onRemove: () => void
+}
+
+function SortablePhotoItem({
+  id,
+  photo,
+  index,
+  isCover,
+  isAnyDragging,
+  onRemove,
+}: SortablePhotoItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    touchAction: isDragging ? 'none' : 'manipulation',
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`relative aspect-video rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden group border transition-all cursor-grab active:cursor-grabbing select-none ${
+        isDragging
+          ? 'opacity-30 border-dashed border-amber-500 scale-95 z-0'
+          : isCover
+          ? 'border-amber-500 ring-2 ring-amber-500/30 shadow-xs'
+          : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600'
+      } ${isAnyDragging && !isDragging ? 'transition-transform duration-200' : ''}`}
+    >
+      <Image
+        src={photo.url}
+        alt={`Foto ${index + 1}`}
+        fill
+        className="object-cover pointer-events-none"
+        sizes="(max-width: 640px) 50vw, 25vw"
+      />
+
+      {/* Botão de remover foto */}
+      <button
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation()
+          onRemove()
+        }}
+        className={`absolute top-1.5 right-1.5 h-7 w-7 flex items-center justify-center bg-black/75 hover:bg-red-600 text-white rounded-full transition-all shadow-md z-10 ${
+          isAnyDragging ? 'hidden' : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
+        }`}
+        aria-label="Remover foto"
+        title="Remover foto"
+      >
+        <X className="h-4 w-4" />
+      </button>
+
+      {/* Badge de Capa: exclusivo na posição 0 */}
+      {isCover && (
+        <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 bg-amber-500 text-zinc-950 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs z-10 pointer-events-none">
+          <Star className="h-3 w-3 fill-zinc-950" /> Capa
+        </span>
+      )}
+    </div>
+  )
 }
 
 interface UploadingPhoto {
@@ -132,14 +234,16 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     if (Array.isArray(rawFotos) && rawFotos.length > 0) {
       return rawFotos
         .map((f: any, idx: number) => ({
+          id: (typeof f === 'object' && f?.id) || (typeof f === 'object' && f?.public_id ? String(f.public_id) : undefined) || f?.url || `photo-${idx}-${crypto.randomUUID()}`,
           url: typeof f === 'string' ? f : f?.url || '',
           public_id: typeof f === 'object' && f?.public_id ? String(f.public_id) : null,
-          is_capa: typeof f === 'object' && typeof f?.is_capa === 'boolean' ? f.is_capa : idx === 0,
+          is_capa: idx === 0,
         }))
         .filter((item: VehiclePhotoItem) => Boolean(item.url))
     }
     if (Array.isArray(vehicle.images)) {
       return vehicle.images.map((url, idx) => ({
+        id: url || `photo-${idx}-${crypto.randomUUID()}`,
         url,
         public_id: null,
         is_capa: idx === 0,
@@ -148,7 +252,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     return []
   })
   const [uploadingPhotos, setUploadingPhotos] = useState<UploadingPhoto[]>([])
-  const [isDragging, setIsDragging] = useState(false)
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const [showReorderHint, setShowReorderHint] = useState(false)
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(vehicle?.features ?? [])
   const [fuel, setFuel] = useState<string>(vehicle?.fuel ?? 'Flex')
   const [transmission, setTransmission] = useState<string>(vehicle?.transmission ?? 'Automático')
@@ -158,6 +264,80 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const [sku, setSku] = useState<string>(vehicle?.sku ?? '')
   const [aiLoading, setAiLoading] = useState(false)
   const [descMode, setDescMode] = useState<'manual' | 'ai'>('manual')
+
+  // Recupera se o usuário já dispensou a dica de reordenação
+  useEffect(() => {
+    try {
+      const dismissed = localStorage.getItem('vendazap_reorder_hint_dismissed')
+      if (!dismissed) {
+        setShowReorderHint(true)
+      }
+    } catch {}
+  }, [])
+
+  const handleDismissHint = () => {
+    setShowReorderHint(false)
+    try {
+      localStorage.setItem('vendazap_reorder_hint_dismissed', 'true')
+    } catch {}
+  }
+
+  // Sensores otimizados para toque (estilo iOS, delay 250ms e tolerância 5px contra scroll) e mouse
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id))
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveId(null)
+
+    if (!over || active.id === over.id) return
+
+    setPhotos((prev) => {
+      const oldIndex = prev.findIndex((p) => p.id === active.id)
+      const newIndex = prev.findIndex((p) => p.id === over.id)
+      if (oldIndex === -1 || newIndex === -1) return prev
+
+      const reordered = arrayMove(prev, oldIndex, newIndex)
+      return reordered.map((photo, idx) => ({
+        ...photo,
+        is_capa: idx === 0,
+      }))
+    })
+  }
+
+  const handleDragCancel = () => {
+    setActiveId(null)
+  }
+
+  const handleRemovePhoto = (idToRemove: string) => {
+    setPhotos((prev) => {
+      const filtered = prev.filter((p) => p.id !== idToRemove)
+      return filtered.map((photo, idx) => ({
+        ...photo,
+        is_capa: idx === 0,
+      }))
+    })
+  }
+
+  const activePhoto = activeId ? photos.find((p) => p.id === activeId) : null
 
   // Auto-generate SKU for new vehicles on mount
   useEffect(() => {
@@ -393,18 +573,16 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             }
           )
 
-          setPhotos((prev) =>
-            prev.length < 10
-              ? [
-                  ...prev,
-                  {
-                    url: uploadResult.secure_url,
-                    public_id: uploadResult.public_id || null,
-                    is_capa: prev.length === 0,
-                  },
-                ]
-              : prev
-          )
+          setPhotos((prev) => {
+            if (prev.length >= 10) return prev
+            const newPhoto: VehiclePhotoItem = {
+              id: uploadResult.public_id || `upload-${Date.now()}-${crypto.randomUUID()}`,
+              url: uploadResult.secure_url,
+              public_id: uploadResult.public_id || null,
+              is_capa: prev.length === 0,
+            }
+            return [...prev, newPhoto]
+          })
           successCount += 1
         } catch (err: any) {
           console.error('Erro no processamento/upload da foto:', err)
@@ -435,23 +613,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
   const handleDropFiles = async (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsDragging(false)
+    setIsDraggingFiles(false)
     const files = Array.from(e.dataTransfer?.files ?? [])
     await processSelectedFiles(files)
-  }
-
-  const handleSetCover = (index: number) => {
-    if (index === 0) return
-    setPhotos((prev) => {
-      const selected = prev[index]
-      if (!selected) return prev
-      const rest = prev.filter((_, i) => i !== index)
-      return [
-        { ...selected, is_capa: true },
-        ...rest.map((p) => ({ ...p, is_capa: false })),
-      ]
-    })
-    toast.success('Foto definida como capa do veículo!')
   }
 
   const onSubmit = async (data: VehicleFormData) => {
@@ -552,123 +716,152 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             </span>
           </div>
 
-          <div
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              if (photos.length < 10) setIsDragging(true)
-            }}
-            onDragLeave={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              setIsDragging(false)
-            }}
-            onDrop={handleDropFiles}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+          {/* Dica de reordenação (exibida apenas quando tem fotos e não dispensada) */}
+          {photos.length > 1 && showReorderHint && (
+            <div className="flex items-center justify-between gap-2 px-3 py-2 mb-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-300 text-xs">
+              <div className="flex items-center gap-2">
+                <GripHorizontal className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <span>Segure e arraste para reordenar — a primeira foto é a capa.</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleDismissHint}
+                className="p-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-400 transition-colors"
+                title="Dispensar dica"
+                aria-label="Dispensar aviso de reordenação"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
+          <DndContext
+            id="vehicle-photos-dnd"
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
           >
-            {photos.map((photo, i) => (
+            <SortableContext
+              items={photos.map((p) => p.id)}
+              strategy={rectSortingStrategy}
+            >
               <div
-                key={`${photo.url}-${i}`}
-                className={`relative aspect-video rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden group border transition-all ${
-                  i === 0
-                    ? 'border-amber-500 ring-2 ring-amber-500/30'
-                    : 'border-zinc-200 dark:border-zinc-700'
-                }`}
+                onDragOver={(e) => {
+                  if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    if (photos.length < 10) setIsDraggingFiles(true)
+                  }
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setIsDraggingFiles(false)
+                }}
+                onDrop={handleDropFiles}
+                className="grid grid-cols-2 sm:grid-cols-4 gap-3"
               >
-                <Image src={photo.url} alt={`Foto ${i + 1}`} fill className="object-cover" sizes="(max-width: 640px) 50vw, 25vw" />
-                <button
-                  type="button"
-                  onClick={() => setPhotos(prev => prev.filter((_, idx) => idx !== i))}
-                  className="absolute top-1.5 right-1.5 h-7 w-7 flex items-center justify-center bg-black/75 hover:bg-red-600 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shadow-md"
-                  aria-label="Remover foto"
-                  title="Remover foto"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                {photos.map((photo, i) => (
+                  <SortablePhotoItem
+                    key={photo.id}
+                    id={photo.id}
+                    photo={photo}
+                    index={i}
+                    isCover={i === 0}
+                    isAnyDragging={Boolean(activeId)}
+                    onRemove={() => handleRemovePhoto(photo.id)}
+                  />
+                ))}
 
-                {i === 0 ? (
-                  <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 bg-amber-500 text-zinc-950 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
-                    <Star className="h-3 w-3 fill-zinc-950" /> Capa
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleSetCover(i)}
-                    className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 bg-black/75 hover:bg-amber-500 hover:text-zinc-950 text-white text-[10px] font-bold px-2 py-0.5 rounded-md opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all shadow-xs"
-                    title="Definir como foto de capa"
+                {/* Previews em andamento com barra de progresso individual */}
+                {uploadingPhotos.map((item) => (
+                  <div
+                    key={item.id}
+                    className="relative aspect-video rounded-xl bg-zinc-900 overflow-hidden border border-indigo-500/50"
                   >
-                    <Star className="h-3 w-3" /> Definir Capa
-                  </button>
-                )}
-              </div>
-            ))}
-
-            {/* Previews em andamento com barra de progresso individual */}
-            {uploadingPhotos.map((item) => (
-              <div
-                key={item.id}
-                className="relative aspect-video rounded-xl bg-zinc-900 overflow-hidden border border-indigo-500/50"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.previewUrl}
-                  alt={item.name}
-                  className="w-full h-full object-cover opacity-45"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 bg-black/50">
-                  <Loader2 className="h-5 w-5 text-white animate-spin mb-1.5" />
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">
-                    {item.stage === 'optimizing' ? 'Otimizando imagem...' : 'Enviando...'} {item.progress}%
-                  </span>
-                  <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden mt-1.5">
-                    <div
-                      className="h-full bg-indigo-500 transition-all duration-200 rounded-full"
-                      style={{ width: `${item.progress}%` }}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.previewUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover opacity-45"
                     />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-3 bg-black/50">
+                      <Loader2 className="h-5 w-5 text-white animate-spin mb-1.5" />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                        {item.stage === 'optimizing' ? 'Otimizando imagem...' : 'Enviando...'} {item.progress}%
+                      </span>
+                      <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden mt-1.5">
+                        <div
+                          className="h-full bg-indigo-500 transition-all duration-200 rounded-full"
+                          style={{ width: `${item.progress}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))}
 
-            <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
-              photos.length >= 10
-                ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
-                : isDragging
-                ? 'border-indigo-500 bg-indigo-500/10 cursor-pointer'
-                : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-            }`}>
-              {uploading ? (
-                <div className="flex flex-col items-center">
-                  <Loader2 className="h-5 w-5 text-zinc-400 animate-spin mb-1" />
-                  <span className="text-[10px] font-semibold text-zinc-400">Processando...</span>
+                <label className={`flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed transition-colors ${
+                  photos.length >= 10
+                    ? 'border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/10 cursor-not-allowed'
+                    : isDraggingFiles
+                    ? 'border-indigo-500 bg-indigo-500/10 cursor-pointer'
+                    : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 cursor-pointer bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                }`}>
+                  {uploading ? (
+                    <div className="flex flex-col items-center">
+                      <Loader2 className="h-5 w-5 text-zinc-400 animate-spin mb-1" />
+                      <span className="text-[10px] font-semibold text-zinc-400">Processando...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className={`h-5 w-5 mb-1 ${photos.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
+                      <span className={`text-xs font-medium text-center px-2 ${photos.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                        {photos.length >= 10 ? 'Limite atingido' : 'Adicionar ou arrastar fotos'}
+                      </span>
+                      <span className={`text-[10px] font-semibold mt-0.5 ${
+                        photos.length >= 10
+                          ? 'text-rose-500'
+                          : photos.length >= 8
+                          ? 'text-amber-500'
+                          : 'text-zinc-400'
+                      }`}>
+                        {photos.length}/10 fotos
+                      </span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,.jpg,.jpeg,.png,.webp"
+                    multiple
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={photos.length >= 10}
+                  />
+                </label>
+              </div>
+            </SortableContext>
+
+            <DragOverlay adjustScale style={{ transformOrigin: '0 0' }}>
+              {activePhoto ? (
+                <div className="relative aspect-video rounded-xl bg-zinc-900 overflow-hidden shadow-2xl ring-2 ring-amber-500 scale-105 cursor-grabbing z-50">
+                  <Image
+                    src={activePhoto.url}
+                    alt="Foto arrastando"
+                    fill
+                    className="object-cover pointer-events-none"
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                  />
+                  {photos.findIndex((p) => p.id === activePhoto.id) === 0 && (
+                    <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 bg-amber-500 text-zinc-950 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs pointer-events-none">
+                      <Star className="h-3 w-3 fill-zinc-950" /> Capa
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <>
-                  <Upload className={`h-5 w-5 mb-1 ${photos.length >= 10 ? 'text-rose-400' : 'text-zinc-500 dark:text-zinc-400'}`} />
-                  <span className={`text-xs font-medium text-center px-2 ${photos.length >= 10 ? 'text-rose-500' : 'text-zinc-600 dark:text-zinc-400'}`}>
-                    {photos.length >= 10 ? 'Limite atingido' : 'Adicionar ou arrastar fotos'}
-                  </span>
-                  <span className={`text-[10px] font-semibold mt-0.5 ${
-                    photos.length >= 10
-                      ? 'text-rose-500'
-                      : photos.length >= 8
-                      ? 'text-amber-500'
-                      : 'text-zinc-400'
-                  }`}>
-                    {photos.length}/10 fotos
-                  </span>
-                </>
-              )}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,.jpg,.jpeg,.png,.webp"
-                multiple
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={photos.length >= 10}
-              />
-            </label>
-          </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         </CardContent>
       </Card>
 
