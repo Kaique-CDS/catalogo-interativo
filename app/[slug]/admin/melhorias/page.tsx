@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 interface Note {
   id: string
@@ -58,6 +59,7 @@ export default function MelhoriasPage() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<Note['category']>('Melhoria')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState<string | null>(null)
   const hasMigratedLocalRef = useRef(false)
 
@@ -73,8 +75,7 @@ export default function MelhoriasPage() {
         const data = await res.json()
         const rawList = Array.isArray(data) ? data : Array.isArray(data?.melhorias) ? data.melhorias : []
 
-        // Se este dispositivo (ex: celular) tinha anotações salvas apenas no localStorage antes da integração,
-        // sincroniza automaticamente para o Supabase uma única vez para que apareçam no PC.
+        // Sincroniza anotações locais legadas caso existam
         if (!hasMigratedLocalRef.current) {
           hasMigratedLocalRef.current = true
           try {
@@ -131,16 +132,70 @@ export default function MelhoriasPage() {
     }
   }, [slug, storageKey])
 
-  // Carrega ao abrir e mantém sincronizado em tempo real entre Celular e PC
+  // Sincronização em Tempo Real (Supabase Realtime) entre Celular e PC
   useEffect(() => {
     loadNotes(false)
 
-    const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        loadNotes(true)
-      }
-    }, 4000)
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`melhorias-realtime-${slug || 'client'}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'melhorias' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const row: any = payload.new
+            if (row && row.id) {
+              const newNote: Note = {
+                id: row.id,
+                title: row.titulo,
+                description: row.descricao || '',
+                category: dbTipoToCategory[row.tipo] || 'Melhoria',
+                createdAt: row.created_at || new Date().toISOString(),
+              }
+              setNotes((prev) => {
+                if (prev.some((n) => n.id === newNote.id)) return prev
+                const updated = [newNote, ...prev]
+                localStorage.setItem(storageKey, JSON.stringify(updated))
+                return updated
+              })
+            }
+          } else if (payload.eventType === 'DELETE') {
+            const oldId = payload.old?.id
+            if (oldId) {
+              setNotes((prev) => {
+                const updated = prev.filter((n) => n.id !== oldId)
+                localStorage.setItem(storageKey, JSON.stringify(updated))
+                return updated
+              })
+            } else {
+              loadNotes(true)
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const row: any = payload.new
+            if (row && row.id) {
+              setNotes((prev) => {
+                const updated = prev.map((n) =>
+                  n.id === row.id
+                    ? {
+                        id: row.id,
+                        title: row.titulo,
+                        description: row.descricao || '',
+                        category: dbTipoToCategory[row.tipo] || 'Melhoria',
+                        createdAt: row.created_at || n.createdAt,
+                      }
+                    : n
+                )
+                localStorage.setItem(storageKey, JSON.stringify(updated))
+                return updated
+              })
+            }
+          }
+        }
+      )
+      .subscribe()
 
+    // Fallback: sincronizar ao focar ou reativar a aba
     const onFocusOrVisible = () => {
       if (document.visibilityState === 'visible') {
         loadNotes(true)
@@ -150,17 +205,13 @@ export default function MelhoriasPage() {
     window.addEventListener('focus', onFocusOrVisible)
     document.addEventListener('visibilitychange', onFocusOrVisible)
 
+    // Ao desmontar o componente, remove a subscription para não acumular conexões
     return () => {
-      clearInterval(interval)
+      supabase.removeChannel(channel)
       window.removeEventListener('focus', onFocusOrVisible)
       document.removeEventListener('visibilitychange', onFocusOrVisible)
     }
-  }, [loadNotes])
-
-  const persist = (updated: Note[]) => {
-    setNotes(updated)
-    localStorage.setItem(storageKey, JSON.stringify(updated))
-  }
+  }, [loadNotes, slug, storageKey])
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -173,59 +224,96 @@ export default function MelhoriasPage() {
     setIsSubmitting(true)
     setFallbackWhatsappUrl(null)
 
-    setTitle('')
-    setDescription('')
-    setCategory('Melhoria')
-
     const whatsappMessage = `[Ticket - ${currentCategory}]\nTítulo: ${currentTitle}\nDescrição: ${currentDescription || 'Sem descrição informada'}`
     const whatsappUrl = `https://wa.me/5511993270543?text=${encodeURIComponent(whatsappMessage)}`
 
     try {
-      // 1. Salva no Supabase para sincronizar entre Celular e PC
-      const dbRes = await fetch('/api/admin/melhorias', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tipo: categoryConfig[currentCategory].dbTipo,
-          titulo: currentTitle,
-          descricao: currentDescription || null,
-        }),
-      })
-      const dbData = await dbRes.json().catch(() => ({}))
-      const savedRow = dbData?.melhoria || dbData
+      const supabase = createClient()
+      const dbTipo = categoryConfig[currentCategory].dbTipo
+      let savedRow: any = null
+
+      // 1. Grava diretamente no Supabase na tabela melhorias
+      const { data: insertedData, error: insertError } = await supabase
+        .from('melhorias')
+        .insert([
+          {
+            tipo: dbTipo,
+            titulo: currentTitle,
+            descricao: currentDescription || null,
+          },
+        ])
+        .select()
+        .single()
+
+      if (!insertError && insertedData) {
+        savedRow = insertedData
+      } else {
+        // Fallback via API route que usa service role
+        const dbRes = await fetch('/api/admin/melhorias', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo: dbTipo,
+            titulo: currentTitle,
+            descricao: currentDescription || null,
+          }),
+        })
+
+        if (!dbRes.ok) {
+          const errData = await dbRes.json().catch(() => ({}))
+          throw new Error(errData.error || insertError?.message || 'Falha ao salvar anotação no banco.')
+        }
+
+        const dbData = await dbRes.json()
+        savedRow = dbData?.melhoria || dbData
+      }
+
+      if (!savedRow || !savedRow.id) {
+        throw new Error('Falha ao confirmar criação da anotação no banco de dados.')
+      }
 
       const newNote: Note = {
-        id: savedRow?.id || crypto.randomUUID(),
+        id: savedRow.id,
         title: currentTitle,
         description: currentDescription,
         category: currentCategory,
-        createdAt: savedRow?.created_at || new Date().toISOString(),
+        createdAt: savedRow.created_at || new Date().toISOString(),
       }
-      persist([newNote, ...notes])
 
-      // Recarrega do servidor para garantir lista idêntica em todos os dispositivos
-      loadNotes(true)
-
-      // 2. Dispara o envio de e-mail via API route (/api/send-ticket)
-      const res = await fetch('/api/send-ticket', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tipo: currentCategory,
-          titulo: currentTitle,
-          descricao: currentDescription,
-        }),
+      // Atualiza localmente sem duplicar se o Realtime já entregou
+      setNotes((prev) => {
+        if (prev.some((n) => n.id === newNote.id)) return prev
+        const updated = [newNote, ...prev]
+        localStorage.setItem(storageKey, JSON.stringify(updated))
+        return updated
       })
 
-      const data = await res.json().catch(() => ({}))
+      setTitle('')
+      setDescription('')
+      setCategory('Melhoria')
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Falha ao enviar notificação por e-mail.')
+      // 2. Dispara notificação por e-mail via API route (/api/send-ticket)
+      try {
+        const res = await fetch('/api/send-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo: currentCategory,
+            titulo: currentTitle,
+            descricao: currentDescription,
+          }),
+        })
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          console.warn('Aviso no envio de e-mail:', data.error)
+        }
+      } catch (emailErr) {
+        console.warn('Falha no envio de e-mail:', emailErr)
       }
 
-      toast.success('Anotação sincronizada na nuvem e ticket enviado por e-mail!')
+      toast.success('Anotação sincronizada na nuvem!')
 
-      // 3. Abre o WhatsApp automaticamente após sucesso do e-mail se o navegador estiver em primeiro plano
+      // 3. Abre o WhatsApp se o navegador estiver em primeiro plano
       const isForeground =
         typeof document !== 'undefined' &&
         document.visibilityState === 'visible' &&
@@ -241,7 +329,7 @@ export default function MelhoriasPage() {
         setFallbackWhatsappUrl(whatsappUrl)
       }
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao enviar e-mail do ticket. A anotação foi salva na nuvem.')
+      toast.error(err?.message || 'Erro ao registrar anotação no banco.')
       setFallbackWhatsappUrl(whatsappUrl)
     } finally {
       setIsSubmitting(false)
@@ -249,12 +337,49 @@ export default function MelhoriasPage() {
   }
 
   const handleDelete = async (id: string) => {
-    persist(notes.filter((n) => n.id !== id))
+    if (deletingId) return
+    setDeletingId(id)
+
     try {
-      await fetch(`/api/admin/melhorias?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
-      toast.success('Anotação removida.')
-    } catch {
-      toast.error('Erro ao remover anotação do servidor.')
+      const supabase = createClient()
+
+      // 1. Executa DELETE real na tabela melhorias do Supabase
+      let success = false
+      const { error: sbError } = await supabase
+        .from('melhorias')
+        .delete()
+        .eq('id', id)
+
+      if (!sbError) {
+        success = true
+      } else {
+        console.warn('DELETE direto retornou erro, tentando fallback da API:', sbError)
+        // Fallback para API route que usa service role
+        const res = await fetch(`/api/admin/melhorias?id=${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+        })
+        if (res.ok) {
+          success = true
+        } else {
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.error || sbError.message || 'Falha ao excluir no banco de dados')
+        }
+      }
+
+      if (success) {
+        // Só atualiza o state local depois de confirmar que o delete no banco teve sucesso!
+        setNotes((prev) => {
+          const updated = prev.filter((n) => n.id !== id)
+          localStorage.setItem(storageKey, JSON.stringify(updated))
+          return updated
+        })
+        toast.success('Anotação removida com sucesso.')
+      }
+    } catch (err: any) {
+      console.error('Erro ao excluir anotação do banco:', err)
+      toast.error(err?.message || 'Erro ao remover anotação do banco. O item foi mantido.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -410,11 +535,16 @@ export default function MelhoriasPage() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  disabled={deletingId === note.id}
                   onClick={() => handleDelete(note.id)}
-                  className="h-9 w-9 flex-shrink-0 text-muted-foreground hover:text-white hover:bg-red-500 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                  className="h-9 w-9 flex-shrink-0 text-muted-foreground hover:text-white hover:bg-red-500 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all disabled:opacity-50"
                   title="Excluir anotação"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  {deletingId === note.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-red-400" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             )

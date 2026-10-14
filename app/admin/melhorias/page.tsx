@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import type { ErpMelhoria, MelhoriaTipo } from '@/lib/supabase/erp-db'
 
 const CATEGORIES: MelhoriaTipo[] = ['urgente', 'feature', 'bug', 'analise']
@@ -65,6 +66,7 @@ export default function SuperAdminMelhoriasPage() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<MelhoriaTipo>('feature')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [fallbackWhatsappUrl, setFallbackWhatsappUrl] = useState<string | null>(null)
 
   const loadMelhorias = useCallback(async (silent = false) => {
@@ -88,11 +90,39 @@ export default function SuperAdminMelhoriasPage() {
   useEffect(() => {
     loadMelhorias(false)
 
-    const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        loadMelhorias(true)
-      }
-    }, 4000)
+    const supabase = createClient()
+    const channel = supabase
+      .channel('superadmin-melhorias-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'melhorias' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const row: any = payload.new
+            if (row && row.id) {
+              setNotes((prev) => {
+                if (prev.some((n) => n.id === row.id)) return prev
+                return [row as ErpMelhoria, ...prev]
+              })
+            }
+          } else if (payload.eventType === 'DELETE') {
+            const oldId = payload.old?.id
+            if (oldId) {
+              setNotes((prev) => prev.filter((n) => n.id !== oldId))
+            } else {
+              loadMelhorias(true)
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const row: any = payload.new
+            if (row && row.id) {
+              setNotes((prev) =>
+                prev.map((n) => (n.id === row.id ? (row as ErpMelhoria) : n))
+              )
+            }
+          }
+        }
+      )
+      .subscribe()
 
     const onFocusOrVisible = () => {
       if (document.visibilityState === 'visible') {
@@ -104,7 +134,7 @@ export default function SuperAdminMelhoriasPage() {
     document.addEventListener('visibilitychange', onFocusOrVisible)
 
     return () => {
-      clearInterval(interval)
+      supabase.removeChannel(channel)
       window.removeEventListener('focus', onFocusOrVisible)
       document.removeEventListener('visibilitychange', onFocusOrVisible)
     }
@@ -143,9 +173,11 @@ export default function SuperAdminMelhoriasPage() {
 
       const createdItem = dbData.melhoria || dbData
       if (createdItem?.id) {
-        setNotes((prev) => [createdItem, ...prev])
+        setNotes((prev) => {
+          if (prev.some((n) => n.id === createdItem.id)) return prev
+          return [createdItem, ...prev]
+        })
       }
-      loadMelhorias(true)
 
       setTitle('')
       setDescription('')
@@ -195,15 +227,45 @@ export default function SuperAdminMelhoriasPage() {
   }
 
   const handleDelete = async (id: string) => {
+    if (deletingId) return
+    setDeletingId(id)
+
     try {
-      const res = await fetch(`/api/admin/melhorias?id=${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-      })
-      if (!res.ok) throw new Error('Falha ao excluir')
-      setNotes((prev) => prev.filter((n) => n.id !== id))
-      toast.success('Anotação removida do banco.')
-    } catch {
-      toast.error('Erro ao excluir anotação.')
+      const supabase = createClient()
+
+      // 1. Executa DELETE real na tabela melhorias do Supabase
+      let success = false
+      const { error: sbError } = await supabase
+        .from('melhorias')
+        .delete()
+        .eq('id', id)
+
+      if (!sbError) {
+        success = true
+      } else {
+        console.warn('DELETE direto retornou erro, tentando fallback da API:', sbError)
+        // Fallback para API route que usa service role
+        const res = await fetch(`/api/admin/melhorias?id=${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+        })
+        if (res.ok) {
+          success = true
+        } else {
+          const errData = await res.json().catch(() => ({}))
+          throw new Error(errData.error || sbError.message || 'Falha ao excluir no banco de dados')
+        }
+      }
+
+      if (success) {
+        // Só atualiza o state local depois de confirmar que o delete no banco teve sucesso!
+        setNotes((prev) => prev.filter((n) => n.id !== id))
+        toast.success('Anotação removida com sucesso.')
+      }
+    } catch (err: any) {
+      console.error('Erro ao excluir anotação do banco:', err)
+      toast.error(err?.message || 'Erro ao remover anotação do banco. O item foi mantido.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -364,10 +426,15 @@ export default function SuperAdminMelhoriasPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(note.id)}
+                  disabled={deletingId === note.id}
                   className="h-8 w-8 flex-shrink-0 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
                   title="Excluir anotação"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  {deletingId === note.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-red-500" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             )

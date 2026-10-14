@@ -942,16 +942,17 @@ export async function createMelhoria(input: {
 
 export async function deleteMelhoria(id: string): Promise<void> {
   const supabase = createAdminClient()
-  const { error } = await supabase.from('melhorias').delete().eq('id', id)
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
 
-  if (!error) return
-
-  if (isMissingTableError(error)) {
-    const state = await getFallbackState()
-    state.melhorias = state.melhorias.filter((m) => m.id !== id)
-    await saveFallbackState(state)
-    return
+  if (isUuid) {
+    const { error } = await supabase.from('melhorias').delete().eq('id', id)
+    if (!error) return
+    if (!isMissingTableError(error)) {
+      throw new Error(error?.message || 'Erro ao excluir melhoria')
+    }
   }
 
-  throw new Error(error?.message || 'Erro ao excluir melhoria')
+  const state = await getFallbackState()
+  state.melhorias = state.melhorias.filter((m) => m.id !== id)
+  await saveFallbackState(state)
 }

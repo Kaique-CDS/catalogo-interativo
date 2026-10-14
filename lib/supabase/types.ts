@@ -125,9 +125,33 @@ export type Database = {
           created_at?: string
         }
       }
+      melhorias: {
+        Row: {
+          id: string
+          tipo: 'urgente' | 'feature' | 'bug' | 'analise'
+          titulo: string
+          descricao: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tipo: 'urgente' | 'feature' | 'bug' | 'analise'
+          titulo: string
+          descricao?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tipo?: 'urgente' | 'feature' | 'bug' | 'analise'
+          titulo?: string
+          descricao?: string | null
+          created_at?: string
+        }
+      }
     }
   }
 }
 
 export type Store = Database['public']['Tables']['stores']['Row']
 export type Vehicle = Database['public']['Tables']['vehicles']['Row']
+export type Melhoria = Database['public']['Tables']['melhorias']['Row']
