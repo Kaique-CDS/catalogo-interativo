@@ -178,7 +178,7 @@
     text-shadow: none !important;
   }
 
-  /* Footer L&L: fundo #2A0F55 com texto branco e links lavanda */
+  /* Footer L&L: fundo #2A0F55 com todo o texto em branco puro */
   .tenant-ll-multimarcas footer.store-footer {
     background-color: #2A0F55 !important;
     border-top: 1px solid rgba(230, 222, 245, 0.15) !important;
@@ -192,15 +192,17 @@
     color: #FFFFFF !important;
     text-shadow: none !important;
   }
+  .tenant-ll-multimarcas footer.store-footer,
   .tenant-ll-multimarcas footer.store-footer p,
-  .tenant-ll-multimarcas footer.store-footer span:not(.font-heading) {
-    color: #EFE8FA !important;
-  }
-  .tenant-ll-multimarcas footer.store-footer a {
-    color: #EFE8FA !important;
+  .tenant-ll-multimarcas footer.store-footer span,
+  .tenant-ll-multimarcas footer.store-footer li,
+  .tenant-ll-multimarcas footer.store-footer a,
+  .tenant-ll-multimarcas footer.store-footer .text-muted-foreground {
+    color: #FFFFFF !important;
   }
   .tenant-ll-multimarcas footer.store-footer a:hover {
     color: #FFFFFF !important;
+    opacity: 0.85;
   }
   .tenant-ll-multimarcas footer.store-footer .bg-surface-2 {
     background-color: rgba(255, 255, 255, 0.12) !important;
@@ -210,7 +212,7 @@
     background-color: rgba(255, 255, 255, 0.22) !important;
   }
 
-  /* Contêiner preto arredondado para a logo da L&L no tema claro */
+  /* Contêiner da logo da L&L (100% transparente para a nova logo sem fundo) */
   .brand-logo-container {
     background-color: transparent;
     border: none;
@@ -218,11 +220,11 @@
     padding: 0;
   }
   .tenant-ll-multimarcas .brand-logo-container {
-    background-color: #0A0A0A !important;
-    border: 1px solid #2A0F55 !important;
-    border-radius: 12px !important;
-    padding: 3px !important;
-    box-shadow: 0 2px 8px rgba(42, 15, 85, 0.15) !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
   }
 
   /* Cards de Veículos L&L no tema claro */

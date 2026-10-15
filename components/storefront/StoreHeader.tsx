@@ -28,10 +28,10 @@ export default function StoreHeader({ store }: Props) {
               <Image
                 src={logoUrl}
                 alt={store.name}
-                width={48}
-                height={48}
+                width={80}
+                height={44}
                 priority
-                className="h-8 w-8 sm:h-11 sm:w-11 object-contain flex-shrink-0"
+                className="h-8 sm:h-11 w-auto max-w-[120px] sm:max-w-[140px] object-contain flex-shrink-0"
               />
             </div>
           ) : (

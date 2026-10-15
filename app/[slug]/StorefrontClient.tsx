@@ -10,7 +10,7 @@ import CookieBanner from '@/components/storefront/CookieBanner'
 import { isBusinessOpen, getNextOpenInfo, CONCESSIONARIA_HOURS } from '@/lib/businessHours'
 import { getVehicles } from '@/lib/vehicles'
 import type { Store, Vehicle } from '@/lib/supabase/types'
-import { ShieldCheck, BadgeCheck, BadgePercent, Car } from 'lucide-react'
+import { ShieldCheck, BadgeCheck, BadgePercent, Car, Clock, Phone as PhoneIcon, MessageCircle, MapPin } from 'lucide-react'
 import BrandBanner from '@/components/storefront/BrandBanner'
 import { getTrafficSource } from '@/lib/analytics-source'
 import { getTenantBrand } from '@/lib/tenants'
@@ -114,7 +114,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
 
   return (
     <div
-      className="min-h-screen bg-surface-0 text-foreground transition-colors duration-300 pb-12"
+      className="min-h-screen flex flex-col bg-surface-0 text-foreground transition-colors duration-300"
       style={{ fontFamily: 'var(--font-body, Montserrat, sans-serif)' }}
     >
       {fontGoogleUrl && (
@@ -133,7 +133,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
       </section>
 
       {/* ── Grid Principal ── */}
-      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-7xl">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-7xl flex-1 pb-16 sm:pb-8">
         <VehicleGrid
           vehicles={vehicles}
           store={store}
@@ -144,7 +144,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-surface bg-surface-0 store-footer mt-8 pt-12 pb-8">
+      <footer className="border-t border-surface/20 store-footer mt-auto pt-12 pb-8">
         <div className="container mx-auto px-4 max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-10">
 
           {/* Coluna 1 — Marca */}
@@ -155,9 +155,9 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
                   <Image
                     src={store.logo_url || brand.logo.footer}
                     alt={store.name}
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 object-contain flex-shrink-0"
+                    width={96}
+                    height={48}
+                    className="h-10 sm:h-12 w-auto max-w-[140px] object-contain flex-shrink-0"
                   />
                 </div>
               ) : (
@@ -167,7 +167,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
               )}
               <span className="font-heading text-white text-xl uppercase tracking-wide">{store.name}</span>
             </div>
-            {store.slogan && <p className="text-muted-foreground text-sm mb-4">{store.slogan}</p>}
+            {store.slogan && <p className="text-white/80 text-sm mb-4">{store.slogan}</p>}
             <div className="flex gap-3 mt-4">
               <a
                 href={instagramInfo.url}
@@ -195,33 +195,33 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
           {/* Coluna 2 — Contato */}
           <div>
             <h4 className="font-heading text-white text-lg uppercase tracking-wide mb-4">Contato</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
+            <ul className="space-y-3 text-sm text-white">
               {(store.address || brand.address) && (
-                <li className="flex items-start gap-2">
-                  <span className="text-brand mt-0.5">📍</span>
-                  {store.address || brand.address}
+                <li className="flex items-start gap-2.5 text-white">
+                  <MapPin className="h-4 w-4 text-brand shrink-0 mt-0.5" />
+                  <span className="text-white">{store.address || brand.address}</span>
                 </li>
               )}
-              <li className="flex items-center gap-2">
-                <span className="text-brand">📞</span>
-                <a href={`tel:${phoneInfo.tel}`} className="hover:text-white transition-colors">
+              <li className="flex items-center gap-2.5 text-white">
+                <PhoneIcon className="h-4 w-4 text-brand shrink-0" />
+                <a href={`tel:${phoneInfo.tel}`} className="text-white hover:text-white/80 transition-colors">
                   {phoneInfo.label}: {phoneInfo.display}
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <span className="text-brand">💬</span>
+              <li className="flex items-center gap-2.5 text-white">
+                <MessageCircle className="h-4 w-4 text-[#25D366] shrink-0" />
                 <a
                   href={`https://wa.me/${whatsappInfo.number}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
+                  className="text-white hover:text-white/80 transition-colors"
                 >
                   WhatsApp: {whatsappInfo.display}
                 </a>
               </li>
               {store.opening_hours && (
-                <li className="flex items-start gap-2">
-                  <span className="text-brand">🕒</span>
-                  {store.opening_hours}
+                <li className="flex items-start gap-2.5 text-white">
+                  <Clock className="h-4 w-4 text-brand shrink-0 mt-0.5" />
+                  <span className="text-white font-medium">{store.opening_hours}</span>
                 </li>
               )}
             </ul>
@@ -230,22 +230,22 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
           {/* Coluna 3 — Institucional */}
           <div>
             <h4 className="font-heading text-white text-lg uppercase tracking-wide mb-4">Institucional</h4>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href={`/${slug}`} className="hover:text-brand transition-colors">Nosso Estoque</a></li>
-              <li><a href={`/${slug}/quem-somos`} className="hover:text-brand transition-colors">Quem Somos</a></li>
-              <li><a href={`/${slug}/termos`} className="hover:text-brand transition-colors">Termos e Condições</a></li>
-              <li><a href={`/${slug}/privacidade`} className="hover:text-brand transition-colors">Política de Privacidade</a></li>
+            <ul className="space-y-3 text-sm text-white/90">
+              <li><a href={`/${slug}`} className="text-white/90 hover:text-white transition-colors">Nosso Estoque</a></li>
+              <li><a href={`/${slug}/quem-somos`} className="text-white/90 hover:text-white transition-colors">Quem Somos</a></li>
+              <li><a href={`/${slug}/termos`} className="text-white/90 hover:text-white transition-colors">Termos e Condições</a></li>
+              <li><a href={`/${slug}/privacidade`} className="text-white/90 hover:text-white transition-colors">Política de Privacidade</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 max-w-7xl mt-10 pt-6 border-t border-surface text-center flex flex-col md:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-muted-foreground/60">
+        <div className="container mx-auto px-4 max-w-7xl mt-10 pt-6 border-t border-white/10 text-center flex flex-col md:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-white/70">
             {brand.copyright(new Date().getFullYear())}
           </p>
-          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
+          <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
             Desenvolvido por{' '}
-            <a href="/" className="text-brand hover:text-brand/80 transition-colors">VendaZap Catálogos</a>
+            <a href="/" className="text-white hover:text-white/90 underline transition-colors">VendaZap Catálogos</a>
           </p>
         </div>
       </footer>

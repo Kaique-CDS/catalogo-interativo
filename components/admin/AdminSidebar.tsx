@@ -44,11 +44,11 @@ export default function AdminSidebar({ store, slug }: Props) {
       <header className="md:hidden flex items-center justify-between px-4 py-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] bg-surface-1/95 backdrop-blur-md text-foreground fixed top-0 left-0 right-0 z-40 border-b border-surface">
         <div className="flex items-center gap-2.5 min-w-0">
           {storeLogo ? (
-            <div className="brand-logo-container h-8 w-8 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg">
+            <div className="brand-logo-container h-8 w-auto min-w-[32px] max-w-[90px] flex items-center justify-center flex-shrink-0">
               <img
                 src={storeLogo}
                 alt={storeName}
-                className="h-full w-full object-contain"
+                className="h-full w-auto object-contain"
               />
             </div>
           ) : (
@@ -112,11 +112,11 @@ export default function AdminSidebar({ store, slug }: Props) {
         <div>
           <div className="px-5 py-5 border-b border-surface flex items-center gap-3" title={`${storeName} - Painel Administrativo`}>
             {storeLogo ? (
-              <div className="brand-logo-container h-10 w-10 flex items-center justify-center flex-shrink-0 overflow-hidden rounded-lg">
+              <div className="brand-logo-container h-10 w-auto min-w-[40px] max-w-[120px] flex items-center justify-center flex-shrink-0">
                 <img
                   src={storeLogo}
                   alt={storeName}
-                  className="h-full w-full object-contain"
+                  className="h-full w-auto object-contain"
                 />
               </div>
             ) : (
