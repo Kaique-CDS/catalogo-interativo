@@ -264,12 +264,12 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           </div>
 
           {/* Scrollable content */}
-          <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] space-y-6 text-zinc-800 dark:text-zinc-200">
+          <div className="p-4 sm:p-6 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] space-y-6 text-foreground">
             <div>
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{vehicle.model}</span>
-              <h2 className="font-heading text-xl sm:text-2xl text-zinc-900 dark:text-white uppercase leading-snug tracking-wide">{vehicle.brand} {vehicle.title.replace(`${vehicle.brand} `, '')}</h2>
+              <h2 className="font-heading text-xl sm:text-2xl text-heading uppercase leading-snug tracking-wide">{vehicle.brand} {vehicle.title.replace(`${vehicle.brand} `, '')}</h2>
               <div className="flex items-center gap-3 mt-3">
-                <span className="font-heading text-2xl sm:text-3xl text-zinc-900 dark:text-white">
+                <span className="font-heading text-2xl sm:text-3xl text-price">
                   Preço sob consulta
                 </span>
                 <span className="text-xs font-bold text-muted-foreground bg-surface-1 border border-surface px-2.5 py-1 rounded-md uppercase tracking-wider">
@@ -284,28 +284,28 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
                 <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
                   <Calendar className="h-3.5 w-3.5 text-brand" /> Ano
                 </span>
-                <span className="text-sm font-bold text-white block">{vehicle.year}</span>
+                <span className="text-sm font-bold text-foreground block">{vehicle.year}</span>
               </div>
 
               <div className="bg-surface-1 border border-surface p-3 rounded-xl flex flex-col justify-center h-[76px]">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
                   <Gauge className="h-3.5 w-3.5 text-brand" /> Km
                 </span>
-                <span className="text-sm font-bold text-white block">{formatMileage(vehicle.mileage)}</span>
+                <span className="text-sm font-bold text-foreground block">{formatMileage(vehicle.mileage)}</span>
               </div>
 
               <div className="bg-surface-1 border border-surface p-3 rounded-xl flex flex-col justify-center h-[76px]">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
                   <Cog className="h-3.5 w-3.5 text-brand" /> Câmbio
                 </span>
-                <span className="text-[13px] font-bold text-white block leading-tight">{vehicle.transmission || 'Automático'}</span>
+                <span className="text-[13px] font-bold text-foreground block leading-tight">{vehicle.transmission || 'Automático'}</span>
               </div>
 
               <div className="bg-surface-1 border border-surface p-3 rounded-xl flex flex-col justify-center h-[76px]">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
                   <Fuel className="h-3.5 w-3.5 text-brand" /> Combustível
                 </span>
-                <span className="text-[13px] font-bold text-white block leading-tight">{vehicle.fuel || 'Flex'}</span>
+                <span className="text-[13px] font-bold text-foreground block leading-tight">{vehicle.fuel || 'Flex'}</span>
               </div>
 
               {vehicle.plate_end && (
@@ -313,7 +313,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
                   <span className="text-[10px] text-muted-foreground uppercase font-bold flex items-center gap-1.5 mb-1">
                     Placa
                   </span>
-                  <span className="text-sm font-bold text-white block font-mono">
+                  <span className="text-sm font-bold text-foreground block font-mono">
                     Final {vehicle.plate_end}
                   </span>
                 </div>
@@ -323,11 +323,11 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             {/* Features */}
             {vehicle.features && vehicle.features.length > 0 && (
               <div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-heading uppercase tracking-wider mb-3 flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-brand" />
                   Opcionais & Equipamentos
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-zinc-300">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-foreground">
                   {vehicle.features.map((feat) => (
                     <div key={feat} className="flex items-center gap-2.5 bg-surface-1 border border-surface/50 px-3 py-2.5 rounded-xl">
                       <Check className="h-4 w-4 text-brand flex-shrink-0" />
@@ -341,10 +341,10 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             {/* Description */}
             {vehicle.description && (
               <div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">
+                <h4 className="text-xs font-bold text-heading uppercase tracking-wider mb-2">
                   Sobre este Veículo
                 </h4>
-                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line bg-surface-1 p-4 rounded-xl border border-surface">
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line bg-surface-1 p-4 rounded-xl border border-surface">
                   {vehicle.description}
                 </p>
               </div>
@@ -355,7 +355,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
               {store.address && (
                 <div className="text-xs text-muted-foreground flex items-center gap-2.5">
                   <MapPin className="h-4 w-4 text-brand flex-shrink-0" />
-                  <span>Disponível para visitação em: <strong className="text-white">{store.address}</strong></span>
+                  <span>Disponível para visitação em: <strong className="text-foreground">{store.address}</strong></span>
                 </div>
               )}
               {store.opening_hours && (
@@ -371,7 +371,7 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
           <div className="p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))] bg-surface-1 border-t border-surface flex items-center justify-between gap-4 flex-shrink-0">
             <div className="hidden sm:block">
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold block mb-0.5">Interessado?</span>
-              <span className="text-sm text-white font-medium">Escolha como prosseguir</span>
+              <span className="text-sm text-foreground font-medium">Escolha como prosseguir</span>
             </div>
 
             <Button

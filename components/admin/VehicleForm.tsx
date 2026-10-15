@@ -1259,7 +1259,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
       {/* Ações */}
       <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" disabled={saving} className="flex-1 sm:flex-none px-8 py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-xl text-sm font-semibold shadow-sm">
+        <Button type="submit" disabled={saving} className="flex-1 sm:flex-none px-8 py-3 btn-brand rounded-xl text-sm font-semibold shadow-sm">
           {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           {isEditing ? 'Salvar Alterações' : 'Publicar Veículo no Catálogo'}
         </Button>

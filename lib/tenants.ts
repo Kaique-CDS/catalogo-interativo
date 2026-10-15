@@ -87,7 +87,7 @@ const LL_MULTIMARCAS: TenantBrand = {
   isDefault: false,
   name: 'L&L Multimarcas',
   themeClass: 'tenant-ll-multimarcas',
-  themeColor: '#0A0A0A',
+  themeColor: '#4B1F8F',
   metaDescription:
     'L&L Multimarcas: seminovos multimarcas com parceria em todos os bancos e facilidades para autônomos. Confira o estoque e fale com a gente.',
   instagram: { handle: 'lloficial.multimarcas', url: 'https://instagram.com/lloficial.multimarcas' },

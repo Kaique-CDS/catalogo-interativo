@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
@@ -141,7 +141,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               placeholder="Buscar por modelo, marca ou SKU..."
-              className="w-full pl-10 pr-3 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand border border-surface rounded-[10px] bg-surface-1 text-white placeholder:text-muted-foreground transition-all"
+              className="w-full pl-10 pr-3 h-12 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand border border-surface rounded-[10px] bg-surface-1 text-foreground placeholder:text-muted-foreground transition-all"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
@@ -154,7 +154,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             className={`h-12 px-4 rounded-[10px] border font-semibold text-sm flex items-center gap-2 flex-shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-brand
               ${showAdvanced || hasFilters
                 ? 'border-brand text-brand bg-brand/10'
-                : 'border-surface text-muted-foreground hover:border-white/30 hover:text-white bg-surface-1'
+                : 'border-surface text-muted-foreground hover:border-brand/40 hover:text-foreground bg-surface-1'
               }`}
           >
             <SlidersHorizontal className="h-4 w-4" />
@@ -174,16 +174,16 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
           )}
         </div>
 
-        {/* â”€â”€ Filtros avanÃ§ados â”€â”€ */}
+        {/* ── Filtros avançados ── */}
         {showAdvanced && (
           <div className="pt-3 border-t border-surface grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block tracking-wider">Marca</label>
               <Select value={brand} onValueChange={(v) => { setBrand(v); applyFilters() }}>
-                <SelectTrigger className="h-9 text-xs rounded-[10px] bg-surface-3 border-surface text-white focus:ring-brand focus:border-brand">
+                <SelectTrigger className="h-9 text-xs rounded-[10px] bg-surface-3 border-surface text-foreground focus:ring-brand focus:border-brand">
                   <SelectValue placeholder="Todas" />
                 </SelectTrigger>
-                <SelectContent className="bg-surface-2 border-surface text-white">
+                <SelectContent className="bg-surface-2 border-surface text-foreground">
                   <SelectItem value="all">Todas as Marcas</SelectItem>
                   {brands.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
                 </SelectContent>
@@ -193,10 +193,10 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             <div>
               <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block tracking-wider">Ano</label>
               <Select value={year} onValueChange={(v) => { setYear(v); applyFilters() }}>
-                <SelectTrigger className="h-9 text-xs rounded-[10px] bg-surface-3 border-surface text-white focus:ring-brand focus:border-brand">
+                <SelectTrigger className="h-9 text-xs rounded-[10px] bg-surface-3 border-surface text-foreground focus:ring-brand focus:border-brand">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
-                <SelectContent className="bg-surface-2 border-surface text-white">
+                <SelectContent className="bg-surface-2 border-surface text-foreground">
                   <SelectItem value="all">Qualquer ano</SelectItem>
                   {years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}
                 </SelectContent>

@@ -96,7 +96,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-surface-0 font-sans text-white overflow-x-hidden">
+    <div className="flex flex-col md:flex-row min-h-screen bg-surface-0 font-sans text-foreground overflow-x-hidden">
       <AdminSidebar store={storeToUse} slug={slug} />
       <main className="flex-1 overflow-y-auto pt-[68px] pb-28 md:pt-0 md:pb-8 w-full min-w-0">
         <div className="p-4 sm:p-6 md:p-8 max-w-[1100px] mx-auto w-full">{children}</div>

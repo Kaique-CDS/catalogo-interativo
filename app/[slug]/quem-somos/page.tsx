@@ -21,7 +21,7 @@ export default async function QuemSomosPage({ params }: { params: Promise<{ slug
         </p>
         <p>Veículos revisados, de total procedência e com qualidade garantida para você realizar seu sonho com tranquilidade.</p>
         <p>Nossa missão é propiciar aos nossos clientes uma experiência transparente, ágil e segura na aquisição do seu novo carro.</p>
-        <p className="font-heading text-white text-xl uppercase tracking-wide pt-4">
+        <p className="font-heading text-heading text-xl uppercase tracking-wide pt-4">
           L&L MULTIMARCAS — CONFIANÇA E PARCERIA PARA O SEU PRÓXIMO VEÍCULO!
         </p>
       </InstitutionalLayout>
@@ -36,7 +36,7 @@ export default async function QuemSomosPage({ params }: { params: Promise<{ slug
       </p>
       <p>Veículos de procedência, com qualidade garantida.</p>
       <p>Nossa missão é propiciar aos nossos clientes uma ótima experiência na aquisição de um novo carro.</p>
-      <p className="font-heading text-white text-xl uppercase tracking-wide pt-4">
+      <p className="font-heading text-heading text-xl uppercase tracking-wide pt-4">
         MILHATICAR, VEÍCULOS NOVOS E SEMINOVOS, NACIONAIS E IMPORTADOS!
       </p>
     </InstitutionalLayout>

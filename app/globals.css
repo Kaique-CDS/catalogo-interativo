@@ -37,16 +37,19 @@
     --brand-red: #FF2D0F;
     --brand-red-dark: #D81F06;
     --brand-red-rgb: 255, 45, 15;    /* mesmo #FF2D0F, usado em sombras/glow */
+    --brand-heading: #09090B;
+    --brand-price: #FF2D0F;
     --brand-surface-0: #000000;
     --brand-surface-1: #0A0A0A;
     --brand-surface-2: #141414;
     --brand-surface-3: #1C1C1C;
+    --brand-border: rgba(255, 255, 255, 0.08);
+    --brand-footer-bg: #000000;
+    --brand-card-shadow: none;
     --brand-whatsapp: #25D366;
-    /* --brand-accent (bordas/foco) e --brand-text (texto/ícones) não são definidos aqui:
-       sem override de tenant eles caem em --brand-red, mantendo a Milhaticar idêntica. */
   }
 
-  /* Modo Escuro (padrão em toda a plataforma e fixo nas lojas de clientes) */
+  /* Modo Escuro (padrão em toda a plataforma e fixo na Milhaticar) */
   .dark,
   .store-fixed-dark {
     --background: 0 0% 4%;           /* #0A0A0A */
@@ -68,43 +71,234 @@
     --border: 0 0% 14%;
     --input: 0 0% 11%;
     --ring: 8 100% 53%;
+
+    --brand-heading: #FFFFFF;
+    --brand-price: #FFFFFF;
+    --brand-surface-0: #000000;
+    --brand-surface-1: #0A0A0A;
+    --brand-surface-2: #141414;
+    --brand-surface-3: #1C1C1C;
+    --brand-border: rgba(255, 255, 255, 0.08);
+    --brand-footer-bg: #000000;
+    --brand-card-shadow: none;
+    --brand-whatsapp: #25D366;
   }
 
   /* ============================================================
-     TENANT: L&L Multimarcas (/ll-multimarcas)
-     Aplicado via classe no wrapper de app/[slug]/layout.tsx.
-     Contraste (WCAG AA): branco sobre #4B1F8F = 11.1:1 · branco sobre #7B3FD1 = 6.0:1
-     · #A47FE8 (texto/ícones) sobre #0A0A0A = 6.4:1 · #7B3FD1 (bordas/foco) sobre #0A0A0A = 3.3:1
+     TENANT: L&L Multimarcas (/ll-multimarcas) — TEMA CLARO
+     Fundo branco, roxo como cor da marca, contraste WCAG AA.
      ============================================================ */
   .tenant-ll-multimarcas {
-    --brand-red: #4B1F8F;            /* roxo principal — preenchimentos (botões, badges, chips) */
-    --brand-red-dark: #7B3FD1;       /* roxo claro — hover de preenchimentos */
-    --brand-red-rgb: 123, 63, 209;   /* glow/sombras em roxo claro */
-    --brand-accent: #7B3FD1;         /* bordas, hovers e anéis de foco */
-    --brand-text: #A47FE8;           /* texto/ícones de destaque sobre preto (tom do #7B3FD1 p/ AA) */
+    color-scheme: light;
+
+    /* Tokens shadcn/ui para tema claro */
+    --background: 0 0% 100%;             /* #FFFFFF */
+    --foreground: 255 52% 13%;            /* #1A1033 */
+    --card: 0 0% 100%;                   /* #FFFFFF */
+    --card-foreground: 255 52% 13%;      /* #1A1033 */
+    --popover: 0 0% 100%;                /* #FFFFFF */
+    --popover-foreground: 255 52% 13%;   /* #1A1033 */
+
+    --primary: 264 64% 34%;              /* #4B1F8F */
+    --primary-foreground: 0 0% 100%;     /* #FFFFFF */
+
+    --secondary: 264 56% 95%;            /* #EFE8FA (Lavanda clara) */
+    --secondary-foreground: 264 64% 34%; /* #4B1F8F */
+
+    --muted: 264 45% 97%;                /* #F8F6FC (Área alternada) */
+    --muted-foreground: 247 13% 39%;     /* #5B5670 (Texto secundário) */
+
+    --accent: 264 56% 95%;               /* #EFE8FA */
+    --accent-foreground: 264 64% 34%;    /* #4B1F8F */
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 263 50% 92%;               /* #E6DEF5 */
+    --input: 263 50% 92%;                /* #E6DEF5 */
+    --ring: 265 61% 53%;                 /* #7B3FD1 */
+
+    /* Gráficos em escala de roxos */
+    --chart-1: #4B1F8F;
+    --chart-2: #7B3FD1;
+    --chart-3: #9F6DF2;
+    --chart-4: #C4A7F8;
+    --chart-5: #EFE8FA;
+
+    /* Tokens da marca L&L Multimarcas */
+    --brand-red: #4B1F8F;                /* Roxo principal */
+    --brand-red-dark: #3A1673;           /* Roxo hover/pressed */
+    --brand-red-rgb: 75, 31, 143;
+    --brand-accent: #7B3FD1;             /* Roxo médio para focus ring / destaques */
+    --brand-accent-light: #EFE8FA;       /* Lavanda clara */
+    --brand-text: #4B1F8F;               /* Texto roxo da marca */
     --brand-silver: #C8CCD0;
-    --brand-surface-0: #0A0A0A;      /* preto */
-    --brand-surface-1: #110D18;      /* superfícies com leve tom roxo (#2A0F55 diluído) */
-    --brand-surface-2: #18121F;
-    --brand-surface-3: #211829;
-    --primary: 264 64% 34%;          /* #4B1F8F */
-    --primary-foreground: 0 0% 100%;
-    --ring: 265 61% 53%;             /* #7B3FD1 */
+    --brand-heading: #2A0F55;            /* Roxo escuro para títulos */
+    --brand-surface-0: #FFFFFF;          /* Fundo da página */
+    --brand-surface-1: #FFFFFF;          /* Cards e superfícies principais */
+    --brand-surface-2: #F8F6FC;          /* Áreas alternadas / inputs */
+    --brand-surface-3: #EFE8FA;          /* Lavanda clara para chips / hover */
+    --brand-surface-dark: #2A0F55;      /* Roxo escuro */
+    --brand-border: #E6DEF5;             /* Borda lilás sutil */
+    --brand-card-shadow: 0 4px 20px -2px rgba(75, 31, 143, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+    --brand-price: #4B1F8F;              /* Preços em roxo */
+    --brand-whatsapp: #25D366;
   }
-  /* Cor padrão dos anéis `ring-*` sem cor explícita (o Tailwind usa azul por padrão) */
+
+  /* Anéis de foco padrão */
   .tenant-ll-multimarcas *,
   .tenant-ll-multimarcas *::before,
   .tenant-ll-multimarcas *::after {
-    --tw-ring-color: rgb(123 63 209 / 0.6);
+    --tw-ring-color: rgb(123 63 209 / 0.5);
   }
-  /* Loader da vitrine (app/[slug]/loading.tsx) */
-  .tenant-ll-multimarcas .tenant-loading {
-    --muted: 266 30% 16%;
-    background-color: var(--brand-surface-0);
+
+  /* Títulos L&L: sem sombra/glitch, cor #2A0F55 */
+  .tenant-ll-multimarcas .font-heading,
+  .tenant-ll-multimarcas h1,
+  .tenant-ll-multimarcas h2,
+  .tenant-ll-multimarcas h3,
+  .tenant-ll-multimarcas h4 {
+    color: var(--brand-heading, #2A0F55);
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    filter: none !important;
   }
-  .tenant-ll-multimarcas .tenant-loading-surface {
-    background-color: var(--brand-surface-1);
-    border-color: rgba(123, 63, 209, 0.25);
+
+  /* Exceções onde o texto DEVE ser branco */
+  .tenant-ll-multimarcas .btn-brand,
+  .tenant-ll-multimarcas .btn-brand *,
+  .tenant-ll-multimarcas .btn-whatsapp,
+  .tenant-ll-multimarcas .btn-whatsapp *,
+  .tenant-ll-multimarcas .bg-brand,
+  .tenant-ll-multimarcas .bg-brand *,
+  .tenant-ll-multimarcas .badge-cover,
+  .tenant-ll-multimarcas .active-nav-item,
+  .tenant-ll-multimarcas .active-nav-item * {
+    color: #FFFFFF !important;
+    text-shadow: none !important;
+  }
+
+  /* Footer L&L: fundo #2A0F55 com texto branco e links lavanda */
+  .tenant-ll-multimarcas footer.store-footer {
+    background-color: #2A0F55 !important;
+    border-top: 1px solid rgba(230, 222, 245, 0.15) !important;
+    color: #FFFFFF !important;
+  }
+  .tenant-ll-multimarcas footer.store-footer .font-heading,
+  .tenant-ll-multimarcas footer.store-footer h1,
+  .tenant-ll-multimarcas footer.store-footer h2,
+  .tenant-ll-multimarcas footer.store-footer h3,
+  .tenant-ll-multimarcas footer.store-footer h4 {
+    color: #FFFFFF !important;
+    text-shadow: none !important;
+  }
+  .tenant-ll-multimarcas footer.store-footer p,
+  .tenant-ll-multimarcas footer.store-footer span:not(.font-heading) {
+    color: #EFE8FA !important;
+  }
+  .tenant-ll-multimarcas footer.store-footer a {
+    color: #EFE8FA !important;
+  }
+  .tenant-ll-multimarcas footer.store-footer a:hover {
+    color: #FFFFFF !important;
+  }
+  .tenant-ll-multimarcas footer.store-footer .bg-surface-2 {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+  }
+  .tenant-ll-multimarcas footer.store-footer .bg-surface-2:hover {
+    background-color: rgba(255, 255, 255, 0.22) !important;
+  }
+
+  /* Contêiner preto arredondado para a logo da L&L no tema claro */
+  .brand-logo-container {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 0;
+  }
+  .tenant-ll-multimarcas .brand-logo-container {
+    background-color: #0A0A0A !important;
+    border: 1px solid #2A0F55 !important;
+    border-radius: 12px !important;
+    padding: 3px !important;
+    box-shadow: 0 2px 8px rgba(42, 15, 85, 0.15) !important;
+  }
+
+  /* Cards de Veículos L&L no tema claro */
+  .tenant-ll-multimarcas .card-vehicle {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E6DEF5 !important;
+    box-shadow: 0 4px 16px -2px rgba(75, 31, 143, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+  }
+  @media (hover: hover) {
+    .tenant-ll-multimarcas .card-vehicle:hover {
+      border-color: #7B3FD1 !important;
+      box-shadow: 0 10px 28px -4px rgba(75, 31, 143, 0.14), 0 4px 10px -2px rgba(0, 0, 0, 0.05) !important;
+      transform: translateY(-2px);
+    }
+  }
+
+  /* Chips de especificações no card da L&L */
+  .tenant-ll-multimarcas .card-vehicle .bg-surface-3 {
+    background-color: #EFE8FA !important;
+    color: #1A1033 !important;
+  }
+  .tenant-ll-multimarcas .card-vehicle .border-surface {
+    border-color: #E6DEF5 !important;
+  }
+
+  /* Botão Ver Detalhes no Card L&L */
+  .tenant-ll-multimarcas .btn-card-details {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E6DEF5 !important;
+    color: #4B1F8F !important;
+    font-weight: 600;
+  }
+  .tenant-ll-multimarcas .btn-card-details:hover {
+    background-color: #EFE8FA !important;
+    border-color: #7B3FD1 !important;
+    color: #2A0F55 !important;
+  }
+
+  /* Badges de Status do Veículo: publicado = roxo, oculto/pausado = cinza */
+  .badge-status-published {
+    background-color: rgba(6, 78, 59, 0.3);
+    color: #34d399;
+    border: 1px solid rgba(6, 95, 70, 0.5);
+  }
+  .tenant-ll-multimarcas .badge-status-published {
+    background-color: #EFE8FA !important;
+    color: #4B1F8F !important;
+    border: 1px solid #7B3FD1 !important;
+  }
+  .badge-status-hidden {
+    background-color: var(--brand-surface-2);
+    color: var(--muted-foreground);
+    border: 1px solid var(--brand-border);
+  }
+  .tenant-ll-multimarcas .badge-status-hidden {
+    background-color: #F4F4F5 !important;
+    color: #71717A !important;
+    border: 1px solid #E4E4E7 !important;
+  }
+
+  /* Inputs na L&L */
+  .tenant-ll-multimarcas .input-brand {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E6DEF5 !important;
+    color: #1A1033 !important;
+  }
+  .tenant-ll-multimarcas .input-brand:focus-within,
+  .tenant-ll-multimarcas .input-brand:focus {
+    border-color: #7B3FD1 !important;
+    box-shadow: 0 0 0 2px rgba(123, 63, 209, 0.2) !important;
+  }
+
+  /* Skeletons e Loader da vitrine na L&L */
+  .tenant-ll-multimarcas .tenant-loading,
+  .tenant-ll-multimarcas [data-skeleton] {
+    background-color: #EFE8FA !important;
   }
 }
 
@@ -147,11 +341,13 @@
   .bg-whatsapp         { background-color: var(--brand-whatsapp); }
 
   .border-brand        { border-color: var(--brand-accent, var(--brand-red)); }
-  .border-surface      { border-color: rgba(255,255,255,0.08); }
+  .border-surface      { border-color: var(--brand-border, rgba(255,255,255,0.08)); }
+  .text-heading        { color: var(--brand-heading, #ffffff); }
+  .text-price          { color: var(--brand-price, #ffffff); }
 
   .btn-brand {
     background-color: var(--brand-red);
-    color: #fff;
+    color: #fff !important;
     font-weight: 700;
     border-radius: 10px;
     transition: background-color 150ms ease-out, box-shadow 150ms ease-out, transform 100ms ease-out;
@@ -174,7 +370,7 @@
 
   .card-vehicle {
     background-color: var(--brand-surface-1);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--brand-border, rgba(255,255,255,0.08));
     border-radius: 12px;
     transition: border-color 200ms ease-out, box-shadow 200ms ease-out, transform 200ms ease-out;
   }
@@ -188,8 +384,8 @@
 
   .input-brand {
     background-color: var(--brand-surface-2);
-    border-color: rgba(255,255,255,0.1);
-    color: #fff;
+    border-color: var(--brand-border, rgba(255,255,255,0.1));
+    color: var(--foreground);
     border-radius: 10px;
   }
   .input-brand:focus-within,

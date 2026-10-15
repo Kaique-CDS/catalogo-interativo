@@ -139,20 +139,22 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-surface bg-surface-0 mt-8 pt-12 pb-8">
+      <footer className="border-t border-surface bg-surface-0 store-footer mt-8 pt-12 pb-8">
         <div className="container mx-auto px-4 max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-10">
 
           {/* Coluna 1 — Marca */}
           <div>
             <div className="flex items-center gap-3 mb-4">
               {store.logo_url || brand.logo.footer ? (
-                <Image
-                  src={store.logo_url || brand.logo.footer}
-                  alt={store.name}
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 object-contain flex-shrink-0"
-                />
+                <div className="brand-logo-container flex items-center justify-center shrink-0">
+                  <Image
+                    src={store.logo_url || brand.logo.footer}
+                    alt={store.name}
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 object-contain flex-shrink-0"
+                  />
+                </div>
               ) : (
                 <div className="h-10 w-10 bg-brand rounded-[10px] flex items-center justify-center font-heading text-white text-2xl select-none">
                   {store.name.charAt(0).toUpperCase()}

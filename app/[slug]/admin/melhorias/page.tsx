@@ -388,7 +388,7 @@ export default function MelhoriasPage() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-heading text-white uppercase tracking-wide">
+          <h1 className="text-2xl sm:text-3xl font-heading text-heading uppercase tracking-wide">
             Melhorias &amp; Anotações Internas
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -400,7 +400,7 @@ export default function MelhoriasPage() {
           size="icon"
           onClick={() => loadNotes(false)}
           disabled={loading}
-          className="border-surface bg-surface-1 text-muted-foreground hover:text-white rounded-xl shrink-0"
+          className="border-surface bg-surface-1 text-muted-foreground hover:text-foreground rounded-xl shrink-0"
           title="Sincronizar agora"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -409,7 +409,7 @@ export default function MelhoriasPage() {
 
       {/* Add Note Form */}
       <div className="bg-surface-1 border border-surface rounded-xl p-4 sm:p-6 shadow-xs">
-        <h2 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Nova anotação</h2>
+        <h2 className="text-sm font-bold text-heading mb-4 uppercase tracking-wider">Nova anotação</h2>
         <form onSubmit={handleAdd} className="space-y-3">
           {/* Category select */}
           <div className="flex flex-wrap gap-2">
@@ -494,7 +494,7 @@ export default function MelhoriasPage() {
             <div className="h-14 w-14 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-4">
               <Lightbulb className="h-7 w-7 text-brand" />
             </div>
-            <p className="text-sm font-bold text-white">Nenhuma anotação ainda</p>
+            <p className="text-sm font-bold text-foreground">Nenhuma anotação ainda</p>
             <p className="text-xs text-muted-foreground mt-1 max-w-xs">
               Use o formulário acima para registrar ideias, melhorias ou pendências do seu catálogo.
             </p>
@@ -523,7 +523,7 @@ export default function MelhoriasPage() {
                       {formatDate(note.createdAt)}
                     </span>
                   </div>
-                  <p className="text-sm font-bold text-white truncate">
+                  <p className="text-sm font-bold text-foreground truncate">
                     {note.title}
                   </p>
                   {note.description && (

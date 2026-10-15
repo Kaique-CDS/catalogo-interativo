@@ -32,7 +32,7 @@ export default async function ConfiguracoesPage({ params }: { params: Promise<{ 
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl font-heading text-white mb-2 uppercase tracking-wide">Configurações da Loja</h1>
+      <h1 className="text-2xl sm:text-3xl font-heading text-heading mb-2 uppercase tracking-wide">Configurações da Loja</h1>
       <p className="text-muted-foreground mb-8 text-sm">Personalize o tema visual, cores, fontes, WhatsApp e dados da concessionária.</p>
       <StoreSettingsForm store={store} slug={slug} />
     </div>

@@ -77,9 +77,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function StoreSlugLayout({ children, params }: Props) {
   const { slug } = await params
   const brand = getTenantBrand(slug)
+  const isLightTenant = brand.themeClass === 'tenant-ll-multimarcas'
 
   return (
-    <div className={cn('dark store-fixed-dark min-h-screen bg-surface-0 text-white', brand.themeClass)}>
+    <div
+      data-tenant={brand.slugs[0]}
+      className={cn(
+        'min-h-screen',
+        isLightTenant
+          ? 'light bg-surface-0 text-foreground'
+          : 'dark store-fixed-dark bg-surface-0 text-white',
+        brand.themeClass
+      )}
+    >
       {children}
     </div>
   )

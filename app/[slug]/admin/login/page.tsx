@@ -59,7 +59,7 @@ export default function LoginPage(props: any = {}) {
   return (
     <div className="min-h-screen bg-surface-0 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex items-center justify-center h-20 w-20 rounded-2xl bg-surface-1 border border-surface mx-auto mb-4 shadow-xl p-2.5">
+        <div className="brand-logo-container flex items-center justify-center h-20 w-20 mx-auto mb-4 shadow-xl p-2.5">
           {storeLogo ? (
             <img src={storeLogo} alt={storeName} className="h-full w-full object-contain" />
           ) : (
@@ -67,7 +67,7 @@ export default function LoginPage(props: any = {}) {
           )}
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-heading uppercase text-white text-center tracking-wide">
+        <h1 className="text-2xl sm:text-3xl font-heading uppercase text-heading text-center tracking-wide">
           {storeName}
         </h1>
         <p className="text-xs text-muted-foreground text-center mt-1.5 mb-6">
@@ -77,7 +77,7 @@ export default function LoginPage(props: any = {}) {
         <div className="bg-surface-1 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-5 border border-surface">
           <div className="flex items-center gap-2 p-3 bg-surface-2 rounded-xl border border-surface">
             <ShieldCheck className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-            <p className="text-xs text-white font-medium tracking-wide uppercase">
+            <p className="text-xs text-foreground font-medium tracking-wide uppercase">
               Área restrita. Apenas usuários autorizados.
             </p>
           </div>

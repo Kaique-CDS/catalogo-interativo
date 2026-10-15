@@ -54,7 +54,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-heading text-white tracking-wide uppercase leading-none">
+            <h1 className="text-2xl sm:text-3xl font-heading text-heading tracking-wide uppercase leading-none">
               Estoque
             </h1>
             <span
@@ -62,8 +62,8 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
                 isAtLimit
                   ? 'bg-brand/10 text-brand border-brand/20'
                   : vehicles.length >= 40
-                  ? 'bg-amber-900/30 text-amber-400 border-amber-800'
-                  : 'bg-surface-2 text-muted-foreground border-surface'
+                  ? 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                  : 'bg-surface-3 text-muted-foreground border-surface'
               }`}
             >
               {vehicles.length}/50 carros
@@ -77,10 +77,10 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
         <div className="relative group grid grid-cols-2 sm:flex items-center gap-2.5 w-full sm:w-auto">
           <Button
             variant="outline"
-            className="w-full sm:w-auto justify-center gap-2 border-surface bg-surface-1 hover:bg-surface-2 text-white rounded-xl text-xs font-bold shadow-xs h-11 px-3.5"
+            className="w-full sm:w-auto justify-center gap-2 border-surface bg-surface-1 hover:bg-surface-2 text-foreground rounded-xl text-xs font-bold shadow-xs h-11 px-3.5"
             onClick={() => setShowBulkUpload(true)}
           >
-            <Upload className="h-4 w-4 shrink-0" />
+            <Upload className="h-4 w-4 shrink-0 text-brand" />
             <span className="truncate">Importar Planilha</span>
           </Button>
 
@@ -106,7 +106,7 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
             </div>
           )}
           {isAtLimit && (
-            <div className="absolute right-0 top-full mt-1.5 z-10 hidden sm:group-hover:block w-64 p-2.5 bg-surface-2 border border-surface text-white text-xs rounded-xl shadow-lg">
+            <div className="absolute right-0 top-full mt-1.5 z-10 hidden sm:group-hover:block w-64 p-2.5 bg-surface-2 border border-surface text-foreground text-xs rounded-xl shadow-lg">
               Limite de 50 veículos atingido. Exclua um para adicionar outro.
             </div>
           )}

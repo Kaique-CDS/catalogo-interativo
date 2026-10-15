@@ -54,7 +54,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
 
         {/* Título em Anton (heading) */}
         <div>
-          <h3 className="font-heading text-white text-lg sm:text-xl uppercase leading-tight tracking-wide line-clamp-2">
+          <h3 className="font-heading text-heading text-lg sm:text-xl uppercase leading-tight tracking-wide line-clamp-2">
             {vehicle.brand} {vehicle.model} {vehicle.year}
           </h3>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium line-clamp-1">
@@ -64,18 +64,18 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
 
         {/* Chips de especificações: km, combustível, câmbio */}
         <div className="flex flex-wrap gap-2 text-xs font-medium">
-          <span className="flex items-center gap-1.5 bg-surface-3 text-white px-2.5 py-1.5 rounded-[6px]">
+          <span className="flex items-center gap-1.5 bg-surface-3 text-foreground px-2.5 py-1.5 rounded-[6px]">
             <Gauge className="h-3.5 w-3.5 text-brand flex-shrink-0" />
             {formatMileage(mileage)}
           </span>
           {vehicle.fuel && (
-            <span className="flex items-center gap-1.5 bg-surface-3 text-white px-2.5 py-1.5 rounded-[6px]">
+            <span className="flex items-center gap-1.5 bg-surface-3 text-foreground px-2.5 py-1.5 rounded-[6px]">
               <Fuel className="h-3.5 w-3.5 text-brand flex-shrink-0" />
               {vehicle.fuel}
             </span>
           )}
           {vehicle.transmission && (
-            <span className="flex items-center gap-1.5 bg-surface-3 text-white px-2.5 py-1.5 rounded-[6px]">
+            <span className="flex items-center gap-1.5 bg-surface-3 text-foreground px-2.5 py-1.5 rounded-[6px]">
               <Cog className="h-3.5 w-3.5 text-brand flex-shrink-0" />
               {vehicle.transmission}
             </span>
@@ -87,7 +87,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onSelect?.(vehicle) }}
-            className="h-11 rounded-[10px] border border-surface text-white text-xs sm:text-sm font-semibold hover:border-white/30 hover:bg-surface-3 transition-colors"
+            className="btn-card-details h-11 rounded-[10px] border border-surface text-foreground text-xs sm:text-sm font-semibold hover:border-brand/40 hover:bg-surface-3 transition-colors"
           >
             Ver Detalhes
           </button>

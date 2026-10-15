@@ -114,7 +114,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       {/* Vitrine URL */}
       <Card className="border-surface bg-surface-1">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-2 text-sm font-medium text-white mb-1.5">
+          <div className="flex items-center gap-2 text-sm font-medium text-heading mb-1.5">
             <Globe className="h-4 w-4 text-brand" />URL da sua vitrine
           </div>
           <p className="text-sm text-brand font-mono font-medium opacity-90">{storefrontUrl}</p>
@@ -124,7 +124,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       {/* 2. Logo e Banner de Capa */}
       <Card className="border-surface bg-surface-1">
         <CardHeader className="pb-3 border-b border-surface">
-          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+          <CardTitle className="text-sm font-bold text-heading flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-brand" /> Imagens da Loja
           </CardTitle>
         </CardHeader>
@@ -143,7 +143,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                 </div>
               )}
               <label className="cursor-pointer">
-                <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border border-surface rounded-xl hover:bg-surface-2 transition-colors text-white bg-surface-1">
+                <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border border-surface rounded-xl hover:bg-surface-2 transition-colors text-foreground bg-surface-1">
                   {uploadingLogo ? <><Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />Enviando...</> : <><Upload className="h-3.5 w-3.5 text-brand" />Trocar logo</>}
                 </div>
                 <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
@@ -160,7 +160,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
               </div>
             )}
             <label className="cursor-pointer">
-              <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border border-surface rounded-xl hover:bg-surface-2 transition-colors text-white bg-surface-1">
+              <div className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium border border-surface rounded-xl hover:bg-surface-2 transition-colors text-foreground bg-surface-1">
                 {uploadingBanner ? <><Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />Enviando...</> : <><Upload className="h-3.5 w-3.5 text-brand" />{bannerUrl ? 'Trocar banner' : 'Enviar banner de capa'}</>}
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
@@ -173,14 +173,14 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       {/* 3. Informações Básicas & Contato */}
       <Card className="border-surface bg-surface-1">
         <CardHeader className="pb-3 border-b border-surface">
-          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+          <CardTitle className="text-sm font-bold text-heading flex items-center gap-2">
              <Globe className="h-4 w-4 text-brand" /> Informações da Loja
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-5">
           <div className="space-y-1.5">
             <Label htmlFor="name" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nome da loja *</Label>
-            <Input id="name" {...register('name')} className="bg-surface-2 border-surface text-white focus-visible:ring-brand" />
+            <Input id="name" {...register('name')} className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand" />
             {errors.name && <p className="text-xs text-brand">{errors.name.message}</p>}
           </div>
           <div className="space-y-1.5">
@@ -191,13 +191,13 @@ export default function StoreSettingsForm({ store, slug }: Props) {
               id="slogan"
               placeholder="Ex: Os melhores seminovos com laudo aprovado e procedência garantida."
               {...register('slogan')}
-              className="bg-surface-2 border-surface text-white focus-visible:ring-brand"
+              className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
             />
             <p className="text-[11px] text-muted-foreground">Aparece em destaque no cabeçalho da sua vitrine.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="address" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Endereço físico</Label>
-            <Input id="address" placeholder="Av. das Nações, 1500 - São Paulo, SP" {...register('address')} className="bg-surface-2 border-surface text-white focus-visible:ring-brand" />
+            <Input id="address" placeholder="Av. das Nações, 1500 - São Paulo, SP" {...register('address')} className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="opening_hours" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -207,7 +207,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
               id="opening_hours"
               placeholder="Ex: Seg a Sex: 09h às 18h | Sáb: 09h às 13h"
               {...register('opening_hours')}
-              className="bg-surface-2 border-surface text-white focus-visible:ring-brand"
+              className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
             />
             <p className="text-[11px] text-muted-foreground">Aparece no rodapé da vitrine e no modal do veículo.</p>
           </div>
@@ -217,14 +217,14 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       {/* 4. WhatsApp por Setor */}
       <Card className="border-surface bg-surface-1">
         <CardHeader className="pb-3 border-b border-surface">
-          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+          <CardTitle className="text-sm font-bold text-heading flex items-center gap-2">
             <Phone className="h-4 w-4 text-brand" /> WhatsApp por Setor
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-5">
           <div className="space-y-1.5">
             <Label htmlFor="whatsapp" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">WhatsApp — Vendas * <span className="text-[10px] opacity-70">(número principal)</span></Label>
-            <Input id="whatsapp" placeholder="5511993270543" {...register('whatsapp')} className="bg-surface-2 border-surface text-white focus-visible:ring-brand" />
+            <Input id="whatsapp" placeholder="5511993270543" {...register('whatsapp')} className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand" />
             <p className="text-[11px] text-muted-foreground">Somente números com DDI (ex: 5511993270543)</p>
             {errors.whatsapp && <p className="text-xs text-brand">{errors.whatsapp.message}</p>}
           </div>
@@ -236,7 +236,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
               id="whatsapp_financeiro"
               placeholder="5511993270543"
               {...register('whatsapp_financeiro')}
-              className="bg-surface-2 border-surface text-white focus-visible:ring-brand"
+              className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
             />
             <p className="text-[11px] text-muted-foreground">
               Clientes que solicitam simulação de financiamento serão direcionados para este número.

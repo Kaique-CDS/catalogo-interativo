@@ -77,7 +77,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
       {vehicles.length === 0 ? (
         <div className="text-center py-20 bg-surface-1 rounded-2xl border border-surface p-8 max-w-md mx-auto">
           <Car className="h-14 w-14 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-heading text-white text-xl uppercase tracking-wide mb-2">
+          <h3 className="font-heading text-heading text-xl uppercase tracking-wide mb-2">
             Nenhum Veículo Encontrado
           </h3>
           <p className="text-muted-foreground text-sm">
@@ -113,7 +113,7 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
               <Button
                 onClick={() => setVisibleCount((prev) => prev + 4)}
                 variant="outline"
-                className="h-11 px-6 rounded-full border-surface bg-surface-2 hover:bg-surface-3 text-white text-xs sm:text-sm font-bold gap-2 shadow-sm transition-all hover:border-brand"
+                className="h-11 px-6 rounded-full border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs sm:text-sm font-bold gap-2 shadow-sm transition-all hover:border-brand"
               >
                 <span>Ver mais veículos</span>
                 <ChevronDown className="h-4 w-4 text-brand" />

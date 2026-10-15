@@ -66,14 +66,16 @@ export default function StoreHeader({ store }: Props) {
           aria-label={`Voltar para ${store.name}`}
         >
           {logoUrl ? (
-            <Image
-              src={logoUrl}
-              alt={store.name}
-              width={48}
-              height={48}
-              priority
-              className="h-8 w-8 sm:h-11 sm:w-11 object-contain flex-shrink-0"
-            />
+            <div className="brand-logo-container flex items-center justify-center shrink-0">
+              <Image
+                src={logoUrl}
+                alt={store.name}
+                width={48}
+                height={48}
+                priority
+                className="h-8 w-8 sm:h-11 sm:w-11 object-contain flex-shrink-0"
+              />
+            </div>
           ) : (
             /* Fallback: inicial da loja */
             <div className="h-8 w-8 sm:h-11 sm:w-11 bg-brand rounded-[10px] flex items-center justify-center font-heading text-white text-lg sm:text-2xl flex-shrink-0 select-none">
@@ -81,7 +83,7 @@ export default function StoreHeader({ store }: Props) {
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="font-heading text-white text-sm sm:text-base md:text-xl uppercase tracking-wide leading-tight truncate">
+            <h1 className="font-heading text-heading text-sm sm:text-base md:text-xl uppercase tracking-wide leading-tight truncate">
               {store.name}
             </h1>
             {store.slogan && (
@@ -118,12 +120,12 @@ export default function StoreHeader({ store }: Props) {
           {/* Telefone — Visível em Celular e Desktop (100% Mobile First) */}
           <a
             href={`tel:${phoneInfo.tel}`}
-            className="flex items-center gap-1.5 h-8 sm:h-9 px-2 sm:px-3 rounded-[10px] border border-surface bg-surface-1/40 hover:bg-surface-2 text-xs sm:text-sm font-semibold text-white/90 hover:text-white hover:border-brand/40 transition-colors shrink-0 group"
+            className="flex items-center gap-1.5 h-8 sm:h-9 px-2 sm:px-3 rounded-[10px] border border-surface bg-surface-1/40 hover:bg-surface-2 text-xs sm:text-sm font-semibold text-foreground hover:text-brand hover:border-brand/40 transition-colors shrink-0 group"
             title={`Ligar para ${phoneInfo.display}`}
             aria-label={`Ligar para ${phoneInfo.display}`}
           >
             <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-brand shrink-0" />
-            <span className="text-[11px] sm:text-xs md:text-sm font-semibold whitespace-nowrap tracking-tight group-hover:text-white">
+            <span className="text-[11px] sm:text-xs md:text-sm font-semibold whitespace-nowrap tracking-tight group-hover:text-brand">
               {phoneInfo.display}
             </span>
           </a>
