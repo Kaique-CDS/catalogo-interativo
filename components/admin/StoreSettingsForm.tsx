@@ -11,14 +11,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Loader2, Globe, Phone, Clock, Sparkles, Image as ImageIcon } from 'lucide-react'
+import { Upload, Loader2, Globe, Phone, Clock, Sparkles, Image as ImageIcon, Instagram, PhoneCall, MessageCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Store } from '@/lib/supabase/types'
 
-
-
 const settingsSchema = z.object({
   name:                z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
+  phone:               z.string().optional(),
+  instagram:           z.string().optional(),
   whatsapp:            z.string().min(10, 'Informe um número de WhatsApp válido (com DDI)'),
   whatsapp_financeiro: z.string().optional(),
   opening_hours:       z.string().optional(),
@@ -44,6 +44,8 @@ export default function StoreSettingsForm({ store, slug }: Props) {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       name:                store.name,
+      phone:               store.phone ?? '',
+      instagram:           store.instagram ?? '',
       whatsapp:            store.whatsapp,
       whatsapp_financeiro: store.whatsapp_financeiro ?? '',
       opening_hours:       store.opening_hours ?? 'Seg a Sex: 09h às 18h',
@@ -82,27 +84,38 @@ export default function StoreSettingsForm({ store, slug }: Props) {
 
   const onSubmit = async (data: SettingsFormData) => {
     setSaving(true)
-    const payload = {
-      name: data.name,
-      whatsapp: data.whatsapp,
-      whatsapp_financeiro: data.whatsapp_financeiro || null,
-      opening_hours: data.opening_hours || null,
-      address: data.address || null,
-      slogan: data.slogan || null,
-      logo_url: logoUrl,
-      banner_url: bannerUrl,
-    }
+    try {
+      const response = await fetch('/api/store-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          store_id: store.id,
+          slug,
+          name: data.name,
+          slogan: data.slogan || null,
+          address: data.address || null,
+          opening_hours: data.opening_hours || null,
+          phone: data.phone || null,
+          instagram: data.instagram || null,
+          whatsapp: data.whatsapp,
+          whatsapp_financeiro: data.whatsapp_financeiro || null,
+          logo_url: logoUrl,
+          banner_url: bannerUrl,
+        }),
+      })
 
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-      toast.success('Configurações salvas (Modo Demo)!')
+      const resData = await response.json()
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.error || 'Erro ao salvar as configurações')
+      }
+
+      toast.success('Configurações salvas com sucesso!')
+    } catch (err: any) {
+      console.error('Erro ao salvar configurações:', err)
+      toast.error(err.message || 'Erro ao salvar as configurações')
+    } finally {
       setSaving(false)
-      return
     }
-
-    const { error } = await supabase.from('stores').update(payload).eq('id', store.id)
-    if (error) { toast.error('Erro ao salvar as configurações'); setSaving(false); return }
-    toast.success('Configurações salvas com sucesso!')
-    setSaving(false)
   }
 
   const storefrontUrl = typeof window !== 'undefined'
@@ -170,11 +183,11 @@ export default function StoreSettingsForm({ store, slug }: Props) {
         </CardContent>
       </Card>
 
-      {/* 3. Informações Básicas & Contato */}
+      {/* 3. Informações Básicas & Redes Sociais */}
       <Card className="border-surface bg-surface-1">
         <CardHeader className="pb-3 border-b border-surface">
           <CardTitle className="text-sm font-bold text-heading flex items-center gap-2">
-             <Globe className="h-4 w-4 text-brand" /> Informações da Loja
+             <Globe className="h-4 w-4 text-brand" /> Informações da Loja & Redes Sociais
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-5">
@@ -196,6 +209,20 @@ export default function StoreSettingsForm({ store, slug }: Props) {
             <p className="text-[11px] text-muted-foreground">Aparece em destaque no cabeçalho da sua vitrine.</p>
           </div>
           <div className="space-y-1.5">
+            <Label htmlFor="instagram" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Instagram className="h-3.5 w-3.5 text-brand" /> Instagram da Loja
+            </Label>
+            <Input
+              id="instagram"
+              placeholder="Ex: @lloficialmultimarcas ou https://www.instagram.com/lloficialmultimarcas/"
+              {...register('instagram')}
+              className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Link ou @ do perfil no Instagram da sua loja. Usado nos botões e no rodapé.
+            </p>
+          </div>
+          <div className="space-y-1.5">
             <Label htmlFor="address" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Endereço físico</Label>
             <Input id="address" placeholder="Av. das Nações, 1500 - São Paulo, SP" {...register('address')} className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand" />
           </div>
@@ -214,33 +241,60 @@ export default function StoreSettingsForm({ store, slug }: Props) {
         </CardContent>
       </Card>
 
-      {/* 4. WhatsApp por Setor */}
+      {/* 4. Telefones & WhatsApp por Setor */}
       <Card className="border-surface bg-surface-1">
         <CardHeader className="pb-3 border-b border-surface">
           <CardTitle className="text-sm font-bold text-heading flex items-center gap-2">
-            <Phone className="h-4 w-4 text-brand" /> WhatsApp por Setor
+            <Phone className="h-4 w-4 text-brand" /> Telefones de Contato & WhatsApp
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 pt-5">
-          <div className="space-y-1.5">
-            <Label htmlFor="whatsapp" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">WhatsApp — Vendas * <span className="text-[10px] opacity-70">(número principal)</span></Label>
-            <Input id="whatsapp" placeholder="5511993270543" {...register('whatsapp')} className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand" />
-            <p className="text-[11px] text-muted-foreground">Somente números com DDI (ex: 5511993270543)</p>
+        <CardContent className="space-y-5 pt-5">
+          {/* Telefone para Ligações */}
+          <div className="space-y-1.5 p-3.5 rounded-xl border border-surface bg-surface-2/60">
+            <Label htmlFor="phone" className="text-xs font-bold text-foreground flex items-center gap-1.5">
+              <PhoneCall className="h-3.5 w-3.5 text-brand" /> Telefone para Ligações (Chamadas / Televendas)
+            </Label>
+            <Input
+              id="phone"
+              placeholder="Ex: (11) 2376-0448 ou 1123760448"
+              {...register('phone')}
+              className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Número discado quando o cliente clica no botão de telefone do cabeçalho ou rodapé. Pode ser fixo ou celular.
+            </p>
+          </div>
+
+          {/* WhatsApp Vendas */}
+          <div className="space-y-1.5 p-3.5 rounded-xl border border-surface bg-surface-2/60">
+            <Label htmlFor="whatsapp" className="text-xs font-bold text-foreground flex items-center gap-1.5">
+              <MessageCircle className="h-3.5 w-3.5 text-[#25D366]" /> WhatsApp — Atendimento / Vendas * (responder no Zap)
+            </Label>
+            <Input
+              id="whatsapp"
+              placeholder="5511993270543 ou 551123760448"
+              {...register('whatsapp')}
+              className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Número onde seus consultores responderão conversas no WhatsApp (digite com DDI, ex: 5511993270543 ou 551123760448).
+            </p>
             {errors.whatsapp && <p className="text-xs text-brand">{errors.whatsapp.message}</p>}
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="whatsapp_financeiro" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              WhatsApp — Financeiro <span className="text-[10px] opacity-70">(opcional)</span>
+
+          {/* WhatsApp Financeiro */}
+          <div className="space-y-1.5 p-3.5 rounded-xl border border-surface bg-surface-2/60">
+            <Label htmlFor="whatsapp_financeiro" className="text-xs font-bold text-foreground flex items-center gap-1.5">
+              <MessageCircle className="h-3.5 w-3.5 text-brand" /> WhatsApp — Financiamento / Aprovação <span className="text-[10px] text-muted-foreground font-normal">(opcional)</span>
             </Label>
             <Input
               id="whatsapp_financeiro"
               placeholder="5511993270543"
               {...register('whatsapp_financeiro')}
-              className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
+              className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
             />
             <p className="text-[11px] text-muted-foreground">
-              Clientes que solicitam simulação de financiamento serão direcionados para este número.
-              Se não preenchido, usará o número de Vendas.
+              Clientes que solicitarem simulação de financiamento no site serão direcionados para este número. Se não preenchido, usará o número de Vendas.
             </p>
           </div>
         </CardContent>

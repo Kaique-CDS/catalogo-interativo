@@ -11,6 +11,8 @@ export type Database = {
           address: string | null
           whatsapp: string
           whatsapp_financeiro: string | null
+          phone?: string | null
+          instagram?: string | null
           opening_hours: string | null
           primary_color: string | null
           font_family: string | null
@@ -27,6 +29,8 @@ export type Database = {
           address?: string | null
           whatsapp: string
           whatsapp_financeiro?: string | null
+          phone?: string | null
+          instagram?: string | null
           opening_hours?: string | null
           primary_color?: string | null
           font_family?: string | null
@@ -43,6 +47,8 @@ export type Database = {
           address?: string | null
           whatsapp?: string
           whatsapp_financeiro?: string | null
+          phone?: string | null
+          instagram?: string | null
           opening_hours?: string | null
           primary_color?: string | null
           font_family?: string | null

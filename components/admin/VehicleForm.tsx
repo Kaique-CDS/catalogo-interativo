@@ -204,6 +204,55 @@ const COMMON_FEATURES = [
   'IPVA Pago',
 ]
 
+export const POPULAR_BRANDS = [
+  'Audi',
+  'BMW',
+  'Caoa Chery',
+  'Chevrolet',
+  'Citroën',
+  'Fiat',
+  'Ford',
+  'Honda',
+  'Hyundai',
+  'JAC',
+  'Jeep',
+  'Kia',
+  'Land Rover',
+  'Lexus',
+  'Mercedes-Benz',
+  'Mini',
+  'Mitsubishi',
+  'Nissan',
+  'Peugeot',
+  'Porsche',
+  'RAM',
+  'Renault',
+  'Subaru',
+  'Suzuki',
+  'Toyota',
+  'Troller',
+  'Volkswagen',
+  'Volvo',
+  'Outra',
+] as const
+
+export const VEHICLE_COLORS = [
+  'Branco',
+  'Preto',
+  'Prata',
+  'Cinza',
+  'Vermelho',
+  'Azul',
+  'Verde',
+  'Amarelo',
+  'Marrom',
+  'Bege',
+  'Laranja',
+  'Dourado',
+  'Bordô / Vinho',
+  'Outra',
+] as const
+
 const vehicleSchema = z.object({
   title: z.string().min(3, 'Título deve ter ao menos 3 caracteres'),
   brand: z.string().min(1, 'Marca é obrigatória'),
@@ -366,6 +415,54 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       transmission: 'Automático',
     },
   })
+
+  const initialBrand = vehicle?.brand || ''
+  const matchedBrand = POPULAR_BRANDS.find((b) => b.toLowerCase() === initialBrand.toLowerCase())
+  const [selectedBrand, setSelectedBrand] = useState<string>(
+    initialBrand ? (matchedBrand || 'Outra') : ''
+  )
+  const [customBrand, setCustomBrand] = useState<string>(
+    initialBrand && !matchedBrand ? initialBrand : ''
+  )
+
+  const initialColor = vehicle?.color || ''
+  const matchedColor = VEHICLE_COLORS.find((c) => c.toLowerCase() === initialColor.toLowerCase())
+  const [selectedColor, setSelectedColor] = useState<string>(
+    initialColor ? (matchedColor || 'Outra') : ''
+  )
+  const [customColor, setCustomColor] = useState<string>(
+    initialColor && !matchedColor ? initialColor : ''
+  )
+
+  const handleBrandSelect = (val: string) => {
+    setSelectedBrand(val)
+    if (val === 'Outra') {
+      setValue('brand', customBrand, { shouldValidate: true })
+    } else {
+      setValue('brand', val, { shouldValidate: true })
+    }
+  }
+
+  const handleCustomBrandInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    setCustomBrand(val)
+    setValue('brand', val, { shouldValidate: true })
+  }
+
+  const handleColorSelect = (val: string) => {
+    setSelectedColor(val)
+    if (val === 'Outra') {
+      setValue('color', customColor, { shouldValidate: true })
+    } else {
+      setValue('color', val, { shouldValidate: true })
+    }
+  }
+
+  const handleCustomColorInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+    setCustomColor(val)
+    setValue('color', val, { shouldValidate: true })
+  }
 
   // Monitoramento reativo das especificações do carro para desbloqueio da I.A
   const watchedValues = watch()
@@ -900,7 +997,27 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="brand" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Marca *</Label>
-              <Input id="brand" placeholder="Ex: Honda, Toyota, BMW" className="text-sm rounded-xl" {...register('brand')} />
+              <Select value={selectedBrand} onValueChange={handleBrandSelect}>
+                <SelectTrigger id="brand-select" className="rounded-xl text-sm">
+                  <SelectValue placeholder="Selecione a marca" />
+                </SelectTrigger>
+                <SelectContent className="max-h-64">
+                  {POPULAR_BRANDS.map((b) => (
+                    <SelectItem key={b} value={b}>
+                      {b}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedBrand === 'Outra' && (
+                <Input
+                  id="custom-brand"
+                  placeholder="Digite o nome da marca (ex: Ferrari, BYD...)"
+                  value={customBrand}
+                  onChange={handleCustomBrandInput}
+                  className="text-sm rounded-xl mt-1.5"
+                />
+              )}
               {errors.brand && <p className="text-xs text-red-500">{errors.brand.message}</p>}
             </div>
             <div className="space-y-1.5">
@@ -959,7 +1076,27 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="color" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Cor</Label>
-              <Input id="color" placeholder="Ex: Branco Pérola, Preto" className="text-sm rounded-xl" {...register('color')} />
+              <Select value={selectedColor} onValueChange={handleColorSelect}>
+                <SelectTrigger id="color-select" className="rounded-xl text-sm">
+                  <SelectValue placeholder="Selecione a cor" />
+                </SelectTrigger>
+                <SelectContent className="max-h-64">
+                  {VEHICLE_COLORS.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedColor === 'Outra' && (
+                <Input
+                  id="custom-color"
+                  placeholder="Digite a cor (ex: Azul Metálico, Pérola...)"
+                  value={customColor}
+                  onChange={handleCustomColorInput}
+                  className="text-sm rounded-xl mt-1.5"
+                />
+              )}
             </div>
           </div>
         </CardContent>

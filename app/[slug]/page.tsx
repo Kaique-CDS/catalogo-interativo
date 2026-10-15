@@ -110,6 +110,7 @@ const DEMO_VEHICLES: Vehicle[] = [
 ]
 
 import { getTenantBrand, getTenantDemoStore } from '@/lib/tenants'
+import { getStoreWithContacts } from '@/lib/store-service'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -154,10 +155,10 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
       const supabase = await createClient()
       const { data: storeData } = await supabase
-        .from('stores').select('*').eq('slug', slug).maybeSingle()
+        .from('stores').select('id').eq('slug', slug).maybeSingle()
 
       if (storeData) {
-        store = storeData
+        store = await getStoreWithContacts(slug)
         const { data: vData } = await supabase
           .from('vehicles').select('*')
           .eq('store_id', storeData.id).eq('is_active', true)

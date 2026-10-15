@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { Gauge, Car, Fuel, Cog, Eye } from 'lucide-react'
-import { formatMileage } from '@/lib/utils'
+import { formatMileage, formatCurrency } from '@/lib/utils'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 
 interface Props {
@@ -50,7 +50,7 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
       </div>
 
       {/* ── Conteúdo ── */}
-      <div className="p-4 flex flex-col flex-1 gap-4">
+      <div className="p-4 flex flex-col flex-1 gap-3.5">
 
         {/* Título em Anton (heading) */}
         <div>
@@ -60,6 +60,19 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
           <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium line-clamp-1">
             {vehicle.title.replace(`${vehicle.brand} `, '').replace(`${vehicle.model} `, '')}
           </p>
+        </div>
+
+        {/* Preço do Veículo em destaque */}
+        <div className="flex items-baseline">
+          {vehicle.price && vehicle.price > 0 ? (
+            <span className="font-heading text-price text-2xl sm:text-[26px] tracking-tight leading-none">
+              {formatCurrency(vehicle.price)}
+            </span>
+          ) : (
+            <span className="font-heading text-muted-foreground text-sm uppercase leading-none">
+              Preço sob consulta
+            </span>
+          )}
         </div>
 
         {/* Chips de especificações: km, combustível, câmbio */}

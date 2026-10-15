@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { formatMileage } from '@/lib/utils'
+import { formatMileage, formatCurrency } from '@/lib/utils'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 import { toast } from 'sonner'
 import InterestOptionsSheet from './InterestOptionsSheet'
@@ -140,7 +140,8 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const shareUrl = `${origin}/${store.slug}?v=${vehicle.id}`
     const shareTitle = `${vehicle.title} (${vehicle.year}) - ${store.name}`
-    const shareText = `🚗 *${vehicle.title} (${vehicle.year})*\n💬 *Preço sob consulta via WhatsApp*\n\nConfira fotos e ficha completa na *${store.name}*:\n${shareUrl}`
+    const priceText = vehicle.price && vehicle.price > 0 ? formatCurrency(vehicle.price) : 'Preço sob consulta via WhatsApp'
+    const shareText = `🚗 *${vehicle.title} (${vehicle.year})*\n💰 *${priceText}*\n\nConfira fotos e ficha completa na *${store.name}*:\n${shareUrl}`
 
     if (navigator.share) {
       try {
@@ -269,12 +270,25 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{vehicle.model}</span>
               <h2 className="font-heading text-xl sm:text-2xl text-heading uppercase leading-snug tracking-wide">{vehicle.brand} {vehicle.title.replace(`${vehicle.brand} `, '')}</h2>
               <div className="flex items-center gap-3 mt-3">
-                <span className="font-heading text-2xl sm:text-3xl text-price">
-                  Preço sob consulta
-                </span>
-                <span className="text-xs font-bold text-muted-foreground bg-surface-1 border border-surface px-2.5 py-1 rounded-md uppercase tracking-wider">
-                  Direto no WhatsApp
-                </span>
+                {vehicle.price && vehicle.price > 0 ? (
+                  <>
+                    <span className="font-heading text-2xl sm:text-3xl text-price">
+                      {formatCurrency(vehicle.price)}
+                    </span>
+                    <span className="text-xs font-bold text-muted-foreground bg-surface-1 border border-surface px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      Seminovos Selecionados
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-heading text-2xl sm:text-3xl text-price">
+                      Preço sob consulta
+                    </span>
+                    <span className="text-xs font-bold text-muted-foreground bg-surface-1 border border-surface px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      Direto no WhatsApp
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 

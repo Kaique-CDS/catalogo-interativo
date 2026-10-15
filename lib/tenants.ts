@@ -90,7 +90,7 @@ const LL_MULTIMARCAS: TenantBrand = {
   themeColor: '#4B1F8F',
   metaDescription:
     'L&L Multimarcas: seminovos multimarcas com parceria em todos os bancos e facilidades para autônomos. Confira o estoque e fale com a gente.',
-  instagram: { handle: 'lloficial.multimarcas', url: 'https://instagram.com/lloficial.multimarcas' },
+  instagram: { handle: 'lloficialmultimarcas', url: 'https://www.instagram.com/lloficialmultimarcas/' },
   phone: { tel: '+551123760448', display: '(11) 2376-0448', label: 'Televendas' },
   whatsapp: { number: '551123760448', display: '(11) 2376-0448' },
   address: null,
@@ -102,7 +102,7 @@ const LL_MULTIMARCAS: TenantBrand = {
     og: `${LL_ASSETS}/og-image.jpg`,
   },
   banners: { desktop: `${LL_ASSETS}/banner-desktop.jpg`, mobile: `${LL_ASSETS}/banner-mobile.jpg` },
-  copyright: (year) => `© ${year} L&L MULTIMARCAS. Todos os direitos reservados.`,
+  copyright: (year) => `© A PARTIR DE 2022 - ${year} L&L MULTIMARCAS. Todos os direitos reservados.`,
   allowLocalDemoVehicles: false,
   demoStore: {
     id: 'demo-ll-multimarcas',
