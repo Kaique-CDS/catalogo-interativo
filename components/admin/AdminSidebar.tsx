@@ -28,9 +28,10 @@ export default function AdminSidebar({ store, slug }: Props) {
   const storeLogo = store?.logo_url || brand.logo.header
 
   const handleLogout = async () => {
+    document.cookie = `admin_auth_${slug}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;`
     document.cookie = 'admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
     const { carAdminLogoutAction } = await import('@/app/[slug]/admin/login/actions')
-    await carAdminLogoutAction()
+    await carAdminLogoutAction(slug)
     toast.success('Você saiu do painel!')
     window.location.reload()
   }

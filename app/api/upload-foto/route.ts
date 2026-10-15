@@ -92,9 +92,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const rawTenant = (formData.get('slug') || formData.get('tenant') || 'milhaticar') as string
+    const tenantSlug = slugifyMarca(rawTenant)
     const marcaSlug = slugifyMarca(rawMarca)
     const idVeiculo = sanitizeIdVeiculo(rawIdVeiculo)
-    const folder = `milhaticar/veiculos/${marcaSlug}/${idVeiculo}`
+    const folder = `${tenantSlug}/veiculos/${marcaSlug}/${idVeiculo}`
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)

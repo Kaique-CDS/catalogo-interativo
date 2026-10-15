@@ -37,13 +37,14 @@ export default function LoginPage(props: any = {}) {
     }
 
     try {
+      formData.append('slug', slug)
       const res = await carAdminLoginAction(null, formData)
       if (res?.error) {
         setErrorMsg(res.error)
         toast.error(res.error)
         setPending(false)
       } else {
-        document.cookie = 'admin_auth=true; path=/; samesite=lax'
+        document.cookie = `admin_auth_${slug}=true; path=/; samesite=lax`
         toast.success('Login realizado com sucesso!')
         window.location.reload()
       }
@@ -89,6 +90,7 @@ export default function LoginPage(props: any = {}) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <input type="hidden" name="slug" value={slug} />
             <div className="space-y-1.5">
               <Label htmlFor="username" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <User className="h-3.5 w-3.5" /> Usuário

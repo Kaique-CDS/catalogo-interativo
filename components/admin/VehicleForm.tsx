@@ -483,6 +483,9 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       formData.append('file', fileToSend)
       formData.append('marca', marca)
       formData.append('id_veiculo', idVeiculo)
+      if (slug) {
+        formData.append('slug', slug)
+      }
       xhr.send(formData)
     })
   }

@@ -72,11 +72,26 @@ export default async function AdminLayout({
 }) {
   const { slug } = await params
   const cookieStore = await cookies()
-  const isAuthCookie = cookieStore.get('admin_auth')?.value === 'true'
+  const normalizedSlug = slug.toLowerCase()
+
+  // Verificação estrita de isolamento de sessão por tenant:
+  let isAuthForThisSlug = false
+
+  if (normalizedSlug === 'll-multimarcas') {
+    isAuthForThisSlug = cookieStore.get('admin_auth_ll-multimarcas')?.value === 'true'
+  } else if (normalizedSlug === 'milhaticar' || normalizedSlug === 'loja-exemplo') {
+    isAuthForThisSlug =
+      cookieStore.get('admin_auth_milhaticar')?.value === 'true' ||
+      cookieStore.get('admin_auth_loja-exemplo')?.value === 'true' ||
+      (cookieStore.get('admin_auth')?.value === 'true' && !cookieStore.get('admin_auth_ll-multimarcas')?.value)
+  } else {
+    isAuthForThisSlug = cookieStore.get(`admin_auth_${normalizedSlug}`)?.value === 'true'
+  }
+
   const storeToUse = await getStoreBySlug(slug)
 
-  // Se não estiver logado, exibe a tela de login diretamente com logo e nome da loja
-  if (!isAuthCookie) {
+  // Se não estiver autenticado especificamente para este tenant, exibe a tela de login da loja
+  if (!isAuthForThisSlug) {
     return <LoginPage store={storeToUse} />
   }
 
