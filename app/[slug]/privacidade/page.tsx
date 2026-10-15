@@ -1,10 +1,16 @@
 import type { Metadata } from 'next'
 import InstitutionalLayout from '@/components/storefront/InstitutionalLayout'
+import { getTenantBrand } from '@/lib/tenants'
 
-export const metadata: Metadata = { title: 'Política de Privacidade - Milhaticar' }
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const brand = getTenantBrand(slug)
+  return { title: `Política de Privacidade - ${brand.name}` }
+}
 
 export default async function PrivacidadePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const brand = getTenantBrand(slug)
   return (
     <InstitutionalLayout slug={slug} title="Política de Privacidade">
       <p>
@@ -108,9 +114,9 @@ export default async function PrivacidadePage({ params }: { params: Promise<{ sl
         </li>
       </ul>
       <p>
-        Para exercer seus direitos, entre em contato pelo Televendas{' '}
-        <a href="tel:+551147294937" className="text-brand hover:underline">(11) 4729-4937</a> ou pelo WhatsApp{' '}
-        <a href="https://wa.me/5511994942661" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">(11) 99494-2661</a>.
+        Para exercer seus direitos, entre em contato pelo {brand.phone.label}{' '}
+        <a href={`tel:${brand.phone.tel}`} className="text-brand hover:underline">{brand.phone.display}</a> ou pelo WhatsApp{' '}
+        <a href={`https://wa.me/${brand.whatsapp.number}`} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">{brand.whatsapp.display}</a>.
       </p>
 
       <h2>7. Atualizações desta Política</h2>

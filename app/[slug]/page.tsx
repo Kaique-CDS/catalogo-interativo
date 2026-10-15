@@ -109,14 +109,17 @@ const DEMO_VEHICLES: Vehicle[] = [
   }
 ]
 
+import { getTenantBrand, getTenantDemoStore } from '@/lib/tenants'
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
+  const brand = getTenantBrand(slug)
   try {
     const supabase = await createClient()
     const { data: store } = await supabase
       .from('stores').select('name, slogan, logo_url').eq('slug', slug).maybeSingle()
     if (store) {
-      const iconUrl = store.logo_url || '/logo-milhaticar.png'
+      const iconUrl = store.logo_url || brand.logo.favicon
       return {
         title: `${store.name} - Catálogo de Veículos`,
         description: store.slogan || `Confira os veículos disponíveis na ${store.name}`,
@@ -128,12 +131,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   } catch (e) {}
 
+  const demoStore = getTenantDemoStore(slug)
   return {
-    title: `${DEMO_STORE.name} - Catálogo de Veículos`,
-    description: DEMO_STORE.slogan || `Confira o catálogo de seminovos da ${DEMO_STORE.name}`,
+    title: `${demoStore.name} - Catálogo de Veículos`,
+    description: demoStore.slogan || `Confira o catálogo de seminovos da ${demoStore.name}`,
     icons: {
-      icon: '/logo-milhaticar.png',
-      apple: '/logo-milhaticar.png',
+      icon: brand.logo.favicon,
+      apple: brand.logo.appleIcon,
     },
   }
 }
@@ -141,6 +145,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StorefrontPage({ params, searchParams }: Props) {
   const { slug } = await params
   const sParams = await searchParams
+  const demoStore = getTenantDemoStore(slug)
 
   let store: Store | null = null
   let vehicles: Vehicle[] | null = null
@@ -174,7 +179,7 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
       searchParams={sParams} 
       initialStore={store} 
       initialVehicles={vehicles} 
-      DEMO_STORE={DEMO_STORE} 
+      DEMO_STORE={demoStore} 
     />
   )
 }

@@ -36,11 +36,14 @@
     /* Tokens fixos da vitrine de lojas de clientes */
     --brand-red: #FF2D0F;
     --brand-red-dark: #D81F06;
+    --brand-red-rgb: 255, 45, 15;    /* mesmo #FF2D0F, usado em sombras/glow */
     --brand-surface-0: #000000;
     --brand-surface-1: #0A0A0A;
     --brand-surface-2: #141414;
     --brand-surface-3: #1C1C1C;
     --brand-whatsapp: #25D366;
+    /* --brand-accent (bordas/foco) e --brand-text (texto/ícones) não são definidos aqui:
+       sem override de tenant eles caem em --brand-red, mantendo a Milhaticar idêntica. */
   }
 
   /* Modo Escuro (padrão em toda a plataforma e fixo nas lojas de clientes) */
@@ -65,6 +68,43 @@
     --border: 0 0% 14%;
     --input: 0 0% 11%;
     --ring: 8 100% 53%;
+  }
+
+  /* ============================================================
+     TENANT: L&L Multimarcas (/ll-multimarcas)
+     Aplicado via classe no wrapper de app/[slug]/layout.tsx.
+     Contraste (WCAG AA): branco sobre #4B1F8F = 11.1:1 · branco sobre #7B3FD1 = 6.0:1
+     · #A47FE8 (texto/ícones) sobre #0A0A0A = 6.4:1 · #7B3FD1 (bordas/foco) sobre #0A0A0A = 3.3:1
+     ============================================================ */
+  .tenant-ll-multimarcas {
+    --brand-red: #4B1F8F;            /* roxo principal — preenchimentos (botões, badges, chips) */
+    --brand-red-dark: #7B3FD1;       /* roxo claro — hover de preenchimentos */
+    --brand-red-rgb: 123, 63, 209;   /* glow/sombras em roxo claro */
+    --brand-accent: #7B3FD1;         /* bordas, hovers e anéis de foco */
+    --brand-text: #A47FE8;           /* texto/ícones de destaque sobre preto (tom do #7B3FD1 p/ AA) */
+    --brand-silver: #C8CCD0;
+    --brand-surface-0: #0A0A0A;      /* preto */
+    --brand-surface-1: #110D18;      /* superfícies com leve tom roxo (#2A0F55 diluído) */
+    --brand-surface-2: #18121F;
+    --brand-surface-3: #211829;
+    --primary: 264 64% 34%;          /* #4B1F8F */
+    --primary-foreground: 0 0% 100%;
+    --ring: 265 61% 53%;             /* #7B3FD1 */
+  }
+  /* Cor padrão dos anéis `ring-*` sem cor explícita (o Tailwind usa azul por padrão) */
+  .tenant-ll-multimarcas *,
+  .tenant-ll-multimarcas *::before,
+  .tenant-ll-multimarcas *::after {
+    --tw-ring-color: rgb(123 63 209 / 0.6);
+  }
+  /* Loader da vitrine (app/[slug]/loading.tsx) */
+  .tenant-ll-multimarcas .tenant-loading {
+    --muted: 266 30% 16%;
+    background-color: var(--brand-surface-0);
+  }
+  .tenant-ll-multimarcas .tenant-loading-surface {
+    background-color: var(--brand-surface-1);
+    border-color: rgba(123, 63, 209, 0.25);
   }
 }
 
@@ -95,7 +135,7 @@
    UTILITÁRIOS SEMÂNTICOS DA VITRINE DE CLIENTES
    ============================================================ */
 @layer utilities {
-  .text-brand          { color: var(--brand-red); }
+  .text-brand          { color: var(--brand-text, var(--brand-red)); }
   .text-brand-muted    { color: var(--muted-foreground); }
 
   .bg-surface-0        { background-color: var(--brand-surface-0); }
@@ -106,7 +146,7 @@
   .bg-brand-dark       { background-color: var(--brand-red-dark); }
   .bg-whatsapp         { background-color: var(--brand-whatsapp); }
 
-  .border-brand        { border-color: var(--brand-red); }
+  .border-brand        { border-color: var(--brand-accent, var(--brand-red)); }
   .border-surface      { border-color: rgba(255,255,255,0.08); }
 
   .btn-brand {
@@ -118,10 +158,10 @@
   }
   .btn-brand:hover {
     background-color: var(--brand-red-dark);
-    box-shadow: 0 4px 16px rgba(255,45,15,0.3);
+    box-shadow: 0 4px 16px rgba(var(--brand-red-rgb, 255, 45, 15), 0.3);
   }
   .btn-brand:active  { transform: scale(0.98); }
-  .btn-brand:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 2px; }
+  .btn-brand:focus-visible { outline: 2px solid var(--brand-accent, var(--brand-red)); outline-offset: 2px; }
 
   .btn-whatsapp {
     background-color: var(--brand-whatsapp);
@@ -140,8 +180,8 @@
   }
   @media (hover: hover) {
     .card-vehicle:hover {
-      border-color: var(--brand-red);
-      box-shadow: 0 8px 32px rgba(255,45,15,0.15);
+      border-color: var(--brand-accent, var(--brand-red));
+      box-shadow: 0 8px 32px rgba(var(--brand-red-rgb, 255, 45, 15), 0.15);
       transform: translateY(-2px);
     }
   }
@@ -154,8 +194,8 @@
   }
   .input-brand:focus-within,
   .input-brand:focus {
-    border-color: var(--brand-red);
-    box-shadow: 0 0 0 2px rgba(255,45,15,0.2);
+    border-color: var(--brand-accent, var(--brand-red));
+    box-shadow: 0 0 0 2px rgba(var(--brand-red-rgb, 255, 45, 15), 0.2);
     outline: none;
   }
 

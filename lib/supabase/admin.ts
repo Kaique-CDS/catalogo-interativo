@@ -32,17 +32,11 @@ export async function isAdminRequest(): Promise<boolean> {
   return cookieStore.get('admin_auth')?.value === 'true'
 }
 
-const DEFAULT_STORE = {
-  name: 'Milhaticar',
-  slogan: 'Certeza de bons negócios',
-  whatsapp: '5511994942661',
-  address: 'Av. Gov. Adhemar de Barros, 2618 – Braz Cubas – Mogi das Cruzes/SP',
-  logo_url: '/logo-milhaticar.png',
-}
+import { getTenantBrand } from '@/lib/tenants'
 
 /**
  * Retorna o UUID da loja a partir do slug da URL.
- * Se a loja ainda não existir no banco, cria automaticamente.
+ * Se a loja ainda não existir no banco, cria automaticamente com a identidade do tenant.
  */
 export async function resolveStoreId(supabase: SupabaseClient, slug: string): Promise<string> {
   if (!slug) throw new Error('slug da loja é obrigatório')
@@ -56,9 +50,20 @@ export async function resolveStoreId(supabase: SupabaseClient, slug: string): Pr
   if (findError) throw new Error(`Erro ao buscar loja: ${findError.message}`)
   if (existing?.id) return existing.id
 
+  const brand = getTenantBrand(slug)
+  const storeToInsert = {
+    slug,
+    name: brand.name,
+    slogan: brand.demoStore.slogan || 'Certeza de bons negócios',
+    whatsapp: brand.whatsapp.number,
+    address: brand.address || null,
+    logo_url: brand.logo.header,
+    primary_color: brand.demoStore.primary_color || '#18181B',
+  }
+
   const { data: created, error: createError } = await supabase
     .from('stores')
-    .insert([{ slug, ...DEFAULT_STORE }])
+    .insert([storeToInsert])
     .select('id')
     .single()
 

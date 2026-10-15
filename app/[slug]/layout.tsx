@@ -1,17 +1,30 @@
 import React from 'react'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { getTenantBrand } from '@/lib/tenants'
+import { cn } from '@/lib/utils'
 
 interface Props {
   children: React.ReactNode
   params: Promise<{ slug: string }>
 }
 
+export async function generateViewport({ params }: { params: Promise<{ slug: string }> }): Promise<Viewport> {
+  const { slug } = await params
+  const brand = getTenantBrand(slug)
+  return {
+    themeColor: brand.themeColor,
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  let storeName = 'Milhaticar'
-  let iconUrl = '/logo-milhaticar.png'
-  let slogan = 'Catálogo de Veículos'
+  const brand = getTenantBrand(slug)
+  let storeName = brand.name
+  let iconUrl = brand.logo.favicon
+  let appleIconUrl = brand.logo.appleIcon
+  let slogan = brand.metaDescription
+  let ogImage = brand.logo.og
 
   try {
     const supabase = await createClient()
@@ -24,26 +37,49 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (store) {
       storeName = store.name || storeName
       iconUrl = store.logo_url || iconUrl
+      appleIconUrl = store.logo_url || appleIconUrl
       slogan = store.slogan || slogan
     }
   } catch {
-    // fallback to default store metadata
+    // fallback to tenant brand metadata
   }
 
+  const title = `${storeName} - Catálogo de Veículos`
+
   return {
-    title: `${storeName} - Catálogo de Veículos`,
+    title,
     description: slogan,
     icons: {
-      icon: iconUrl,
+      icon: [
+        { url: iconUrl, sizes: 'any' },
+        { url: iconUrl, type: 'image/png' },
+      ],
       shortcut: iconUrl,
-      apple: iconUrl,
+      apple: appleIconUrl,
+    },
+    openGraph: {
+      title,
+      description: slogan,
+      siteName: storeName,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: storeName,
+        },
+      ],
+      type: 'website',
     },
   }
 }
 
-export default function StoreSlugLayout({ children }: Props) {
+export default async function StoreSlugLayout({ children, params }: Props) {
+  const { slug } = await params
+  const brand = getTenantBrand(slug)
+
   return (
-    <div className="dark store-fixed-dark min-h-screen bg-surface-0 text-white">
+    <div className={cn('dark store-fixed-dark min-h-screen bg-surface-0 text-white', brand.themeClass)}>
       {children}
     </div>
   )

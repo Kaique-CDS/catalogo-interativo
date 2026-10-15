@@ -1,7 +1,12 @@
 import type { Metadata } from 'next'
 import InstitutionalLayout from '@/components/storefront/InstitutionalLayout'
+import { getTenantBrand } from '@/lib/tenants'
 
-export const metadata: Metadata = { title: 'Termos e Condições - Milhaticar' }
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const brand = getTenantBrand(slug)
+  return { title: `Termos e Condições - ${brand.name}` }
+}
 
 export default async function TermosPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params

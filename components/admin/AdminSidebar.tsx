@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
+import { getTenantBrand } from '@/lib/tenants'
+
 interface Props {
   store: { id: string; name: string; slug: string; logo_url?: string | null }
   slug: string
@@ -21,8 +23,9 @@ const navItems = (slug: string) => [
 
 export default function AdminSidebar({ store, slug }: Props) {
   const pathname = usePathname()
-  const storeName = store?.name || 'Milhaticar'
-  const storeLogo = store?.logo_url || '/logo-milhaticar.png'
+  const brand = getTenantBrand(slug || store?.slug)
+  const storeName = store?.name || brand.name
+  const storeLogo = store?.logo_url || brand.logo.header
 
   const handleLogout = async () => {
     document.cookie = 'admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'

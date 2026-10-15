@@ -1,10 +1,20 @@
-export default function BrandBanner({ altText = "Bem-vindo à Milhaticar" }: { altText?: string }) {
+interface BrandBannerProps {
+  altText?: string
+  desktopBanner?: string
+  mobileBanner?: string
+}
+
+export default function BrandBanner({
+  altText = 'Bem-vindo ao catálogo',
+  desktopBanner = '/banner-desktop.png',
+  mobileBanner = '/banner-mobile.png',
+}: BrandBannerProps) {
   return (
     <div className="w-full relative rounded-2xl overflow-hidden border border-surface bg-surface-1">
       <picture>
-        <source media="(min-width: 768px)" srcSet="/banner-desktop.png" />
+        <source media="(min-width: 768px)" srcSet={desktopBanner} />
         <img 
-          src="/banner-mobile.png" 
+          src={mobileBanner} 
           alt={altText}
           width={1080}
           height={1350}
