@@ -13,6 +13,9 @@ export type Database = {
           whatsapp_financeiro: string | null
           phone?: string | null
           instagram?: string | null
+          email?: string | null
+          maps_embed_url?: string | null
+          banner_mobile_url?: string | null
           opening_hours: string | null
           primary_color: string | null
           font_family: string | null

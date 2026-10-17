@@ -77,12 +77,15 @@ export async function saveStoreWithContacts(payload: {
   instagram?: string | null
   whatsapp: string
   whatsapp_financeiro?: string | null
+  email?: string | null
+  maps_embed_url?: string | null
   logo_url?: string | null
   banner_url?: string | null
+  banner_mobile_url?: string | null
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createAdminClient()
 
-  // 1. Tenta atualizar com as colunas phone e instagram diretamente na tabela stores
+  // 1. Tenta atualizar com todas as colunas diretamente na tabela stores
   const { error: fullUpdateError } = await supabase
     .from('stores')
     .update({
@@ -94,8 +97,11 @@ export async function saveStoreWithContacts(payload: {
       instagram: payload.instagram || null,
       whatsapp: payload.whatsapp,
       whatsapp_financeiro: payload.whatsapp_financeiro || null,
+      email: payload.email || null,
+      maps_embed_url: payload.maps_embed_url || null,
       logo_url: payload.logo_url,
       banner_url: payload.banner_url,
+      banner_mobile_url: payload.banner_mobile_url || null,
     })
     .eq('id', payload.store_id)
 
@@ -108,7 +114,7 @@ export async function saveStoreWithContacts(payload: {
     return { success: true }
   }
 
-  // 2. Se a coluna phone ou instagram não existir na tabela (PGRST204 ou similar), atualiza os campos padrão
+  // 2. Se alguma coluna opcional falhar, tenta o fallback com campos essenciais
   const { error: fallbackError } = await supabase
     .from('stores')
     .update({

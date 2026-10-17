@@ -16,10 +16,28 @@ export async function GET(request: Request) {
   }
 }
 
+import { revalidatePath } from 'next/cache'
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { store_id, slug, name, slogan, address, opening_hours, phone, instagram, whatsapp, whatsapp_financeiro, logo_url, banner_url } = body
+    const {
+      store_id,
+      slug,
+      name,
+      slogan,
+      address,
+      opening_hours,
+      phone,
+      instagram,
+      whatsapp,
+      whatsapp_financeiro,
+      email,
+      maps_embed_url,
+      logo_url,
+      banner_url,
+      banner_mobile_url,
+    } = body
 
     if (!store_id || !slug || !name || !whatsapp) {
       return NextResponse.json({ error: 'Campos obrigatórios ausentes' }, { status: 400 })
@@ -36,12 +54,23 @@ export async function POST(request: Request) {
       instagram,
       whatsapp,
       whatsapp_financeiro,
+      email,
+      maps_embed_url,
       logo_url,
       banner_url,
+      banner_mobile_url,
     })
 
     if (!result.success) {
       return NextResponse.json({ error: result.error || 'Erro ao salvar configurações' }, { status: 500 })
+    }
+
+    // Revalida páginas públicas da vitrine para refletir alterações imediatamente
+    try {
+      revalidatePath(`/${slug}`)
+      revalidatePath(`/${slug}/quem-somos`)
+    } catch (e) {
+      console.warn('Erro ao revalidar caminhos:', e)
     }
 
     return NextResponse.json({ success: true })

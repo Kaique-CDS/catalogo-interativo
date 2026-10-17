@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Upload, Loader2, Globe, Phone, Clock, Sparkles, Image as ImageIcon, Instagram, PhoneCall, MessageCircle } from 'lucide-react'
+import { Upload, Loader2, Globe, Phone, Clock, Sparkles, Image as ImageIcon, Instagram, PhoneCall, MessageCircle, MapPin, Mail, AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Store } from '@/lib/supabase/types'
 
@@ -21,6 +21,8 @@ const settingsSchema = z.object({
   instagram:           z.string().optional(),
   whatsapp:            z.string().min(10, 'Informe um número de WhatsApp válido (com DDI)'),
   whatsapp_financeiro: z.string().optional(),
+  email:               z.string().optional(),
+  maps_embed_url:      z.string().optional(),
   opening_hours:       z.string().optional(),
   address:             z.string().optional(),
   slogan:              z.string().optional(),
@@ -40,7 +42,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
   const [uploadingBanner, setUploadingBanner] = useState(false)
   const [saving,        setSaving]        = useState(false)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<SettingsFormData>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       name:                store.name,
@@ -48,11 +50,15 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       instagram:           store.instagram ?? '',
       whatsapp:            store.whatsapp,
       whatsapp_financeiro: store.whatsapp_financeiro ?? '',
+      email:               store.email ?? '',
+      maps_embed_url:      store.maps_embed_url ?? '',
       opening_hours:       store.opening_hours ?? 'Seg a Sex: 09h às 18h',
       address:             store.address ?? '',
       slogan:              store.slogan ?? '',
     },
   })
+
+  const watchedAddress = watch('address')
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -99,6 +105,8 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           instagram: data.instagram || null,
           whatsapp: data.whatsapp,
           whatsapp_financeiro: data.whatsapp_financeiro || null,
+          email: data.email || null,
+          maps_embed_url: data.maps_embed_url || null,
           logo_url: logoUrl,
           banner_url: bannerUrl,
         }),
@@ -223,8 +231,43 @@ export default function StoreSettingsForm({ store, slug }: Props) {
             </p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="address" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Endereço físico</Label>
+            <Label htmlFor="address" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 text-brand" /> Endereço físico
+            </Label>
             <Input id="address" placeholder="Av. das Nações, 1500 - São Paulo, SP" {...register('address')} className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand" />
+            {(!watchedAddress || !watchedAddress.trim()) && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1 mt-1">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                Preencha o endereço para exibir o mapa na vitrine
+              </p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Mail className="h-3.5 w-3.5 text-brand" /> E-mail de Contato (Opcional)
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="contato@sualoja.com.br"
+              {...register('email')}
+              className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
+            />
+            <p className="text-[11px] text-muted-foreground">Exibido na seção de atendimento e no rodapé da vitrine.</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="maps_embed_url" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5 text-brand" /> Incorporação do Google Maps (Opcional)
+            </Label>
+            <Input
+              id="maps_embed_url"
+              placeholder="Cole o código iframe ou link embed do Google Maps"
+              {...register('maps_embed_url')}
+              className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Se deixar em branco, o mapa gerará a localização automaticamente pelo endereço físico acima.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="opening_hours" className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -236,7 +279,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
               {...register('opening_hours')}
               className="bg-surface-2 border-surface text-foreground focus-visible:ring-brand"
             />
-            <p className="text-[11px] text-muted-foreground">Aparece no rodapé da vitrine e no modal do veículo.</p>
+            <p className="text-[11px] text-muted-foreground">Aparece no rodapé da vitrine e no modal do veículo. Separe múltiplos turnos por "|".</p>
           </div>
         </CardContent>
       </Card>
