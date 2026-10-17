@@ -1,71 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, resolveStoreId } from '@/lib/supabase/admin'
+import { classifyTrafficSource } from '@/lib/traffic-classifier'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function isValidUuid(val?: string | null): val is string {
   return !!val && UUID_REGEX.test(val)
-}
-
-function normalizeSource(
-  raw?: string | null,
-  req?: NextRequest
-): 'instagram' | 'google' | 'facebook' | 'direct' {
-  if (raw) {
-    const s = raw.toLowerCase().trim()
-    if (s.includes('insta') || s === 'ig') return 'instagram'
-    if (s.includes('goog') || s === 'gads' || s === 'adwords') return 'google'
-    if (s.includes('face') || s === 'fb' || s === 'meta' || s.includes('messenger')) return 'facebook'
-    if (s === 'direct' || s === 'direto') {
-      // Fall through to inspect headers in case client sent 'direct' as fallback
-    }
-  }
-
-  if (req) {
-    const referer = (req.headers.get('referer') || '').toLowerCase()
-    const ua = (req.headers.get('user-agent') || '').toLowerCase()
-
-    if (referer) {
-      try {
-        const refUrl = new URL(referer)
-        const p = refUrl.searchParams
-        const paramSource = (
-          p.get('ref') ||
-          p.get('utm_source') ||
-          p.get('source') ||
-          p.get('origem') ||
-          ''
-        ).toLowerCase()
-
-        if (paramSource.includes('insta') || paramSource === 'ig' || p.has('igshid') || p.has('igsh')) {
-          return 'instagram'
-        }
-        if (paramSource.includes('goog') || paramSource === 'gads' || p.has('gclid') || p.has('gad_source')) {
-          return 'google'
-        }
-        if (paramSource.includes('face') || paramSource === 'fb' || paramSource === 'meta') {
-          return 'facebook'
-        }
-      } catch {
-        // Ignore URL parse error
-      }
-    }
-
-    if (ua.includes('instagram')) return 'instagram'
-    if (ua.includes('fban') || ua.includes('fbav') || ua.includes('fb_iab') || ua.includes('fbios') || ua.includes('fb4a')) {
-      return 'facebook'
-    }
-    if (ua.includes('gsa/') || ua.includes('googleapp')) return 'google'
-
-    if (referer.includes('instagram.com') || referer.includes('ig.me')) return 'instagram'
-    if (referer.includes('google.') || referer.includes('googlequicksearchbox')) return 'google'
-    if (referer.includes('facebook.com') || referer.includes('fb.com') || referer.includes('messenger.com')) {
-      return 'facebook'
-    }
-    if (referer.includes('fbclid=')) return 'facebook'
-  }
-
-  return 'direct'
 }
 
 function extractSlugFromReferer(referer?: string | null): string | null {
@@ -82,35 +22,116 @@ function extractSlugFromReferer(referer?: string | null): string | null {
   return null
 }
 
+/**
+ * Distribui percentuais garantindo soma exata de 100% (método dos maiores restos).
+ */
+function calculateExactPercentages(
+  items: Array<{ name: string; count: number }>
+): Array<{ name: string; count: number; value: number }> {
+  const total = items.reduce((acc, it) => acc + it.count, 0)
+  if (total === 0) {
+    return items.map((it) => ({ ...it, value: 0 }))
+  }
+
+  const rawValues = items.map((it) => {
+    const exact = (it.count * 100) / total
+    const floor = Math.floor(exact)
+    const remainder = exact - floor
+    return { ...it, floor, remainder }
+  })
+
+  const sumFloors = rawValues.reduce((acc, it) => acc + it.floor, 0)
+  let diff = 100 - sumFloors
+
+  // Ordena por maior resto para distribuir a diferença
+  const sortedByRemainder = [...rawValues].sort((a, b) => b.remainder - a.remainder)
+  const bonusSet = new Set<string>()
+
+  for (let i = 0; i < diff && i < sortedByRemainder.length; i++) {
+    bonusSet.add(sortedByRemainder[i].name)
+  }
+
+  return rawValues.map((it) => ({
+    name: it.name,
+    count: it.count,
+    value: it.floor + (bonusSet.has(it.name) ? 1 : 0),
+  }))
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // 1. Ignora acessos de administradores logados
+    const adminAuthCookie = req.cookies.get('admin_auth')
+    if (adminAuthCookie?.value === 'true') {
+      return NextResponse.json({ success: true, ignored: 'admin_session' }, { status: 200 })
+    }
+
+    const ua = req.headers.get('user-agent') || ''
+    const referer = req.headers.get('referer') || ''
+
+    // 2. Classificação / Detecção de bots
+    const serverClassification = classifyTrafficSource({
+      url: referer || undefined,
+      referrer: referer || undefined,
+      userAgent: ua,
+      ownHost: req.nextUrl?.host || undefined,
+    })
+
+    if (serverClassification.isBot) {
+      return NextResponse.json({ success: true, ignored: 'bot_traffic' }, { status: 200 })
+    }
+
     const supabase = createAdminClient()
     const body = await req.json()
-    const { store_id, slug, vehicle_id, event_type, source } = body
+    const {
+      store_id,
+      slug,
+      vehicle_id,
+      event_type,
+      source,
+      session_id,
+      source_detail,
+      referrer_host,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+    } = body
 
     if (!event_type) {
-      return NextResponse.json({ error: 'event_type e obrigatorio' }, { status: 400 })
+      return NextResponse.json({ error: 'event_type é obrigatório' }, { status: 400 })
     }
 
     let finalStoreId = isValidUuid(store_id) ? store_id : null
     if (!finalStoreId) {
-      const targetSlug = slug || extractSlugFromReferer(req.headers.get('referer')) || 'loja-exemplo'
+      const targetSlug = slug || extractSlugFromReferer(referer) || 'loja-exemplo'
       finalStoreId = await resolveStoreId(supabase, targetSlug)
     }
 
     const validVehicleId = isValidUuid(vehicle_id) ? vehicle_id : null
-    const finalSource = normalizeSource(source, req)
 
-    const { error } = await supabase
-      .from('analytics_events')
-      .insert([
-        {
-          store_id: finalStoreId,
-          vehicle_id: validVehicleId,
-          event_type,
-          source: finalSource,
-        },
-      ])
+    // Origem: prioriza cliente ou fallback do classificador do servidor
+    const finalSource =
+      source && source !== 'direct' && source !== 'Direto / não identificado'
+        ? source
+        : serverClassification.source
+
+    const finalSourceDetail = source_detail || serverClassification.sourceDetail
+    const finalReferrerHost = referrer_host || serverClassification.referrerHost
+
+    const { error } = await supabase.from('analytics_events').insert([
+      {
+        store_id: finalStoreId,
+        vehicle_id: validVehicleId,
+        event_type,
+        source: finalSource,
+        session_id: session_id || null,
+        source_detail: finalSourceDetail || null,
+        referrer_host: finalReferrerHost || null,
+        utm_source: utm_source || serverClassification.utmSource || null,
+        utm_medium: utm_medium || serverClassification.utmMedium || null,
+        utm_campaign: utm_campaign || serverClassification.utmCampaign || null,
+      },
+    ])
 
     if (error) {
       console.error('Supabase error inserting analytics event:', error)
@@ -131,7 +152,7 @@ export async function GET(req: NextRequest) {
     const slug = searchParams.get('slug')
 
     if (!store_id && !slug) {
-      return NextResponse.json({ error: 'store_id ou slug e obrigatorio' }, { status: 400 })
+      return NextResponse.json({ error: 'store_id ou slug é obrigatório' }, { status: 400 })
     }
 
     const supabase = createAdminClient()
@@ -157,7 +178,8 @@ export async function GET(req: NextRequest) {
             totalViews: 0,
             whatsappClicks: 0,
             shares: 0,
-            sources: { instagram: 0, google: 0, facebook: 0, direct: 0 },
+            sources: {},
+            trafficSourcesList: [],
             topVehicles: [],
           },
           { status: 200 }
@@ -169,29 +191,19 @@ export async function GET(req: NextRequest) {
     let totalViews = 0
     let whatsappClicks = 0
     let shares = 0
-    const sourcesCount: Record<string, number> = { instagram: 0, google: 0, facebook: 0, direct: 0 }
-    const storeViewsSources: Record<string, number> = { instagram: 0, google: 0, facebook: 0, direct: 0 }
-    let hasStoreLevelViews = false
+
+    // Contagem por canal real de tráfego
+    const rawSourcesCount: Record<string, number> = {}
     const vehicleStats: Record<string, { views: number; clicks: number }> = {}
 
     events?.forEach((ev) => {
-      const normSource = normalizeSource(ev.source)
+      const channel = ev.source || 'Direto / não identificado'
 
       if (ev.event_type === 'page_view') {
         totalViews++
-        sourcesCount[normSource] = (sourcesCount[normSource] || 0) + 1
-
-        // Visita principal da vitrine (vehicle_id === null) ou qualquer evento vindo de rede social/busca
-        if (!ev.vehicle_id || normSource !== 'direct') {
-          hasStoreLevelViews = true
-          storeViewsSources[normSource] = (storeViewsSources[normSource] || 0) + 1
-        }
+        rawSourcesCount[channel] = (rawSourcesCount[channel] || 0) + 1
       } else if (ev.event_type === 'whatsapp_click') {
         whatsappClicks++
-        if (normSource !== 'direct') {
-          hasStoreLevelViews = true
-          storeViewsSources[normSource] = (storeViewsSources[normSource] || 0) + 1
-        }
       } else if (ev.event_type === 'share') {
         shares++
       }
@@ -203,6 +215,43 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // Ordena canais por volume decrescente
+    const sortedChannels = Object.entries(rawSourcesCount)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+
+    // Agrupa em Top 5/6 + "Outros" se houver mais que 6 canais
+    let displayList: Array<{ name: string; count: number }> = []
+    if (sortedChannels.length <= 6) {
+      displayList = sortedChannels
+    } else {
+      const top5 = sortedChannels.slice(0, 5)
+      const rest = sortedChannels.slice(5)
+      const othersCount = rest.reduce((acc, it) => acc + it.count, 0)
+      displayList = [...top5, { name: 'Outros canais', count: othersCount }]
+    }
+
+    // Calcula porcentagens exatas somando 100%
+    const trafficWithPercentages = calculateExactPercentages(displayList)
+
+    // Paleta de gradiente de roxos/marcas para as barras
+    const colorPalette = [
+      'bg-brand',
+      'bg-[var(--chart-2,#7B3FD1)]',
+      'bg-[var(--chart-3,#34D399)]',
+      'bg-[var(--chart-4,#3B82F6)]',
+      'bg-[var(--chart-5,#F59E0B)]',
+      'bg-zinc-400',
+    ]
+
+    const trafficSourcesList = trafficWithPercentages.map((item, idx) => ({
+      key: `source_${idx}`,
+      name: item.name,
+      count: item.count,
+      value: item.value,
+      color: colorPalette[idx % colorPalette.length],
+    }))
+
     const topVehiclesIds = Object.keys(vehicleStats)
       .sort((a, b) => vehicleStats[b].views - vehicleStats[a].views)
       .slice(0, 3)
@@ -213,12 +262,17 @@ export async function GET(req: NextRequest) {
       clicks: vehicleStats[id].clicks,
     }))
 
+    const conversionRate =
+      totalViews > 0 ? ((whatsappClicks / totalViews) * 100).toFixed(1) : '0.0'
+
     return NextResponse.json(
       {
         totalViews,
         whatsappClicks,
         shares,
-        sources: hasStoreLevelViews ? storeViewsSources : sourcesCount,
+        conversionRate,
+        sources: rawSourcesCount,
+        trafficSourcesList,
         topVehicles,
       },
       { status: 200 }

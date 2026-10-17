@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getTrafficSource } from '@/lib/analytics-source'
+import { getClientTrafficInfo } from '@/lib/analytics-source'
 
 interface Props {
   storeId?: string
@@ -127,6 +127,7 @@ export default function FloatingWhatsApp({ storeId, slug, storeName, whatsapp, c
         aria-label="Falar no WhatsApp"
         title="Falar no WhatsApp"
         onClick={() => {
+          const trafficInfo = getClientTrafficInfo()
           fetch('/api/analytics', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -134,7 +135,10 @@ export default function FloatingWhatsApp({ storeId, slug, storeName, whatsapp, c
               store_id: storeId,
               slug,
               event_type: 'whatsapp_click',
-              source: getTrafficSource(),
+              source: trafficInfo.source,
+              session_id: trafficInfo.sessionId,
+              source_detail: trafficInfo.sourceDetail,
+              referrer_host: trafficInfo.referrerHost,
             }),
           }).catch(console.error)
         }}

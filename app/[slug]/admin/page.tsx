@@ -21,12 +21,20 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
     whatsappClicks: number
     shares: number
     sources: Record<string, number>
+    trafficSourcesList?: Array<{
+      key: string
+      name: string
+      count: number
+      value: number
+      color: string
+    }>
     topVehicles: any[]
   }>({
     totalViews: 0,
     whatsappClicks: 0,
     shares: 0,
-    sources: { instagram: 0, google: 0, facebook: 0, direct: 0 },
+    sources: {},
+    trafficSourcesList: [],
     topVehicles: []
   })
   const [loadingAnalytics, setLoadingAnalytics] = useState(true)
@@ -91,17 +99,13 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
   ]
 
   const totalSources = Object.values(analytics.sources).reduce((a, b) => a + b, 0)
-  const getSourcePercent = (key: string) => totalSources > 0 ? Math.round(((analytics.sources[key] || 0) / totalSources) * 100) : 0
-  const getSourceCount = (key: string) => analytics.sources[key] || 0
+  
+  // Lista dinâmica do Analytics (Top canais reais + Outros)
+  const trafficSources = analytics.trafficSourcesList && analytics.trafficSourcesList.length > 0
+    ? analytics.trafficSourcesList
+    : []
 
-  const trafficSources = [
-    { key: 'instagram', name: 'Instagram (Bio/Stories)', count: getSourceCount('instagram'), value: getSourcePercent('instagram'), color: 'bg-[var(--chart-1,var(--brand-red))]' },
-    { key: 'google', name: 'Google Busca', count: getSourceCount('google'), value: getSourcePercent('google'), color: 'bg-[var(--chart-2,#34d399)]' },
-    { key: 'direct', name: 'Acesso Direto (Link)', count: getSourceCount('direct'), value: getSourcePercent('direct'), color: 'bg-[var(--chart-4,#a1a1aa)]' },
-    { key: 'facebook', name: 'Facebook', count: getSourceCount('facebook'), value: getSourcePercent('facebook'), color: 'bg-[var(--chart-3,#3b82f6)]' },
-  ]
-
-  const leadingSource = [...trafficSources].sort((a, b) => b.count - a.count)[0]
+  const leadingSource = trafficSources.length > 0 ? trafficSources[0] : null
 
   const copyTrackingLink = (refKey: string, label: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
@@ -171,25 +175,33 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
           <h2 className="text-xs sm:text-sm font-bold text-heading flex items-center gap-2 mb-4 uppercase tracking-wider">
             <Globe className="h-4 w-4 text-brand shrink-0" /> De onde vêm os clientes?
           </h2>
-          <div className="space-y-4">
-            {trafficSources.map((source) => (
-              <div key={source.key}>
-                <div className="flex justify-between items-baseline text-xs mb-1.5">
-                  <span className="font-medium text-muted-foreground">{source.name}</span>
-                  <span className="font-heading text-sm text-heading tracking-wider">
-                    <span className="text-[11px] font-sans font-normal text-muted-foreground mr-1.5">({source.count})</span>
-                    {source.value}%
-                  </span>
+          {trafficSources.length === 0 ? (
+            <div className="py-8 text-center text-xs text-muted-foreground bg-surface-2/40 rounded-xl border border-surface p-4">
+              Nenhum acesso registrado no período.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {trafficSources.map((source) => (
+                <div key={source.key} title={`${source.name}: ${source.count} acesso(s) (${source.value}%)`}>
+                  <div className="flex justify-between items-baseline text-xs mb-1.5">
+                    <span className="font-medium text-muted-foreground truncate max-w-[190px]">{source.name}</span>
+                    <span className="font-heading text-sm text-heading tracking-wider shrink-0">
+                      <span className="text-[11px] font-sans font-normal text-muted-foreground mr-1.5" title={`${source.count} visitas`}>
+                        ({source.count})
+                      </span>
+                      {source.value}%
+                    </span>
+                  </div>
+                  <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${source.color} transition-all duration-1000`}
+                      style={{ width: `${Math.max(source.value, 1)}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 w-full bg-surface-2 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${source.color} transition-all duration-1000`}
-                    style={{ width: `${source.value}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Links rápidos de rastreamento para Bio/Campanhas */}
           <div className="mt-4 pt-3.5 border-t border-surface">
@@ -226,7 +238,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
               </>
             ) : (
               <>
-                O sistema detecta automaticamente acessos vindos do <strong className="text-foreground">Instagram, Google e Facebook</strong> (inclusive pelos navegadores internos do iOS e Android).
+                O sistema classifica automaticamente todos os acessos vindos do <strong className="text-foreground">Instagram, Google, Facebook, WhatsApp, OLX, Webmotors</strong> e campanhas com UTMs.
               </>
             )}
           </p>

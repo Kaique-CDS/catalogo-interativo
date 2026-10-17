@@ -1,124 +1,114 @@
-const SESSION_SOURCE_KEY = 'vz_traffic_source'
+import { classifyTrafficSource, type TrafficClassificationResult } from './traffic-classifier'
 
-export type TrafficSource = 'instagram' | 'google' | 'facebook' | 'direct'
+const SESSION_SOURCE_KEY = 'vz_traffic_source'
+const SESSION_ID_KEY = 'vz_session_id'
+const SESSION_DETAIL_KEY = 'vz_traffic_detail'
+
+export type TrafficSource = string
+
+export interface ClientTrafficInfo {
+  source: string
+  sessionId: string
+  sourceDetail: string | null
+  referrerHost: string | null
+  utmSource: string | null
+  utmMedium: string | null
+  utmCampaign: string | null
+}
 
 /**
- * Detecta de forma precisa a origem do tráfego no iOS, Android e Desktop:
- * 1. Parâmetros de URL (?ref=, ?utm_source=, ?source=, ?origem=, ?igshid=, ?gclid=, ?fbclid=)
- * 2. User-Agent de navegadores internos (In-App Browser do Instagram, Facebook e Google App no iOS/Android)
- * 3. document.referrer (google.com, google.com.br, l.instagram.com, m.facebook.com, etc.)
- * 4. Persiste na sessionStorage para manter a atribuição durante toda a navegação do cliente.
+ * Obtém ou inicializa o ID único da sessão atual do visitante no sessionStorage.
  */
-export function getTrafficSource(): TrafficSource {
-  if (typeof window === 'undefined') return 'direct'
+export function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') return 'server_session'
+  try {
+    let sid = sessionStorage.getItem(SESSION_ID_KEY)
+    if (!sid) {
+      sid =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `vz_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      sessionStorage.setItem(SESSION_ID_KEY, sid)
+    }
+    return sid
+  } catch {
+    return `vz_fallback_${Date.now()}`
+  }
+}
+
+/**
+ * Retorna as informações completas de atribuição de tráfego do cliente,
+ * respeitando a persistência de sessão (a primeira origem prevalece).
+ */
+export function getClientTrafficInfo(): ClientTrafficInfo {
+  if (typeof window === 'undefined') {
+    return {
+      source: 'Direto / não identificado',
+      sessionId: 'server_session',
+      sourceDetail: null,
+      referrerHost: null,
+      utmSource: null,
+      utmMedium: null,
+      utmCampaign: null,
+    }
+  }
 
   try {
-    const params = new URLSearchParams(window.location.search)
-    const rawParam = (
-      params.get('ref') ||
-      params.get('utm_source') ||
-      params.get('source') ||
-      params.get('origem') ||
-      ''
-    )
-      .toLowerCase()
-      .trim()
+    const sessionId = getOrCreateSessionId()
+    const classified = classifyTrafficSource({
+      url: window.location.href,
+      referrer: document.referrer || null,
+      userAgent: navigator.userAgent || null,
+      ownHost: window.location.host || null,
+    })
 
-    // 1. Parâmetros explícitos de URL
-    if (
-      rawParam.includes('insta') ||
-      rawParam === 'ig' ||
-      params.has('igshid') ||
-      params.has('igsh')
-    ) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'instagram')
-      return 'instagram'
-    }
+    const storedSource = sessionStorage.getItem(SESSION_SOURCE_KEY)
+    const storedDetail = sessionStorage.getItem(SESSION_DETAIL_KEY)
 
-    if (
-      rawParam.includes('google') ||
-      rawParam === 'gads' ||
-      rawParam === 'adwords' ||
-      params.has('gclid') ||
-      params.has('gad_source')
-    ) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'google')
-      return 'google'
+    // Se é navegação interna ou direto mas já tínhamos uma origem nesta sessão, preserva a primeira
+    if (storedSource && (classified.isInternal || classified.source === 'Direto / não identificado')) {
+      return {
+        source: storedSource,
+        sessionId,
+        sourceDetail: storedDetail || classified.sourceDetail,
+        referrerHost: classified.referrerHost,
+        utmSource: classified.utmSource,
+        utmMedium: classified.utmMedium,
+        utmCampaign: classified.utmCampaign,
+      }
     }
 
-    if (
-      rawParam.includes('face') ||
-      rawParam === 'fb' ||
-      rawParam === 'meta'
-    ) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'facebook')
-      return 'facebook'
+    // Caso contrário, atualiza a origem na sessão
+    sessionStorage.setItem(SESSION_SOURCE_KEY, classified.source)
+    if (classified.sourceDetail) {
+      sessionStorage.setItem(SESSION_DETAIL_KEY, classified.sourceDetail)
     }
 
-    if (rawParam === 'direct' || rawParam === 'direto') {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'direct')
-      return 'direct'
+    return {
+      source: classified.source,
+      sessionId,
+      sourceDetail: classified.sourceDetail,
+      referrerHost: classified.referrerHost,
+      utmSource: classified.utmSource,
+      utmMedium: classified.utmMedium,
+      utmCampaign: classified.utmCampaign,
     }
-
-    // 2. User-Agent dos In-App Browsers (iOS e Android)
-    const ua = (navigator.userAgent || '').toLowerCase()
-    if (ua.includes('instagram')) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'instagram')
-      return 'instagram'
-    }
-    if (
-      ua.includes('fban') ||
-      ua.includes('fbav') ||
-      ua.includes('fb_iab') ||
-      ua.includes('fbios') ||
-      ua.includes('fb4a')
-    ) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'facebook')
-      return 'facebook'
-    }
-    if (ua.includes('gsa/') || ua.includes('googleapp')) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'google')
-      return 'google'
-    }
-
-    // 3. Document Referrer
-    const referrer = (document.referrer || '').toLowerCase()
-    if (referrer.includes('instagram.com') || referrer.includes('ig.me')) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'instagram')
-      return 'instagram'
-    }
-    if (
-      referrer.includes('google.') ||
-      referrer.includes('googlequicksearchbox') ||
-      referrer.includes('googleapis.com')
-    ) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'google')
-      return 'google'
-    }
-    if (
-      referrer.includes('facebook.com') ||
-      referrer.includes('fb.com') ||
-      referrer.includes('messenger.com')
-    ) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'facebook')
-      return 'facebook'
-    }
-
-    // fbclid sem User-Agent do Instagram cai para Facebook
-    if (params.has('fbclid')) {
-      sessionStorage.setItem(SESSION_SOURCE_KEY, 'facebook')
-      return 'facebook'
-    }
-
-    // 4. Verifica se já havia uma origem salva nesta sessão
-    const saved = sessionStorage.getItem(SESSION_SOURCE_KEY) as TrafficSource | null
-    if (saved && ['instagram', 'google', 'facebook', 'direct'].includes(saved)) {
-      return saved
-    }
-
-    sessionStorage.setItem(SESSION_SOURCE_KEY, 'direct')
-    return 'direct'
   } catch {
-    return 'direct'
+    return {
+      source: 'Direto / não identificado',
+      sessionId: getOrCreateSessionId(),
+      sourceDetail: null,
+      referrerHost: null,
+      utmSource: null,
+      utmMedium: null,
+      utmCampaign: null,
+    }
   }
+}
+
+/**
+ * Função mantida para retrocompatibilidade com componentes existentes.
+ */
+export function getTrafficSource(): string {
+  return getClientTrafficInfo().source
 }

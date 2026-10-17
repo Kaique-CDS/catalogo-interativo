@@ -14,7 +14,7 @@ import { ShieldCheck, BadgeCheck, BadgePercent, Car, Clock, Phone as PhoneIcon, 
 import BrandBanner from '@/components/storefront/BrandBanner'
 import LocationSection from '@/components/storefront/LocationSection'
 import Footer from '@/components/storefront/Footer'
-import { getTrafficSource } from '@/lib/analytics-source'
+import { getClientTrafficInfo } from '@/lib/analytics-source'
 import { getTenantBrand } from '@/lib/tenants'
 import { getStorePhone, getStoreInstagram, getStoreWhatsApp } from '@/lib/store-contact'
 
@@ -43,7 +43,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
     setIsOpen(isBusinessOpen(CONCESSIONARIA_HOURS, saoPauloNow))
 
     // Track page view with accurate source detection (URL params, In-App Browser UA, Referrer, sessionStorage)
-    const source = getTrafficSource()
+    const trafficInfo = getClientTrafficInfo()
 
     fetch('/api/analytics', {
       method: 'POST',
@@ -52,7 +52,13 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
         store_id: store.id,
         slug,
         event_type: 'page_view',
-        source,
+        source: trafficInfo.source,
+        session_id: trafficInfo.sessionId,
+        source_detail: trafficInfo.sourceDetail,
+        referrer_host: trafficInfo.referrerHost,
+        utm_source: trafficInfo.utmSource,
+        utm_medium: trafficInfo.utmMedium,
+        utm_campaign: trafficInfo.utmCampaign,
       }),
     }).catch(console.error)
   }, [slug, store.id])
