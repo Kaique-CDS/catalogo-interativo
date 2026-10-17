@@ -34,7 +34,7 @@ export interface TenantBrand {
     appleIcon: string
     og: string
   }
-  banners: { desktop: string; mobile: string }
+  banners: { desktop: string | null; mobile: string | null }
   copyright: (year: number) => string
   /** Usa os veículos demo do localStorage quando não há banco (somente o tenant padrão) */
   allowLocalDemoVehicles: boolean
@@ -101,7 +101,7 @@ const LL_MULTIMARCAS: TenantBrand = {
     appleIcon: `${LL_ASSETS}/apple-touch-icon.png`,
     og: `${LL_ASSETS}/og-image.jpg`,
   },
-  banners: { desktop: `${LL_ASSETS}/banner-desktop.jpg`, mobile: `${LL_ASSETS}/banner-mobile.jpg` },
+  banners: { desktop: null, mobile: null },
   copyright: (year) => `© A PARTIR DE 2022 - ${year} L&L MULTIMARCAS. Todos os direitos reservados.`,
   allowLocalDemoVehicles: false,
   demoStore: {

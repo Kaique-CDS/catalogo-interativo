@@ -132,13 +132,15 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
       <StoreHeader store={store} />
 
       {/* ── Brand Banner ── */}
-      <section className="container mx-auto px-3 sm:px-4 mt-6 max-w-7xl">
-        <BrandBanner
-          altText={`Bem-vindo à ${store.name}`}
-          desktopBanner={brand.banners.desktop}
-          mobileBanner={brand.banners.mobile}
-        />
-      </section>
+      {(store.banner_url || store.banner_mobile_url || brand.banners.desktop || brand.banners.mobile) && (
+        <section className="container mx-auto px-3 sm:px-4 mt-6 max-w-7xl">
+          <BrandBanner
+            altText={`Bem-vindo à ${store.name}`}
+            desktopBanner={store.banner_url || brand.banners.desktop}
+            mobileBanner={store.banner_mobile_url || brand.banners.mobile || store.banner_url}
+          />
+        </section>
+      )}
 
       {/* ── Grid Principal ── */}
       <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-7xl flex-1 pb-16 sm:pb-8">
