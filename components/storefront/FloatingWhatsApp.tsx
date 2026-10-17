@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { getTrafficSource } from '@/lib/analytics-source'
 
 interface Props {
@@ -11,12 +12,114 @@ interface Props {
 }
 
 export default function FloatingWhatsApp({ storeId, slug, storeName, whatsapp, customMessage }: Props) {
+  const [bottomOffset, setBottomOffset] = useState<number>(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   const cleanPhone = whatsapp.replace(/\D/g, '')
   const message = customMessage || `Olá, *${storeName}*! 👋\nGostaria de tirar algumas dúvidas sobre os veículos disponíveis no catálogo.`
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
 
+  // 1. Acoplamento dinâmico via IntersectionObserver + Scroll:
+  // Quando o footer entra na viewport, calcula o overlap e ancora o botão
+  // exatamente 16px acima do topo do rodapé, nunca cobrindo créditos nem copyright.
+  useEffect(() => {
+    const findFooter = () =>
+      document.querySelector('footer.store-footer') ||
+      document.querySelector('footer')
+
+    const updatePosition = () => {
+      const footer = findFooter()
+      if (!footer) {
+        setBottomOffset(0)
+        return
+      }
+
+      const rect = footer.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+      // Distância da base da viewport até o topo do footer
+      const overlap = windowHeight - rect.top
+
+      if (overlap > 0) {
+        // Ancora 16px acima do topo do footer
+        setBottomOffset(Math.round(overlap + 16))
+      } else {
+        setBottomOffset(0)
+      }
+    }
+
+    // Atualização inicial
+    updatePosition()
+
+    const footer = findFooter()
+    let observer: IntersectionObserver | null = null
+
+    if (footer && typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        () => {
+          updatePosition()
+        },
+        {
+          root: null,
+          threshold: [0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        }
+      )
+      observer.observe(footer)
+    }
+
+    window.addEventListener('scroll', updatePosition, { passive: true })
+    window.addEventListener('resize', updatePosition, { passive: true })
+
+    return () => {
+      if (observer) observer.disconnect()
+      window.removeEventListener('scroll', updatePosition)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [])
+
+  // 2. Ocultar o botão automaticamente quando houver modal, drawer ou lightbox aberto
+  // (evita cobrir CTAs como 'Tenho Interesse' e opções de financiamento)
+  useEffect(() => {
+    const checkModal = () => {
+      if (typeof document === 'undefined') return
+      const hasDialog = !!document.querySelector(
+        '[role="dialog"], [aria-modal="true"], .fixed.inset-0.z-50, [data-state="open"]'
+      )
+      const isBodyLocked =
+        document.body.style.overflow === 'hidden' ||
+        document.body.style.position === 'fixed'
+
+      setIsModalOpen(hasDialog || isBodyLocked)
+    }
+
+    checkModal()
+
+    const observer = new MutationObserver(checkModal)
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class', 'data-state'],
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <aside aria-label="Atendimento via WhatsApp" className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-30">
+    <aside
+      aria-label="Atendimento via WhatsApp"
+      style={{
+        bottom:
+          bottomOffset > 0
+            ? `${bottomOffset}px`
+            : 'max(1.25rem, env(safe-area-inset-bottom, 1.25rem))',
+        right: 'max(1.25rem, env(safe-area-inset-right, 1.25rem))',
+      }}
+      className={`fixed z-30 transition-all duration-200 ease-out ${
+        isModalOpen
+          ? 'opacity-0 pointer-events-none scale-75'
+          : 'opacity-100 pointer-events-auto scale-100'
+      }`}
+    >
       <a
         href={url}
         target="_blank"
@@ -32,13 +135,14 @@ export default function FloatingWhatsApp({ storeId, slug, storeName, whatsapp, c
               slug,
               event_type: 'whatsapp_click',
               source: getTrafficSource(),
-            })
+            }),
           }).catch(console.error)
         }}
         className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full
                    bg-[#25D366] hover:bg-[#20bd5a] text-white
                    shadow-[0_4px_20px_rgba(37,211,102,0.5)] hover:shadow-[0_6px_28px_rgba(37,211,102,0.7)]
-                   transition-all duration-200 transform hover:scale-105 active:scale-95 group"
+                   transition-all duration-200 transform hover:scale-105 active:scale-95 group
+                   focus:outline-hidden focus:ring-4 focus:ring-[#25D366]/40"
       >
         {/* Símbolo Oficial do WhatsApp (FontAwesome / Brand Asset) */}
         <svg
