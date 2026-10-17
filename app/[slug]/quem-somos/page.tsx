@@ -14,7 +14,7 @@ export default async function QuemSomosPage({ params }: { params: Promise<{ slug
 
   if (brand.slugs.includes('ll-multimarcas')) {
     return (
-      <InstitutionalLayout slug={slug} title="Quem Somos">
+      <InstitutionalLayout slug={slug} title="Quem Somos" showLocation={true}>
         <p>
           <strong>L&L MULTIMARCAS</strong> é a sua loja especializada em veículos seminovos selecionados, com
           parceria em todos os bancos e as melhores condições de aprovação do mercado, inclusive para autônomos.
@@ -29,7 +29,7 @@ export default async function QuemSomosPage({ params }: { params: Promise<{ slug
   }
 
   return (
-    <InstitutionalLayout slug={slug} title="Quem Somos">
+    <InstitutionalLayout slug={slug} title="Quem Somos" showLocation={true}>
       <p>
         <strong>MILHATICAR</strong> é a nova loja de veículos Novos e Seminovos localizada na{' '}
         <strong>AV. GOV. ADHEMAR DE BARROS, 2618 - BRAZ CUBAS - MOGI DAS CRUZES - SP</strong>.
