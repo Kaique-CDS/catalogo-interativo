@@ -12,6 +12,31 @@ import {
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
+function formatFriendlyChannel(raw: string): string {
+  const s = String(raw || '').trim().toLowerCase()
+  if (s === 'direct' || s === 'direto' || s === 'direto / não identificado') return 'Acesso Direto'
+  if (s === 'google' || s === 'google (orgânico)') return 'Google Busca'
+  if (s === 'google ads' || s === 'gads') return 'Google Ads'
+  if (s === 'instagram' || s === 'ig') return 'Instagram'
+  if (s === 'instagram (app)') return 'Instagram (app)'
+  if (s === 'instagram ads') return 'Instagram Ads'
+  if (s === 'facebook' || s === 'fb') return 'Facebook'
+  if (s === 'facebook (app)') return 'Facebook (app)'
+  if (s === 'facebook ads') return 'Facebook Ads'
+  if (s === 'meta (facebook/instagram)') return 'Meta (Face/Insta)'
+  if (s === 'whatsapp' || s === 'wa') return 'WhatsApp'
+  if (s === 'olx') return 'OLX'
+  if (s === 'webmotors') return 'Webmotors'
+  if (s === 'icarros') return 'iCarros'
+  if (s === 'linktree') return 'Linktree'
+  if (s === 'tiktok') return 'TikTok'
+  if (s === 'tiktok ads') return 'TikTok Ads'
+  if (s === 'bing') return 'Bing'
+  if (s === 'bing ads') return 'Bing Ads'
+  if (s === 'outros sites' || s === 'outros canais') return 'Outros sites'
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
+}
+
 export default function AdminDashboardPage({ params }: { params: Promise<{ slug: string }> }) {
   const [slug, setSlug] = useState<string>('')
   const [copiedSource, setCopiedSource] = useState<string | null>(null)
@@ -100,10 +125,13 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
 
   const totalSources = Object.values(analytics.sources).reduce((a, b) => a + b, 0)
   
-  // Lista dinâmica do Analytics (Top canais reais + Outros)
-  const trafficSources = analytics.trafficSourcesList && analytics.trafficSourcesList.length > 0
+  // Lista dinâmica do Analytics (Top canais reais + Outros) com nomes formatados
+  const trafficSources = (analytics.trafficSourcesList && analytics.trafficSourcesList.length > 0
     ? analytics.trafficSourcesList
-    : []
+    : []).map((item) => ({
+      ...item,
+      name: formatFriendlyChannel(item.name),
+    }))
 
   const leadingSource = trafficSources.length > 0 ? trafficSources[0] : null
 

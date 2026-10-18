@@ -145,6 +145,32 @@ export async function POST(req: NextRequest) {
   }
 }
 
+function formatChannelDisplayName(raw: string): string {
+  const s = String(raw || '').trim().toLowerCase()
+  if (s === 'direct' || s === 'direto' || s === 'direto / não identificado') return 'Acesso Direto'
+  if (s === 'google' || s === 'google (orgânico)') return 'Google Busca'
+  if (s === 'google ads' || s === 'gads') return 'Google Ads'
+  if (s === 'instagram' || s === 'ig') return 'Instagram'
+  if (s === 'instagram (app)') return 'Instagram (app)'
+  if (s === 'instagram ads') return 'Instagram Ads'
+  if (s === 'facebook' || s === 'fb') return 'Facebook'
+  if (s === 'facebook (app)') return 'Facebook (app)'
+  if (s === 'facebook ads') return 'Facebook Ads'
+  if (s === 'meta (facebook/instagram)') return 'Meta (Face/Insta)'
+  if (s === 'whatsapp' || s === 'wa') return 'WhatsApp'
+  if (s === 'olx') return 'OLX'
+  if (s === 'webmotors') return 'Webmotors'
+  if (s === 'icarros') return 'iCarros'
+  if (s === 'linktree') return 'Linktree'
+  if (s === 'tiktok') return 'TikTok'
+  if (s === 'tiktok ads') return 'TikTok Ads'
+  if (s === 'bing') return 'Bing'
+  if (s === 'bing ads') return 'Bing Ads'
+  if (s === 'outros sites' || s === 'outros canais') return 'Outros sites'
+  if (s.startsWith('ref:')) return `Site: ${s.replace('ref:', '')}`
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -192,12 +218,12 @@ export async function GET(req: NextRequest) {
     let whatsappClicks = 0
     let shares = 0
 
-    // Contagem por canal real de tráfego
+    // Contagem por canal real de tráfego com nomes amigáveis em pt-BR
     const rawSourcesCount: Record<string, number> = {}
     const vehicleStats: Record<string, { views: number; clicks: number }> = {}
 
     events?.forEach((ev) => {
-      const channel = ev.source || 'Direto / não identificado'
+      const channel = formatChannelDisplayName(ev.source || 'direct')
 
       if (ev.event_type === 'page_view') {
         totalViews++

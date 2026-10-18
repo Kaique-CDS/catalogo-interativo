@@ -3,10 +3,10 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone as PhoneIcon, MessageCircle, Clock } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import type { Store } from '@/lib/supabase/types'
 import { getTenantBrand } from '@/lib/tenants'
-import { getStorePhone, getStoreInstagram, getStoreWhatsApp } from '@/lib/store-contact'
+import { getStoreInstagram, getStoreWhatsApp } from '@/lib/store-contact'
 
 interface FooterProps {
   store: Store
@@ -16,7 +16,6 @@ interface FooterProps {
 
 export default function Footer({ store, variant = 'full', className = '' }: FooterProps) {
   const brand = getTenantBrand(store.slug)
-  const phoneInfo = getStorePhone(store)
   const instagramInfo = getStoreInstagram(store)
   const whatsappInfo = getStoreWhatsApp(store)
   const currentYear = new Date().getFullYear()
@@ -30,7 +29,7 @@ export default function Footer({ store, variant = 'full', className = '' }: Foot
   return (
     <footer className={`border-t border-surface/20 store-footer mt-auto ${className}`}>
       {variant === 'full' && (
-        <div className="container mx-auto px-4 max-w-7xl pt-12 pb-8 grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="container mx-auto px-4 max-w-7xl pt-12 pb-8 grid grid-cols-1 md:grid-cols-2 gap-10 justify-between">
           {/* Coluna 1 — Marca */}
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -51,7 +50,7 @@ export default function Footer({ store, variant = 'full', className = '' }: Foot
               )}
               <span className="font-heading text-white text-xl uppercase tracking-wide">{store.name}</span>
             </div>
-            {store.slogan && <p className="text-white/80 text-sm mb-4">{store.slogan}</p>}
+            {store.slogan && <p className="text-white/80 text-sm mb-4 max-w-md">{store.slogan}</p>}
             <div className="flex gap-3 mt-4">
               {instagramInfo.handle && (
                 <a
@@ -84,48 +83,8 @@ export default function Footer({ store, variant = 'full', className = '' }: Foot
             </div>
           </div>
 
-          {/* Coluna 2 — Contato */}
-          <div>
-            <h4 className="font-heading text-white text-lg uppercase tracking-wide mb-4">Contato</h4>
-            <ul className="space-y-3 text-sm text-white">
-              {(store.address || brand.address) && (
-                <li className="flex items-start gap-2.5 text-white">
-                  <MapPin className="h-4 w-4 text-brand shrink-0 mt-0.5" />
-                  <span className="text-white leading-relaxed">{store.address || brand.address}</span>
-                </li>
-              )}
-              {phoneInfo.display && (
-                <li className="flex items-center gap-2.5 text-white">
-                  <PhoneIcon className="h-4 w-4 text-brand shrink-0" />
-                  <a href={`tel:${phoneInfo.tel}`} className="text-white hover:text-white/80 transition-colors">
-                    {phoneInfo.label}: {phoneInfo.display}
-                  </a>
-                </li>
-              )}
-              {whatsappInfo.display && (
-                <li className="flex items-center gap-2.5 text-white">
-                  <MessageCircle className="h-4 w-4 text-[#25D366] shrink-0" />
-                  <a
-                    href={`https://wa.me/${whatsappInfo.number}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white hover:text-white/80 transition-colors"
-                  >
-                    WhatsApp: {whatsappInfo.display}
-                  </a>
-                </li>
-              )}
-              {store.opening_hours && (
-                <li className="flex items-start gap-2.5 text-white">
-                  <Clock className="h-4 w-4 text-brand shrink-0 mt-0.5" />
-                  <span className="text-white font-medium">{store.opening_hours}</span>
-                </li>
-              )}
-            </ul>
-          </div>
-
-          {/* Coluna 3 — Institucional */}
-          <div>
+          {/* Coluna 2 — Institucional */}
+          <div className="md:text-right">
             <h4 className="font-heading text-white text-lg uppercase tracking-wide mb-4">Institucional</h4>
             <ul className="space-y-3 text-sm text-white/90">
               <li><Link href={`/${store.slug}`} className="text-white/90 hover:text-white transition-colors">Nosso Estoque</Link></li>
