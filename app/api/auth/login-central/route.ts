@@ -3,6 +3,8 @@ import {
   authenticateLojista,
   setLojistaSessionCookie,
 } from '@/lib/auth-lojista'
+import { SUPER_ADMIN_COOKIE, signSuperAdminToken } from '@/lib/admin-auth'
+import { insertAuditLog } from '@/lib/supabase/erp-db'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -26,6 +28,45 @@ export async function POST(req: NextRequest) {
         { error: result.error || 'Credenciais inválidas.' },
         { status: 401 }
       )
+    }
+
+    // Se for o Super Admin da plataforma, autentica e direciona para /admin
+    if (result.isSuperAdmin) {
+      const username = result.user?.email || 'super_admin'
+      const token = await signSuperAdminToken(username)
+      const ip =
+        req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+        req.headers.get('x-real-ip') ||
+        '127.0.0.1'
+
+      try {
+        await insertAuditLog({
+          tipo: 'login',
+          criticidade: 'normal',
+          descricao: 'Super Admin fez login pelo acesso central (/entrar)',
+          ator: username,
+          ip,
+        })
+      } catch {}
+
+      const res = NextResponse.json(
+        {
+          success: true,
+          redirectTo: '/admin',
+          isSuperAdmin: true,
+        },
+        { status: 200 }
+      )
+
+      res.cookies.set(SUPER_ADMIN_COOKIE, token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 8, // 8 horas
+        secure: process.env.NODE_ENV === 'production',
+      })
+
+      return res
     }
 
     // Se possui exatamente 1 loja, já ativa o cookie e retorna a URL de destino

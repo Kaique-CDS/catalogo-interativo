@@ -144,10 +144,10 @@ export default function CentralLoginPage() {
                     <Lock className="h-5 w-5" />
                   </div>
                   <CardTitle className="text-2xl font-black text-zinc-900 dark:text-white">
-                    Acessar Painel do Lojista
+                    Entrar no Painel
                   </CardTitle>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                    Digite seu usuário ou e-mail cadastrado. O sistema identificará sua loja automaticamente.
+                    Digite seu usuário ou e-mail cadastrado. O sistema identificará seu painel automaticamente.
                   </p>
                 </CardHeader>
 
@@ -321,15 +321,6 @@ export default function CentralLoginPage() {
                   Fale com a gente
                 </a>
               </p>
-
-              <div className="pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60">
-                <Link
-                  href="/admin"
-                  className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-                >
-                  Acesso Restrito: Painel Super-Admin →
-                </Link>
-              </div>
             </div>
           </div>
         </main>

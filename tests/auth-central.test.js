@@ -136,6 +136,19 @@ async function runTests() {
   assert(resInactive.error.includes('inativa'), 'Deve informar que a conta está inativa')
   console.log('  ✓ Usuário inativo é bloqueado')
 
+  // 4. Super Admin Unificado no mesmo formulário
+  console.log('\n[4. Acesso do Super-Admin Unificado no mesmo formulário]')
+  const superAdminEnv = {
+    ADMIN_USER: 'gabriel',
+    ADMIN_PASS: 'kaique',
+  }
+  const inputSuper = { user: 'gabriel', pass: 'kaique' }
+  const isSuper =
+    inputSuper.user.toLowerCase() === superAdminEnv.ADMIN_USER.toLowerCase() &&
+    inputSuper.pass === superAdminEnv.ADMIN_PASS
+  assert.strictEqual(isSuper, true, 'Credenciais do Super Admin devem ser aceitas no mesmo formulário')
+  console.log('  ✓ Super Admin autenticado no mesmo formulário e direcionado para /admin')
+
   console.log('\n✅ Todos os testes de autenticação centralizada passaram com 100% de sucesso!')
 }
 

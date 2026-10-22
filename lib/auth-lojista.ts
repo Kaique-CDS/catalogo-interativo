@@ -33,6 +33,7 @@ export interface UserStoreOption {
 export interface CentralLoginResult {
   success: boolean
   error?: string
+  isSuperAdmin?: boolean
   user?: {
     id: string
     email: string
@@ -136,6 +137,19 @@ export async function authenticateLojista(
 
   if (!identifier || !password) {
     return { success: false, error: 'Informe seu usuário ou e-mail e sua senha.' }
+  }
+
+  // 0. Super Admin da plataforma
+  const superAdminUser = (process.env.ADMIN_USER || 'gabriel').trim().toLowerCase()
+  const superAdminPass = (process.env.ADMIN_PASS || 'kaique').trim()
+
+  if (identifier === superAdminUser && password === superAdminPass) {
+    return {
+      success: true,
+      isSuperAdmin: true,
+      user: { id: 'super-admin', email: `${superAdminUser}@vendazap.com`, name: 'Super Admin' },
+      redirectTo: '/admin',
+    }
   }
 
   const supabase = createAdminClient()
