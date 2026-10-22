@@ -9,6 +9,7 @@ import {
 import { type ContractClause, DEFAULT_SALE_CLAUSES } from '@/lib/contracts/utils'
 
 import { saveLocalContract, getLocalContracts } from '@/lib/contracts/cache'
+import { setupContractSigners } from '@/lib/contracts/signature-service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -225,14 +226,42 @@ export async function POST(req: NextRequest) {
     // Salva no cache local para resiliência e suporte a testes locais
     saveLocalContract(contractResult)
 
+    // Configura os signatários (Comprador e Loja) e gera tokens seguros de 32 bytes
+    let signersInfo = null
+    try {
+      const originUrl = req.nextUrl.origin || 'http://localhost:3000'
+      signersInfo = await setupContractSigners({
+        contractId: contractResult.id,
+        buyer: {
+          name: buyer.name,
+          cpf_cnpj: buyer.cpf_cnpj,
+          email: buyer.email || '',
+          phone: buyer.phone || '',
+        },
+        store: {
+          name: store.name,
+          contract_rep_nome: store.contract_rep_nome || undefined,
+          contract_rep_cpf: store.contract_rep_cpf || undefined,
+          contract_cnpj: store.contract_cnpj || undefined,
+          email: store.contract_email || store.email || undefined,
+          whatsapp: store.contract_phone || store.whatsapp || undefined,
+        },
+        slug,
+        originUrl,
+      })
+    } catch (sgnErr) {
+      console.warn('Erro ao configurar signatários do contrato:', sgnErr)
+    }
+
     // 3. REGISTRA EVENTO DE AUDITORIA
     try {
       await supabase.from('contract_events').insert([
         {
           contract_id: contractResult.id,
-          event_type: 'criado',
+          event_type: 'created',
           description: `Contrato de Venda Nº ${nextNumber} criado com sucesso por ${store.name}`,
-          ip_address: getRequestIp(req),
+          ip: getRequestIp(req),
+          user_agent: req.headers.get('user-agent') || 'Browser',
           metadata: {
             buyer_name: buyer.name,
             vehicle_plate: vehicle.plate,
@@ -249,6 +278,7 @@ export async function POST(req: NextRequest) {
       contract: contractResult,
       contract_id: contractResult.id,
       number: nextNumber,
+      signers: signersInfo,
     })
   } catch (err: any) {
     console.error('Error in POST /api/contracts:', err)

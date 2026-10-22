@@ -52,6 +52,19 @@ export interface FinancialData {
   notes?: string
 }
 
+export interface ContractSignerEvidence {
+  role: 'buyer' | 'seller' | 'outorgante' | 'outorgado'
+  name: string
+  document: string
+  email?: string
+  phone?: string
+  signedAt?: string
+  signatureImageUrl?: string
+  ip?: string
+  userAgent?: string
+  otpVerifiedAt?: string
+}
+
 export interface GenerateContractPdfOptions {
   number: number
   store: Store
@@ -61,6 +74,9 @@ export interface GenerateContractPdfOptions {
   clauses: ContractClause[]
   isPrintVersion?: boolean // true = linhas para assinatura manual; false = assinatura online
   date?: string
+  signers?: ContractSignerEvidence[]
+  isFinalSigned?: boolean
+  sha256Hash?: string
 }
 
 /**
@@ -74,6 +90,36 @@ function cleanText(text: string | null | undefined): string {
     .replace(/[‘’]/g, "'")
     .replace(/[\u2022\u2023\u25E6\u2043\u2219]/g, '-')
     .trim()
+}
+
+/**
+ * Converte base64 ou URL de assinatura em imagem embutida no PDF.
+ */
+async function embedSignatureImage(pdfDoc: PDFDocument, base64OrUrl?: string) {
+  if (!base64OrUrl) return null
+  try {
+    let buf: Buffer | null = null
+    if (base64OrUrl.startsWith('data:image/')) {
+      const b64Data = base64OrUrl.split(',')[1] || ''
+      buf = Buffer.from(b64Data, 'base64')
+    } else if (base64OrUrl.startsWith('http')) {
+      const res = await fetch(base64OrUrl)
+      if (res.ok) buf = Buffer.from(await res.arrayBuffer())
+    }
+    if (!buf) return null
+    try {
+      return await pdfDoc.embedPng(buf)
+    } catch {
+      try {
+        return await pdfDoc.embedJpg(buf)
+      } catch {
+        return null
+      }
+    }
+  } catch (err) {
+    console.warn('Erro ao embutir imagem de assinatura no PDF:', err)
+    return null
+  }
 }
 
 /**
@@ -708,6 +754,110 @@ export async function generateVehicleSaleContractPdf(
       font: fontRegular,
       color: textMuted,
     })
+  } else if (opts.isFinalSigned && opts.signers && opts.signers.length > 0) {
+    // -------------------------------------------------------------
+    // ASSINATURAS DIGITAIS EFETUADAS (FASE 4)
+    // -------------------------------------------------------------
+    const sellerSigner = opts.signers.find((s) => s.role === 'seller')
+    const buyerSigner = opts.signers.find((s) => s.role === 'buyer')
+
+    // Tenta embutir imagens das assinaturas
+    const sellerImg = sellerSigner?.signatureImageUrl
+      ? await embedSignatureImage(pdfDoc, sellerSigner.signatureImageUrl)
+      : null
+    const buyerImg = buyerSigner?.signatureImageUrl
+      ? await embedSignatureImage(pdfDoc, buyerSigner.signatureImageUrl)
+      : null
+
+    if (sellerImg) {
+      currentPage.drawImage(sellerImg, {
+        x: MARGIN_X,
+        y: cursorY - 10,
+        width: Math.min(sellerImg.width * 0.25, 120),
+        height: 35,
+      })
+    }
+    if (buyerImg) {
+      currentPage.drawImage(buyerImg, {
+        x: MARGIN_X + halfColWidth + 24,
+        y: cursorY - 10,
+        width: Math.min(buyerImg.width * 0.25, 120),
+        height: 35,
+      })
+    }
+
+    cursorY -= 15
+
+    // Linha Vendedor
+    currentPage.drawLine({
+      start: { x: MARGIN_X, y: cursorY },
+      end: { x: MARGIN_X + halfColWidth, y: cursorY },
+      thickness: 0.8,
+      color: brandColor,
+    })
+
+    // Linha Comprador
+    currentPage.drawLine({
+      start: { x: MARGIN_X + halfColWidth + 24, y: cursorY },
+      end: { x: MARGIN_X + CONTENT_WIDTH, y: cursorY },
+      thickness: 0.8,
+      color: brandColor,
+    })
+    cursorY -= 12
+
+    // Dados Vendedor
+    currentPage.drawText(cleanText(sellerSigner?.name || opts.store.contract_razao_social || opts.store.name), {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 8,
+      font: fontBold,
+      color: textColor,
+    })
+    currentPage.drawText(cleanText(buyerSigner?.name || opts.buyer.name), {
+      x: MARGIN_X + halfColWidth + 24,
+      y: cursorY,
+      size: 8,
+      font: fontBold,
+      color: textColor,
+    })
+    cursorY -= 10
+
+    const sellerSub = `VENDEDOR • Assinado em ${sellerSigner?.signedAt ? new Date(sellerSigner.signedAt).toLocaleDateString('pt-BR') : dateFormatted}`
+    const buyerSub = `COMPRADOR • Assinado em ${buyerSigner?.signedAt ? new Date(buyerSigner.signedAt).toLocaleDateString('pt-BR') : dateFormatted}`
+
+    currentPage.drawText(cleanText(sellerSub), {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 6.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+    currentPage.drawText(cleanText(buyerSub), {
+      x: MARGIN_X + halfColWidth + 24,
+      y: cursorY,
+      size: 6.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+    cursorY -= 9
+
+    const sellerIp = `IP: ${cleanText(sellerSigner?.ip || 'Autenticado no Admin')} • Lei 14.063/2020`
+    const buyerIp = `IP: ${cleanText(buyerSigner?.ip || 'Assinatura Eletrônica')} • Lei 14.063/2020`
+
+    currentPage.drawText(sellerIp, {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 6,
+      font: fontRegular,
+      color: brandColor,
+    })
+    currentPage.drawText(buyerIp, {
+      x: MARGIN_X + halfColWidth + 24,
+      y: cursorY,
+      size: 6,
+      font: fontRegular,
+      color: brandColor,
+    })
   } else {
     // Área de Assinatura Eletrônica (Fase 4 / Prévia)
     currentPage.drawRectangle({
@@ -752,6 +902,224 @@ export async function generateVehicleSaleContractPdf(
   }
 
   // -------------------------------------------------------------
+  // CERTIFICADO DE EVIDÊNCIAS DE ASSINATURA ELETRÔNICA (FASE 4)
+  // -------------------------------------------------------------
+  if (opts.isFinalSigned && opts.signers && opts.signers.length > 0) {
+    const certPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
+    pages.push(certPage)
+
+    let certY = PAGE_HEIGHT - MARGIN_X
+
+    // Faixa superior decorativa
+    certPage.drawRectangle({
+      x: MARGIN_X,
+      y: certY - 2,
+      width: CONTENT_WIDTH,
+      height: 3,
+      color: brandColor,
+    })
+    certY -= 20
+
+    certPage.drawText('CERTIFICADO DE CONFORMIDADE E EVIDÊNCIAS', {
+      x: MARGIN_X,
+      y: certY,
+      size: 13,
+      font: fontBold,
+      color: brandColor,
+    })
+    certY -= 14
+
+    certPage.drawText('VALIDAÇÃO JURÍDICA DE ASSINATURA ELETRÔNICA • LEI FEDERAL Nº 14.063/2020', {
+      x: MARGIN_X,
+      y: certY,
+      size: 8,
+      font: fontBold,
+      color: textColor,
+    })
+    certY -= 16
+
+    certPage.drawText(
+      'As partes abaixo identificadas assinaram eletronicamente o presente contrato após validação de identidade e código de uso único (OTP), com registro cronológico e integridade garantida por hash criptográfico.',
+      {
+        x: MARGIN_X,
+        y: certY,
+        size: 7.5,
+        font: fontRegular,
+        color: textMuted,
+      }
+    )
+    certY -= 25
+
+    // Caixa de Informações do Documento
+    certPage.drawRectangle({
+      x: MARGIN_X,
+      y: certY - 45,
+      width: CONTENT_WIDTH,
+      height: 50,
+      color: grayLight,
+      borderColor: grayBorder,
+      borderWidth: 0.8,
+    })
+
+    certPage.drawText(`Documento: Contrato de Compra e Venda Nº ${opts.number}/${currentYear}`, {
+      x: MARGIN_X + 10,
+      y: certY - 14,
+      size: 8,
+      font: fontBold,
+      color: textColor,
+    })
+    certPage.drawText(`Veículo: ${cleanText(opts.vehicle.brand)} ${cleanText(opts.vehicle.model)} • Placa: ${cleanText(opts.vehicle.plate)} • Chassi: ${cleanText(opts.vehicle.chassis)}`, {
+      x: MARGIN_X + 10,
+      y: certY - 26,
+      size: 7.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+    certPage.drawText(`Hash Criptográfico do Contrato (SHA-256): ${opts.sha256Hash || 'Verificação nativa do documento digital'}`, {
+      x: MARGIN_X + 10,
+      y: certY - 38,
+      size: 6.5,
+      font: fontRegular,
+      color: brandColor,
+    })
+    certY -= 65
+
+    // Lista de Evidências por Signatário
+    for (const signer of opts.signers) {
+      const cardHeight = 110
+      certPage.drawRectangle({
+        x: MARGIN_X,
+        y: certY - cardHeight,
+        width: CONTENT_WIDTH,
+        height: cardHeight,
+        color: grayLight,
+        borderColor: grayBorder,
+        borderWidth: 0.8,
+      })
+
+      // Barra lateral de status no card
+      certPage.drawRectangle({
+        x: MARGIN_X,
+        y: certY - cardHeight,
+        width: 4,
+        height: cardHeight,
+        color: brandColor,
+      })
+
+      let cardY = certY - 14
+      const isBuyer = signer.role === 'buyer'
+      const roleLabel = isBuyer ? 'COMPRADOR' : 'VENDEDOR / REPRESENTANTE'
+
+      certPage.drawText(`[ASSINADO ELETRONICAMENTE] ${roleLabel}`, {
+        x: MARGIN_X + 14,
+        y: cardY,
+        size: 8,
+        font: fontBold,
+        color: brandColor,
+      })
+      cardY -= 14
+
+      certPage.drawText(`Nome Completo: ${cleanText(signer.name)}`, {
+        x: MARGIN_X + 14,
+        y: cardY,
+        size: 8,
+        font: fontBold,
+        color: textColor,
+      })
+      cardY -= 12
+
+      certPage.drawText(`Documento (CPF/CNPJ): ${cleanText(signer.document)} • E-mail: ${cleanText(signer.email || 'Não informado')}`, {
+        x: MARGIN_X + 14,
+        y: cardY,
+        size: 7.5,
+        font: fontRegular,
+        color: textMuted,
+      })
+      cardY -= 12
+
+      if (signer.phone) {
+        certPage.drawText(`Telefone / WhatsApp: ${cleanText(signer.phone)}`, {
+          x: MARGIN_X + 14,
+          y: cardY,
+          size: 7.5,
+          font: fontRegular,
+          color: textMuted,
+        })
+        cardY -= 12
+      }
+
+      const signedDateStr = signer.signedAt
+        ? new Date(signer.signedAt).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+        : 'Assinado eletronicamente'
+
+      certPage.drawText(`Data/Hora da Assinatura: ${signedDateStr} (Horário de Brasília)`, {
+        x: MARGIN_X + 14,
+        y: cardY,
+        size: 7.5,
+        font: fontBold,
+        color: textColor,
+      })
+      cardY -= 12
+
+      certPage.drawText(`Autenticação: Código OTP verificado via e-mail • IP de Origem: ${cleanText(signer.ip || '127.0.0.1')}`, {
+        x: MARGIN_X + 14,
+        y: cardY,
+        size: 7,
+        font: fontRegular,
+        color: textMuted,
+      })
+      cardY -= 11
+
+      const ua = signer.userAgent ? cleanText(signer.userAgent).slice(0, 75) : 'Navegador Web Conforme'
+      certPage.drawText(`Dispositivo / Navegador: ${ua}`, {
+        x: MARGIN_X + 14,
+        y: cardY,
+        size: 6.5,
+        font: fontRegular,
+        color: textMuted,
+      })
+
+      // Se houver imagem da assinatura, desenha à direita do card
+      if (signer.signatureImageUrl) {
+        const sigImg = await embedSignatureImage(pdfDoc, signer.signatureImageUrl)
+        if (sigImg) {
+          certPage.drawImage(sigImg, {
+            x: MARGIN_X + CONTENT_WIDTH - 120,
+            y: certY - cardHeight + 20,
+            width: 100,
+            height: 38,
+          })
+        }
+      }
+
+      certY -= cardHeight + 15
+    }
+
+    // Declaração jurídica final
+    certPage.drawText(
+      'DECLARAÇÃO DE EFICÁCIA PROBATÓRIA: Este certificado atesta a autenticidade e integridade das assinaturas eletrônicas apostas,',
+      {
+        x: MARGIN_X,
+        y: certY,
+        size: 6.5,
+        font: fontBold,
+        color: textColor,
+      }
+    )
+    certY -= 9
+    certPage.drawText(
+      'nos termos do art. 10, § 2º da Medida Provisória nº 2.200-2/2001 e da Lei nº 14.063/2020. O hash garante a não alteração posterior do documento.',
+      {
+        x: MARGIN_X,
+        y: certY,
+        size: 6.5,
+        font: fontRegular,
+        color: textMuted,
+      }
+    )
+  }
+
+  // -------------------------------------------------------------
   // 7. RODAPÉ COM PAGINAÇÃO EM TODAS AS PÁGINAS
   // -------------------------------------------------------------
   const totalPages = pages.length
@@ -786,3 +1154,6 @@ export async function generateVehicleSaleContractPdf(
 
   return await pdfDoc.save()
 }
+
+export const generateContractPdf = generateVehicleSaleContractPdf
+

@@ -60,7 +60,24 @@ export async function GET(
       store = getTenantDemoStore('milhaticar')
     }
 
+    const isSigned =
+      searchParams.get('signed') === 'true' ||
+      (!isPrint && contract.status === 'signed')
+
     // 2. Gera os bytes do PDF no servidor
+    const signersList = (contract.signers || []).map((s: any) => ({
+      role: s.role,
+      name: s.name,
+      document: s.document,
+      email: s.email,
+      phone: s.phone,
+      signedAt: s.signed_at || s.signedAt,
+      signatureImageUrl: s.signature_image_url || s.signatureImageUrl,
+      ip: s.ip,
+      userAgent: s.user_agent || s.userAgent,
+      otpVerifiedAt: s.otp_verified_at || s.otpVerifiedAt,
+    }))
+
     const pdfBytes = await generateVehicleSaleContractPdf({
       number: contract.number,
       store,
@@ -69,9 +86,12 @@ export async function GET(
       financial: contract.financial_data as any,
       clauses: contract.clauses as any,
       isPrintVersion: isPrint,
+      isFinalSigned: isSigned,
+      signers: signersList,
+      sha256Hash: contract.pdf_sha256,
     })
 
-    const filename = `Contrato-Venda-N${contract.number}-${isPrint ? 'Impressao' : 'Digital'}.pdf`
+    const filename = `Contrato-Venda-N${contract.number}-${isPrint ? 'Impressao' : isSigned ? 'Assinado' : 'Digital'}.pdf`
     const disposition = isDownload ? `attachment; filename="${filename}"` : `inline; filename="${filename}"`
 
     const buffer = Buffer.from(pdfBytes)
