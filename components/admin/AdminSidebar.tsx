@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Lightbulb, FileSignature } from 'lucide-react'
+import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Ticket, FileSignature } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -28,7 +28,7 @@ const navItems = (slug: string, contractsEnabled: boolean = false) => [
   { href: `/${slug}/admin/estoque`,       label: 'Estoque',       icon: Car },
   ...(contractsEnabled ? [{ href: `/${slug}/admin/contratos`, label: 'Contratos', icon: FileSignature }] : []),
   { href: `/${slug}/admin/configuracoes`, label: 'Configurações', icon: Settings },
-  { href: `/${slug}/admin/melhorias`,     label: 'Melhorias',     icon: Lightbulb },
+  { href: `/${slug}/admin/melhorias`,     label: 'Tickets',       icon: Ticket },
 ]
 
 export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {

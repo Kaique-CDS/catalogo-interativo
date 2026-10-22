@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Users, CreditCard, Settings, LogOut, Bell, Search, Sparkles, Menu, X, Activity, Lightbulb } from 'lucide-react'
+import { LayoutDashboard, Users, CreditCard, Settings, LogOut, Bell, Search, Sparkles, Menu, X, Activity, Ticket } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     { href: '/admin/financeiro', label: 'Financeiro', icon: CreditCard },
     { href: '/admin/auditoria', label: 'Auditoria de Logs', icon: Activity },
     { href: '/admin/configuracoes', label: 'Configurações', icon: Settings },
-    { href: '/admin/melhorias', label: 'Melhorias', icon: Lightbulb },
+    { href: '/admin/melhorias', label: 'Tickets', icon: Ticket },
   ]
 
   if (pathname === '/admin/login') {
