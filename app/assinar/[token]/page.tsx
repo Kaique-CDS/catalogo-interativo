@@ -168,11 +168,13 @@ export default function PublicSigningPage() {
     if (!ctx) return
 
     const rect = canvas.getBoundingClientRect()
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const clientX = 'touches' in e && e.touches.length > 0 ? e.touches[0].clientX : (e as React.MouseEvent).clientX
+    const clientY = 'touches' in e && e.touches.length > 0 ? e.touches[0].clientY : (e as React.MouseEvent).clientY
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
 
     ctx.beginPath()
-    ctx.moveTo(clientX - rect.left, clientY - rect.top)
+    ctx.moveTo((clientX - rect.left) * scaleX, (clientY - rect.top) * scaleY)
     setIsDrawing(true)
   }
 
@@ -184,14 +186,16 @@ export default function PublicSigningPage() {
     if (!ctx) return
 
     const rect = canvas.getBoundingClientRect()
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const clientX = 'touches' in e && e.touches.length > 0 ? e.touches[0].clientX : (e as React.MouseEvent).clientX
+    const clientY = 'touches' in e && e.touches.length > 0 ? e.touches[0].clientY : (e as React.MouseEvent).clientY
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
 
-    ctx.lineWidth = 2.5
+    ctx.lineWidth = 3
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     ctx.strokeStyle = '#0f172a'
-    ctx.lineTo(clientX - rect.left, clientY - rect.top)
+    ctx.lineTo((clientX - rect.left) * scaleX, (clientY - rect.top) * scaleY)
     ctx.stroke()
     setHasSignature(true)
   }
@@ -549,10 +553,11 @@ export default function PublicSigningPage() {
                     onMouseMove={draw}
                     onMouseUp={stopDrawing}
                     onMouseLeave={stopDrawing}
-                    onTouchStart={startDrawing}
-                    onTouchMove={draw}
-                    onTouchEnd={stopDrawing}
-                    className="w-full h-44 cursor-crosshair block"
+                    onTouchStart={(e) => { e.preventDefault(); startDrawing(e) }}
+                    onTouchMove={(e) => { e.preventDefault(); draw(e) }}
+                    onTouchEnd={(e) => { e.preventDefault(); stopDrawing() }}
+                    className="w-full h-44 cursor-crosshair block touch-none"
+                    style={{ touchAction: 'none' }}
                   />
                   {!hasSignature && (
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-xs text-zinc-400 font-medium">

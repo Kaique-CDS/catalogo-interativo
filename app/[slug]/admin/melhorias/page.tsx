@@ -346,7 +346,7 @@ export default function ClientTicketsPage() {
               <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
                 Tipo do Chamado *
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {(['melhoria', 'problema', 'duvida'] as TicketType[]).map((t) => {
                   const cfg = TYPE_CONFIG[t]
                   const Icon = cfg.icon
@@ -357,14 +357,14 @@ export default function ClientTicketsPage() {
                       type="button"
                       onClick={() => setType(t)}
                       className={cn(
-                        'flex items-center justify-center gap-2 p-2.5 rounded-xl text-xs font-bold border transition-all',
+                        'flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 p-2 sm:p-2.5 min-h-[44px] rounded-xl text-[11px] sm:text-xs font-bold border transition-all text-center',
                         isSelected
                           ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900 shadow-xs'
                           : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                       )}
                     >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span>{cfg.label}</span>
+                      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                      <span className="truncate max-w-full">{cfg.label}</span>
                     </button>
                   )
                 })}
@@ -429,9 +429,10 @@ export default function ClientTicketsPage() {
                       <button
                         type="button"
                         onClick={() => removePrint(idx)}
-                        className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-colors"
+                        className="absolute top-1.5 right-1.5 h-8 w-8 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-colors shadow-sm"
+                        aria-label="Remover print"
                       >
-                        <X className="h-3.5 w-3.5" />
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   ))}

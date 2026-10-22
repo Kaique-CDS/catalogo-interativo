@@ -48,22 +48,22 @@ export default function LandingPage() {
             <a href="#planos" className="hover:text-zinc-900 dark:hover:text-white transition">Planos</a>
             <a href="#segmentos" className="hover:text-zinc-900 dark:hover:text-white transition">Segmentos</a>
           </nav>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <Link href="/entrar">
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl text-xs sm:text-sm font-semibold border-zinc-200 dark:border-zinc-700 gap-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-xl text-xs sm:text-sm font-semibold border-zinc-200 dark:border-zinc-700 gap-1 sm:gap-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 px-2 sm:px-3 h-9 sm:h-9"
               >
-                <LogIn className="h-3.5 w-3.5" /> Entrar
+                <LogIn className="h-3.5 w-3.5" /> <span>Entrar</span>
               </Button>
             </Link>
             <Link href="/loja-exemplo">
               <Button variant="ghost" size="sm" className="hidden sm:flex text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">Demo</Button>
             </Link>
             <ThemeToggle />
-            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs text-xs sm:text-sm px-3 sm:px-4" onClick={() => setShowDemoModal(true)}>
-              Assinar Agora
+            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs text-xs sm:text-sm px-2.5 sm:px-4" onClick={() => setShowDemoModal(true)}>
+              <span>Assinar<span className="hidden min-[400px]:inline"> Agora</span></span>
             </Button>
           </div>
         </div>

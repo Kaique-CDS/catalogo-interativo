@@ -126,8 +126,8 @@ export default function CentralLoginPage() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Link href="/">
-              <Button variant="ghost" size="sm" className="text-xs text-zinc-600 dark:text-zinc-400 rounded-xl">
-                Voltar à Home
+              <Button variant="ghost" size="sm" className="text-xs text-zinc-600 dark:text-zinc-400 rounded-xl px-2.5 sm:px-3">
+                <span>Voltar<span className="hidden sm:inline"> à Home</span></span>
               </Button>
             </Link>
           </div>
@@ -210,7 +210,8 @@ export default function CentralLoginPage() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                          className="absolute right-0 top-1/2 -translate-y-1/2 h-11 w-11 flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                          aria-label={showPassword ? 'Ocultar senha' : 'Ver senha'}
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>

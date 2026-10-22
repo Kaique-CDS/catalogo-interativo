@@ -82,7 +82,7 @@ export default function InterestOptionsSheet({ vehicle, store, onClose, onOpenFi
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="h-11 w-11 flex items-center justify-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Fechar"
           >
             <X className="h-5 w-5 text-zinc-500" />

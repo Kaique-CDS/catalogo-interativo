@@ -98,7 +98,7 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
         <div className="flex items-center gap-3 px-5 py-4 border-b dark:border-zinc-800 flex-shrink-0">
           <button
             onClick={onBack}
-            className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="h-11 w-11 flex items-center justify-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Voltar"
           >
             <ChevronLeft className="h-5 w-5 text-zinc-500" />
@@ -111,7 +111,7 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="h-11 w-11 flex items-center justify-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Fechar"
           >
             <X className="h-5 w-5 text-zinc-500" />
@@ -156,7 +156,7 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
               <select
                 id="cnh"
                 {...register('cnh')}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Selecione</option>
                 <option value="Sim">Sim</option>
@@ -184,7 +184,7 @@ export default function FinancingModal({ vehicle, store, hasTradeIn, onClose, on
               <select
                 id="banco"
                 {...register('banco')}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Selecione...</option>
                 {BANKS.map((b) => (

@@ -607,13 +607,13 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16 font-sans">
+    <div className="space-y-6 max-w-4xl mx-auto pb-28 sm:pb-20 font-sans">
       {/* ── BARRA SUPERIOR DE PROGRESSO DO WIZARD ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-surface pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Link href={`/${slug}/admin/contratos`}>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground" aria-label="Voltar aos contratos">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
             </Link>
@@ -621,12 +621,12 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
               Novo Contrato de Venda de Veículo
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground ml-10">
+          <p className="text-xs text-muted-foreground ml-2 sm:ml-12">
             Passo {currentStep} de 5: {STEPS[currentStep - 1].title} – {STEPS[currentStep - 1].desc}
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+        <div className="flex items-center gap-1.5 self-start sm:self-auto overflow-x-auto max-w-full pb-1 scrollbar-hide">
           {STEPS.map((s) => {
             const Icon = s.icon
             const isCompleted = currentStep > s.id
@@ -641,7 +641,7 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                     setCurrentStep(s.id)
                   }
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center justify-center gap-1.5 px-3 h-11 min-w-[44px] rounded-xl text-xs font-semibold transition-all shrink-0 ${
                   isCurrent
                     ? 'bg-brand text-white shadow-xs'
                     : isCompleted
@@ -649,7 +649,7 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                     : 'bg-surface-2 text-muted-foreground hover:text-foreground opacity-60'
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-4 w-4" />
                 <span className="hidden md:inline">{s.title}</span>
               </button>
             )
@@ -1626,14 +1626,14 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
         </div>
       )}
 
-      {/* ── BOTÕES DE NAVEGAÇÃO ENTRE PASSOS (ANTERIOR / PRÓXIMO) ── */}
-      <div className="flex items-center justify-between pt-4 border-t border-surface">
+      {/* ── BOTÕES DE NAVEGAÇÃO ENTRE PASSOS (ANTERIOR / PRÓXIMO - STICKY NO MOBILE) ── */}
+      <div className="sticky bottom-0 z-30 bg-surface-1/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 py-3 sm:py-4 border-t border-surface pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center justify-between shadow-lg sm:shadow-none">
         <Button
           type="button"
           variant="outline"
           onClick={handlePrev}
           disabled={currentStep === 1 || generating}
-          className="rounded-xl border-surface hover:bg-surface-2 text-xs gap-1.5"
+          className="rounded-xl border-surface hover:bg-surface-2 text-xs sm:text-sm h-11 px-4 gap-1.5"
         >
           <ChevronLeft className="h-4 w-4" /> Anterior
         </Button>
@@ -1642,17 +1642,17 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
           <Button
             type="button"
             onClick={handleNext}
-            className="btn-brand rounded-xl text-xs font-bold gap-1.5 px-6"
+            className="btn-brand rounded-xl text-xs sm:text-sm font-bold gap-1.5 px-6 h-11"
           >
             Próximo <ChevronRight className="h-4 w-4" />
           </Button>
         )}
       </div>
 
-      {/* ── MODAL: PUXAR DO ESTOQUE DA LOJA ── */}
+      {/* ── MODAL: PUXAR DO ESTOQUE DA LOJA (BOTTOM SHEET NO MOBILE) ── */}
       {stockModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-surface-1 border border-surface rounded-2xl p-5 w-full max-w-lg shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-surface-1 border border-surface rounded-t-3xl sm:rounded-2xl p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-5 w-full max-w-lg shadow-2xl space-y-4 max-h-[88vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-surface pb-3">
               <div className="flex items-center gap-2">
                 <Car className="h-5 w-5 text-brand" />
@@ -1661,9 +1661,10 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
               <button
                 type="button"
                 onClick={() => setStockModalOpen(false)}
-                className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+                className="h-11 w-11 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground"
+                aria-label="Fechar"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 

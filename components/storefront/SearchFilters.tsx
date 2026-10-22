@@ -180,7 +180,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             <div>
               <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block tracking-wider">Marca</label>
               <Select value={brand} onValueChange={(v) => { setBrand(v); applyFilters() }}>
-                <SelectTrigger className="h-9 text-xs rounded-[10px] bg-surface-3 border-surface text-foreground focus:ring-brand focus:border-brand">
+                <SelectTrigger className="h-11 text-xs rounded-[10px] bg-surface-3 border-surface text-foreground focus:ring-brand focus:border-brand">
                   <SelectValue placeholder="Todas" />
                 </SelectTrigger>
                 <SelectContent className="bg-surface-2 border-surface text-foreground">
@@ -193,7 +193,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             <div>
               <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1.5 block tracking-wider">Ano</label>
               <Select value={year} onValueChange={(v) => { setYear(v); applyFilters() }}>
-                <SelectTrigger className="h-9 text-xs rounded-[10px] bg-surface-3 border-surface text-foreground focus:ring-brand focus:border-brand">
+                <SelectTrigger className="h-11 text-xs rounded-[10px] bg-surface-3 border-surface text-foreground focus:ring-brand focus:border-brand">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent className="bg-surface-2 border-surface text-foreground">
@@ -206,7 +206,7 @@ export default function SearchFilters({ brands, years, searchParams }: Props) {
             <div className="col-span-2 flex items-end">
               <button
                 onClick={applyFilters}
-                className="btn-brand w-full h-9 text-xs"
+                className="btn-brand w-full h-11 text-xs font-bold"
               >
                 Aplicar Filtros
               </button>

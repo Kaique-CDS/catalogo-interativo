@@ -640,7 +640,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenShareModal(c)}
-                        className={`text-xs rounded-xl h-9 gap-1.5 font-bold ${
+                        className={`text-xs rounded-xl h-11 px-3.5 gap-1.5 font-bold ${
                           isSigned
                             ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10'
                             : 'border-brand/40 text-brand bg-brand/5 hover:bg-brand/10'
@@ -673,7 +673,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-2"
+                          className="h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-2"
                         >
                           <Printer className="h-4 w-4" />
                         </Button>
@@ -685,7 +685,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                         size="icon"
                         onClick={() => handleDeleteContract(c)}
                         disabled={deletingId === c.id}
-                        className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        className="h-11 w-11 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         title="Cancelar Contrato"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -701,8 +701,8 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
 
       {/* ── MODAL: ASSINATURAS & COMPARTILHAMENTO (FASE 4) ── */}
       {shareModalContract && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-surface-1 border border-surface rounded-2xl p-5 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] flex flex-col animate-in fade-in-50 zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-surface-1 border border-surface rounded-t-3xl sm:rounded-2xl p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-5 w-full max-w-lg shadow-2xl space-y-4 max-h-[90vh] flex flex-col animate-in fade-in-50 zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-surface pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="h-8 w-8 rounded-xl bg-brand/15 text-brand flex items-center justify-center">
@@ -786,7 +786,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                           variant="outline"
                           size="sm"
                           onClick={() => handleCopyLink(getBuyerSigningUrl())}
-                          className="text-xs rounded-xl h-8 gap-1.5 flex-1 border-surface hover:bg-surface-2"
+                          className="text-xs sm:text-sm rounded-xl h-11 gap-1.5 flex-1 border-surface hover:bg-surface-2"
                         >
                           {copiedUrl ? (
                             <>
@@ -803,7 +803,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                           type="button"
                           size="sm"
                           onClick={() => handleSendWhatsApp(shareModalContract, getBuyerSigningUrl())}
-                          className="text-xs rounded-xl h-8 gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold"
+                          className="text-xs sm:text-sm rounded-xl h-11 gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold"
                         >
                           <MessageCircle className="h-3.5 w-3.5" /> Enviar por WhatsApp
                         </Button>

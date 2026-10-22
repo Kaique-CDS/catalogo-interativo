@@ -543,7 +543,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="max-w-4xl mx-auto space-y-6 pb-28 sm:pb-20">
       {/* Barra de Progresso Mobile-First */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs">
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -1565,14 +1565,14 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         )}
       </div>
 
-      {/* Botões de Navegação Inferiores */}
+      {/* Botões de Navegação Inferiores (Sticky Bottom Bar no Mobile) */}
       {!generatedPoa && (
-        <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="sticky bottom-0 z-30 bg-surface-1/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 py-3 sm:py-4 border-t border-zinc-200 dark:border-zinc-800 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center justify-between shadow-lg sm:shadow-none">
           <Button
             type="button"
             variant="outline"
             onClick={currentStep === 1 ? () => router.push(`/${slug}/admin/contratos`) : handleBack}
-            className="rounded-xl text-xs gap-1.5 dark:border-zinc-700"
+            className="rounded-xl text-xs sm:text-sm h-11 px-4 gap-1.5 dark:border-zinc-700"
           >
             <ChevronLeft className="h-4 w-4" />
             {currentStep === 1 ? 'Cancelar' : 'Voltar'}
@@ -1582,7 +1582,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
             <Button
               type="button"
               onClick={handleNext}
-              className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 rounded-xl text-xs font-bold gap-1.5"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 rounded-xl text-xs sm:text-sm font-bold gap-1.5 h-11 px-6"
             >
               Avançar
               <ChevronRight className="h-4 w-4" />
@@ -1592,7 +1592,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
               type="button"
               onClick={handleGeneratePoa}
               disabled={generating}
-              className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 rounded-xl text-xs font-bold gap-1.5"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 rounded-xl text-xs sm:text-sm font-bold gap-1.5 h-11 px-6"
             >
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Scale className="h-4 w-4" />}
               Concluir e Emitir
@@ -1601,10 +1601,10 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         </div>
       )}
 
-      {/* MODAL: SELEÇÃO DE VEÍCULO DO ESTOQUE */}
+      {/* MODAL: SELEÇÃO DE VEÍCULO DO ESTOQUE (BOTTOM SHEET NO MOBILE) */}
       {stockModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-lg w-full max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[85vh] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-4 flex flex-col shadow-2xl overflow-hidden">
             <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Car className="h-4 w-4 text-indigo-500" />
@@ -1612,9 +1612,10 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
               </h3>
               <button
                 onClick={() => setStockModalOpen(false)}
-                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-white"
+                className="h-11 w-11 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-white"
+                aria-label="Fechar"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
             <div className="p-4 border-b border-zinc-100 dark:border-zinc-800">

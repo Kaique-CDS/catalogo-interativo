@@ -248,9 +248,67 @@ export default function FinanceiroPage() {
         </div>
       </div>
 
-      {/* Invoice Table */}
+      {/* Invoice Table / Mobile Cards */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Cards */}
+        <div className="md:hidden divide-y divide-zinc-100 dark:divide-zinc-800 p-3 space-y-3">
+          {loading ? (
+            <div className="text-center py-10 text-xs text-zinc-400">
+              Carregando faturas...
+            </div>
+          ) : filteredFaturas.length === 0 ? (
+            <div className="text-center py-10 text-xs text-zinc-400">
+              Nenhuma fatura encontrada para este filtro.
+            </div>
+          ) : (
+            filteredFaturas.map((inv) => (
+              <div key={inv.id} className="pt-3 first:pt-0 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-bold text-zinc-900 dark:text-white text-sm">
+                      {inv.clientes?.nome_loja || 'Loja'}
+                    </p>
+                    <p className="text-[11px] text-zinc-400">{inv.clientes?.email || ''}</p>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase ${
+                      statusStyle[inv.status] || statusStyle.pendente
+                    }`}
+                  >
+                    {statusLabel[inv.status] || inv.status}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className="text-zinc-500 font-medium">Plano: <strong className="text-zinc-700 dark:text-zinc-300 uppercase">{inv.clientes?.plano || '-'}</strong></span>
+                  <span className="font-black text-sm text-zinc-900 dark:text-white">
+                    R$ {Number(inv.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className="text-zinc-500">
+                    Vencimento: {inv.vencimento ? new Date(inv.vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
+                  </span>
+                  <select
+                    disabled={updatingId === inv.id}
+                    value={inv.status}
+                    onChange={(e) => handleStatusChange(inv.id, e.target.value as FaturaStatus)}
+                    className="h-11 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 text-xs font-semibold text-zinc-800 dark:text-zinc-200 outline-none"
+                  >
+                    <option value="pago">Pago</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="atrasado">Em Atraso</option>
+                    <option value="trial">Trial</option>
+                  </select>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 text-[11px] font-bold uppercase tracking-wider">
               <tr>

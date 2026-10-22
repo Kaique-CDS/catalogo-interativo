@@ -174,11 +174,11 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                 <p className="text-xs font-black text-price mt-0.5">{renderPrice(v.price)}</p>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-3" onClick={() => toggleActive(v)}>
+                <Button size="icon" variant="ghost" className="h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-3" onClick={() => toggleActive(v)}>
                   {v.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
                 <Link href={`/${slug}/admin/estoque/${v.id}`}>
-                  <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-3">
+                  <Button size="icon" variant="ghost" className="h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-3">
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -245,12 +245,12 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                   </div>
                 </div>
 
-                {/* Touch-friendly action bar (40px height per button) */}
+                {/* Touch-friendly action bar (44px height per button) */}
                 <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-surface">
                   <button
                     type="button"
                     onClick={() => toggleActive(v)}
-                    className="h-10 rounded-xl bg-surface-2 hover:bg-surface-3 active:scale-[0.98] text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5 transition-all"
+                    className="h-11 rounded-xl bg-surface-2 hover:bg-surface-3 active:scale-[0.98] text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5 transition-all"
                   >
                     {v.is_active ? (
                       <>
@@ -267,7 +267,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
 
                   <Link
                     href={`/${slug}/admin/estoque/${v.id}`}
-                    className="h-10 rounded-xl bg-surface-2 hover:bg-surface-3 active:scale-[0.98] text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 transition-all"
+                    className="h-11 rounded-xl bg-surface-2 hover:bg-surface-3 active:scale-[0.98] text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 transition-all"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     <span>Editar</span>
@@ -276,7 +276,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                   <button
                     type="button"
                     onClick={() => setVehicleToDelete(v)}
-                    className="h-10 rounded-xl bg-red-950/25 hover:bg-red-950/40 active:scale-[0.98] border border-red-900/30 text-xs font-semibold text-red-400 flex items-center justify-center gap-1.5 transition-all"
+                    className="h-11 rounded-xl bg-red-950/25 hover:bg-red-950/40 active:scale-[0.98] border border-red-900/30 text-xs font-semibold text-red-400 flex items-center justify-center gap-1.5 transition-all"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     <span>Excluir</span>
@@ -374,14 +374,14 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
         </div>
       )}
 
-      {/* Modal de Confirmação de Exclusão Irreversível */}
+      {/* Modal de Confirmação de Exclusão Irreversível (Bottom sheet no mobile) */}
       {vehicleToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
             onClick={!deleting ? () => setVehicleToDelete(null) : undefined}
           />
-          <div className="relative w-full max-w-md bg-surface-1 border border-surface rounded-2xl shadow-2xl p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="relative w-full max-w-md bg-surface-1 border border-surface rounded-t-3xl sm:rounded-2xl shadow-2xl p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6 overflow-hidden animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
             <div className="flex items-start gap-3.5 mb-4">
               <div className="h-11 w-11 rounded-xl bg-red-950/40 border border-red-900/40 flex items-center justify-center shrink-0">
                 <Trash2 className="h-5 w-5 text-red-400" />
@@ -408,7 +408,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                 variant="outline"
                 disabled={deleting}
                 onClick={() => setVehicleToDelete(null)}
-                className="rounded-xl border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs font-semibold h-10 px-4"
+                className="rounded-xl border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs font-semibold h-11 px-5"
               >
                 Cancelar
               </Button>
@@ -416,7 +416,7 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                 type="button"
                 disabled={deleting}
                 onClick={confirmDeleteVehicle}
-                className="rounded-xl bg-red-600 hover:bg-red-700 active:scale-[0.98] text-white text-xs font-bold h-10 px-4 gap-2 transition-all shadow-md shadow-red-900/30"
+                className="rounded-xl bg-red-600 hover:bg-red-700 active:scale-[0.98] text-white text-xs font-bold h-11 px-5 gap-2 transition-all shadow-md shadow-red-900/30"
               >
                 {deleting ? (
                   <>

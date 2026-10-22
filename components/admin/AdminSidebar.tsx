@@ -79,7 +79,7 @@ export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {
 
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <Link href={`/${slug}`} target="_blank">
-            <Button size="sm" variant="ghost" className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground bg-surface-2/60 hover:bg-surface-2 gap-1.5 rounded-xl border border-surface">
+            <Button size="sm" variant="ghost" className="h-11 px-3 text-xs text-muted-foreground hover:text-foreground bg-surface-2/60 hover:bg-surface-2 gap-1.5 rounded-xl border border-surface">
               <ExternalLink className="h-3.5 w-3.5 text-brand" />
               <span className="text-[11px] font-semibold text-foreground">Vitrine</span>
             </Button>
@@ -88,7 +88,7 @@ export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {
             size="sm"
             variant="ghost"
             onClick={handleLogout}
-            className="h-9 w-9 p-0 text-xs text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl"
+            className="h-11 w-11 p-0 text-xs text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl"
             title="Sair"
           >
             <LogOut className="h-4 w-4" />
@@ -112,7 +112,7 @@ export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {
               aria-label={item.label}
               title={item.label}
               className={cn(
-                'flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95',
+                'flex flex-col items-center justify-center min-h-[48px] py-1 px-1 rounded-xl transition-all active:scale-95',
                 isActive
                   ? 'bg-brand/15 text-brand font-bold'
                   : 'text-muted-foreground hover:text-foreground hover:bg-surface-2 font-medium'

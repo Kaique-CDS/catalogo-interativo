@@ -482,7 +482,115 @@ export default function ClientsPage() {
 
       {/* Table */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Cards */}
+        <div className="md:hidden divide-y divide-zinc-100 dark:divide-zinc-800 p-4 space-y-4">
+          {loading ? (
+            <div className="py-10 text-center text-zinc-500 dark:text-zinc-400 text-xs">
+              Carregando clientes do banco...
+            </div>
+          ) : clients.length === 0 ? (
+            <div className="py-10 text-center text-zinc-500 dark:text-zinc-400 text-xs">
+              Nenhum cliente encontrado para os filtros informados.
+            </div>
+          ) : (
+            clients.map((client) => {
+              const limitMb = LIMIT_MB_BY_PLANO[client.plano] || 1024
+              const usedMb = Number(client.uso_banco_mb || 0)
+              const pct = Math.min((usedMb / limitMb) * 100, 100)
+
+              return (
+                <div key={client.id} className="pt-4 first:pt-0 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-bold text-zinc-900 dark:text-white text-sm">{client.nome_loja}</p>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        {client.email} {client.cnpj ? `• CNPJ: ${client.cnpj}` : ''}
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-flex px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${
+                        PLANO_BADGE[client.plano] || PLANO_BADGE.basico
+                      }`}
+                    >
+                      {client.plano}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-zinc-500">Status:</span>
+                    <div>
+                      {client.status === 'ativo' && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                          <CheckCircle2 className="h-3 w-3" /> Ativo
+                        </span>
+                      )}
+                      {client.status === 'trial' && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          <Clock className="h-3 w-3" /> Trial
+                        </span>
+                      )}
+                      {client.status === 'inativo' && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
+                          <AlertCircle className="h-3 w-3" /> Inativo
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-zinc-500">Vencimento:</span>
+                    <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                      {client.data_vencimento ? new Date(client.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-zinc-500">Armazenamento:</span>
+                      <span className="font-mono text-zinc-700 dark:text-zinc-300">{formatMb(usedMb)} / {formatMb(limitMb)}</span>
+                    </div>
+                    <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5">
+                      <div className={`h-1.5 rounded-full ${pct > 80 ? 'bg-rose-500' : 'bg-indigo-500'}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-11 rounded-xl text-xs gap-1.5 text-zinc-700 dark:text-zinc-300"
+                      onClick={() => handleCobrarWhatsApp(client)}
+                    >
+                      <Send className="h-4 w-4 text-emerald-500" />
+                      <span>Cobrar</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-11 rounded-xl text-xs gap-1.5 text-zinc-700 dark:text-zinc-300"
+                      onClick={() => openEditModal(client)}
+                    >
+                      <Edit className="h-4 w-4 text-indigo-500" />
+                      <span>Editar</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-11 rounded-xl text-xs gap-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                      onClick={() => handleDeleteClient(client)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>Excluir</span>
+                    </Button>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 font-bold uppercase text-[10px] tracking-wider">
               <tr>

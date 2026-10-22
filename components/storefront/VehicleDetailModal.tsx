@@ -242,15 +242,17 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             <div className="absolute top-3.5 right-3.5 flex items-center gap-2 z-10 pointer-events-auto">
               <button
                 onClick={handleShare}
-                className="h-9 w-9 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center backdrop-blur-md transition-colors"
+                className="h-11 w-11 rounded-full bg-black/60 text-white hover:bg-black/80 flex items-center justify-center backdrop-blur-md transition-colors shadow-md"
                 title="Compartilhar"
+                aria-label="Compartilhar"
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-4.5 w-4.5" />
               </button>
               <button
                 onClick={onClose}
-                className="h-9 w-9 rounded-full bg-black/50 text-white hover:bg-black/70 flex items-center justify-center backdrop-blur-md transition-colors"
+                className="h-11 w-11 rounded-full bg-black/60 text-white hover:bg-black/80 flex items-center justify-center backdrop-blur-md transition-colors shadow-md"
                 title="Fechar"
+                aria-label="Fechar"
               >
                 <X className="h-5 w-5" />
               </button>
