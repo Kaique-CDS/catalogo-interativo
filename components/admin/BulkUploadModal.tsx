@@ -1,5 +1,7 @@
 'use client'
 
+import { parseBrlCurrency, normalizePlate, normalizeText } from '@/lib/normalization'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -17,6 +19,7 @@ interface Props {
 export default function BulkUploadModal({ slug, onClose, onSuccess }: Props) {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [invalidRowsReport, setInvalidRowsReport] = useState<{ line: number; error: string }[]>([])
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -40,54 +43,95 @@ export default function BulkUploadModal({ slug, onClose, onSuccess }: Props) {
           let successCount = 0
           let errorCount = 0
 
+          const reportList: { line: number; error: string }[] = []
+
           for (let i = 0; i < rows.length; i++) {
             const row = rows[i]
+            const lineNum = i + 2 // +2 considerando cabeçalho na linha 1
             
-            // Basic validation - apenas o mínimo necessário
-            if (!row.marca || !row.modelo || !row.ano) {
-              // Verifica se a linha não está completamente vazia antes de contar como erro
-              if (Object.values(row).some(v => v !== '')) errorCount++
+            // Se linha vazia
+            if (!Object.values(row).some(v => String(v || '').trim() !== '')) {
               continue
             }
 
-            const precoStr = String(row.preco || '0')
-            const price = parseFloat(precoStr.replace(/\./g, '').replace(',', '.'))
+            // Validação das colunas obrigatórias
+            if (!row.marca || String(row.marca).trim() === '') {
+              reportList.push({ line: lineNum, error: 'Coluna "marca" não informada.' })
+              errorCount++
+              continue
+            }
+            if (!row.modelo || String(row.modelo).trim() === '') {
+              reportList.push({ line: lineNum, error: 'Coluna "modelo" não informada.' })
+              errorCount++
+              continue
+            }
+            const yearNum = parseInt(String(row.ano || '').replace(/\D/g, ''), 10)
+            if (isNaN(yearNum) || yearNum < 1950 || yearNum > 2035) {
+              reportList.push({ line: lineNum, error: `Ano inválido (${row.ano || 'vazio'}).` })
+              errorCount++
+              continue
+            }
+
+            const parsedPrice = parseBrlCurrency(row.preco)
+            if (parsedPrice <= 0) {
+              reportList.push({ line: lineNum, error: `Preço inválido ou zerado (${row.preco || '0'}).` })
+              errorCount++
+              continue
+            }
+
+            const kmNum = parseInt(String(row.quilometragem || '0').replace(/\D/g, ''), 10) || 0
+
+            // Fotos: suporta URLs separadas por vírgula ou ponto-e-vírgula
+            const rawFotos = String(row.fotos || '')
+            const fotosArray = rawFotos
+              ? rawFotos
+                  .split(/[,;]/)
+                  .map((u: string) => u.trim())
+                  .filter((url: string) => url.startsWith('http://') || url.startsWith('https://'))
+              : []
 
             const payload = {
               slug,
-              title: `${row.marca} ${row.modelo} ${row.versao || ''}`.trim(),
-              brand: row.marca,
-              model: row.modelo,
-              year: parseInt(row.ano, 10),
-              mileage: parseInt(row.quilometragem || '0', 10),
-              price: isNaN(price) ? 0 : price,
-              fuel: row.combustivel || 'Flex',
-              transmission: row.cambio || 'Automático',
-              color: row.cor || '',
-              plate_end: row.placa_final || '',
-              features: row.opcionais ? String(row.opcionais).split(/[,;]/).map((f: string) => f.trim()).filter(Boolean) : [],
-              description: row.descricao || 'Veículo em excelente estado.',
-              images: row.fotos ? String(row.fotos).split(/[,;]/).map((f: string) => f.trim()).filter((url: string) => url.startsWith('http')) : [],
-              is_active: String(row.ativo).toUpperCase() === 'N' ? false : true,
-              sku: row.sku ? String(row.sku).trim() : generateSKU()
+              title: normalizeText(`${row.marca} ${row.modelo} ${row.versao || ''}`),
+              brand: normalizeText(row.marca),
+              model: normalizeText(row.modelo),
+              year: yearNum,
+              mileage: kmNum,
+              price: parsedPrice,
+              fuel: row.combustivel ? normalizeText(row.combustivel) : 'Flex',
+              transmission: row.cambio ? normalizeText(row.cambio) : 'Automático',
+              color: row.cor ? normalizeText(row.cor) : '',
+              plate_end: row.placa_final ? normalizePlate(row.placa_final) : '',
+              features: row.opcionais ? String(row.opcionais).split(/[,;]/).map((f: string) => normalizeText(f)).filter(Boolean) : [],
+              description: row.descricao ? normalizeText(row.descricao) : 'Veículo em excelente estado.',
+              images: fotosArray,
+              is_active: String(row.ativo || '').toUpperCase().trim() === 'N' ? false : true,
+              sku: row.sku && String(row.sku).trim() ? normalizeText(String(row.sku)) : generateSKU()
             }
 
-            // Post to API
-            const res = await fetch('/api/vehicles', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            })
+            try {
+              const res = await fetch('/api/vehicles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              })
 
-            if (res.ok) {
-              successCount++
-            } else {
+              if (res.ok) {
+                successCount++
+              } else {
+                errorCount++
+                const errData = await res.json().catch(() => ({}))
+                reportList.push({ line: lineNum, error: errData.error || 'Erro ao gravar veículo no servidor.' })
+              }
+            } catch (postErr: any) {
               errorCount++
-              const errData = await res.json().catch(() => ({}))
-              console.error(`Erro ao importar linha ${i + 2}:`, errData)
+              reportList.push({ line: lineNum, error: postErr.message || 'Falha de rede.' })
             }
+
             setProgress(10 + Math.floor(((i + 1) / rows.length) * 90))
           }
+
+          setInvalidRowsReport(reportList)
 
           if (successCount > 0) {
             if (errorCount > 0) {

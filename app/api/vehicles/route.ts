@@ -1,3 +1,4 @@
+import { parseBrlCurrency, normalizeText, normalizePlate } from '@/lib/normalization'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient, resolveStoreId } from '@/lib/supabase/admin'
 
@@ -68,22 +69,22 @@ export async function POST(req: NextRequest) {
 
     const baseRow: Record<string, any> = {
       store_id: finalStoreId,
-      title,
-      brand,
-      model,
+      title: normalizeText(title),
+      brand: normalizeText(brand),
+      model: normalizeText(model),
       year: parseInt(String(year), 10),
       mileage: parseInt(String(mileage || 0), 10),
-      price: parseFloat(String(price || 0)),
-      fuel,
-      transmission,
-      color,
-      plate_end,
-      features,
-      badge,
-      description,
+      price: parseBrlCurrency(price),
+      fuel: fuel ? normalizeText(fuel) : 'Flex',
+      transmission: transmission ? normalizeText(transmission) : 'Manual',
+      color: color ? normalizeText(color) : '',
+      plate_end: plate_end ? normalizePlate(plate_end) : '',
+      features: Array.isArray(features) ? features.map(f => normalizeText(String(f))).filter(Boolean) : [],
+      badge: badge ? normalizeText(badge) : null,
+      description: description ? normalizeText(description) : '',
       images: orderedImages,
       is_active: is_active ?? true,
-      sku: sku || `MHC-${Math.floor(1000 + Math.random() * 9000)}`,
+      sku: sku ? normalizeText(sku) : `MHC-${Math.floor(1000 + Math.random() * 9000)}`,
     }
 
     if (id && UUID_REGEX.test(String(id))) {

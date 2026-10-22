@@ -54,7 +54,7 @@ export function formatPhone(raw?: string | null, fallbackLabel = 'Televendas'): 
     const local = digits.slice(2)
     const ddd = local.slice(0, 2)
     const rest = local.slice(2)
-    const isNine = rest.length === 5
+    const isNine = rest.length === 9
     const part1 = isNine ? rest.slice(0, 5) : rest.slice(0, 4)
     const part2 = isNine ? rest.slice(5) : rest.slice(4)
     return {
@@ -119,9 +119,26 @@ export function getStoreWhatsApp(store?: Store | null): WhatsAppInfo {
   const brand = getTenantBrand(store?.slug)
   const raw = store?.whatsapp?.trim() || brand.whatsapp.number
   const digits = raw.replace(/\D/g, '')
-  const formatted = formatPhone(digits)
+  const fullNumber = digits.startsWith('55')
+    ? digits
+    : digits.length === 10 || digits.length === 11
+    ? `55${digits}`
+    : digits
+  const formatted = formatPhone(fullNumber)
   return {
-    number: digits.startsWith('55') ? digits : `55${digits}`,
+    number: fullNumber || brand.whatsapp.number,
     display: formatted.display || brand.whatsapp.display,
   }
+}
+
+/** Resolve endereço oficial da loja (com fallback unificado no cadastro da marca) */
+export function getStoreAddress(store?: Store | null): string {
+  const brand = getTenantBrand(store?.slug)
+  return store?.address?.trim() || brand.address || brand.demoStore.address || ''
+}
+
+/** Resolve horário oficial de funcionamento da loja (com fallback no tenant) */
+export function getStoreOpeningHours(store?: Store | null): string {
+  const brand = getTenantBrand(store?.slug)
+  return store?.opening_hours?.trim() || brand.demoStore.opening_hours || 'Seg a Sex 09h às 18h | Sáb 09h às 13h'
 }

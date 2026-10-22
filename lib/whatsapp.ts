@@ -74,7 +74,8 @@ export function buildWhatsAppUrl(params: WhatsAppLeadParams): string {
   )
 
   const message = lines.join('\n')
-  const cleanPhone = targetNumber.replace(/\D/g, '')
+  const digits = targetNumber.replace(/\D/g, '')
+  const cleanPhone = digits.startsWith('55') ? digits : digits.length >= 10 ? `55${digits}` : digits
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
 }
 
@@ -135,6 +136,7 @@ export function buildFinancingWhatsAppUrl(params: WhatsAppFinancingParams): stri
   )
 
   const message = lines.join('\n')
-  const cleanPhone = targetNumber.replace(/\D/g, '')
+  const digits = targetNumber.replace(/\D/g, '')
+  const cleanPhone = digits.startsWith('55') ? digits : digits.length >= 10 ? `55${digits}` : digits
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
 }

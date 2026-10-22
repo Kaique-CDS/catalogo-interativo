@@ -115,7 +115,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
         storeName={store.name}
         nextOpen={getNextOpenInfo(CONCESSIONARIA_HOURS, saoPauloNow)}
         theme="zinc"
-        whatsapp={store.whatsapp}
+        whatsapp={whatsappInfo.number}
       />
     )
   }
@@ -165,7 +165,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
         storeId={store.id}
         slug={slug}
         storeName={store.name}
-        whatsapp={store.whatsapp}
+        whatsapp={whatsappInfo.number}
         customMessage={`Olá! Estou no catálogo *${store.name}* e gostaria de informações.`}
       />
       <CookieBanner />

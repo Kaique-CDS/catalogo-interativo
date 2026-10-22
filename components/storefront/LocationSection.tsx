@@ -3,7 +3,7 @@
 import React from 'react'
 import { MapPin, Phone, MessageCircle, Mail, Clock, ExternalLink, Navigation } from 'lucide-react'
 import type { Store } from '@/lib/supabase/types'
-import { getStorePhone, getStoreInstagram, getStoreWhatsApp } from '@/lib/store-contact'
+import { getStorePhone, getStoreInstagram, getStoreWhatsApp, getStoreAddress, getStoreOpeningHours } from '@/lib/store-contact'
 
 interface Props {
   store: Store
@@ -40,7 +40,7 @@ export function extractMapsEmbedSrc(raw?: string | null): string | null {
 }
 
 export default function LocationSection({ store, className = '', title }: Props) {
-  const address = store.address?.trim() || null
+  const address = getStoreAddress(store) || null
   const phoneInfo = getStorePhone(store)
   const instagramInfo = getStoreInstagram(store)
   const whatsappInfo = getStoreWhatsApp(store)
@@ -64,8 +64,9 @@ export default function LocationSection({ store, className = '', title }: Props)
     : null
 
   // Quebra horários de funcionamento por "|" ou "\n"
-  const hoursList = store.opening_hours
-    ? store.opening_hours.split(/[|\n]/).map((h) => h.trim()).filter(Boolean)
+  const openingHours = getStoreOpeningHours(store)
+  const hoursList = openingHours
+    ? openingHours.split(/[|\n]/).map((h) => h.trim()).filter(Boolean)
     : []
 
   return (

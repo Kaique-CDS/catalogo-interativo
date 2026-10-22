@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { MapPin, Phone } from 'lucide-react'
 import type { Store } from '@/lib/supabase/types'
 import { getTenantBrand } from '@/lib/tenants'
-import { getStorePhone, getStoreInstagram } from '@/lib/store-contact'
+import { getStorePhone, getStoreInstagram, getStoreAddress } from '@/lib/store-contact'
 
 interface Props { store: Store }
 
@@ -11,6 +11,7 @@ export default function StoreHeader({ store }: Props) {
   const brand = getTenantBrand(store.slug)
   const phoneInfo = getStorePhone(store)
   const instagramInfo = getStoreInstagram(store)
+  const storeAddress = getStoreAddress(store)
   const logoUrl = store.logo_url || brand.logo.header
 
   return (
@@ -49,10 +50,10 @@ export default function StoreHeader({ store }: Props) {
                 {store.slogan}
               </p>
             )}
-            {!store.slogan && store.address && (
+            {!store.slogan && storeAddress && (
               <p className="text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1 truncate">
                 <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-brand" />
-                <span className="truncate">{store.address}</span>
+                <span className="truncate">{storeAddress}</span>
               </p>
             )}
           </div>

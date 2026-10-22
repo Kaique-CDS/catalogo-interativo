@@ -1,0 +1,3724 @@
+{
+  "stores": [
+    {
+      "id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "slug": "loja-exemplo",
+      "name": "Milhaticar",
+      "logo_url": "/logo-milhaticar.png",
+      "address": "Av. Gov. Adhemar de Barros, 2618 – Braz Cubas – Mogi das Cruzes/SP",
+      "whatsapp": "5511994942661",
+      "owner_id": null,
+      "created_at": "2026-10-11T02:05:44.85769+00:00",
+      "whatsapp_financeiro": null,
+      "opening_hours": "Seg a Sex: 09h às 18h",
+      "primary_color": "#18181B",
+      "font_family": "Inter",
+      "slogan": "Carros Nacionais e Importados",
+      "banner_url": null
+    },
+    {
+      "id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "slug": "ll-multimarcas",
+      "name": "L&L Multimarcas",
+      "logo_url": "https://res.cloudinary.com/prnrnxaw/image/upload/v1792348443/ll-multimarcas/logo/logo_1792348443348.svg",
+      "address": "Avenida Marechal Tito, 3921 - Jardim Miragaia, São Paulo - SP, 08160-505",
+      "whatsapp": "1196729-6936",
+      "owner_id": null,
+      "created_at": "2026-10-15T17:21:10.85494+00:00",
+      "whatsapp_financeiro": "1196729-6936",
+      "opening_hours": "Seg a Sex: 09h às 18h | Sáb: 09h às 13h",
+      "primary_color": "#4B1F8F",
+      "font_family": "Inter",
+      "slogan": "Seminovos com parceria em todos os bancos",
+      "banner_url": "https://res.cloudinary.com/prnrnxaw/image/upload/v1792349558/ll-multimarcas/banners/desktop/banner_desktop_1792349558716.png"
+    },
+    {
+      "id": "eb735e2f-d662-4e41-8c5d-1c4c3c12503f",
+      "slug": "__erp_system_state__",
+      "name": "ERP State",
+      "logo_url": null,
+      "address": null,
+      "whatsapp": "5511993270543",
+      "owner_id": null,
+      "created_at": "2026-10-12T22:02:51.073718+00:00",
+      "whatsapp_financeiro": null,
+      "opening_hours": "Seg a Sex: 09h às 18h",
+      "primary_color": "#18181B",
+      "font_family": "Inter",
+      "slogan": "{\"clientes\":[],\"faturas\":[],\"logs_auditoria\":[{\"id\":\"abdb608f-fc33-47c2-959c-df1d53a84882\",\"tipo\":\"login\",\"criticidade\":\"normal\",\"descricao\":\"Super Admin fez login no painel\",\"ator\":\"gabriel\",\"ip\":\"::1\",\"created_at\":\"2026-10-22T03:24:32.522Z\"},{\"id\":\"995b8642-50b5-4a82-bfdc-fbf93316098c\",\"tipo\":\"exclusao\",\"criticidade\":\"normal\",\"descricao\":\"Veículo \\\"Volkswagen Gol 1.6 MI STAR 8V 2P\\\" excluído do catálogo (Sem fotos registradas no Cloudinary).\",\"ator\":\"Lojista\",\"ip\":\"177.204.91.188\",\"created_at\":\"2026-10-15T03:51:35.695Z\"},{\"id\":\"2e1b3753-94a0-469e-ae53-48d39e2dd361\",\"tipo\":\"exclusao\",\"criticidade\":\"normal\",\"descricao\":\"Veículo \\\"Volkswagen Gol CLI 2P\\\" excluído do catálogo (Sem fotos registradas no Cloudinary).\",\"ator\":\"Lojista\",\"ip\":\"177.204.91.188\",\"created_at\":\"2026-10-15T03:51:31.620Z\"},{\"id\":\"a5ab40e9-dcb8-4a2f-9942-d916ff252e61\",\"tipo\":\"login\",\"criticidade\":\"normal\",\"descricao\":\"Super Admin fez login no painel\",\"ator\":\"gabriel\",\"ip\":\"177.161.133.43\",\"created_at\":\"2026-10-13T04:23:39.943Z\"},{\"id\":\"09ab8bcc-2514-4456-ae0c-ce3f56ef2047\",\"tipo\":\"login\",\"criticidade\":\"normal\",\"descricao\":\"Super Admin fez login no painel\",\"ator\":\"gabriel\",\"ip\":\"177.204.91.188\",\"created_at\":\"2026-10-12T22:04:27.436Z\"}],\"configuracoes\":{\"id\":1,\"nome_plataforma\":\"VendaZap\",\"email_suporte\":\"suporte@vendazap.com\",\"whatsapp_suporte\":\"5511993270543\",\"dias_trial\":7,\"limite_carros_starter\":20,\"limite_carros_premium\":40,\"limite_carros_enterprise\":100,\"emails_cobranca_ativo\":true},\"melhorias\":[],\"notifiedInvoiceIds\":[]}",
+      "banner_url": null
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "ecb3e2c6-cf47-4024-a019-cf6a994b7a96",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Chevrolet Celta 1.4 MPFI SUPER 4P",
+      "brand": "Chevrolet",
+      "model": "Celta",
+      "year": 2005,
+      "mileage": 0,
+      "price": 24900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670738/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670738/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670738/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670738/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670738/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670739/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670739/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670740/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670740/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670740/milhaticar/veiculos/chevrolet/celta-2005-1798/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:53.081294+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "3",
+      "features": [],
+      "badge": null,
+      "sku": "2ATTP"
+    },
+    {
+      "id": "50d8e971-2614-42c7-b4fc-58b1779fa437",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Chevrolet Corsa 1.4 MAXX 4P",
+      "brand": "Chevrolet",
+      "model": "Corsa",
+      "year": 2009,
+      "mileage": 0,
+      "price": 29900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670742/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670742/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670741/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670742/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670742/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670743/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670743/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670744/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670744/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670744/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670743/milhaticar/veiculos/chevrolet/corsa-2009-1882/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:53.653844+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Bege",
+      "plate_end": "2",
+      "features": [],
+      "badge": null,
+      "sku": "EV37B"
+    },
+    {
+      "id": "6ba4581e-8ef4-427e-b3a7-1184e9da5184",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Chevrolet Vectra 2.0 GT HATCH 4P",
+      "brand": "Chevrolet",
+      "model": "Vectra",
+      "year": 2009,
+      "mileage": 0,
+      "price": 35900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671970/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671970/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671970/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671970/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671971/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671972/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671972/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671972/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671971/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671972/milhaticar/veiculos/chevrolet/vectra-2009-1845/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:54.267727+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Preta",
+      "plate_end": "8",
+      "features": [],
+      "badge": null,
+      "sku": "BQ4B7"
+    },
+    {
+      "id": "97e9b378-cd82-4c53-a2ec-fd6e259f34b4",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Fiat 500 1.4 CULT 8V 4P",
+      "brand": "Fiat",
+      "model": "500",
+      "year": 2012,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671974/milhaticar/veiculos/fiat/500-2012-1826/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671974/milhaticar/veiculos/fiat/500-2012-1826/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671973/milhaticar/veiculos/fiat/500-2012-1826/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671974/milhaticar/veiculos/fiat/500-2012-1826/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671974/milhaticar/veiculos/fiat/500-2012-1826/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671975/milhaticar/veiculos/fiat/500-2012-1826/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671975/milhaticar/veiculos/fiat/500-2012-1826/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671976/milhaticar/veiculos/fiat/500-2012-1826/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671976/milhaticar/veiculos/fiat/500-2012-1826/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671976/milhaticar/veiculos/fiat/500-2012-1826/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671976/milhaticar/veiculos/fiat/500-2012-1826/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:55.007638+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "9",
+      "features": [],
+      "badge": null,
+      "sku": "W5QHH"
+    },
+    {
+      "id": "b5115f8d-87e4-481a-addf-40f6d2f33674",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Fiat Palio 1.0 FIRE 4P",
+      "brand": "Fiat",
+      "model": "Palio",
+      "year": 2008,
+      "mileage": 235185,
+      "price": 25900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671983/milhaticar/veiculos/fiat/palio-2008-1834/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671984/milhaticar/veiculos/fiat/palio-2008-1834/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671984/milhaticar/veiculos/fiat/palio-2008-1834/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671984/milhaticar/veiculos/fiat/palio-2008-1834/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671984/milhaticar/veiculos/fiat/palio-2008-1834/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671985/milhaticar/veiculos/fiat/palio-2008-1834/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671985/milhaticar/veiculos/fiat/palio-2008-1834/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671986/milhaticar/veiculos/fiat/palio-2008-1834/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671986/milhaticar/veiculos/fiat/palio-2008-1834/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671985/milhaticar/veiculos/fiat/palio-2008-1834/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671986/milhaticar/veiculos/fiat/palio-2008-1834/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:56.371155+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Cinza",
+      "plate_end": "3",
+      "features": [],
+      "badge": null,
+      "sku": "7T7GM"
+    },
+    {
+      "id": "bd77b58a-f077-4068-94eb-1566d4a67b75",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Fiat Palio 1.0 MPI FIRE ECONOMY 4P",
+      "brand": "Fiat",
+      "model": "Palio",
+      "year": 2010,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671988/milhaticar/veiculos/fiat/palio-2010-1811/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671987/milhaticar/veiculos/fiat/palio-2010-1811/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671988/milhaticar/veiculos/fiat/palio-2010-1811/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671988/milhaticar/veiculos/fiat/palio-2010-1811/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671988/milhaticar/veiculos/fiat/palio-2010-1811/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671988/milhaticar/veiculos/fiat/palio-2010-1811/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671989/milhaticar/veiculos/fiat/palio-2010-1811/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671989/milhaticar/veiculos/fiat/palio-2010-1811/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671990/milhaticar/veiculos/fiat/palio-2010-1811/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671989/milhaticar/veiculos/fiat/palio-2010-1811/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:56.952304+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "3",
+      "features": [],
+      "badge": null,
+      "sku": "KEA7V"
+    },
+    {
+      "id": "04a440a5-e8f7-42e4-88c3-1a081e88e1ed",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Fiat Siena EL 1.0 4P",
+      "brand": "Fiat",
+      "model": "Siena",
+      "year": 2013,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671992/milhaticar/veiculos/fiat/siena-2013-1870/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671992/milhaticar/veiculos/fiat/siena-2013-1870/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671992/milhaticar/veiculos/fiat/siena-2013-1870/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671991/milhaticar/veiculos/fiat/siena-2013-1870/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671992/milhaticar/veiculos/fiat/siena-2013-1870/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671993/milhaticar/veiculos/fiat/siena-2013-1870/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671993/milhaticar/veiculos/fiat/siena-2013-1870/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671994/milhaticar/veiculos/fiat/siena-2013-1870/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671994/milhaticar/veiculos/fiat/siena-2013-1870/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671993/milhaticar/veiculos/fiat/siena-2013-1870/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671993/milhaticar/veiculos/fiat/siena-2013-1870/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:57.682842+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "8",
+      "features": [],
+      "badge": null,
+      "sku": "ZQX4N"
+    },
+    {
+      "id": "a07fdecc-c337-49a1-9926-c95baf205875",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Fiat Toro 2.0 16V TB RANCH 4WD AT9 4P",
+      "brand": "Fiat",
+      "model": "Toro",
+      "year": 2019,
+      "mileage": 90595,
+      "price": 107900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671996/milhaticar/veiculos/fiat/toro-2019-1886/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671996/milhaticar/veiculos/fiat/toro-2019-1886/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671996/milhaticar/veiculos/fiat/toro-2019-1886/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671995/milhaticar/veiculos/fiat/toro-2019-1886/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671996/milhaticar/veiculos/fiat/toro-2019-1886/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671997/milhaticar/veiculos/fiat/toro-2019-1886/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671997/milhaticar/veiculos/fiat/toro-2019-1886/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671998/milhaticar/veiculos/fiat/toro-2019-1886/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671998/milhaticar/veiculos/fiat/toro-2019-1886/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671997/milhaticar/veiculos/fiat/toro-2019-1886/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671998/milhaticar/veiculos/fiat/toro-2019-1886/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:58.430435+00:00",
+      "fuel": "Diesel",
+      "transmission": "Manual",
+      "color": "Vermelha",
+      "plate_end": "4",
+      "features": [],
+      "badge": null,
+      "sku": "M7ESV"
+    },
+    {
+      "id": "3c228fb2-9aff-45ac-ad53-e1824f489283",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Ford Fiesta 1.0 4P",
+      "brand": "Ford",
+      "model": "Fiesta",
+      "year": 2014,
+      "mileage": 0,
+      "price": 34900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672004/milhaticar/veiculos/ford/fiesta-2014-1850/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672004/milhaticar/veiculos/ford/fiesta-2014-1850/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672004/milhaticar/veiculos/ford/fiesta-2014-1850/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672003/milhaticar/veiculos/ford/fiesta-2014-1850/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672004/milhaticar/veiculos/ford/fiesta-2014-1850/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672004/milhaticar/veiculos/ford/fiesta-2014-1850/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672004/milhaticar/veiculos/ford/fiesta-2014-1850/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672005/milhaticar/veiculos/ford/fiesta-2014-1850/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672005/milhaticar/veiculos/ford/fiesta-2014-1850/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672005/milhaticar/veiculos/ford/fiesta-2014-1850/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672006/milhaticar/veiculos/ford/fiesta-2014-1850/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:59.641985+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Vermelha",
+      "plate_end": "2",
+      "features": [],
+      "badge": null,
+      "sku": "6XPN3"
+    },
+    {
+      "id": "1a461f91-1fe4-44d9-90a0-83bb99910022",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Ford Ranger XLS 12A 4P",
+      "brand": "Ford",
+      "model": "Ranger",
+      "year": 2008,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672007/milhaticar/veiculos/ford/ranger-2008-1900/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672008/milhaticar/veiculos/ford/ranger-2008-1900/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672008/milhaticar/veiculos/ford/ranger-2008-1900/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672008/milhaticar/veiculos/ford/ranger-2008-1900/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672007/milhaticar/veiculos/ford/ranger-2008-1900/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672008/milhaticar/veiculos/ford/ranger-2008-1900/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672008/milhaticar/veiculos/ford/ranger-2008-1900/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672009/milhaticar/veiculos/ford/ranger-2008-1900/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672009/milhaticar/veiculos/ford/ranger-2008-1900/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672009/milhaticar/veiculos/ford/ranger-2008-1900/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672009/milhaticar/veiculos/ford/ranger-2008-1900/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:00.772317+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "8",
+      "features": [],
+      "badge": null,
+      "sku": "F3WNF"
+    },
+    {
+      "id": "a83d0c08-3f01-4fd7-9a83-fe99945b14d7",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Honda Civic 1.8 LXS 16V 4P",
+      "brand": "Honda",
+      "model": "Civic",
+      "year": 2008,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672011/milhaticar/veiculos/honda/civic-2008-1873/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672010/milhaticar/veiculos/honda/civic-2008-1873/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672011/milhaticar/veiculos/honda/civic-2008-1873/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672011/milhaticar/veiculos/honda/civic-2008-1873/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672011/milhaticar/veiculos/honda/civic-2008-1873/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672012/milhaticar/veiculos/honda/civic-2008-1873/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672012/milhaticar/veiculos/honda/civic-2008-1873/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672013/milhaticar/veiculos/honda/civic-2008-1873/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672013/milhaticar/veiculos/honda/civic-2008-1873/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672012/milhaticar/veiculos/honda/civic-2008-1873/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672013/milhaticar/veiculos/honda/civic-2008-1873/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:01.521234+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "5",
+      "features": [],
+      "badge": null,
+      "sku": "DMNFZ"
+    },
+    {
+      "id": "9961a396-36ee-4ec3-a541-e9faa8570187",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Hyundai I30 2.0 4P",
+      "brand": "Hyundai",
+      "model": "I30",
+      "year": 2011,
+      "mileage": 128492,
+      "price": 48900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672015/milhaticar/veiculos/hyundai/i30-2011-1884/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672015/milhaticar/veiculos/hyundai/i30-2011-1884/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672015/milhaticar/veiculos/hyundai/i30-2011-1884/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672014/milhaticar/veiculos/hyundai/i30-2011-1884/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672015/milhaticar/veiculos/hyundai/i30-2011-1884/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672015/milhaticar/veiculos/hyundai/i30-2011-1884/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672016/milhaticar/veiculos/hyundai/i30-2011-1884/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672017/milhaticar/veiculos/hyundai/i30-2011-1884/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672016/milhaticar/veiculos/hyundai/i30-2011-1884/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672016/milhaticar/veiculos/hyundai/i30-2011-1884/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672016/milhaticar/veiculos/hyundai/i30-2011-1884/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:02.386184+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "9",
+      "features": [],
+      "badge": null,
+      "sku": "WJJXN"
+    },
+    {
+      "id": "cfeb7946-9c6d-4e94-ab33-62b5fabc9414",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Land Rover Discovery Sport SE 2.0 7 LUG 4P",
+      "brand": "Land Rover",
+      "model": "Discovery Sport",
+      "year": 2022,
+      "mileage": 0,
+      "price": 245900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672023/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672023/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672023/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672022/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672023/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672023/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672024/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672024/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672024/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672024/milhaticar/veiculos/land-rover/discovery-sport-2022-1800/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:04.117019+00:00",
+      "fuel": "Elétrico e Diesel",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "5",
+      "features": [],
+      "badge": null,
+      "sku": "ZU3AB"
+    },
+    {
+      "id": "4193e276-f9e9-4ac7-b486-60a3493bdca9",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Nissan Kicks 1.6 ADVANCE 4P",
+      "brand": "Nissan",
+      "model": "Kicks",
+      "year": 2024,
+      "mileage": 53400,
+      "price": 106900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672033/milhaticar/veiculos/nissan/kicks-2024-1885/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672034/milhaticar/veiculos/nissan/kicks-2024-1885/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672034/milhaticar/veiculos/nissan/kicks-2024-1885/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672034/milhaticar/veiculos/nissan/kicks-2024-1885/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672034/milhaticar/veiculos/nissan/kicks-2024-1885/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672034/milhaticar/veiculos/nissan/kicks-2024-1885/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672035/milhaticar/veiculos/nissan/kicks-2024-1885/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672035/milhaticar/veiculos/nissan/kicks-2024-1885/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672035/milhaticar/veiculos/nissan/kicks-2024-1885/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672035/milhaticar/veiculos/nissan/kicks-2024-1885/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:06.284527+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "2",
+      "features": [],
+      "badge": null,
+      "sku": "PGSRQ"
+    },
+    {
+      "id": "ea69c793-6d8b-4890-a3d0-b23d25144de0",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Mercedes Benz C 300 4P",
+      "brand": "Mercedes Benz",
+      "model": "C 300",
+      "year": 2017,
+      "mileage": 116000,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672027/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672027/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672027/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672026/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672026/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672027/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672028/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672028/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672028/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672028/milhaticar/veiculos/mercedes-benz/c-300-2017-1895/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:04.687633+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "1",
+      "features": [],
+      "badge": null,
+      "sku": "6RQPU"
+    },
+    {
+      "id": "eabcd929-ac4a-4c7d-b33e-f4273ea4b734",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Peugeot 308 1.6 ACTIVE 16V 4P",
+      "brand": "Peugeot",
+      "model": "308",
+      "year": 2014,
+      "mileage": 0,
+      "price": 41900,
+      "description": "MILHATICAR - A CERTEZA DO MELHOR NEGÓCIO Aqui você encontra as melhores oportunidades do mercado, com condições especiais para facilitar a realização do seu sonho: Financiamento em até 60 meses As menores taxas de juros do mercado Veículo sem entrada, mediante análise de crédito Troca com troco Aceitamos seu veículo com a melhor avaliação Parcelamos sua entrada em até 24 vezes cartão de crédito Milhaticar é confiança, transparência e as melhores condições para você sair de carro novo hoje mesmo. Consulte condições e aproveite",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672037/milhaticar/veiculos/peugeot/308-2014-1758/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672037/milhaticar/veiculos/peugeot/308-2014-1758/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672037/milhaticar/veiculos/peugeot/308-2014-1758/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672037/milhaticar/veiculos/peugeot/308-2014-1758/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672038/milhaticar/veiculos/peugeot/308-2014-1758/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672038/milhaticar/veiculos/peugeot/308-2014-1758/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672039/milhaticar/veiculos/peugeot/308-2014-1758/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672038/milhaticar/veiculos/peugeot/308-2014-1758/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672039/milhaticar/veiculos/peugeot/308-2014-1758/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672039/milhaticar/veiculos/peugeot/308-2014-1758/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672039/milhaticar/veiculos/peugeot/308-2014-1758/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:06.722519+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "7",
+      "features": [],
+      "badge": null,
+      "sku": "XLTYU"
+    },
+    {
+      "id": "23980b91-a26e-4be4-87b9-f00faa1ee27d",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Renault Scenic 4P",
+      "brand": "Renault",
+      "model": "Scenic",
+      "year": 2009,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672051/milhaticar/veiculos/renault/scenic-2009-1880/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672052/milhaticar/veiculos/renault/scenic-2009-1880/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672052/milhaticar/veiculos/renault/scenic-2009-1880/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672052/milhaticar/veiculos/renault/scenic-2009-1880/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672052/milhaticar/veiculos/renault/scenic-2009-1880/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672053/milhaticar/veiculos/renault/scenic-2009-1880/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672054/milhaticar/veiculos/renault/scenic-2009-1880/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672054/milhaticar/veiculos/renault/scenic-2009-1880/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672054/milhaticar/veiculos/renault/scenic-2009-1880/foto-09.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:10.227825+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Cinza",
+      "plate_end": "3",
+      "features": [],
+      "badge": null,
+      "sku": "NRT5T"
+    },
+    {
+      "id": "62b06db8-9404-4019-9ba0-896eeb672a5f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Ram 2500 LARAMIE 4P",
+      "brand": "Ram",
+      "model": "2500",
+      "year": 2020,
+      "mileage": 59390,
+      "price": 345900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672045/milhaticar/veiculos/ram/2500-2020-1840/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672044/milhaticar/veiculos/ram/2500-2020-1840/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672045/milhaticar/veiculos/ram/2500-2020-1840/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672045/milhaticar/veiculos/ram/2500-2020-1840/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672044/milhaticar/veiculos/ram/2500-2020-1840/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672045/milhaticar/veiculos/ram/2500-2020-1840/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672045/milhaticar/veiculos/ram/2500-2020-1840/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672046/milhaticar/veiculos/ram/2500-2020-1840/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672045/milhaticar/veiculos/ram/2500-2020-1840/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672046/milhaticar/veiculos/ram/2500-2020-1840/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672046/milhaticar/veiculos/ram/2500-2020-1840/foto-11.webp"
+      ],
+      "is_active": false,
+      "created_at": "2026-10-11T02:06:08.145171+00:00",
+      "fuel": "Diesel",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "9",
+      "features": [],
+      "badge": null,
+      "sku": "F42VD"
+    },
+    {
+      "id": "84421ae3-1752-412f-8549-296de9019000",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Fusca 1977 Placa preta",
+      "brand": "Volkswagen",
+      "model": "Fusca",
+      "year": 1977,
+      "mileage": 10000,
+      "price": 38000,
+      "description": "Raro Fusca 1977 branco com placa preta, verdadeira peça de colecionador em excelente estado de conservação. O veículo possui apenas 10.000 km rodados, funcionamento perfeito com câmbio manual e motor a gasolina. Uma oportunidade única para garantir este clássico por apenas R$ 38.000.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/oowjscobq6ourhezexwf.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/vow5osq5g7rxhntmvwap.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/fgnfvarkslcuj1ppliel.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093592/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/lot1w2dxz48n5d4qmu2i.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/xile5bju0wfba6tsgufc.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/nk5haoyxxanljfvuhnot.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/ay1n9oxbkc1ahfhwwksl.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/trukx1emxapqcfmmhg0j.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/azt7g9jpvz5cfv10r5dz.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093593/ll-multimarcas/veiculos/sem-marca/84421ae3-1752-412f-8549-296de9019000/lcivbz6jjrzjrkhy7cwn.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T19:48:56.990155+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Branco",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "J3Y2F"
+    },
+    {
+      "id": "b479d8c0-bda9-4d27-9c13-48cf84817f77",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Toyota Corolla SEG18VVT 4P",
+      "brand": "Toyota",
+      "model": "Corolla",
+      "year": 2003,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672063/milhaticar/veiculos/toyota/corolla-2003-1899/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672064/milhaticar/veiculos/toyota/corolla-2003-1899/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672063/milhaticar/veiculos/toyota/corolla-2003-1899/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672063/milhaticar/veiculos/toyota/corolla-2003-1899/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672063/milhaticar/veiculos/toyota/corolla-2003-1899/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672064/milhaticar/veiculos/toyota/corolla-2003-1899/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672064/milhaticar/veiculos/toyota/corolla-2003-1899/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672065/milhaticar/veiculos/toyota/corolla-2003-1899/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672065/milhaticar/veiculos/toyota/corolla-2003-1899/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672065/milhaticar/veiculos/toyota/corolla-2003-1899/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:12.511614+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Bege",
+      "plate_end": "0",
+      "features": [],
+      "badge": null,
+      "sku": "L56YC"
+    },
+    {
+      "id": "4b76525e-b28b-4275-b577-a3c140a9e65a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Toyota Corolla XEI1.8 4P",
+      "brand": "Toyota",
+      "model": "Corolla",
+      "year": 2009,
+      "mileage": 177630,
+      "price": 54900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672067/milhaticar/veiculos/toyota/corolla-2009-1883/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672067/milhaticar/veiculos/toyota/corolla-2009-1883/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672067/milhaticar/veiculos/toyota/corolla-2009-1883/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672066/milhaticar/veiculos/toyota/corolla-2009-1883/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672067/milhaticar/veiculos/toyota/corolla-2009-1883/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672068/milhaticar/veiculos/toyota/corolla-2009-1883/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672069/milhaticar/veiculos/toyota/corolla-2009-1883/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672069/milhaticar/veiculos/toyota/corolla-2009-1883/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672068/milhaticar/veiculos/toyota/corolla-2009-1883/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672068/milhaticar/veiculos/toyota/corolla-2009-1883/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672069/milhaticar/veiculos/toyota/corolla-2009-1883/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:12.934247+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "7",
+      "features": [],
+      "badge": null,
+      "sku": "K493P"
+    },
+    {
+      "id": "f4750fc5-4afa-4cbb-99ce-393e63b8a1a7",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen Fox 1.0 MI TRENDLINE 4P",
+      "brand": "Volkswagen",
+      "model": "Fox",
+      "year": 2015,
+      "mileage": 0,
+      "price": 44900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672070/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672071/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672071/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672071/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672071/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672071/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672072/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672071/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672072/milhaticar/veiculos/volkswagen/fox-2015-1894/foto-09.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:13.711495+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "4",
+      "features": [],
+      "badge": null,
+      "sku": "U96KX"
+    },
+    {
+      "id": "b111a814-23de-4b38-8f2b-945b46bf7bb4",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Toyota Corolla 2.0 XEI 4P",
+      "brand": "Toyota",
+      "model": "Corolla",
+      "year": 2016,
+      "mileage": 142678,
+      "price": 86900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672058/milhaticar/veiculos/toyota/corolla-2016-1881/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672059/milhaticar/veiculos/toyota/corolla-2016-1881/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672059/milhaticar/veiculos/toyota/corolla-2016-1881/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672059/milhaticar/veiculos/toyota/corolla-2016-1881/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672059/milhaticar/veiculos/toyota/corolla-2016-1881/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672060/milhaticar/veiculos/toyota/corolla-2016-1881/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672061/milhaticar/veiculos/toyota/corolla-2016-1881/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672061/milhaticar/veiculos/toyota/corolla-2016-1881/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672060/milhaticar/veiculos/toyota/corolla-2016-1881/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672060/milhaticar/veiculos/toyota/corolla-2016-1881/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672061/milhaticar/veiculos/toyota/corolla-2016-1881/foto-11.webp"
+      ],
+      "is_active": false,
+      "created_at": "2026-10-11T02:06:11.730539+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Vermelha",
+      "plate_end": "7",
+      "features": [],
+      "badge": null,
+      "sku": "5JNCD"
+    },
+    {
+      "id": "bc660626-33ec-4ecf-ad3c-35434c26d096",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen Jetta 2.0 4P",
+      "brand": "Volkswagen",
+      "model": "Jetta",
+      "year": 2012,
+      "mileage": 0,
+      "price": 54900,
+      "description": "Leve para casa este Volkswagen Jetta 2.0 2012 na cor preta, um sedã clássico que une elegância, conforto e excelente desempenho na estrada. O veículo conta com câmbio manual e está impecável por apenas R$ 54.900. Venha conferir esta oportunidade única e garanta o seu próximo carro hoje mesmo!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672085/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672086/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672086/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672086/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672086/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672087/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672087/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672087/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672088/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672088/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672088/milhaticar/veiculos/volkswagen/jetta-2012-1892/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:17.582929+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Preta",
+      "plate_end": "6",
+      "features": [],
+      "badge": null,
+      "sku": "P9WCK"
+    },
+    {
+      "id": "8b1bf546-0046-48c9-b361-6bb38ee58140",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Palio 2010 1.0 ",
+      "brand": "Fiat",
+      "model": "Palio",
+      "year": 2010,
+      "mileage": 112000,
+      "price": 28990,
+      "description": "Aproveite esta oportunidade imperdível e leve para casa o Fiat Palio 2010 1.0 Flex por apenas R$ 28.990. Com câmbio manual e cor vermelha marcante, este modelo seminovo possui 112.000 km rodados, oferecendo economia e confiabilidade para o seu dia a dia. Venha fazer um test drive e garanta já o seu!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/olmzj2j6dth80gcikqlm.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/if7bctkgtov8unqmioyn.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/a0zwkkodb9rwzljlefbz.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/uia2mf5sdufimujczmst.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/jbqy7zpgfjdydipqh6r4.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/mazniymbpqao7syynzu5.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/wxecajka4whl7rwoqswu.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/hybw2kt1c4dkvvxigs5r.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/rlmjreqktjust91c4ecb.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094191/ll-multimarcas/veiculos/sem-marca/8b1bf546-0046-48c9-b361-6bb38ee58140/szomfq137jc942estsmj.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T19:57:56.78619+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Vermelho",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "K9GHH"
+    },
+    {
+      "id": "920b7c2d-e01e-4497-a3ba-0983d39a8986",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen Golf 4P",
+      "brand": "Volkswagen",
+      "model": "Golf",
+      "year": 2004,
+      "mileage": 0,
+      "price": 39900,
+      "description": "Oportunidade única para entusiastas, Volkswagen Golf 4P 2004 preto seminovo com incríveis 0 km rodados. Equipado com motor a gasolina e câmbio manual, este clássico está impecável e pronto para colecionadores exigentes. Leve para sua garagem este ícone atemporal por apenas R$ 39.900 e aproveite.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672079/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672079/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672078/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672079/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672078/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672079/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672080/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672080/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672080/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672080/milhaticar/veiculos/volkswagen/golf-2004-1856/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:16.199393+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Preta",
+      "plate_end": "1",
+      "features": [],
+      "badge": null,
+      "sku": "PPAKK"
+    },
+    {
+      "id": "c10388ad-ba94-4cd2-a692-82714fe64126",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen Saveiro 1.6 MSI ROBUST CS 2P",
+      "brand": "Volkswagen",
+      "model": "Saveiro",
+      "year": 2025,
+      "mileage": 56675,
+      "price": 79900,
+      "description": "Procurando uma picape robusta e econômica para o seu trabalho? A Volkswagen Saveiro 1.6 MSI Robust CS 2025 branca com câmbio manual e 56.675 km rodados está pronta para rodar e impulsionar seus negócios. Por apenas R$ 79.900, ela oferece a durabilidade e a confiança que você precisa no dia a dia. Venha conferir e garantir o melhor negócio na nossa loja hoje mesmo!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672089/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672090/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672090/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672090/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672090/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672091/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672092/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672092/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672092/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672091/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672092/milhaticar/veiculos/volkswagen/saveiro-2025-1839/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:18.164193+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "0",
+      "features": [],
+      "badge": null,
+      "sku": "XDZFX"
+    },
+    {
+      "id": "11acf5c5-de32-4499-b10d-e3167eb75049",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Renault Kwid outsider 1.0 completo ",
+      "brand": "Renault",
+      "model": "Kwid",
+      "year": 2020,
+      "mileage": 150000,
+      "price": 45990,
+      "description": "O Renault Kwid Outsider 2020 vermelho é a escolha perfeita para quem busca economia e estilo no dia a dia. Este modelo 1.0 flex completo possui câmbio manual e está pronto para rodar por apenas R$ 45.990. Aproveite esta oportunidade única e venha garantir o seu seminovo hoje mesmo em nossa loja.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094358/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/lgbdwmvsmcqcevip85kj.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094357/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/k6ms2jo2ofdmri2mzcj5.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094358/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/vjjg4kd0hke6avalkhvl.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094358/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/osmflsymppt3adqhafyf.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094358/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/dlwxbwg5hudlzpgsbetn.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094357/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/bczc0k3ylgeuk6zlkdo8.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094357/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/yrvfvpkoy15wchqejtsq.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094357/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/qkxlasrkehilxw2zhxry.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094357/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/g4glwdh9ucmxoippy59v.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792094357/ll-multimarcas/veiculos/sem-marca/11acf5c5-de32-4499-b10d-e3167eb75049/m7mvv5iwdmig6hti0foq.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T20:00:46.178111+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Vermelho",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "JZQRQ"
+    },
+    {
+      "id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen Virtus CL TSI 4P",
+      "brand": "Volkswagen",
+      "model": "Virtus",
+      "year": 2022,
+      "mileage": 79831,
+      "price": 89900,
+      "description": "Leve para casa o Volkswagen Virtus CL TSI 2022 na elegante cor cinza por apenas R$ 89.900. Este sedan seminovo combina motor turbo, câmbio manual e excelente espaço interno, estando com 79.831 km rodados. Venha garantir conforto, economia e performance na sua próxima conquista sobre rodas!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672102/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672102/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672102/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672101/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672102/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672103/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672103/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672104/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672104/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672103/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672103/milhaticar/veiculos/volkswagen/virtus-2022-1887/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:20.77622+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Cinza",
+      "plate_end": "1",
+      "features": [],
+      "badge": null,
+      "sku": "WXC2N"
+    },
+    {
+      "id": "f1cf2801-290a-4e7d-89a4-c886f707978f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Chevrolet Celta 1.0 MPFI LS 8V 4P",
+      "brand": "Chevrolet",
+      "model": "Celta",
+      "year": 2013,
+      "mileage": 212630,
+      "price": 31900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670734/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670734/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670734/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670734/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670735/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670736/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670736/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670736/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670735/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670736/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791670736/milhaticar/veiculos/chevrolet/celta-2013-1898/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:52.328459+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Vermelha",
+      "plate_end": "2",
+      "features": [],
+      "badge": null,
+      "sku": "GY2NR"
+    },
+    {
+      "id": "e14ab645-9d16-4f93-935f-fbf26bd009ce",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Fiat Idea 1.4 MPI ATTRA 8V 4P",
+      "brand": "Fiat",
+      "model": "Idea",
+      "year": 2014,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671979/milhaticar/veiculos/fiat/idea-2014-1867/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671979/milhaticar/veiculos/fiat/idea-2014-1867/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671979/milhaticar/veiculos/fiat/idea-2014-1867/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671978/milhaticar/veiculos/fiat/idea-2014-1867/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671979/milhaticar/veiculos/fiat/idea-2014-1867/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671980/milhaticar/veiculos/fiat/idea-2014-1867/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671981/milhaticar/veiculos/fiat/idea-2014-1867/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671981/milhaticar/veiculos/fiat/idea-2014-1867/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671981/milhaticar/veiculos/fiat/idea-2014-1867/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671981/milhaticar/veiculos/fiat/idea-2014-1867/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671982/milhaticar/veiculos/fiat/idea-2014-1867/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:55.757771+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "6",
+      "features": [],
+      "badge": null,
+      "sku": "NW6JW"
+    },
+    {
+      "id": "b46bdca2-6629-4e17-bc8b-ab3dcdd54905",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Fiat Uno 1.0 VIVACE 4P",
+      "brand": "Fiat",
+      "model": "Uno",
+      "year": 2014,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791671999/milhaticar/veiculos/fiat/uno-2014-1876/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672000/milhaticar/veiculos/fiat/uno-2014-1876/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672000/milhaticar/veiculos/fiat/uno-2014-1876/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672000/milhaticar/veiculos/fiat/uno-2014-1876/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672000/milhaticar/veiculos/fiat/uno-2014-1876/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672001/milhaticar/veiculos/fiat/uno-2014-1876/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672002/milhaticar/veiculos/fiat/uno-2014-1876/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672002/milhaticar/veiculos/fiat/uno-2014-1876/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672002/milhaticar/veiculos/fiat/uno-2014-1876/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672001/milhaticar/veiculos/fiat/uno-2014-1876/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:05:59.066987+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "3",
+      "features": [],
+      "badge": null,
+      "sku": "PKEDN"
+    },
+    {
+      "id": "1d2cda6b-4598-4fe2-b32b-bf487234cf93",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Jeep Renegade 1.8 AT 4P",
+      "brand": "Jeep",
+      "model": "Renegade",
+      "year": 2018,
+      "mileage": 0,
+      "price": 71900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672018/milhaticar/veiculos/jeep/renegade-2018-1862/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672019/milhaticar/veiculos/jeep/renegade-2018-1862/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672019/milhaticar/veiculos/jeep/renegade-2018-1862/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672019/milhaticar/veiculos/jeep/renegade-2018-1862/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672019/milhaticar/veiculos/jeep/renegade-2018-1862/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672019/milhaticar/veiculos/jeep/renegade-2018-1862/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672020/milhaticar/veiculos/jeep/renegade-2018-1862/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672020/milhaticar/veiculos/jeep/renegade-2018-1862/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672020/milhaticar/veiculos/jeep/renegade-2018-1862/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672020/milhaticar/veiculos/jeep/renegade-2018-1862/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672021/milhaticar/veiculos/jeep/renegade-2018-1862/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:03.236389+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Vermelha",
+      "plate_end": "6",
+      "features": [],
+      "badge": null,
+      "sku": "WRQG2"
+    },
+    {
+      "id": "29b32334-47f9-4ea0-9998-c3965f0dafb8",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Renault Clio 1.6 EXPR 16V 4P",
+      "brand": "Renault",
+      "model": "Clio",
+      "year": 2016,
+      "mileage": 0,
+      "price": 0,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672048/milhaticar/veiculos/renault/clio-2016-1897/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672048/milhaticar/veiculos/renault/clio-2016-1897/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672048/milhaticar/veiculos/renault/clio-2016-1897/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672047/milhaticar/veiculos/renault/clio-2016-1897/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672048/milhaticar/veiculos/renault/clio-2016-1897/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672049/milhaticar/veiculos/renault/clio-2016-1897/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672050/milhaticar/veiculos/renault/clio-2016-1897/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672050/milhaticar/veiculos/renault/clio-2016-1897/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672049/milhaticar/veiculos/renault/clio-2016-1897/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672049/milhaticar/veiculos/renault/clio-2016-1897/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672050/milhaticar/veiculos/renault/clio-2016-1897/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:09.41312+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "0",
+      "features": [],
+      "badge": null,
+      "sku": "LY3GS"
+    },
+    {
+      "id": "c989446a-fdfd-4732-913a-5beaef2f9826",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Smart Fortwo COUPE 2P",
+      "brand": "Smart",
+      "model": "Fortwo",
+      "year": 2009,
+      "mileage": 0,
+      "price": 59900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672055/milhaticar/veiculos/smart/fortwo-2009-1816/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672056/milhaticar/veiculos/smart/fortwo-2009-1816/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672056/milhaticar/veiculos/smart/fortwo-2009-1816/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672056/milhaticar/veiculos/smart/fortwo-2009-1816/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672056/milhaticar/veiculos/smart/fortwo-2009-1816/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672056/milhaticar/veiculos/smart/fortwo-2009-1816/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672057/milhaticar/veiculos/smart/fortwo-2009-1816/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672057/milhaticar/veiculos/smart/fortwo-2009-1816/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672057/milhaticar/veiculos/smart/fortwo-2009-1816/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672057/milhaticar/veiculos/smart/fortwo-2009-1816/foto-10.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:11.062154+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Vermelha",
+      "plate_end": "0",
+      "features": [],
+      "badge": null,
+      "sku": "9VKRW"
+    },
+    {
+      "id": "28c8a6db-3eb6-4f2b-9555-b295a0248858",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen T-Cross 1.0 200 TSI TOTAL 4P",
+      "brand": "Volkswagen",
+      "model": "T-Cross",
+      "year": 2025,
+      "mileage": 42800,
+      "price": 110900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672094/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672095/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672095/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672095/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672095/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672096/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672095/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672096/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672096/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672097/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672097/milhaticar/veiculos/volkswagen/t-cross-2025-1875/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:19.673467+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "1",
+      "features": [],
+      "badge": null,
+      "sku": "PRTDY"
+    },
+    {
+      "id": "7911b3bc-16cb-4943-82fc-ac88cc40ae7f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen Gol 1.0 MI PLUS 2P",
+      "brand": "Volkswagen",
+      "model": "Gol",
+      "year": 1997,
+      "mileage": 0,
+      "price": 27900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672073/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672074/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672074/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672074/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672074/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672074/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672075/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672075/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672075/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672075/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672075/milhaticar/veiculos/volkswagen/gol-1997-1809/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:14.28333+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Vermelha",
+      "plate_end": "5",
+      "features": [],
+      "badge": null,
+      "sku": "ZAKS9"
+    },
+    {
+      "id": "293a4ee5-aad2-4e9b-93a8-24565e43ca7f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Volkswagen Golf GTI AB 4P",
+      "brand": "Volkswagen",
+      "model": "Golf",
+      "year": 2014,
+      "mileage": 0,
+      "price": 129900,
+      "description": "Veículo em excelente estado.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672082/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672082/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672082/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672081/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672082/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672083/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672083/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672084/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672084/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672083/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672084/milhaticar/veiculos/volkswagen/golf-2014-1855/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:16.780833+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "3",
+      "features": [],
+      "badge": null,
+      "sku": "L96J8"
+    },
+    {
+      "id": "06cfba87-e1e9-4afd-b70b-c564392c8039",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Fox 2008 1.0 City",
+      "brand": "Volkswagen",
+      "model": "Fox",
+      "year": 2008,
+      "mileage": 176000,
+      "price": 24990,
+      "description": "Oportunidade imperdível! Leve para casa este Volkswagen Fox 2008 1.0 City na cor prata, ideal para quem busca economia e praticidade no dia a dia. O veículo possui câmbio manual, motor flex e 176.000 km rodados, oferecendo excelente custo-benefício por apenas R$ 24.990. Venha conferir de perto e garantir o seu!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090274/ll-multimarcas/veiculos/sem-marca/06cfba87-e1e9-4afd-b70b-c564392c8039/tldrhaywjywptj7ijvix.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090274/ll-multimarcas/veiculos/sem-marca/06cfba87-e1e9-4afd-b70b-c564392c8039/wlozcnjgt9fm7y4y9k5c.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090274/ll-multimarcas/veiculos/sem-marca/06cfba87-e1e9-4afd-b70b-c564392c8039/tkthmby5sbscz6tra4vv.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090274/ll-multimarcas/veiculos/sem-marca/06cfba87-e1e9-4afd-b70b-c564392c8039/a9msyelkfdegn0gcipkz.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090274/ll-multimarcas/veiculos/sem-marca/06cfba87-e1e9-4afd-b70b-c564392c8039/h06edefeoex7djijck26.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090274/ll-multimarcas/veiculos/sem-marca/06cfba87-e1e9-4afd-b70b-c564392c8039/yvpox4dnf8tpu2cbeuww.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090274/ll-multimarcas/veiculos/sem-marca/06cfba87-e1e9-4afd-b70b-c564392c8039/zbp7bnzfymxdx8e9jyqd.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T18:53:03.580363+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "F64AF"
+    },
+    {
+      "id": "5876c5ed-af8d-4495-99d3-2fec2923a4aa",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "Porsche Macan 4P",
+      "brand": "Porsche",
+      "model": "Macan",
+      "year": 2021,
+      "mileage": 29660,
+      "price": 350900,
+      "description": "Procura esportividade e sofisticação? O Porsche Macan 2021 na cor branca une desempenho impecável e elegância marcante por R$ 350.900. Com apenas 29.660 km rodados, motor a gasolina e raro câmbio manual, este seminovo exclusivo oferece uma experiência de pilotagem incomparável. Venha garantir o seu na nossa concessionária hoje mesmo!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672041/milhaticar/veiculos/porsche/macan-2021-1857/foto-01.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672041/milhaticar/veiculos/porsche/macan-2021-1857/foto-02.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672040/milhaticar/veiculos/porsche/macan-2021-1857/foto-03.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672041/milhaticar/veiculos/porsche/macan-2021-1857/foto-04.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672041/milhaticar/veiculos/porsche/macan-2021-1857/foto-05.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672041/milhaticar/veiculos/porsche/macan-2021-1857/foto-06.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672042/milhaticar/veiculos/porsche/macan-2021-1857/foto-07.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672042/milhaticar/veiculos/porsche/macan-2021-1857/foto-08.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672042/milhaticar/veiculos/porsche/macan-2021-1857/foto-09.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672042/milhaticar/veiculos/porsche/macan-2021-1857/foto-10.webp",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791672042/milhaticar/veiculos/porsche/macan-2021-1857/foto-11.webp"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-11T02:06:07.560841+00:00",
+      "fuel": "Gasolina",
+      "transmission": "Manual",
+      "color": "Branca",
+      "plate_end": "2",
+      "features": [],
+      "badge": null,
+      "sku": "9FZKK"
+    },
+    {
+      "id": "bea81f6b-230d-4454-8084-8e7c896763a1",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "title": "GLA 250 SPORT 2.0 2019",
+      "brand": "Mercedes Benz",
+      "model": "GLA 250 SPORT",
+      "year": 2019,
+      "mileage": 44219,
+      "price": 152900,
+      "description": "Realize o sonho de ter uma Mercedes-Benz GLA 250 Sport 2.0 2019 cinza por R$ 152.900. Com apenas 44.219 km rodados, este SUV automático e flex oferece teto solar, bancos em couro e central multimídia. Aproveite todo o conforto e segurança que você e sua família merecem.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940183/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/smslsgkn0t7fjfj7e7v1.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940183/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/qaot9gpfeetzusy3vqxt.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940182/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/vrq9nsk1hppd1qmxb0rn.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940184/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/bv9purcl8odheluukjwe.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940182/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/xb3asmsf7dbsjjk9xwmo.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940182/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/bv6h5hktbwvxlahwuwjs.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940183/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/x7m74bzngxvpzwn0ohjz.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940184/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/ocypkys5sds75ah5ft85.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940182/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/xfnghc4mwwld1sivnjg9.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1791940182/milhaticar/veiculos/sem-marca/bea81f6b-230d-4454-8084-8e7c896763a1/cq9tpspn1ipn0pdpnxqr.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-14T01:13:42.086419+00:00",
+      "fuel": "Flex",
+      "transmission": "Automático",
+      "color": "Cinza ",
+      "plate_end": "5",
+      "features": [
+        "Ar-condicionado",
+        "Direção Elétrica/Hidráulica",
+        "Câmbio Automático",
+        "Teto Solar",
+        "Bancos em Couro",
+        "Central Multimídia",
+        "Câmera de Ré / Sensor",
+        "Freios ABS / Airbags",
+        "Faróis de LED",
+        "Chave Presencial / Start-Stop",
+        "Laudo Cautelar Aprovado",
+        "Painel 100% Digital"
+      ],
+      "badge": null,
+      "sku": "8547V"
+    },
+    {
+      "id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Honda City EX 2011",
+      "brand": "Honda",
+      "model": "City",
+      "year": 2011,
+      "mileage": 119000,
+      "price": 52900,
+      "description": "Oportunidade imperdível! Honda City EX 2011 prata, automático e flex, com 119.000 km rodados, oferecendo todo o conforto, economia e confiabilidade que você procura. Veículo completíssimo e em excelente estado de conservação por apenas R$ 52.900. Venha garantir o seu test-drive hoje mesmo!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090120/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/laus5fs9rv1e6mbz0im1.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/s8yy0ofb2jtphrrbawf2.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/of15u459hwygapztatna.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/eyjq8eiku3fllekivw0h.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/wknnagvrjici0ax2gzui.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/qidnpiewi6zfx9jrcryf.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/o4brdtozgkx6mre1fujt.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/xvwltvcbekd5fg3tottu.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/m079xj9rdfem8ypgnm9v.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090121/ll-multimarcas/veiculos/sem-marca/d7447505-fd16-4c81-9590-6162e6b8c279/e8ejuwcjlvf89q5dsait.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T18:50:33.735089+00:00",
+      "fuel": "Flex",
+      "transmission": "Automático",
+      "color": "Prata",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "VWH46"
+    },
+    {
+      "id": "6f4f8daf-c0a4-4e06-88fe-1032dc74324d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Classic 2011 ls 1.0",
+      "brand": "Chevrolet",
+      "model": "Classic",
+      "year": 2011,
+      "mileage": 140000,
+      "price": 25900,
+      "description": "Oportunidade imperdível! Leve para casa este Chevrolet Classic LS 1.0 2011 na cor preto, com câmbio manual e motor flex, ideal para quem busca economia e praticidade no dia a dia. O veículo possui 140.000 km rodados e está em ótimo estado de conservação por apenas R$ 25.900. Venha conferir de perto e garantir o seu novo carro hoje mesmo!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090939/ll-multimarcas/veiculos/sem-marca/6f4f8daf-c0a4-4e06-88fe-1032dc74324d/pcar6txxktk8dvjczaua.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090939/ll-multimarcas/veiculos/sem-marca/6f4f8daf-c0a4-4e06-88fe-1032dc74324d/iumuq04jlfhma9qbj3ph.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090939/ll-multimarcas/veiculos/sem-marca/6f4f8daf-c0a4-4e06-88fe-1032dc74324d/bkjllov0igsbpqiw0o8b.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090939/ll-multimarcas/veiculos/sem-marca/6f4f8daf-c0a4-4e06-88fe-1032dc74324d/kuyvunejfsttqxv1awzs.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090939/ll-multimarcas/veiculos/sem-marca/6f4f8daf-c0a4-4e06-88fe-1032dc74324d/e6wyeyla3yuwj4ulyajk.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090939/ll-multimarcas/veiculos/sem-marca/6f4f8daf-c0a4-4e06-88fe-1032dc74324d/jvgeflg61oepsrffxajc.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090939/ll-multimarcas/veiculos/sem-marca/6f4f8daf-c0a4-4e06-88fe-1032dc74324d/xklkmgwdmutvugsnap6j.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T19:06:01.446285+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Preto",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "5JDQU"
+    },
+    {
+      "id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Eco Sport 2012 Freestyle 1.6 Completa",
+      "brand": "Ford",
+      "model": "Eco Sport",
+      "year": 2012,
+      "mileage": 211000,
+      "price": 42900,
+      "description": "Aproveite esta oportunidade e garanta sua Ford EcoSport Freestyle 1.6 2012 completa na cor prata. Um SUV versátil, espaçoso e ideal para o seu dia a dia, equipado com câmbio manual e motor flex. Tudo isso por apenas R$ 42.900 com a qualidade que você procura.",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/rlcgce4kppl9kd1p33qf.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/bghowfa9oilba6pr7dny.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/x5bxwnbdijqdpflnz3n6.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/mwsbnpfyvcmbwbhc3x4z.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/mj2sqgjzcfig5w90jreh.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/tqdjnbvwawxeagydztrn.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/cvqmcgfaw9h0fhqfbn31.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/dap7zterabroecmtui6h.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/km7awkqjl47hxrfmwlc1.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792090612/ll-multimarcas/veiculos/sem-marca/b660557b-5048-41a8-80df-8cbbcb75f439/rps9fhzv209l1kts7xgk.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T19:01:52.202259+00:00",
+      "fuel": "Flex",
+      "transmission": "Manual",
+      "color": "Prata",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "HQYSL"
+    },
+    {
+      "id": "cf514354-673a-4ce9-885a-f4c4bdff8846",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "title": "Hyundai i30 2012 automático 2.0 completo ",
+      "brand": "Hyundai",
+      "model": "i30",
+      "year": 2012,
+      "mileage": 130000,
+      "price": 49990,
+      "description": "Leve para casa o Hyundai i30 2012 automático 2.0 completo na cor prata por apenas R$ 49.990. Com 130.000 km rodados, este hatch flex une conforto, potência e excelente custo-benefício para o seu dia a dia. Venha fazer um test-drive e garanta já o seu!",
+      "images": [
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/t8q9ewahif8f0oxbymqd.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/n9cuzssfhpfr3b2zxefm.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/z4rncti4blqlsnn3ezpd.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/weqqmcxvvntfena3jejf.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/sebe7qvbglemqaa6hsly.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/q529ji4obfyadgjtboc3.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/kqqsabmal2thn9pkdfxq.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/pcoz9inhl7swlpz2drdw.jpg",
+        "https://res.cloudinary.com/prnrnxaw/image/upload/v1792093779/ll-multimarcas/veiculos/sem-marca/cf514354-673a-4ce9-885a-f4c4bdff8846/shv2msgmvupwezl6bcpx.jpg"
+      ],
+      "is_active": true,
+      "created_at": "2026-10-15T19:51:39.336952+00:00",
+      "fuel": "Flex",
+      "transmission": "Automático",
+      "color": "Prata",
+      "plate_end": "",
+      "features": [],
+      "badge": null,
+      "sku": "T2NJW"
+    }
+  ],
+  "analytics_events": [
+    {
+      "id": "576181cf-b251-4f6a-b53c-107b915492d1",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "b111a814-23de-4b38-8f2b-945b46bf7bb4",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:07:18.133115+00:00"
+    },
+    {
+      "id": "ecfe8dc0-9984-4be1-b625-414635701952",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "eabcd929-ac4a-4c7d-b33e-f4273ea4b734",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:07:27.444934+00:00"
+    },
+    {
+      "id": "e9f9c054-b32a-4f63-b20a-4947b3f8d33e",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "5876c5ed-af8d-4495-99d3-2fec2923a4aa",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:07:31.470841+00:00"
+    },
+    {
+      "id": "690fd907-9e9d-4acc-a416-b0f0c9f08bda",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "cfeb7946-9c6d-4e94-ab33-62b5fabc9414",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:07:33.498693+00:00"
+    },
+    {
+      "id": "03203a08-ef02-4c71-bbeb-a07bc7d519b7",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "9961a396-36ee-4ec3-a541-e9faa8570187",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:07:35.876317+00:00"
+    },
+    {
+      "id": "814ef323-d241-4443-a0dc-a2a2a7e1a5ae",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:08:11.621505+00:00"
+    },
+    {
+      "id": "5a309311-69c8-4829-a526-d13002a93c82",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "5876c5ed-af8d-4495-99d3-2fec2923a4aa",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:12:39.323662+00:00"
+    },
+    {
+      "id": "6e599132-fef0-4468-b87d-f391744bda09",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "62b06db8-9404-4019-9ba0-896eeb672a5f",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:12:44.298194+00:00"
+    },
+    {
+      "id": "62409a21-db08-47d1-926b-3f384ab1c74f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "293a4ee5-aad2-4e9b-93a8-24565e43ca7f",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:12:57.83873+00:00"
+    },
+    {
+      "id": "6b7c7db9-c4f4-467a-8042-f732d83dcc5e",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:26:56.749084+00:00"
+    },
+    {
+      "id": "3ec0bc79-59f5-4b7d-bce0-28ddbb64907a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:26:57.810456+00:00"
+    },
+    {
+      "id": "4665d2c6-b311-4696-95b9-f166829cc538",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:27:27.99784+00:00"
+    },
+    {
+      "id": "6a641be7-6993-4b4d-bf59-9e2c204d3b9b",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:27:52.442385+00:00"
+    },
+    {
+      "id": "bebc3cec-6d20-4418-b387-c53f6711be77",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:28:23.686172+00:00"
+    },
+    {
+      "id": "07371ec2-40cd-4eb5-846d-9a57b13503c1",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "share",
+      "source": "direct",
+      "created_at": "2026-10-11T02:28:24.327033+00:00"
+    },
+    {
+      "id": "8ee107eb-4d26-4cd1-ba63-47a87b6c561c",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:28:44.663509+00:00"
+    },
+    {
+      "id": "49f233e0-1977-4050-869a-5043d7b0892b",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "bc660626-33ec-4ecf-ad3c-35434c26d096",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:28:52.912709+00:00"
+    },
+    {
+      "id": "dc82679d-7a67-49dc-befe-fdc69d571aeb",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:35:10.717046+00:00"
+    },
+    {
+      "id": "47c87998-1ed3-48be-8607-3978fd09ea6e",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:37:08.902784+00:00"
+    },
+    {
+      "id": "017bcc62-dece-4294-8099-a11e4625d845",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:41:47.973317+00:00"
+    },
+    {
+      "id": "3fb6c189-ada1-4c9e-9947-f4c6ed5b7a97",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:43:31.632576+00:00"
+    },
+    {
+      "id": "f1fe5452-3b97-4a1b-b2e3-f322453aad16",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:43:33.619414+00:00"
+    },
+    {
+      "id": "1490f2ad-112e-4cff-b7d1-3de3f6d1613a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-11T02:43:34.343345+00:00"
+    },
+    {
+      "id": "68c87b00-2036-4819-a3d1-7f7653c80366",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:43:34.599835+00:00"
+    },
+    {
+      "id": "ab2175cb-acd5-4ed7-8aee-fe78fd75dd63",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "c10388ad-ba94-4cd2-a692-82714fe64126",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:56:31.986146+00:00"
+    },
+    {
+      "id": "a08d2c14-b460-4a6c-84fa-b8705cc63b0f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "c10388ad-ba94-4cd2-a692-82714fe64126",
+      "event_type": "share",
+      "source": "direct",
+      "created_at": "2026-10-11T02:56:33.324159+00:00"
+    },
+    {
+      "id": "993296be-518f-4e4f-80e3-d8db3b48af52",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:57:35.864497+00:00"
+    },
+    {
+      "id": "b701b6f8-2fca-4ee7-b03c-77ff5338e92f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T03:18:44.388255+00:00"
+    },
+    {
+      "id": "f5dfc3d5-1394-4e59-b987-0251ffc4b82b",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T03:21:17.673773+00:00"
+    },
+    {
+      "id": "5d485ac0-c9dd-4600-b308-fc1c020c4604",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "instagram",
+      "created_at": "2026-10-12T18:52:24.814004+00:00"
+    },
+    {
+      "id": "7a9f7d24-6ba9-4524-a3d0-ae108a2fab4a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "instagram",
+      "created_at": "2026-10-12T18:52:24.814004+00:00"
+    },
+    {
+      "id": "c6dbd71c-55a8-40d1-bae2-67619dfe1833",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "google",
+      "created_at": "2026-10-12T18:52:24.814004+00:00"
+    },
+    {
+      "id": "1b86793a-b065-4313-b1b7-6bddbddfcce4",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "facebook",
+      "created_at": "2026-10-12T18:52:24.814004+00:00"
+    },
+    {
+      "id": "c4ba5a38-c6f3-4ca8-81d4-b29c22900e1b",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T18:52:24.814004+00:00"
+    },
+    {
+      "id": "93d3f0e7-8488-49e5-b843-e3248ea2ef38",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T19:01:54.808088+00:00"
+    },
+    {
+      "id": "8f810aeb-4630-40a9-a06f-0ef80cddbf86",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:21:42.679984+00:00"
+    },
+    {
+      "id": "c3d0d0d2-4d24-4555-ac48-af851dee11a9",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T02:37:13.321433+00:00"
+    },
+    {
+      "id": "10f9014e-4a67-42b1-b459-e859535c8ee5",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T03:18:38.334638+00:00"
+    },
+    {
+      "id": "088141ee-a4f7-4dbf-bc5e-039133968845",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T03:21:25.29222+00:00"
+    },
+    {
+      "id": "c054cfc9-6e2e-449b-99df-cbe072d6f780",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-11T03:21:33.178928+00:00"
+    },
+    {
+      "id": "e3f70d21-ff64-4b1f-95f6-3908cf6f22e4",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T20:55:23.430766+00:00"
+    },
+    {
+      "id": "c85055ff-7b5c-42a7-9f7e-4fea06b62ace",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "c10388ad-ba94-4cd2-a692-82714fe64126",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T20:55:27.07211+00:00"
+    },
+    {
+      "id": "49853b88-e1d0-4ac0-ac7f-4feeb0ecda6b",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "c10388ad-ba94-4cd2-a692-82714fe64126",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T21:02:05.002462+00:00"
+    },
+    {
+      "id": "61092a6b-997a-4784-b67d-b5f9ac3f1a4c",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T21:02:05.002462+00:00"
+    },
+    {
+      "id": "43967199-8ab1-4d5b-b4c1-ee048958c4c8",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T21:02:17.423992+00:00"
+    },
+    {
+      "id": "139dbc49-6ec1-46b1-915c-c149d50f0a22",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "c10388ad-ba94-4cd2-a692-82714fe64126",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T21:02:17.492825+00:00"
+    },
+    {
+      "id": "39bd6a1b-bf40-4333-a02c-ce9699e46324",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T22:03:42.848021+00:00"
+    },
+    {
+      "id": "3229f6fc-a10e-407a-a959-7adf2775c72f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T22:03:58.02485+00:00"
+    },
+    {
+      "id": "5d6ef79b-f6d4-4b6e-a788-68fc99f0f598",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T22:05:51.388237+00:00"
+    },
+    {
+      "id": "ccf81226-4766-4941-9edd-ae38f823057b",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T22:46:33.963951+00:00"
+    },
+    {
+      "id": "cd3e7b5f-e979-4430-ac49-ce704f0f7a99",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-12T22:47:01.456877+00:00"
+    },
+    {
+      "id": "f6a98115-62b0-408a-bd01-744b19b7f7fb",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T03:37:54.447577+00:00"
+    },
+    {
+      "id": "51f4f1ca-06f5-4e99-8e4b-c418d4b4e657",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "5876c5ed-af8d-4495-99d3-2fec2923a4aa",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T03:38:17.737885+00:00"
+    },
+    {
+      "id": "7d822ef4-6967-4829-a573-7d7c9c2d04b0",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T04:06:55.240781+00:00"
+    },
+    {
+      "id": "8bd9757d-6b23-44d9-ac65-29684a09e971",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T04:26:07.652986+00:00"
+    },
+    {
+      "id": "6d9b7959-206e-4b26-aa76-6a45ac833158",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T05:22:09.646277+00:00"
+    },
+    {
+      "id": "a5dafedf-ec42-4c08-8da0-c3904f838a3e",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T13:07:15.552806+00:00"
+    },
+    {
+      "id": "50cf96aa-e11f-472b-a2ab-a349904c6db6",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T13:14:59.566183+00:00"
+    },
+    {
+      "id": "9a246d98-6009-4f3c-8a1c-c4494972c8ee",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T14:15:18.633702+00:00"
+    },
+    {
+      "id": "4aed7c02-f269-493a-90ee-9bfdf7a8cdc3",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T15:56:14.898691+00:00"
+    },
+    {
+      "id": "b11d083e-1fef-4610-8da3-5dc6ef4b50b3",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T19:29:17.569561+00:00"
+    },
+    {
+      "id": "117defa5-e85b-44f5-94b0-26df1faf5bc0",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T15:56:20.539747+00:00"
+    },
+    {
+      "id": "d68a48cb-1155-4deb-9bdc-0cc4dab33980",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T00:16:38.343319+00:00"
+    },
+    {
+      "id": "79a9cc61-9be2-4dff-9748-893ffa4c68db",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T00:22:41.182732+00:00"
+    },
+    {
+      "id": "85495416-2ca7-4814-a9b0-74425dfbd362",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:14:03.196128+00:00"
+    },
+    {
+      "id": "705d7aeb-d51e-44ac-b14c-70103bdb6b02",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "bea81f6b-230d-4454-8084-8e7c896763a1",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:14:04.624822+00:00"
+    },
+    {
+      "id": "7b8a9753-af4f-4066-a61c-88582bd27e7a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:15:20.911708+00:00"
+    },
+    {
+      "id": "8d98af78-50f8-4aff-b04b-e14deb0e3fa5",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:48:22.441399+00:00"
+    },
+    {
+      "id": "c1b84686-5b32-4e1f-9185-b94f9ccbd591",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "bea81f6b-230d-4454-8084-8e7c896763a1",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:48:35.717061+00:00"
+    },
+    {
+      "id": "677f3efa-861f-4fc6-9b1a-cc61d28fce13",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:48:58.846761+00:00"
+    },
+    {
+      "id": "c43d4906-1c3a-4c29-8cde-6dc059a184b9",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:58:18.528909+00:00"
+    },
+    {
+      "id": "9af49b9b-9979-46e4-9eea-4201741f082a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:58:21.291099+00:00"
+    },
+    {
+      "id": "61c0f170-345d-4d00-843d-5e54ca8986a4",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:58:40.458515+00:00"
+    },
+    {
+      "id": "71aabf4d-6c6b-4c1e-b29d-7c3ae9cb95b2",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T01:58:42.997909+00:00"
+    },
+    {
+      "id": "fb7deb61-5f24-4e18-b9d5-4d606e3f109f",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T02:06:12.141704+00:00"
+    },
+    {
+      "id": "c1e4ec4a-d69c-4201-9e0f-e19e8128913a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T02:12:13.573018+00:00"
+    },
+    {
+      "id": "8789a1d9-3ab1-4224-8181-cd69c217c9fe",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T19:54:24.756962+00:00"
+    },
+    {
+      "id": "6deef3bd-c04f-4972-a30c-ee6b19ae505a",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-14T21:09:36.183146+00:00"
+    },
+    {
+      "id": "83b552cb-cb6d-4c47-9960-c15aada1968c",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T00:07:20.398861+00:00"
+    },
+    {
+      "id": "de56d4d4-4e3f-42b4-98e2-a80daaed9790",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T00:08:22.366617+00:00"
+    },
+    {
+      "id": "62ee863a-453b-4ce2-a3b2-f1b94ee9ac9d",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "503456c3-9d18-4aeb-a0d9-8892d5c5c5a7",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T00:08:31.734873+00:00"
+    },
+    {
+      "id": "244261d3-c128-48b2-a23c-fda9f507f717",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T00:09:06.014129+00:00"
+    },
+    {
+      "id": "2cf3e381-2c0f-4489-b6c1-1046bc9af15d",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-13T03:38:03.020403+00:00"
+    },
+    {
+      "id": "c4141f5e-9195-4d2a-8350-5416cc3c1c2e",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T13:33:26.25469+00:00"
+    },
+    {
+      "id": "0a9116c5-5d8b-4af4-8e38-133ca7eabee9",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T13:34:22.677278+00:00"
+    },
+    {
+      "id": "8f634253-9b39-429f-9979-471656837aec",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T13:36:31.073801+00:00"
+    },
+    {
+      "id": "3ef2e3d4-7890-4885-94b5-5fac68ea93e8",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T13:36:45.754144+00:00"
+    },
+    {
+      "id": "4cf5f862-4d45-4266-988a-ff35e8a374a9",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T16:08:39.520059+00:00"
+    },
+    {
+      "id": "306c40aa-5893-4c83-b524-52ad99af3d61",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T16:33:06.74132+00:00"
+    },
+    {
+      "id": "d438f3e2-4975-471b-8e27-6d669ef17d33",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T16:33:09.593914+00:00"
+    },
+    {
+      "id": "ad63bfc4-cf95-4f6f-b263-937bbebe28e3",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T17:04:01.059908+00:00"
+    },
+    {
+      "id": "6ae06116-be47-4d08-8c9a-7ce442483ec1",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T17:27:17.347813+00:00"
+    },
+    {
+      "id": "c4404cf8-fd57-4394-adc0-701087bb6a3e",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T17:27:23.472192+00:00"
+    },
+    {
+      "id": "b856ec83-8a50-4878-a477-95a451083561",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T17:28:01.760979+00:00"
+    },
+    {
+      "id": "7c9a43b7-54e2-4c1e-992a-477083c95b26",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T17:28:28.73181+00:00"
+    },
+    {
+      "id": "d99694d8-cdb6-4c18-8919-6b19753c310a",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:29:49.480971+00:00"
+    },
+    {
+      "id": "def809fd-0076-433e-8787-06f379b3926a",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T18:35:27.978877+00:00"
+    },
+    {
+      "id": "261f5bf3-adf9-4599-9883-89db6c2bd9a8",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:46:45.21418+00:00"
+    },
+    {
+      "id": "9791105e-f004-4f34-b9ea-b6fdabf796f0",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:46:46.113685+00:00"
+    },
+    {
+      "id": "b3afddf4-2441-4c2c-b01b-bfb9b2de4342",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:46:48.407729+00:00"
+    },
+    {
+      "id": "f9ad3f2d-de1d-4bd7-8af2-e59ee4628974",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:46:50.193565+00:00"
+    },
+    {
+      "id": "00b81dd4-61a2-4353-89b2-9729eca5fe1e",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:46:52.122256+00:00"
+    },
+    {
+      "id": "774d1050-3256-4e6c-bdd3-0c2dafad1e9c",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:46:57.87481+00:00"
+    },
+    {
+      "id": "8b463e02-71d7-49c6-b4c8-e11e78b5405e",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:46:59.708514+00:00"
+    },
+    {
+      "id": "25da8990-2950-45e0-9889-08c60479f544",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:47:02.180609+00:00"
+    },
+    {
+      "id": "160834fb-f0d0-4115-a6f8-6914806974b6",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:47:04.631208+00:00"
+    },
+    {
+      "id": "1ad71980-ed7b-455d-aec5-81d35015b202",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:47:07.078287+00:00"
+    },
+    {
+      "id": "992579b4-2adf-4f24-b7a0-764f503b33f2",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:47:09.2568+00:00"
+    },
+    {
+      "id": "01ec048f-0d8a-4234-99d9-8d4999e2d3a2",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:47:12.373017+00:00"
+    },
+    {
+      "id": "2cdd056a-1fa9-4568-bfb4-3ae2a7f9059c",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:47:15.512293+00:00"
+    },
+    {
+      "id": "74123df8-827f-42a2-b52b-493fa8c089d3",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:47:53.304959+00:00"
+    },
+    {
+      "id": "14eccfed-0943-48a1-8395-4b54c03c72b8",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:50:39.487117+00:00"
+    },
+    {
+      "id": "c959b0c8-ffde-488e-a750-a3ef73703cda",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:50:42.769325+00:00"
+    },
+    {
+      "id": "2eed96f1-958e-4a6b-abee-6124eae4d478",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:50:42.834975+00:00"
+    },
+    {
+      "id": "e582aa21-f24f-4498-954f-09f251cd6917",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:51:30.35901+00:00"
+    },
+    {
+      "id": "22bb77fd-dff2-4526-a184-f7c926b7c1f8",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:53:32.14873+00:00"
+    },
+    {
+      "id": "56f41686-9c30-41a4-ace9-289d321928fd",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:54:05.878479+00:00"
+    },
+    {
+      "id": "912885a7-970e-426b-a848-cd73a8489da2",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:54:51.475974+00:00"
+    },
+    {
+      "id": "2fd86503-cea4-4ca1-8fc9-a654a0299aeb",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:54:59.256735+00:00"
+    },
+    {
+      "id": "493a6959-f7e6-40b2-b670-c645dda7e807",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:55:02.971096+00:00"
+    },
+    {
+      "id": "5e1d0589-a5ee-484c-a68d-eff1f1c52d35",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:55:06.439254+00:00"
+    },
+    {
+      "id": "14856312-7feb-477e-9cfe-0c6940c0e941",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:55:45.137247+00:00"
+    },
+    {
+      "id": "46761f65-5ba0-4f2b-88d5-00220abffbe4",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:55:49.507487+00:00"
+    },
+    {
+      "id": "846f94b3-1045-41a8-9a85-a1ad27ff89d2",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:56:02.010517+00:00"
+    },
+    {
+      "id": "8301ae9d-0967-4032-8040-2d5fd06ed0d6",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "ea69c793-6d8b-4890-a3d0-b23d25144de0",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:56:03.034485+00:00"
+    },
+    {
+      "id": "db555f92-f24a-44c0-b207-57dc359df9ed",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:56:27.270866+00:00"
+    },
+    {
+      "id": "2ee08ccc-b66e-4d1e-a5b1-209a046c180b",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:56:33.095527+00:00"
+    },
+    {
+      "id": "fa66e9e6-eb4f-4b18-8ed1-6f6404bfa5eb",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:56:40.021593+00:00"
+    },
+    {
+      "id": "6d4cb8fc-63c1-40cf-b255-c554115f9a49",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T18:58:17.020038+00:00"
+    },
+    {
+      "id": "c867b850-5750-4b53-87f4-306a9de74e5e",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:59:13.27826+00:00"
+    },
+    {
+      "id": "8aff9295-3953-497a-99e0-f36377c4d8bb",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:59:32.333701+00:00"
+    },
+    {
+      "id": "ca5e6986-eae9-431b-83cc-7689474b8ec7",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:59:44.127867+00:00"
+    },
+    {
+      "id": "d55a4393-e6cf-4d74-9957-dc6c42287706",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T18:59:55.296877+00:00"
+    },
+    {
+      "id": "7b35abd1-e837-4616-840d-d0a3eda2ff62",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:00:01.075813+00:00"
+    },
+    {
+      "id": "af0631d3-d826-4ffc-9b9d-4f8422550176",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:00:35.924642+00:00"
+    },
+    {
+      "id": "d53ba995-459b-45d2-b154-3cae81d6553b",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "06cfba87-e1e9-4afd-b70b-c564392c8039",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:00:38.155544+00:00"
+    },
+    {
+      "id": "b8bcab28-f66a-4e3b-a2e0-bbb18a1a84b1",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:00:45.032816+00:00"
+    },
+    {
+      "id": "9947cbca-5225-49c8-8750-f7c09ea89c63",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:00:49.77949+00:00"
+    },
+    {
+      "id": "567becc1-9d94-440b-9998-3739cb200b12",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:00:53.586787+00:00"
+    },
+    {
+      "id": "62039921-a6ae-4f98-ab66-3f388ff28545",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:03:31.397057+00:00"
+    },
+    {
+      "id": "68b10419-3ddb-4310-a48e-6f1e58bb94ba",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:03:35.156975+00:00"
+    },
+    {
+      "id": "f5c6670c-1157-4daf-9888-a577f3ffce3d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:03:40.692308+00:00"
+    },
+    {
+      "id": "026c869e-90e2-411a-9ffd-4b986e3a9ed4",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:03:45.740613+00:00"
+    },
+    {
+      "id": "ac935731-bf03-4110-bf49-3ebca52b7409",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:11.232571+00:00"
+    },
+    {
+      "id": "83982c61-576e-4eda-9cd9-3d0e72e3b21f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "6f4f8daf-c0a4-4e06-88fe-1032dc74324d",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:13.972834+00:00"
+    },
+    {
+      "id": "f9155b50-6a2b-4911-9cd2-dc2ca1213018",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "6f4f8daf-c0a4-4e06-88fe-1032dc74324d",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:19.339146+00:00"
+    },
+    {
+      "id": "b8b911aa-1906-4183-aac8-c91238737d1c",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:24.766179+00:00"
+    },
+    {
+      "id": "00c87f0a-b589-45cd-8877-6c6a0e9d8e09",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "06cfba87-e1e9-4afd-b70b-c564392c8039",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:32.107073+00:00"
+    },
+    {
+      "id": "78e86eb1-b547-45d8-96a3-443c7c67a49d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:51.548805+00:00"
+    },
+    {
+      "id": "5c0ecd43-4293-469e-8329-8c20e37b197b",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:53.333464+00:00"
+    },
+    {
+      "id": "09bd97c4-01d8-46e2-8a38-7c529c76b311",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:55.421701+00:00"
+    },
+    {
+      "id": "1b63a30e-6b34-4ad1-b21a-73372f8ef1e3",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "6f4f8daf-c0a4-4e06-88fe-1032dc74324d",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:06:58.045669+00:00"
+    },
+    {
+      "id": "2bef9b1b-166e-4f7f-8607-bd659ecef7d5",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:06.002093+00:00"
+    },
+    {
+      "id": "1e8d9130-1aae-4bd5-b84c-52fbf09c53fe",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "6f4f8daf-c0a4-4e06-88fe-1032dc74324d",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:10.986503+00:00"
+    },
+    {
+      "id": "9a9f64ce-79bd-4144-a048-540fffac5dc5",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:18.003238+00:00"
+    },
+    {
+      "id": "522cfdbf-ea2a-4ce7-b62e-122c9c15456b",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:23.025274+00:00"
+    },
+    {
+      "id": "db79507f-d6fe-4629-891f-1f312cb9109f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:27.662543+00:00"
+    },
+    {
+      "id": "a1aafa67-af19-44a2-ad6b-d85eaef2ae03",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:28.89446+00:00"
+    },
+    {
+      "id": "8f2a268f-dcd0-4c7b-8d23-dcdd3e1cb9fb",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:31.69992+00:00"
+    },
+    {
+      "id": "6d738b46-12b1-4422-badb-b5176327cc47",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:34.760763+00:00"
+    },
+    {
+      "id": "4229d7b3-3b97-4e69-a64d-f21e191e7c2b",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:36.80917+00:00"
+    },
+    {
+      "id": "7f7d27a4-d4ac-4ad6-86ec-02b72f560866",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:40.923308+00:00"
+    },
+    {
+      "id": "0613744f-9c9f-467d-9b91-1e9849af76b8",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:42.082574+00:00"
+    },
+    {
+      "id": "095b3762-adb4-4dea-8df6-3acd41166c0d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:07:49.869507+00:00"
+    },
+    {
+      "id": "ef775715-4aba-4431-95c5-7aa264314b6b",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:12:39.838435+00:00"
+    },
+    {
+      "id": "46e375ca-fa86-49d9-b4c6-c3a87ed0bedd",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:12:45.864046+00:00"
+    },
+    {
+      "id": "6330aa61-e113-4dc8-8d41-212253dce1ea",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:14:03.480305+00:00"
+    },
+    {
+      "id": "703a1a02-7fe6-43db-aeb3-be226d81f9a7",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "06cfba87-e1e9-4afd-b70b-c564392c8039",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:14:41.060669+00:00"
+    },
+    {
+      "id": "4484dfd0-5741-4c76-8c63-ed5ded26a18f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:15:40.406312+00:00"
+    },
+    {
+      "id": "f46f419c-b5f6-4f7b-9093-c7ac45494150",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:15:42.913695+00:00"
+    },
+    {
+      "id": "47d8ad9d-6866-4e90-b31d-61fd440397a9",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:16:02.082018+00:00"
+    },
+    {
+      "id": "f7ebd2c5-549a-4f2b-a94c-357457a67931",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "d7447505-fd16-4c81-9590-6162e6b8c279",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:16:10.184368+00:00"
+    },
+    {
+      "id": "901afd38-5a0b-4615-8fee-1ae18f04aee0",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:40:29.756149+00:00"
+    },
+    {
+      "id": "ebe417ac-0c57-44cb-98fb-9fee7ec5c006",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "06cfba87-e1e9-4afd-b70b-c564392c8039",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:11.398903+00:00"
+    },
+    {
+      "id": "18dc61c3-670f-42a6-8544-dd7baa5f43c9",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:20.598427+00:00"
+    },
+    {
+      "id": "13fbc97b-c923-4c9a-918f-28185c0611eb",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:22.930499+00:00"
+    },
+    {
+      "id": "16da0f7a-fdd8-4f12-a97c-ebefec40d632",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:25.412165+00:00"
+    },
+    {
+      "id": "b1229b61-bcb0-4b81-973a-ec4be544941f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:28.349262+00:00"
+    },
+    {
+      "id": "80edd983-87eb-4609-9510-a6d03163823c",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:29.720577+00:00"
+    },
+    {
+      "id": "4e6ccdcd-9505-493d-a81a-5fbd54b2c2d2",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "6f4f8daf-c0a4-4e06-88fe-1032dc74324d",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:30.656244+00:00"
+    },
+    {
+      "id": "723f5cb7-034d-431c-9f37-34d013a19b43",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:31.803411+00:00"
+    },
+    {
+      "id": "fe504552-9e7a-4568-b84f-8422430c414a",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "06cfba87-e1e9-4afd-b70b-c564392c8039",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:33.132571+00:00"
+    },
+    {
+      "id": "6f7253e0-87a9-45ac-8990-7c1946b5e622",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:33.136769+00:00"
+    },
+    {
+      "id": "8f6d6d41-8105-4de0-9f83-1cfbbd029a88",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:35.962507+00:00"
+    },
+    {
+      "id": "0e5403fb-c339-4567-b00a-4c63dbc98665",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:36.966967+00:00"
+    },
+    {
+      "id": "da348119-2e83-4bfe-aebc-ec82acd2bca2",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:39.753174+00:00"
+    },
+    {
+      "id": "8797dd0c-b2d9-475a-8519-4afe48b29567",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:40.911773+00:00"
+    },
+    {
+      "id": "ea564f16-80d2-4b5f-88eb-fdd2e165966d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:44.264033+00:00"
+    },
+    {
+      "id": "a60b2843-1404-47cb-81be-47ba9c8278d6",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:45:51.330713+00:00"
+    },
+    {
+      "id": "2e047641-7ad1-469a-b066-c6f4de8a53a0",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:46:00.537631+00:00"
+    },
+    {
+      "id": "04f6af6e-7a28-4a6b-9193-51a327401c5a",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:47:20.781627+00:00"
+    },
+    {
+      "id": "cc4ff207-7ce6-4126-a13f-e681e6132767",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:49:36.475143+00:00"
+    },
+    {
+      "id": "882000e5-83e5-4188-8aef-c54f586b4ec3",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:50:22.670484+00:00"
+    },
+    {
+      "id": "d4ec1fec-f5da-46ba-9adb-c1ac1ae25298",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:50:29.685472+00:00"
+    },
+    {
+      "id": "35e80d58-a58f-44e0-9fda-a2fab379afce",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:52:20.432231+00:00"
+    },
+    {
+      "id": "27387b0b-06fc-46bf-9ce2-29c359d9f5c7",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:52:21.356476+00:00"
+    },
+    {
+      "id": "0447c2dd-55fb-44af-aa2d-829d62a23f59",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:52:21.939555+00:00"
+    },
+    {
+      "id": "74300ec6-9e4b-43c6-a84a-fda65465118b",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:52:22.543074+00:00"
+    },
+    {
+      "id": "11ef194f-9ce4-463d-8ded-fe95e4307007",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:52:27.029195+00:00"
+    },
+    {
+      "id": "0862f74e-6f9f-4571-b248-5507d83a1f2e",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:52:32.622698+00:00"
+    },
+    {
+      "id": "457aa77d-8855-4f19-9076-b584af011f5d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:52:33.816699+00:00"
+    },
+    {
+      "id": "45cfe7ba-8c4b-417f-86d4-bdf21a176a5f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:53:09.983485+00:00"
+    },
+    {
+      "id": "997b0fcd-0647-4104-8571-352a7803ebde",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:53:23.17618+00:00"
+    },
+    {
+      "id": "ec4b63c1-4043-4b20-9d6a-7066c82d2b1b",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:53:26.344124+00:00"
+    },
+    {
+      "id": "212b000b-a471-44a6-8f97-d3bff803d773",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:53:27.627921+00:00"
+    },
+    {
+      "id": "38684306-f3e6-4543-b445-cca6d3f7c3df",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:53:51.281017+00:00"
+    },
+    {
+      "id": "538fef67-38e7-47fd-bc24-332895f55bae",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:54:08.847506+00:00"
+    },
+    {
+      "id": "2becc493-66fa-46f3-b98a-bedb87ea4f1f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:54:13.309381+00:00"
+    },
+    {
+      "id": "d0f520a6-dd9b-446b-9d12-9883ea38f0e8",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:55:21.164787+00:00"
+    },
+    {
+      "id": "313e4a3c-1b95-4b66-8eda-ecbc64f41e1f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T19:55:22.299883+00:00"
+    },
+    {
+      "id": "2be5a575-3489-4c6e-bfe1-380aecfabf25",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T19:58:28.035517+00:00"
+    },
+    {
+      "id": "705ab43a-98f1-4d75-ba63-41488e5baae6",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:00:57.565219+00:00"
+    },
+    {
+      "id": "69b67572-937e-4d24-ac75-df22ec78877f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:02:30.820045+00:00"
+    },
+    {
+      "id": "c3fea262-b104-4b6c-8496-0c9941fd2a42",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "whatsapp_click",
+      "source": "direct",
+      "created_at": "2026-10-15T20:02:35.764733+00:00"
+    },
+    {
+      "id": "25dda4f5-9197-4d16-91ff-fe0269ef1fc4",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:02:39.23711+00:00"
+    },
+    {
+      "id": "abea20de-e932-43f5-b5dc-b3499c6b7e20",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "8b1bf546-0046-48c9-b361-6bb38ee58140",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:03:12.730558+00:00"
+    },
+    {
+      "id": "81561fd4-ae49-4452-8c90-b5b020c8ba54",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "cf514354-673a-4ce9-885a-f4c4bdff8846",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:03:21.960656+00:00"
+    },
+    {
+      "id": "10dd6328-b629-44aa-9208-10a5a178c98c",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:03:54.62557+00:00"
+    },
+    {
+      "id": "22b4bc8b-dacb-466f-a725-dae75f2b8207",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:08:24.57627+00:00"
+    },
+    {
+      "id": "0b2c0372-73d7-4bea-9ff3-7357537fa5b4",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "google",
+      "created_at": "2026-10-15T20:10:04.242735+00:00"
+    },
+    {
+      "id": "f650c034-8a50-4b3d-b29a-a5b4b9ecc978",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:12:59.823869+00:00"
+    },
+    {
+      "id": "760ebe4b-2510-4980-a48d-b26fbbfb2de7",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:13:03.0622+00:00"
+    },
+    {
+      "id": "60d4c361-e660-4bcb-af29-9e430346b585",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:13:10.63615+00:00"
+    },
+    {
+      "id": "d0bc898c-ee82-4a39-b592-1a9ee9e02ba9",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:13:16.274118+00:00"
+    },
+    {
+      "id": "93b15cbc-466d-4389-b64b-0a211779585d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:13:32.312789+00:00"
+    },
+    {
+      "id": "fa03892e-66d1-44b0-89ae-fd7c48de88aa",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:26:30.944965+00:00"
+    },
+    {
+      "id": "58bb311b-2b54-4471-ae04-bed9a0096867",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:28:26.015676+00:00"
+    },
+    {
+      "id": "301bb306-94df-4930-9870-40599bdf441f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:28:35.855736+00:00"
+    },
+    {
+      "id": "8a39152c-02c6-4564-9933-515b71fd7f77",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:28:38.194636+00:00"
+    },
+    {
+      "id": "e8a3f87d-9c5c-45ca-b75b-ed03cd717116",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:30:08.844896+00:00"
+    },
+    {
+      "id": "ab8eaa21-6d2e-4f2c-8f23-12205f81015a",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:50:47.415665+00:00"
+    },
+    {
+      "id": "cd7edcd4-aa93-46de-9a2d-9e813e8b7bf0",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:51:56.978924+00:00"
+    },
+    {
+      "id": "26cb090f-e149-4f30-96b1-d0b66d2cadfb",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:53:13.854855+00:00"
+    },
+    {
+      "id": "dd3b4058-a096-426e-b992-91eb9ce822e8",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:53:40.191419+00:00"
+    },
+    {
+      "id": "5ac4fffa-6cff-4e29-b4b3-db997e0bba97",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:56:41.355197+00:00"
+    },
+    {
+      "id": "3c0f6d83-b602-4443-8eac-a81206f2b107",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T20:57:24.793245+00:00"
+    },
+    {
+      "id": "b1652503-c325-44ff-bca7-c3a11201b661",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T21:17:49.489155+00:00"
+    },
+    {
+      "id": "94ad8425-cf42-4908-9c4f-8eee65fc508d",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T21:18:17.729629+00:00"
+    },
+    {
+      "id": "e55ee83b-597c-4fdb-99e1-49e277d4ec4e",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T21:50:15.547976+00:00"
+    },
+    {
+      "id": "d31e6b31-36b4-43e4-afa6-26296803a6a0",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "11acf5c5-de32-4499-b10d-e3167eb75049",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T21:50:23.842142+00:00"
+    },
+    {
+      "id": "049f4cbf-7eab-4771-9e55-69d8c0d14104",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "cf514354-673a-4ce9-885a-f4c4bdff8846",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T21:50:37.725422+00:00"
+    },
+    {
+      "id": "6c9056eb-3a7b-4bff-87a8-487dd285b320",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "84421ae3-1752-412f-8549-296de9019000",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T21:50:42.43442+00:00"
+    },
+    {
+      "id": "d0388aa6-6480-4d61-b8c9-13b6334d1d02",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-15T22:16:41.859212+00:00"
+    },
+    {
+      "id": "a32b922b-d867-434d-a4ae-f4700bb504ec",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T12:48:05.925636+00:00"
+    },
+    {
+      "id": "ee42ad1f-427c-48ca-8ad9-1fd8334e0242",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T12:51:40.372817+00:00"
+    },
+    {
+      "id": "7a3e3910-45a8-44a2-b8f2-7ea95be04767",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T12:51:45.788937+00:00"
+    },
+    {
+      "id": "b5bcea85-cde1-40c3-93fc-739fcfa05acb",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T12:51:51.038691+00:00"
+    },
+    {
+      "id": "bf5c9285-4426-4cca-a9a3-6041dd2bf4c2",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T12:52:10.138751+00:00"
+    },
+    {
+      "id": "5c7122fe-90d0-4a1b-8bf3-10659d936c40",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T12:53:01.182881+00:00"
+    },
+    {
+      "id": "4f2b27d1-b5fe-4a60-8b15-927846bf4053",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "11acf5c5-de32-4499-b10d-e3167eb75049",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T13:22:01.847262+00:00"
+    },
+    {
+      "id": "cfd28e4a-8842-4185-bab1-b89fdc05cb55",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "84421ae3-1752-412f-8549-296de9019000",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T13:22:12.041776+00:00"
+    },
+    {
+      "id": "db73d539-1f54-417d-bf91-9db1eef00c68",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T14:46:01.976102+00:00"
+    },
+    {
+      "id": "ed7e3bdd-3630-4cac-8728-cacf3dd9f42f",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T17:27:37.586159+00:00"
+    },
+    {
+      "id": "e07ed25b-f365-42e7-aa8c-532a356c3bb1",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:12:40.2289+00:00"
+    },
+    {
+      "id": "5c5c9dcb-4d51-4b81-8b00-524569672ea1",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "cf514354-673a-4ce9-885a-f4c4bdff8846",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:13:09.155353+00:00"
+    },
+    {
+      "id": "94ae2adb-318e-4586-8173-410017300686",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:14:09.684897+00:00"
+    },
+    {
+      "id": "8e1ab975-0879-4aaf-b117-e5e136a4ed17",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:15:02.979172+00:00"
+    },
+    {
+      "id": "0094d183-fac0-4954-bcb6-05388120d8fc",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "b660557b-5048-41a8-80df-8cbbcb75f439",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:15:41.557307+00:00"
+    },
+    {
+      "id": "8d6b2b20-1ef0-4c46-b72a-7c19bebbe2f1",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:16:25.301743+00:00"
+    },
+    {
+      "id": "bc0af2d2-63b0-4b01-befe-42aa2f6efb74",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:17:38.817906+00:00"
+    },
+    {
+      "id": "81111cc1-e58e-4a7d-bcb7-43cd740c7dec",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:17:57.638111+00:00"
+    },
+    {
+      "id": "f8c7b195-4c0b-479d-b069-c79fef7f6020",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "84421ae3-1752-412f-8549-296de9019000",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:18:03.744236+00:00"
+    },
+    {
+      "id": "8ffd2ba2-1f61-4b44-b5c1-15cf08140b0c",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "84421ae3-1752-412f-8549-296de9019000",
+      "event_type": "share",
+      "source": "direct",
+      "created_at": "2026-10-16T23:18:07.338826+00:00"
+    },
+    {
+      "id": "31d7e3c9-c250-4ba0-9977-16f726af93d3",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:20:30.512758+00:00"
+    },
+    {
+      "id": "c4ad871f-6050-4984-8443-239affb829f8",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": "84421ae3-1752-412f-8549-296de9019000",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:20:30.81788+00:00"
+    },
+    {
+      "id": "4166a5dd-e177-48ef-b264-2c45bccb23e4",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:21:07.463477+00:00"
+    },
+    {
+      "id": "a2b1a4cf-fc13-4e97-97b1-cd9ff3e61f48",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "920b7c2d-e01e-4497-a3ba-0983d39a8986",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:21:48.881462+00:00"
+    },
+    {
+      "id": "18bfbade-1822-4645-9f97-75ed7509bb39",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:27:09.377469+00:00"
+    },
+    {
+      "id": "be0ed42c-aabd-47dd-8a09-723c33286ece",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": "920b7c2d-e01e-4497-a3ba-0983d39a8986",
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:27:15.7956+00:00"
+    },
+    {
+      "id": "fba801c9-1089-43e3-91ca-4558788bc055",
+      "store_id": "1a2cca30-8e15-4b9b-b0ea-bdb5c5996948",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-16T23:28:06.506544+00:00"
+    },
+    {
+      "id": "cf0a4c56-30ed-49e3-af89-5c7965490090",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-17T16:56:04.007309+00:00"
+    },
+    {
+      "id": "05a6f484-9a6a-4d79-b9e4-04d8d828c47c",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-17T16:56:05.061764+00:00"
+    },
+    {
+      "id": "1ec3ae53-a71e-4065-b942-b6927fa762b0",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-17T17:20:25.545634+00:00"
+    },
+    {
+      "id": "23a6cdda-8eef-4b90-9fde-95b99ef8fe80",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-17T17:20:33.003814+00:00"
+    },
+    {
+      "id": "85418c88-2536-4af7-80c1-70fdd360d9d0",
+      "store_id": "ed121252-6127-4f87-b6d8-a0dbbfc0abed",
+      "vehicle_id": null,
+      "event_type": "page_view",
+      "source": "direct",
+      "created_at": "2026-10-18T17:35:33.320011+00:00"
+    }
+  ]
+}

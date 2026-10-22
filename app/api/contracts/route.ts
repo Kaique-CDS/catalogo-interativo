@@ -1,3 +1,4 @@
+import { normalizeDigits, normalizePlate, normalizeEmail, normalizeText, parseBrlCurrency, normalizeDateToSaoPaulo } from '@/lib/normalization'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getStoreContractSettings, isContractsEnabled } from '@/lib/contracts/module-guard'
@@ -228,6 +229,45 @@ export async function POST(req: NextRequest) {
       ? `Procuração Nº ${nextNumber} - ${vehicle.brand} ${vehicle.model} (${vehicle.plate})`
       : `Contrato de Venda Nº ${nextNumber} - ${vehicle.brand} ${vehicle.model} (${vehicle.plate})`
 
+    // Normalização rigorosa de partes, veículo e valores financeiros (Fase 0.2)
+    const rawActiveBuyer = isPoa ? (grantor || buyer) : buyer
+    const normalizedBuyer = rawActiveBuyer ? {
+      ...rawActiveBuyer,
+      name: normalizeText(rawActiveBuyer.name),
+      cpf_cnpj: normalizeDigits(rawActiveBuyer.cpf_cnpj),
+      phone: normalizeDigits(rawActiveBuyer.phone),
+      email: normalizeEmail(rawActiveBuyer.email),
+      cep: normalizeDigits(rawActiveBuyer.cep),
+      rg: normalizeText(rawActiveBuyer.rg),
+      cnh: rawActiveBuyer.cnh ? normalizeDigits(rawActiveBuyer.cnh) : '',
+      birth_date: rawActiveBuyer.birth_date ? normalizeDateToSaoPaulo(rawActiveBuyer.birth_date) : null,
+      address: normalizeText(rawActiveBuyer.address),
+    } : null
+
+    const normalizedVehicle = {
+      ...vehicle,
+      brand: normalizeText(vehicle.brand),
+      model: normalizeText(vehicle.model),
+      plate: normalizePlate(vehicle.plate),
+      renavam: normalizeDigits(vehicle.renavam),
+      chassis: normalizeText(vehicle.chassis).toUpperCase(),
+      color: normalizeText(vehicle.color),
+      fuel: normalizeText(vehicle.fuel),
+    }
+
+    const normalizedFinancial = financial ? {
+      ...financial,
+      total_amount: parseBrlCurrency(financial.total_amount),
+      down_payment: parseBrlCurrency(financial.down_payment),
+      transfer_fee_amount: parseBrlCurrency(financial.transfer_fee_amount || (financial as any).transfer_fee),
+      installments: Array.isArray(financial.installments) ? financial.installments.map((inst: any) => ({
+        ...inst,
+        amount: parseBrlCurrency(inst.amount),
+        due_date: inst.due_date ? normalizeDateToSaoPaulo(inst.due_date) : null,
+        method: normalizeText(inst.method),
+      })) : [],
+    } : null
+
     const insertPayload: any = {
       store_id: store.id,
       type: isPoa ? 'procuracao' : 'venda_veiculo',
@@ -235,11 +275,11 @@ export async function POST(req: NextRequest) {
       title,
       status: initialStatus,
       buyer_type: isPoa ? (grantor?.type || buyer?.type || 'pf') : (buyer?.type || 'pf'),
-      buyer_data: isPoa ? (grantor || buyer) : buyer,
+      buyer_data: normalizedBuyer,
       seller_data: isPoa ? (grantee || defaultSellerData) : defaultSellerData,
-      vehicle_data: vehicle,
+      vehicle_data: normalizedVehicle,
       vehicle_id: vehicle_id || null,
-      financial_data: isPoa ? null : financial,
+      financial_data: isPoa ? null : normalizedFinancial,
       clauses: isPoa ? [] : contractClauses,
       validity_days: isPoa ? (validity_days || 365) : null,
       additional_powers: isPoa ? (additional_powers || null) : null,
