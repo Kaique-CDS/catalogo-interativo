@@ -1,5 +1,4 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
 
 /**
  * Cliente Supabase com SERVICE ROLE KEY.
@@ -28,6 +27,7 @@ export function createAdminClient(): SupabaseClient {
 
 /** Verifica se a requisição vem de um admin logado (cookie definido no login). */
 export async function isAdminRequest(): Promise<boolean> {
+  const { cookies } = await import('next/headers')
   const cookieStore = await cookies()
   return cookieStore.get('admin_auth')?.value === 'true'
 }

@@ -1,4 +1,3 @@
-import { getGeminiApiKey } from '@/lib/gemini'
 
 export interface CrlvParsedData {
   plate?: string
@@ -16,7 +15,7 @@ export interface CrlvParsedData {
   has_alienacao: boolean
   alienacao_details?: string
   raw_text?: string
-  source: 'text_layer' | 'gemini_ocr' | 'manual'
+  source: 'text_layer' | 'manual'
 }
 
 /**
@@ -145,108 +144,14 @@ export function parseCrlvText(rawText: string): CrlvParsedData {
   }
 }
 
-const OCR_MODELS = [
-  'gemini-3.8-flash',
-  'gemini-flash-latest',
-  'gemini-3.5-flash',
-]
 
-/**
- * Fallback de OCR com Gemini Multimodal (PDF ou Imagem).
- */
-export async function parseCrlvWithGemini(
-  base64Data: string,
-  mimeType: string
-): Promise<CrlvParsedData> {
-  const apiKey = getGeminiApiKey()
-  if (!apiKey) {
-    throw new Error('Chave do Gemini não configurada para leitura OCR.')
-  }
-
-  const prompt = `Analise este documento brasileiro (CRLV - Certificado de Registro e Licenciamento de Veículo ou foto/digital do documento) e extraia com precisão os dados cadastrais do veículo e do proprietário.
-Responda APENAS um JSON válido e estrito, sem markdown, sem explicações, no seguinte formato:
-{
-  "plate": "placa do veículo (ex: ABC1D23 ou ABC1234)",
-  "renavam": "código renavam (somente números)",
-  "chassis": "número do chassi (17 caracteres)",
-  "brand_model": "marca e modelo do veículo (ex: HONDA/CIVIC TOURING)",
-  "year_fab": 2022,
-  "year_model": 2023,
-  "color": "cor predominante (ex: Branco)",
-  "fuel": "combustível (Flex, Gasolina, Diesel, etc)",
-  "engine": "motor ou cilindrada se houver",
-  "owner_name": "nome completo do proprietário",
-  "owner_cpf_cnpj": "CPF ou CNPJ do proprietário (somente números)",
-  "has_alienacao": true ou false (true se constar alienação fiduciária, arrendamento mercantil, gravame ou reserva de domínio),
-  "alienacao_details": "detalhes do gravame/alienação fiduciária se houver, incluindo nome do banco/financeira"
-}`
-
-  let lastError: unknown = null
-
-  for (const model of OCR_MODELS) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                {
-                  inlineData: {
-                    mimeType,
-                    data: base64Data,
-                  },
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: 'application/json',
-          },
-        }),
-      })
-
-      if (!res.ok) {
-        const errText = await res.text()
-        lastError = new Error(`Erro na API do Gemini (${model}): ${res.status} - ${errText}`)
-        continue
-      }
-
-      const data = await res.json()
-      const rawJson = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}'
-      const parsed = JSON.parse(rawJson)
-
-      return {
-        plate: parsed.plate ? String(parsed.plate).replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : undefined,
-        renavam: parsed.renavam ? String(parsed.renavam).replace(/\D/g, '') : undefined,
-        chassis: parsed.chassis ? String(parsed.chassis).replace(/[^a-zA-Z0-9]/g, '').toUpperCase() : undefined,
-        brand_model: parsed.brand_model ? String(parsed.brand_model).trim().toUpperCase() : undefined,
-        year_fab: parsed.year_fab ? Number(parsed.year_fab) : undefined,
-        year_model: parsed.year_model ? Number(parsed.year_model) : undefined,
-        color: parsed.color ? String(parsed.color).trim() : undefined,
-        fuel: parsed.fuel ? String(parsed.fuel).trim() : undefined,
-        engine: parsed.engine ? String(parsed.engine).trim() : undefined,
-        owner_name: parsed.owner_name ? String(parsed.owner_name).trim().toUpperCase() : undefined,
-        owner_cpf_cnpj: parsed.owner_cpf_cnpj ? String(parsed.owner_cpf_cnpj).replace(/\D/g, '') : undefined,
-        has_alienacao: Boolean(parsed.has_alienacao),
-        alienacao_details: parsed.alienacao_details ? String(parsed.alienacao_details).trim() : undefined,
-        source: 'gemini_ocr',
-      }
-    } catch (err) {
-      lastError = err
-    }
-  }
-
-  throw lastError || new Error('Não foi possível realizar a leitura do CRLV.')
-}
 
 /**
  * Lê arquivo CRLV (Buffer) via camada de texto do PDF com fallback para OCR Gemini.
+ */
+/**
+ * Lê arquivo CRLV (Buffer) usando exclusivamente a camada de texto nativa do PDF (sem IA).
+ * Em total conformidade com a LGPD e privacidade, nenhum dado pessoal de documento é enviado a APIs externas.
  */
 export async function parseCrlvBuffer(
   buffer: Buffer,
@@ -257,26 +162,28 @@ export async function parseCrlvBuffer(
     mimeType === 'application/pdf' ||
     (filename && filename.toLowerCase().endsWith('.pdf'))
 
-  // 1. Se for PDF, tenta primeiro a extração via camada de texto nativa
-  if (isPdf) {
-    try {
-      // Importa dinamicamente pdf-parse
-      const pdfParse = require('pdf-parse')
-      const pdfData = await pdfParse(buffer)
-      if (pdfData?.text && pdfData.text.length > 40) {
-        const parsed = parseCrlvText(pdfData.text)
-        // Se encontrou dados chave essenciais
-        if (parsed.plate || parsed.renavam || parsed.chassis) {
-          return parsed
-        }
-      }
-    } catch (err) {
-      console.warn('Falha na leitura direta da camada de texto do PDF, acionando OCR:', err)
-    }
+  if (!isPdf) {
+    throw new Error(
+      'O arquivo enviado é uma imagem (foto/escaneado). Por motivos de privacidade e conformidade LGPD, a leitura automática não envia documentos a serviços externos de IA. Por favor, envie o CRLV digital oficial em formato PDF ou preencha os dados do veículo manualmente.'
+    )
   }
 
-  // 2. Se for imagem ou se o PDF não possuía camada de texto (escaneado/foto), usa OCR multimodal
-  const targetMime = isPdf ? 'application/pdf' : mimeType || 'image/jpeg'
-  return await parseCrlvWithGemini(buffer.toString('base64'), targetMime)
+  // 1. Extração local da camada de texto nativa do PDF (pdf-parse)
+  try {
+    const pdfParse = require('pdf-parse')
+    const pdfData = await pdfParse(buffer)
+    if (pdfData?.text && pdfData.text.length > 40) {
+      const parsed = parseCrlvText(pdfData.text)
+      if (parsed.plate || parsed.renavam || parsed.chassis) {
+        return parsed
+      }
+    }
+  } catch (err: any) {
+    console.warn('Falha na leitura direta da camada de texto do PDF do CRLV:', err)
+  }
+
+  throw new Error(
+    'O documento PDF enviado não possui camada de texto pesquisável (arquivo digitalizado como imagem). Por segurança e privacidade, preencha os dados do veículo manualmente.'
+  )
 }
 

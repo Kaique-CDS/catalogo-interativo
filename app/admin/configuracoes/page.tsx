@@ -12,6 +12,9 @@ import {
   Mail,
   Phone,
   RefreshCw,
+  Sparkles,
+  ShieldAlert,
+  CheckCircle2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,6 +34,17 @@ export default function ConfiguracoesAdminPage() {
   const [limiteEnterprise, setLimiteEnterprise] = useState('100')
   const [emailsCobrancaAtivo, setEmailsCobrancaAtivo] = useState(true)
 
+  const [aiMetrics, setAiMetrics] = useState<{
+    model: string
+    dailyCalls: number
+    dailyLimit: number
+    dailyRemaining: number
+    dailyUsagePercent: number
+    isLocked: boolean
+    lockReason?: string | null
+  } | null>(null)
+  const [resettingAi, setResettingAi] = useState(false)
+
   const loadConfig = async () => {
     setLoading(true)
     try {
@@ -47,6 +61,15 @@ export default function ConfiguracoesAdminPage() {
         setLimiteEnterprise(String(config.limite_carros_enterprise ?? 100))
         setEmailsCobrancaAtivo(Boolean(config.emails_cobranca_ativo))
       }
+
+      // Carrega métricas de IA
+      try {
+        const aiRes = await fetch('/api/admin/ai-governance', { cache: 'no-store' })
+        if (aiRes.ok) {
+          const { metrics } = await aiRes.json()
+          setAiMetrics(metrics)
+        }
+      } catch {}
     } catch {
       toast.error('Erro ao carregar configurações da plataforma.')
     } finally {
@@ -57,6 +80,26 @@ export default function ConfiguracoesAdminPage() {
   useEffect(() => {
     loadConfig()
   }, [])
+
+
+  const handleResetAiLock = async () => {
+    setResettingAi(true)
+    try {
+      const res = await fetch('/api/admin/ai-governance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset' }),
+      })
+      if (!res.ok) throw new Error('Falha ao reiniciar trava')
+      const data = await res.json()
+      setAiMetrics(data.metrics)
+      toast.success('Trava global de IA reiniciada com sucesso!')
+    } catch {
+      toast.error('Erro ao reiniciar trava de IA.')
+    } finally {
+      setResettingAi(false)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -237,6 +280,63 @@ export default function ConfiguracoesAdminPage() {
             </p>
           </div>
           <Toggle value={emailsCobrancaAtivo} onToggle={() => setEmailsCobrancaAtivo((v) => !v)} />
+        </div>
+      </Section>
+
+      {/* Governança de IA (Google Gemini 100% Gratuito) */}
+      <Section icon={Sparkles} title="Governança de IA (Google Gemini 100% Gratuito)">
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                Modelo Ativo: <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{aiMetrics?.model || 'gemini-2.5-flash-lite'}</span>
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                Plano 100% gratuito do Google AI Studio com margem de segurança de 70% (trava automática).
+              </p>
+            </div>
+            {aiMetrics?.isLocked ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                <ShieldAlert className="h-3.5 w-3.5" /> Trava Global Ativa
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Operando Normalmente
+              </span>
+            )}
+          </div>
+
+          <div>
+            <div className="flex justify-between text-xs mb-1.5 font-medium">
+              <span className="text-zinc-600 dark:text-zinc-400">
+                Chamadas hoje: <strong className="text-zinc-900 dark:text-white">{aiMetrics?.dailyCalls || 0}</strong> de {aiMetrics?.dailyLimit || 1000} permitidas
+              </span>
+              <span className="text-zinc-500">{aiMetrics?.dailyRemaining ?? 1000} restantes</span>
+            </div>
+            <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${(aiMetrics?.dailyUsagePercent || 0) > 80 ? 'bg-rose-500' : (aiMetrics?.dailyUsagePercent || 0) > 50 ? 'bg-amber-500' : 'bg-indigo-600'}`}
+                style={{ width: `${aiMetrics?.dailyUsagePercent || 0}%` }}
+              />
+            </div>
+          </div>
+
+          {aiMetrics?.isLocked && (
+            <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl space-y-2">
+              <p className="text-xs font-semibold text-rose-400">
+                Aviso: {aiMetrics.lockReason || 'Cota máxima atingida ou erro retornado pela API do Gemini.'}
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleResetAiLock}
+                disabled={resettingAi}
+                className="text-xs rounded-lg border-rose-400/40 text-rose-300 hover:bg-rose-500/20 h-8"
+              >
+                {resettingAi ? 'Reativando...' : 'Reativar IA Manualmente'}
+              </Button>
+            </div>
+          )}
         </div>
       </Section>
 

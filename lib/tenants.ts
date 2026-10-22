@@ -102,7 +102,7 @@ const LL_MULTIMARCAS: TenantBrand = {
   themeColor: '#4B1F8F',
   metaDescription:
     'L&L Multimarcas: seminovos multimarcas com parceria em todos os bancos e facilidades para autônomos. Confira o estoque e fale com a gente.',
-  instagram: { handle: 'lloficial.multimarcas', url: 'https://www.instagram.com/lloficial.multimarcas/' },
+  instagram: { handle: 'lloficialmultimarcas', url: 'https://www.instagram.com/lloficialmultimarcas/' },
   phone: { tel: '+551124769444', display: '(11) 2476-9444', label: 'Televendas' },
   whatsapp: { number: '5511967296936', display: '(11) 96729-6936' },
   address: 'Avenida Marechal Tito, 3921 - Jardim Miragaia, São Paulo - SP, 08160-505',
@@ -125,7 +125,7 @@ const LL_MULTIMARCAS: TenantBrand = {
     whatsapp: '5511967296936',
     whatsapp_financeiro: '5511967296936',
     phone: '(11) 2476-9444',
-    instagram: '@lloficial.multimarcas',
+    instagram: '@lloficialmultimarcas',
     opening_hours: 'Seg a Sex: 09h às 18h | Sáb: 09h às 13h',
     primary_color: '#4B1F8F',
     font_family: 'Inter',

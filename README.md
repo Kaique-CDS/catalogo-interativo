@@ -144,3 +144,15 @@ Este projeto está sob a licença [MIT](LICENSE).
 <div align="center">
   <sub>Desenvolvido com ❤️ por <strong>Kaique Corrêa</strong></sub>
 </div>
+
+---
+
+## 🤖 Governança de IA (Google Gemini 100% Gratuito)
+
+> [!IMPORTANT]
+> **Regra Obrigatória:** A chave `GEMINI_API_KEY` (ou `NEXT_PUBLIC_GEMINI_API_KEY`) **DEVE OBRIGATORIAMENTE vir de um projeto do Google AI Studio com faturamento (billing) DESATIVADO**.
+>
+> 1. Obtenha sua chave no [Google AI Studio](https://aistudio.google.com/) garantindo que o projeto **não possui cartão de crédito ou plano pago vinculado**.
+> 2. O catálogo utiliza o modelo gratuito `gemini-2.5-flash-lite` (ou configurável via `GEMINI_MODEL`), que possui cota gratuita de 15 RPM e 1.500 requisições/dia.
+> 3. **Trava Global de Segurança:** O sistema possui monitoramento ativo que desliga toda a IA automaticamente ao atingir **70% da cota gratuita** (1.000 requisições/dia ou 10 requisições/minuto), ou ao receber qualquer resposta 429/cota da API.
+> 4. **Privacidade Total:** Nenhum documento pessoal (CRLV, CNH, CPF, RG ou Contratos) é enviado a qualquer inteligência artificial. A leitura de CRLV opera 100% local no servidor via camada de texto nativa do PDF.

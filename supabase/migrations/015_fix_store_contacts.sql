@@ -19,7 +19,7 @@ SET
   whatsapp_financeiro = '5511967296936',
   opening_hours = 'Seg a Sex: 09h às 18h | Sáb: 09h às 13h',
   address = 'Avenida Marechal Tito, 3921 - Jardim Miragaia, São Paulo - SP, 08160-505',
-  instagram = '@lloficial.multimarcas',
+  instagram = '@lloficialmultimarcas',
   email = 'contato@llmultimarcas.com.br',
   slogan = 'Seminovos com parceria em todos os bancos',
   primary_color = '#4B1F8F',

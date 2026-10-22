@@ -519,11 +519,11 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
         color: colorVal,
         features: selectedFeatures,
       })
-      const result = await generateWithGemini(prompt)
+      const result = await generateWithGemini(prompt, slug)
       setValue('description', result, { shouldValidate: true })
       toast.success('Legenda gerada com sucesso pela IA!')
-    } catch (err) {
-      toast.error('Erro ao gerar descrição com IA. Verifique sua chave do Gemini.')
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao gerar descrição com IA.')
       console.error(err)
     } finally {
       setAiLoading(false)

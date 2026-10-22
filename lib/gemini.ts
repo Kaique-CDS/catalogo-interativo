@@ -1,26 +1,18 @@
-// Modelos Flash-Lite: maior cota gratuita (Free Tier) no Google AI Studio e 0 gasto com tokens de "thinking"
-const GEMINI_MODELS = [
-  'gemini-3.5-flash-lite',
-  'gemini-flash-lite-latest',
-  'gemini-3.1-flash-lite',
-]
+import { AI_CONFIG } from '@/lib/ai-config'
 
-const B64_FALLBACK = 'QVEuQWI4Uk42SmhCckRocVdmclJ3Wkl0WkJleGNYWjZLcWZWZ2l5UVljRkpmLXpCLTJDLUE='
 const CACHE_PREFIX = 'vz_ai_desc_'
 const memoryCache = new Map<string, string>()
 
+/**
+ * Obtém a chave do Gemini configurada exclusivamente nas variáveis de ambiente.
+ * NUNCA possui chave em texto ou base64 no código-fonte.
+ */
 export function getGeminiApiKey(): string {
-  if (process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-    return process.env.NEXT_PUBLIC_GEMINI_API_KEY.trim()
+  if (typeof process !== 'undefined' && process.env) {
+    const key = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    if (key) return key.trim()
   }
-  try {
-    if (typeof atob === 'function') {
-      return atob(B64_FALLBACK)
-    }
-    return Buffer.from(B64_FALLBACK, 'base64').toString('utf-8')
-  } catch {
-    return ''
-  }
+  return ''
 }
 
 function hashPrompt(prompt: string): string {
@@ -31,10 +23,11 @@ function hashPrompt(prompt: string): string {
   return CACHE_PREFIX + Math.abs(h).toString(36)
 }
 
-export async function generateWithGemini(prompt: string): Promise<string> {
-  const apiKey = getGeminiApiKey()
-  if (!apiKey) throw new Error('Chave do Gemini não configurada.')
-
+/**
+ * Gera legenda comercial com IA (Google Gemini Free Tier).
+ * Possui cache inteligente em memória e sessionStorage para não gastar requisições à toa.
+ */
+export async function generateWithGemini(prompt: string, tenantSlug?: string): Promise<string> {
   // 1. Verifica cache da sessão (evita gastar tokens se clicar 2x com os mesmos dados)
   const cacheKey = hashPrompt(prompt)
   if (memoryCache.has(cacheKey)) {
@@ -52,65 +45,66 @@ export async function generateWithGemini(prompt: string): Promise<string> {
     }
   }
 
-  let lastError: unknown = null
+  // 2. Se executado no navegador, faz a requisição pela rota segura de backend (/api/ai/vehicle-description)
+  // que gerencia o contador diário (margem 70%) e a trava global
+  if (typeof window !== 'undefined') {
+    const res = await fetch('/api/ai/vehicle-description', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, tenant_slug: tenantSlug }),
+    })
 
-  for (const model of GEMINI_MODELS) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          // maxOutputTokens: 130 garante texto direto (~250-350 caracteres) gastando ~65 tokens de saída
-          generationConfig: {
-            temperature: 0.65,
-            maxOutputTokens: 130,
-          },
-        }),
-      })
+    const data = await res.json().catch(() => ({}))
 
-      if (!res.ok) {
-        const err = await res.text()
-        lastError = new Error(`Gemini (${model}) status ${res.status}: ${err}`)
-        continue
-      }
-
-      const data = await res.json()
-      let text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-      text = text.replace(/[*#_>`~]/g, '').trim()
-
-      if (!text || text.length < 15) continue
-
-      // Garante com rigor o limite máximo de 500 caracteres
-      if (text.length > 500) {
-        const cut = text.slice(0, 497)
-        const lastPunctuation = Math.max(cut.lastIndexOf('.'), cut.lastIndexOf('!'), cut.lastIndexOf('?'))
-        if (lastPunctuation > 200) {
-          text = cut.slice(0, lastPunctuation + 1)
-        } else {
-          const lastSpace = cut.lastIndexOf(' ')
-          text = (lastSpace > 300 ? cut.slice(0, lastSpace) : cut) + '...'
-        }
-      }
-
-      // Salva no cache para economia máxima de tokens
-      memoryCache.set(cacheKey, text)
-      if (typeof window !== 'undefined') {
-        try {
-          sessionStorage.setItem(cacheKey, text)
-        } catch {
-          // ignore
-        }
-      }
-
-      return text
-    } catch (err) {
-      lastError = err
+    if (!res.ok) {
+      throw new Error(data.error || 'Erro ao gerar descrição com IA.')
     }
+
+    const text = (data.text || '').trim()
+    if (!text) {
+      throw new Error('A IA não retornou um texto válido. Tente novamente.')
+    }
+
+    // Salva no cache local
+    memoryCache.set(cacheKey, text)
+    try {
+      sessionStorage.setItem(cacheKey, text)
+    } catch {}
+
+    return text
   }
 
-  throw lastError || new Error('Não foi possível gerar a descrição com o Gemini. Tente novamente.')
+  // 3. Se executado em ambiente server:
+  const apiKey = getGeminiApiKey()
+  if (!apiKey) throw new Error('Chave do Gemini não configurada.')
+
+  const model = AI_CONFIG.DEFAULT_MODEL
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(8000),
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.65,
+        maxOutputTokens: 120,
+      },
+    }),
+  })
+
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`Erro na API do Gemini (${res.status}): ${errText.slice(0, 100)}`)
+  }
+
+  const data = await res.json()
+  let text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+  text = text.replace(/[*#_>`~]/g, '').trim()
+
+  memoryCache.set(cacheKey, text)
+  return text
 }
 
 export function buildVehicleDescriptionPrompt({
@@ -136,7 +130,7 @@ export function buildVehicleDescriptionPrompt({
   color?: string
   features: string[]
 }): string {
-  // Prompt enxuto (~70 tokens de entrada) sem repetir dados desnecessários
+  // Prompt super enxuto (~70 tokens de entrada) para máxima economia de cota
   const items: string[] = []
   if (title) {
     items.push(title)
