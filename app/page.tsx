@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Car, MessageCircle, Zap, Sparkles, CheckCircle2, ChevronRight, BarChart3, Users, LayoutDashboard, Shirt, Smile, Utensils, Brush, MonitorSmartphone, Gift, ArrowUpCircle } from 'lucide-react'
+import { Car, MessageCircle, Zap, Sparkles, CheckCircle2, ChevronRight, BarChart3, Users, LayoutDashboard, Shirt, Smile, Utensils, Brush, MonitorSmartphone, Gift, ArrowUpCircle, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -49,8 +49,17 @@ export default function LandingPage() {
             <a href="#segmentos" className="hover:text-zinc-900 dark:hover:text-white transition">Segmentos</a>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/entrar">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl text-xs sm:text-sm font-semibold border-zinc-200 dark:border-zinc-700 gap-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                <LogIn className="h-3.5 w-3.5" /> Entrar
+              </Button>
+            </Link>
             <Link href="/loja-exemplo">
-              <Button variant="ghost" size="sm" className="hidden sm:flex text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">Home / Demo</Button>
+              <Button variant="ghost" size="sm" className="hidden sm:flex text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800">Demo</Button>
             </Link>
             <ThemeToggle />
             <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs text-xs sm:text-sm px-3 sm:px-4" onClick={() => setShowDemoModal(true)}>
