@@ -82,6 +82,16 @@ export async function saveStoreWithContacts(payload: {
   logo_url?: string | null
   banner_url?: string | null
   banner_mobile_url?: string | null
+  contract_razao_social?: string | null
+  contract_cnpj?: string | null
+  contract_address?: string | null
+  contract_phone?: string | null
+  contract_email?: string | null
+  contract_foro_cidade?: string | null
+  contract_foro_estado?: string | null
+  contract_rep_nome?: string | null
+  contract_rep_cpf?: string | null
+  contract_signature_url?: string | null
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = createAdminClient()
 
@@ -102,6 +112,16 @@ export async function saveStoreWithContacts(payload: {
       logo_url: payload.logo_url,
       banner_url: payload.banner_url,
       banner_mobile_url: payload.banner_mobile_url || null,
+      contract_razao_social: payload.contract_razao_social || null,
+      contract_cnpj: payload.contract_cnpj || null,
+      contract_address: payload.contract_address || null,
+      contract_phone: payload.contract_phone || null,
+      contract_email: payload.contract_email || null,
+      contract_foro_cidade: payload.contract_foro_cidade || null,
+      contract_foro_estado: payload.contract_foro_estado || null,
+      contract_rep_nome: payload.contract_rep_nome || null,
+      contract_rep_cpf: payload.contract_rep_cpf || null,
+      contract_signature_url: payload.contract_signature_url || null,
     })
     .eq('id', payload.store_id)
 
@@ -114,7 +134,7 @@ export async function saveStoreWithContacts(payload: {
     return { success: true }
   }
 
-  // 2. Se alguma coluna opcional falhar, tenta o fallback com campos essenciais
+  // 2. Se alguma coluna opcional falhar (ex: migration pendente), tenta o fallback com campos essenciais
   const { error: fallbackError } = await supabase
     .from('stores')
     .update({

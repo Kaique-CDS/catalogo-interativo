@@ -13,6 +13,10 @@ import {
   X,
   Clock,
   RefreshCw,
+  FileSignature,
+  ToggleLeft,
+  ToggleRight,
+  ShieldCheck,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -80,6 +84,71 @@ export default function ClientsPage() {
     data_vencimento: '',
   })
 
+  // Módulos das Lojas (Feature Flags)
+  interface StoreModuleItem {
+    id: string
+    name: string
+    slug: string
+    contracts_enabled: boolean
+    modules: Record<string, any> | null
+  }
+  const [storesModules, setStoresModules] = useState<StoreModuleItem[]>([])
+  const [loadingModules, setLoadingModules] = useState(false)
+  const [togglingSlug, setTogglingSlug] = useState<string | null>(null)
+
+  const fetchModules = useCallback(async () => {
+    setLoadingModules(true)
+    try {
+      const res = await fetch('/api/admin/clientes/modules', { cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        setStoresModules(data.stores || [])
+      }
+    } catch (err) {
+      console.error('Erro ao buscar módulos:', err)
+    } finally {
+      setLoadingModules(false)
+    }
+  }, [])
+
+  const handleToggleModule = async (store: StoreModuleItem) => {
+    const nextVal = !store.contracts_enabled
+    setTogglingSlug(store.slug)
+    try {
+      const res = await fetch('/api/admin/clientes/modules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          store_id: store.id,
+          slug: store.slug,
+          contracts_enabled: nextVal,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Falha ao atualizar módulo.')
+      }
+      setStoresModules((prev) =>
+        prev.map((s) =>
+          s.id === store.id
+            ? {
+                ...s,
+                contracts_enabled: nextVal,
+                modules: { ...(s.modules || {}), contracts: nextVal },
+              }
+            : s
+        )
+      )
+      toast.success(
+        `Módulo de Contratos ${nextVal ? 'ATIVADO' : 'DESATIVADO'} para ${store.name || store.slug}!`
+      )
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao alterar status do módulo.')
+    } finally {
+      setTogglingSlug(null)
+    }
+  }
+
   const fetchClients = useCallback(async () => {
     setLoading(true)
     try {
@@ -98,6 +167,10 @@ export default function ClientsPage() {
       setLoading(false)
     }
   }, [searchTerm, statusFilter, planoFilter])
+
+  useEffect(() => {
+    fetchModules()
+  }, [fetchModules])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -250,6 +323,89 @@ export default function ClientsPage() {
             <Plus className="h-4 w-4" /> Adicionar Cliente Manual
           </Button>
         </div>
+      </div>
+
+      {/* SEÇÃO: ATIVAÇÃO DE MÓDULOS POR TENANT (EXCLUSIVO SUPER ADMIN) */}
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <FileSignature className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                Ativação de Módulos por Tenant
+                <span className="text-[10px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-semibold">
+                  Super Admin
+                </span>
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                Ligue ou desligue o <strong>Módulo de Contratos</strong> para cada loja. Se desligado, a aba e rotas são bloqueadas no servidor.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={fetchModules}
+            disabled={loadingModules}
+            className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white gap-1.5"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingModules ? 'animate-spin' : ''}`} /> Atualizar
+          </Button>
+        </div>
+
+        {storesModules.length === 0 ? (
+          <p className="text-xs text-zinc-400 py-2">
+            {loadingModules ? 'Carregando lojas...' : 'Nenhuma loja cadastrada na tabela stores.'}
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {storesModules.map((s) => {
+              const isEnabled = s.contracts_enabled === true || (s.modules && s.modules.contracts === true)
+              const isToggling = togglingSlug === s.slug
+
+              return (
+                <div
+                  key={s.id || s.slug}
+                  className="p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40 flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-zinc-900 dark:text-white truncate">
+                      {s.name || s.slug}
+                    </p>
+                    <p className="text-[10px] text-zinc-400 font-mono mt-0.5">/{s.slug}</p>
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          isEnabled
+                            ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                        }`}
+                      >
+                        Contratos: {isEnabled ? 'Ativo' : 'Desligado'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isToggling}
+                    onClick={() => handleToggleModule(s)}
+                    className="shrink-0 p-1 rounded-lg text-zinc-400 hover:text-indigo-600 transition-colors disabled:opacity-50"
+                    title={isEnabled ? 'Desativar Módulo de Contratos' : 'Ativar Módulo de Contratos'}
+                  >
+                    {isEnabled ? (
+                      <ToggleRight className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                    ) : (
+                      <ToggleLeft className="h-8 w-8 text-zinc-400 dark:text-zinc-600" />
+                    )}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Toolbar: Search + Advanced Filters */}

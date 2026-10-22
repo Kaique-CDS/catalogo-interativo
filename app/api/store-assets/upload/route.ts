@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Slug da loja é obrigatório.' }, { status: 400 })
     }
 
-    if (rawType !== 'logo' && rawType !== 'banner_desktop' && rawType !== 'banner_mobile') {
+    if (rawType !== 'logo' && rawType !== 'banner_desktop' && rawType !== 'banner_mobile' && rawType !== 'signature') {
       return NextResponse.json({ error: 'Tipo de asset inválido.' }, { status: 400 })
     }
 
@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
     let folder = `${tenantSlug}/logo`
     if (rawType === 'banner_desktop') folder = `${tenantSlug}/banners/desktop`
     if (rawType === 'banner_mobile') folder = `${tenantSlug}/banners/mobile`
+    if (rawType === 'signature') folder = `${tenantSlug}/contratos/assinatura`
 
     // Valida peso no servidor
     const spec =
@@ -62,7 +63,9 @@ export async function POST(req: NextRequest) {
         ? IMAGE_SPECS.LOGO
         : rawType === 'banner_desktop'
         ? IMAGE_SPECS.BANNER_DESKTOP
-        : IMAGE_SPECS.BANNER_MOBILE
+        : rawType === 'banner_mobile'
+        ? IMAGE_SPECS.BANNER_MOBILE
+        : IMAGE_SPECS.SIGNATURE
 
     if (file.size > spec.maxSizeBytes) {
       return NextResponse.json(

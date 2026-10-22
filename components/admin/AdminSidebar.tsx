@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Lightbulb } from 'lucide-react'
+import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Lightbulb, FileSignature } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -10,18 +10,28 @@ import { toast } from 'sonner'
 import { getTenantBrand } from '@/lib/tenants'
 
 interface Props {
-  store: { id: string; name: string; slug: string; logo_url?: string | null }
+  store: {
+    id: string
+    name: string
+    slug: string
+    logo_url?: string | null
+    contracts_enabled?: boolean | null
+    modules?: any
+    [key: string]: any
+  }
   slug: string
+  contractsEnabled?: boolean
 }
 
-const navItems = (slug: string) => [
+const navItems = (slug: string, contractsEnabled: boolean = false) => [
   { href: `/${slug}/admin`,               label: 'Início',        icon: LayoutDashboard, exact: true },
   { href: `/${slug}/admin/estoque`,       label: 'Estoque',       icon: Car },
+  ...(contractsEnabled ? [{ href: `/${slug}/admin/contratos`, label: 'Contratos', icon: FileSignature }] : []),
   { href: `/${slug}/admin/configuracoes`, label: 'Configurações', icon: Settings },
   { href: `/${slug}/admin/melhorias`,     label: 'Melhorias',     icon: Lightbulb },
 ]
 
-export default function AdminSidebar({ store, slug }: Props) {
+export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {
   const pathname = usePathname()
   const brand = getTenantBrand(slug || store?.slug)
   const storeName = store?.name || brand.name
@@ -36,7 +46,12 @@ export default function AdminSidebar({ store, slug }: Props) {
     window.location.reload()
   }
 
-  const items = navItems(slug)
+  const isContractsActive =
+    contractsEnabled ??
+    (store?.contracts_enabled === true ||
+      (store?.modules && typeof store.modules === 'object' && (store.modules as any).contracts === true))
+
+  const items = navItems(slug, Boolean(isContractsActive))
 
   return (
     <>
@@ -82,7 +97,12 @@ export default function AdminSidebar({ store, slug }: Props) {
       </header>
 
       {/* 2. Bottom Nav Mobile (Fixed Bottom — iOS & Android Native Tab Bar) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface pt-1.5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-40 grid grid-cols-4 gap-1 shadow-2xl">
+      <nav
+        className={cn(
+          'md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface pt-1.5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-40 grid gap-1 shadow-2xl',
+          items.length === 5 ? 'grid-cols-5' : 'grid-cols-4'
+        )}
+      >
         {items.map((item) => {
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           return (

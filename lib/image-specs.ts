@@ -41,9 +41,21 @@ export const IMAGE_SPECS = {
     allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.svg'],
     folderSuffix: 'logo',
   },
+  SIGNATURE: {
+    label: 'Assinatura Digital / Rubrica',
+    minWidth: 100,
+    maxWidth: 2400,
+    minHeight: 40,
+    maxHeight: 1200,
+    maxSizeBytes: 2 * 1024 * 1024, // 2 MB
+    maxSizeMB: 2,
+    allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+    allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp'],
+    folderSuffix: 'contratos/assinatura',
+  },
 } as const
 
-export type AssetType = 'logo' | 'banner_desktop' | 'banner_mobile'
+export type AssetType = 'logo' | 'banner_desktop' | 'banner_mobile' | 'signature'
 
 export interface ImageDimensions {
   width: number
@@ -143,6 +155,24 @@ export function validateStoreAsset(
       }
     }
 
+    return { valid: true }
+  }
+
+  if (type === 'signature') {
+    const spec = IMAGE_SPECS.SIGNATURE
+    if (image.sizeBytes > spec.maxSizeBytes) {
+      const actualMB = (image.sizeBytes / (1024 * 1024)).toFixed(1)
+      return {
+        valid: false,
+        error: `A assinatura excede o peso máximo de ${spec.maxSizeMB} MB (${actualMB} MB enviados).`,
+      }
+    }
+    if (image.width < spec.minWidth || image.height < spec.minHeight) {
+      return {
+        valid: false,
+        error: `A imagem da assinatura é muito pequena (${image.width} x ${image.height} px).`,
+      }
+    }
     return { valid: true }
   }
 

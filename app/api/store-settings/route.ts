@@ -37,6 +37,16 @@ export async function POST(request: Request) {
       logo_url,
       banner_url,
       banner_mobile_url,
+      contract_razao_social,
+      contract_cnpj,
+      contract_address,
+      contract_phone,
+      contract_email,
+      contract_foro_cidade,
+      contract_foro_estado,
+      contract_rep_nome,
+      contract_rep_cpf,
+      contract_signature_url,
     } = body
 
     if (!store_id || !slug || !name || !whatsapp) {
@@ -59,6 +69,16 @@ export async function POST(request: Request) {
       logo_url,
       banner_url,
       banner_mobile_url,
+      contract_razao_social,
+      contract_cnpj,
+      contract_address,
+      contract_phone,
+      contract_email,
+      contract_foro_cidade,
+      contract_foro_estado,
+      contract_rep_nome,
+      contract_rep_cpf,
+      contract_signature_url,
     })
 
     if (!result.success) {

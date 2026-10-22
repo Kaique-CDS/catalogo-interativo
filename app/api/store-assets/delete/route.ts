@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     if (asset_type === 'logo') updatePayload.logo_url = null
     else if (asset_type === 'banner_desktop') updatePayload.banner_url = null
     else if (asset_type === 'banner_mobile') updatePayload.banner_mobile_url = null
+    else if (asset_type === 'signature') updatePayload.contract_signature_url = null
 
     const { error: dbError } = await supabase
       .from('stores')

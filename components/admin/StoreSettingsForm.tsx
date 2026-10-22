@@ -27,6 +27,10 @@ import {
   Monitor,
   Smartphone,
   X,
+  FileSignature,
+  Building2,
+  Scale,
+  PenLine,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Store } from '@/lib/supabase/types'
@@ -38,16 +42,25 @@ import {
 } from '@/lib/image-specs'
 
 const settingsSchema = z.object({
-  name:                z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
-  phone:               z.string().optional(),
-  instagram:           z.string().optional(),
-  whatsapp:            z.string().min(10, 'Informe um número de WhatsApp válido (com DDI)'),
-  whatsapp_financeiro: z.string().optional(),
-  email:               z.string().optional(),
-  maps_embed_url:      z.string().optional(),
-  opening_hours:       z.string().optional(),
-  address:             z.string().optional(),
-  slogan:              z.string().optional(),
+  name:                  z.string().min(2, 'Nome deve ter ao menos 2 caracteres'),
+  phone:                 z.string().optional(),
+  instagram:             z.string().optional(),
+  whatsapp:              z.string().min(10, 'Informe um número de WhatsApp válido (com DDI)'),
+  whatsapp_financeiro:   z.string().optional(),
+  email:                 z.string().optional(),
+  maps_embed_url:        z.string().optional(),
+  opening_hours:         z.string().optional(),
+  address:               z.string().optional(),
+  slogan:                z.string().optional(),
+  contract_razao_social: z.string().optional(),
+  contract_cnpj:         z.string().optional(),
+  contract_address:      z.string().optional(),
+  contract_phone:        z.string().optional(),
+  contract_email:        z.string().optional(),
+  contract_foro_cidade:  z.string().optional(),
+  contract_foro_estado:  z.string().optional(),
+  contract_rep_nome:     z.string().optional(),
+  contract_rep_cpf:      z.string().optional(),
 })
 
 type SettingsFormData = z.infer<typeof settingsSchema>
@@ -55,16 +68,19 @@ type SettingsFormData = z.infer<typeof settingsSchema>
 interface Props { store: Store; slug: string }
 
 export default function StoreSettingsForm({ store, slug }: Props) {
-  const [logoUrl,         setLogoUrl]         = useState<string | null>(store.logo_url)
-  const [bannerUrl,       setBannerUrl]       = useState<string | null>(store.banner_url)
-  const [bannerMobileUrl, setBannerMobileUrl] = useState<string | null>(store.banner_mobile_url || null)
-  const [saving,          setSaving]          = useState(false)
+  const [logoUrl,               setLogoUrl]               = useState<string | null>(store.logo_url)
+  const [bannerUrl,             setBannerUrl]             = useState<string | null>(store.banner_url)
+  const [bannerMobileUrl,       setBannerMobileUrl]       = useState<string | null>(store.banner_mobile_url || null)
+  const [contractSignatureUrl, setContractSignatureUrl]   = useState<string | null>(store.contract_signature_url || null)
+  const [uploadingSignature,    setUploadingSignature]    = useState(false)
+  const [saving,                setSaving]                = useState(false)
 
   // Estados de upload e progresso
   const [uploadProgress, setUploadProgress] = useState<Record<AssetType, number | null>>({
     logo: null,
     banner_desktop: null,
     banner_mobile: null,
+    signature: null,
   })
 
   // Drag over states
@@ -72,6 +88,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
     logo: false,
     banner_desktop: false,
     banner_mobile: false,
+    signature: false,
   })
 
   // Modal de confirmação de exclusão
@@ -85,16 +102,25 @@ export default function StoreSettingsForm({ store, slug }: Props) {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      name:                store.name,
-      phone:               store.phone ?? '',
-      instagram:           store.instagram ?? '',
-      whatsapp:            store.whatsapp,
-      whatsapp_financeiro: store.whatsapp_financeiro ?? '',
-      email:               store.email ?? '',
-      maps_embed_url:      store.maps_embed_url ?? '',
-      opening_hours:       store.opening_hours ?? 'Seg a Sex: 09h às 18h',
-      address:             store.address ?? '',
-      slogan:              store.slogan ?? '',
+      name:                  store.name,
+      phone:                 store.phone ?? '',
+      instagram:             store.instagram ?? '',
+      whatsapp:              store.whatsapp,
+      whatsapp_financeiro:   store.whatsapp_financeiro ?? '',
+      email:                 store.email ?? '',
+      maps_embed_url:        store.maps_embed_url ?? '',
+      opening_hours:         store.opening_hours ?? 'Seg a Sex: 09h às 18h',
+      address:               store.address ?? '',
+      slogan:                store.slogan ?? '',
+      contract_razao_social: store.contract_razao_social ?? '',
+      contract_cnpj:         store.contract_cnpj ?? '',
+      contract_address:      store.contract_address ?? '',
+      contract_phone:        store.contract_phone ?? '',
+      contract_email:        store.contract_email ?? '',
+      contract_foro_cidade:  store.contract_foro_cidade ?? 'São Paulo',
+      contract_foro_estado:  store.contract_foro_estado ?? 'SP',
+      contract_rep_nome:     store.contract_rep_nome ?? '',
+      contract_rep_cpf:      store.contract_rep_cpf ?? '',
     },
   })
 
@@ -135,6 +161,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       if (type === 'logo') setLogoUrl(data.secure_url)
       else if (type === 'banner_desktop') setBannerUrl(data.secure_url)
       else if (type === 'banner_mobile') setBannerMobileUrl(data.secure_url)
+      else if (type === 'signature') setContractSignatureUrl(data.secure_url)
 
       toast.success(
         `${
@@ -142,7 +169,9 @@ export default function StoreSettingsForm({ store, slug }: Props) {
             ? 'Logo enviada'
             : type === 'banner_desktop'
             ? 'Banner desktop enviado'
-            : 'Banner mobile enviado'
+            : type === 'banner_mobile'
+            ? 'Banner mobile enviado'
+            : 'Assinatura enviada'
         } com sucesso! Clique em "Salvar Configurações" para gravar.`
       )
     } catch (err: any) {
@@ -196,7 +225,9 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           ? logoUrl
           : type === 'banner_desktop'
           ? bannerUrl
-          : bannerMobileUrl
+          : type === 'banner_mobile'
+          ? bannerMobileUrl
+          : contractSignatureUrl
 
       const response = await fetch('/api/store-assets/delete', {
         method: 'POST',
@@ -217,6 +248,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
       if (type === 'logo') setLogoUrl(null)
       else if (type === 'banner_desktop') setBannerUrl(null)
       else if (type === 'banner_mobile') setBannerMobileUrl(null)
+      else if (type === 'signature') setContractSignatureUrl(null)
 
       toast.success('Imagem removida com sucesso!')
       setDeleteModal({ isOpen: false, type: null, title: '' })
@@ -249,6 +281,16 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           logo_url: logoUrl,
           banner_url: bannerUrl,
           banner_mobile_url: bannerMobileUrl,
+          contract_razao_social: data.contract_razao_social || null,
+          contract_cnpj: data.contract_cnpj || null,
+          contract_address: data.contract_address || null,
+          contract_phone: data.contract_phone || null,
+          contract_email: data.contract_email || null,
+          contract_foro_cidade: data.contract_foro_cidade || null,
+          contract_foro_estado: data.contract_foro_estado || null,
+          contract_rep_nome: data.contract_rep_nome || null,
+          contract_rep_cpf: data.contract_rep_cpf || null,
+          contract_signature_url: contractSignatureUrl,
         }),
       })
 
@@ -725,6 +767,259 @@ export default function StoreSettingsForm({ store, slug }: Props) {
               <p className="text-[11px] text-muted-foreground">
                 Clientes que solicitarem simulação de financiamento no site serão direcionados para este número. Se não preenchido, usará o número de Vendas.
               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ── CARD 6: DADOS PARA CONTRATOS & DOCUMENTOS JURÍDICOS ── */}
+        <Card className="border-surface bg-surface-1">
+          <CardHeader className="pb-3 border-b border-surface">
+            <CardTitle className="text-sm font-bold text-heading flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <FileSignature className="h-4 w-4 text-brand" /> 6. Dados para Contratos & Documentos Jurídicos
+              </span>
+              <span className="text-[11px] font-normal text-muted-foreground">Módulo Jurídico</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-5">
+            <div className="bg-brand/5 border border-brand/20 rounded-xl p-3.5 flex items-start gap-3">
+              <Scale className="h-4 w-4 text-brand shrink-0 mt-0.5" />
+              <div className="text-xs space-y-1">
+                <p className="font-semibold text-foreground">Qualificação Automática da Loja</p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Estes dados serão inseridos automaticamente como qualificação do VENDEDOR/OUTORGANTE em todos os contratos de compra e venda e procurações gerados na plataforma.
+                </p>
+              </div>
+            </div>
+
+            {/* Razão Social e CNPJ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="contract_razao_social" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5 text-brand" /> Razão Social da Loja
+                </Label>
+                <Input
+                  id="contract_razao_social"
+                  placeholder="Ex: Auto Prime Veículos Ltda - EPP"
+                  {...register('contract_razao_social')}
+                  className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="contract_cnpj" className="text-xs font-semibold text-foreground">
+                  CNPJ
+                </Label>
+                <Input
+                  id="contract_cnpj"
+                  placeholder="00.000.000/0001-00"
+                  {...register('contract_cnpj')}
+                  className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+                />
+              </div>
+            </div>
+
+            {/* Endereço Completo */}
+            <div className="space-y-1.5">
+              <Label htmlFor="contract_address" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-brand" /> Endereço Completo (com CEP, Bairro, Cidade e UF)
+              </Label>
+              <Input
+                id="contract_address"
+                placeholder="Ex: Av. das Américas, 1500 - Barra da Tijuca, Rio de Janeiro - RJ, CEP 22640-100"
+                {...register('contract_address')}
+                className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Se deixar em branco, o sistema usará o endereço geral cadastrado no Card 3.
+              </p>
+            </div>
+
+            {/* Telefones e E-mail */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="contract_phone" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Phone className="h-3.5 w-3.5 text-brand" /> Telefones para Contrato
+                </Label>
+                <Input
+                  id="contract_phone"
+                  placeholder="(11) 3333-4444 / (11) 99999-8888"
+                  {...register('contract_phone')}
+                  className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="contract_email" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 text-brand" /> E-mail Jurídico / Contratos
+                </Label>
+                <Input
+                  id="contract_email"
+                  type="email"
+                  placeholder="contratos@loja.com.br"
+                  {...register('contract_email')}
+                  className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+                />
+              </div>
+            </div>
+
+            {/* Foro Padrão */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2 space-y-1.5">
+                <Label htmlFor="contract_foro_cidade" className="text-xs font-semibold text-foreground">
+                  Comarca / Foro Padrão (Cidade)
+                </Label>
+                <Input
+                  id="contract_foro_cidade"
+                  placeholder="São Paulo"
+                  {...register('contract_foro_cidade')}
+                  className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="contract_foro_estado" className="text-xs font-semibold text-foreground">
+                  Estado (UF)
+                </Label>
+                <Input
+                  id="contract_foro_estado"
+                  maxLength={2}
+                  placeholder="SP"
+                  {...register('contract_foro_estado')}
+                  className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand uppercase"
+                />
+              </div>
+            </div>
+
+            {/* Representante Legal que assina */}
+            <div className="p-4 rounded-xl border border-surface bg-surface-2/40 space-y-4">
+              <div className="flex items-center gap-2">
+                <PenLine className="h-4 w-4 text-brand" />
+                <h4 className="text-xs font-bold text-foreground">Responsável Legal que Assina pela Loja</h4>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="contract_rep_nome" className="text-xs font-semibold text-foreground">
+                    Nome Completo do Responsável
+                  </Label>
+                  <Input
+                    id="contract_rep_nome"
+                    placeholder="Ex: Carlos Eduardo Silveira"
+                    {...register('contract_rep_nome')}
+                    className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="contract_rep_cpf" className="text-xs font-semibold text-foreground">
+                    CPF do Responsável
+                  </Label>
+                  <Input
+                    id="contract_rep_cpf"
+                    placeholder="000.000.000-00"
+                    {...register('contract_rep_cpf')}
+                    className="bg-surface-1 border-surface text-foreground focus-visible:ring-brand"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Imagem da Assinatura / Rubrica (Opcional) */}
+            <div className="space-y-3 pt-2 border-t border-surface">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <PenLine className="h-3.5 w-3.5 text-brand" /> Imagem da Assinatura / Rubrica da Loja
+                    <span className="text-[10px] text-muted-foreground font-normal">(opcional)</span>
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Imagem digitalizada ou foto da assinatura (fundo transparente ou branco). Se cadastrada, pode ser aplicada automaticamente no PDF quando a loja assinar.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <div className="relative h-20 w-44 rounded-xl border border-surface overflow-hidden shrink-0 flex items-center justify-center bg-white dark:bg-zinc-900 shadow-xs">
+                  {contractSignatureUrl ? (
+                    <Image
+                      src={contractSignatureUrl}
+                      alt="Assinatura da Loja"
+                      width={160}
+                      height={70}
+                      className="h-full w-full object-contain p-2"
+                    />
+                  ) : (
+                    <span className="text-xs text-muted-foreground/60 italic font-mono">
+                      Sem assinatura
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex-1 w-full space-y-2.5">
+                  <div
+                    onDragOver={handleDragOver('signature')}
+                    onDragLeave={handleDragLeave('signature')}
+                    onDrop={handleDrop('signature')}
+                    className={`border-2 border-dashed rounded-xl p-3.5 text-center transition-colors cursor-pointer ${
+                      dragActive.signature
+                        ? 'border-brand bg-brand/5'
+                        : 'border-surface hover:border-brand/50 bg-surface-2/40'
+                    }`}
+                    onClick={() => document.getElementById('input-signature-file')?.click()}
+                  >
+                    <Upload className="h-4 w-4 text-brand mx-auto mb-1" />
+                    <p className="text-xs font-semibold text-foreground">
+                      Clique para selecionar ou arraste a assinatura aqui
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      PNG (transparente recomendado), JPG ou WebP. Máx 2 MB.
+                    </p>
+                    <input
+                      id="input-signature-file"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={handleFileInputChange('signature')}
+                    />
+                  </div>
+
+                  {uploadProgress.signature !== null && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] text-brand font-semibold">
+                        <span>Enviando assinatura...</span>
+                        <span>{uploadProgress.signature}%</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-brand transition-all duration-200"
+                          style={{ width: `${uploadProgress.signature}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {contractSignatureUrl && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => promptDeleteAsset('signature', 'a assinatura')}
+                      className="text-xs text-destructive hover:bg-destructive/10 gap-1.5 h-8 px-2.5 rounded-lg"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Remover Assinatura
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Informação sobre a Logo nos contratos */}
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-2/60 border border-surface text-xs text-muted-foreground">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+              <span>
+                <strong>Cabeçalho dos Contratos:</strong> O cabeçalho dos documentos impressos e digitais utilizará automaticamente a Logo da Loja configurada no Card 1.
+              </span>
             </div>
           </CardContent>
         </Card>
