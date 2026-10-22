@@ -55,6 +55,14 @@ export async function getStoreWithContacts(slug: string): Promise<Store> {
     console.error('Erro ao buscar store do banco:', err)
   }
 
+  const brand = getTenantBrand(slug)
+  if (!store.banner_mobile_url && brand.banners.mobile) {
+    store.banner_mobile_url = brand.banners.mobile
+  }
+  if (!store.banner_url && brand.banners.desktop) {
+    store.banner_url = brand.banners.desktop
+  }
+
   // Se o banco não tiver as colunas phone/instagram ou estiverem vazias, busca dos contatos estendidos
   if (!store.phone || !store.instagram) {
     const extra = await getExtendedStoreContacts(slug)

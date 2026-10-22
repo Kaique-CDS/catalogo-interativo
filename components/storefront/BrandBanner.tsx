@@ -63,7 +63,7 @@ export default function BrandBanner({
           alt={altText}
           width={2560}
           height={1097}
-          className="w-full h-auto object-cover object-center aspect-[16/9] md:aspect-[21/9]"
+          className="w-full h-auto object-contain sm:object-cover object-center aspect-[16/9] md:aspect-[21/9]"
           loading="eager"
         />
       </picture>

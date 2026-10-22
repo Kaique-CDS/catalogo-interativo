@@ -113,14 +113,22 @@ const LL_MULTIMARCAS: TenantBrand = {
     appleIcon: `${LL_ASSETS}/apple-touch-icon.png`,
     og: `${LL_ASSETS}/og-image.jpg`,
   },
-  banners: { desktop: null, mobile: null },
+  banners: {
+    desktop:
+      'https://res.cloudinary.com/prnrnxaw/image/upload/v1792349558/ll-multimarcas/banners/desktop/banner_desktop_1792349558716.png',
+    mobile:
+      'https://res.cloudinary.com/prnrnxaw/image/upload/v1792353279/ll-multimarcas/banners/mobile/banner_mobile_1792353279630.png',
+  },
   copyright: (year) => `© A PARTIR DE 2022 - ${year} L&L MULTIMARCAS. Todos os direitos reservados.`,
   allowLocalDemoVehicles: false,
   demoStore: {
     id: 'demo-ll-multimarcas',
     name: 'L&L Multimarcas',
     logo_url: `${LL_ASSETS}/logo-header.png`,
-    banner_url: null,
+    banner_url:
+      'https://res.cloudinary.com/prnrnxaw/image/upload/v1792349558/ll-multimarcas/banners/desktop/banner_desktop_1792349558716.png',
+    banner_mobile_url:
+      'https://res.cloudinary.com/prnrnxaw/image/upload/v1792353279/ll-multimarcas/banners/mobile/banner_mobile_1792353279630.png',
     address: 'Avenida Marechal Tito, 3921 - Jardim Miragaia, São Paulo - SP, 08160-505',
     whatsapp: '5511967296936',
     whatsapp_financeiro: '5511967296936',
