@@ -325,9 +325,6 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
             <h1 className="text-xl sm:text-2xl font-black text-foreground">
               Módulo de Contratos
             </h1>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand">
-              Fase 5
-            </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             Geração de contratos de venda, procurações, leitura de CRLV e assinatura digital/física.
