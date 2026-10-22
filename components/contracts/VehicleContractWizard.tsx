@@ -1,0 +1,1379 @@
+'use client'
+
+import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import {
+  User,
+  Building2,
+  Car,
+  DollarSign,
+  FileText,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Trash2,
+  AlertTriangle,
+  FileDown,
+  ExternalLink,
+  Search,
+  Scale,
+  Sparkles,
+  Loader2,
+  Calendar,
+  CreditCard,
+  X,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { toast } from 'sonner'
+import type { Store, Vehicle } from '@/lib/supabase/types'
+import {
+  valorPorExtenso,
+  formatCurrency,
+  maskCpfCnpj,
+  maskPhone,
+  maskCep,
+  maskPlaca,
+  maskRenavam,
+  DEFAULT_SALE_CLAUSES,
+  type ContractClause,
+} from '@/lib/contracts/utils'
+import type {
+  BuyerData,
+  VehicleData,
+  FinancialData,
+  PaymentInstallment,
+} from '@/lib/contracts/pdf-generator'
+
+interface Props {
+  store: Store
+  slug: string
+  vehicles: Vehicle[]
+}
+
+const STEPS = [
+  { id: 1, title: 'Partes', icon: User, desc: 'Comprador e Loja' },
+  { id: 2, title: 'Veículo', icon: Car, desc: 'Dados e Estoque' },
+  { id: 3, title: 'Valores', icon: DollarSign, desc: 'Preço e Parcelas' },
+  { id: 4, title: 'Cláusulas', icon: FileText, desc: 'Termos e Foro' },
+  { id: 5, title: 'Revisão', icon: CheckCircle2, desc: 'Emissão e PDF' },
+]
+
+export default function VehicleContractWizard({ store, slug, vehicles }: Props) {
+  const router = useRouter()
+  const [currentStep, setCurrentStep] = useState(1)
+  const [generating, setGenerating] = useState(false)
+  const [generatedContract, setGeneratedContract] = useState<{
+    id: string
+    number: number
+  } | null>(null)
+
+  // -------------------------------------------------------------
+  // PASSO 1: DADOS DO COMPRADOR E VENDEDOR
+  // -------------------------------------------------------------
+  const [buyerType, setBuyerType] = useState<'pf' | 'pj'>('pf')
+  const [buyer, setBuyer] = useState<BuyerData>({
+    type: 'pf',
+    name: '',
+    cpf_cnpj: '',
+    rg_ie: '',
+    cnh: '',
+    birth_date: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: store.contract_foro_cidade || 'São Paulo',
+    state: store.contract_foro_estado || 'SP',
+    zip: '',
+    rep_name: '',
+    rep_cpf: '',
+  })
+
+  // -------------------------------------------------------------
+  // PASSO 2: DADOS DO VEÍCULO
+  // -------------------------------------------------------------
+  const [vehicle, setVehicle] = useState<VehicleData>({
+    brand: '',
+    model: '',
+    year_fab: new Date().getFullYear(),
+    year_model: new Date().getFullYear(),
+    plate: '',
+    chassis: '',
+    renavam: '',
+    color: 'Branco',
+    fuel: 'Flex',
+    mileage: '',
+    engine: '',
+    features: '',
+  })
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
+  const [stockModalOpen, setStockModalOpen] = useState(false)
+  const [stockSearch, setStockSearch] = useState('')
+
+  // -------------------------------------------------------------
+  // PASSO 3: VALORES E PAGAMENTO
+  // -------------------------------------------------------------
+  const [totalAmount, setTotalAmount] = useState<number>(0)
+  const [downPayment, setDownPayment] = useState<number>(0)
+  const [downPaymentDate, setDownPaymentDate] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  )
+  const [transferResponsible, setTransferResponsible] = useState<
+    'comprador' | 'vendedor' | 'dividido'
+  >('comprador')
+  const [transferFeeAmount, setTransferFeeAmount] = useState<number>(0)
+  const [installments, setInstallments] = useState<PaymentInstallment[]>([])
+  const [financialNotes, setFinancialNotes] = useState<string>('')
+
+  // -------------------------------------------------------------
+  // PASSO 4: CLÁUSULAS
+  // -------------------------------------------------------------
+  const [clauses, setClauses] = useState<ContractClause[]>(DEFAULT_SALE_CLAUSES)
+
+  // -------------------------------------------------------------
+  // HANDLERS DE ESTOQUE
+  // -------------------------------------------------------------
+  const handleSelectFromStock = (v: Vehicle) => {
+    setSelectedVehicleId(v.id)
+    setVehicle({
+      brand: v.brand || '',
+      model: v.model || v.title,
+      year_fab: v.year || new Date().getFullYear(),
+      year_model: v.year || new Date().getFullYear(),
+      plate: v.plate_end ? `ABC1D2${v.plate_end}` : '',
+      chassis: '',
+      renavam: '',
+      color: v.color || 'Branco',
+      fuel: v.fuel || 'Flex',
+      mileage: v.mileage || '',
+      engine: '',
+      features: (v.features || []).join(', '),
+    })
+    if (v.price && totalAmount === 0) {
+      setTotalAmount(v.price)
+    }
+    setStockModalOpen(false)
+    toast.success(`Veículo "${v.title}" carregado do estoque com sucesso!`)
+  }
+
+  // -------------------------------------------------------------
+  // HANDLERS DE PARCELAS
+  // -------------------------------------------------------------
+  const handleAddInstallment = () => {
+    const nextNumber = installments.length + 1
+    const nextDate = new Date()
+    nextDate.setMonth(nextDate.getMonth() + nextNumber)
+
+    setInstallments([
+      ...installments,
+      {
+        number: nextNumber,
+        amount: 0,
+        due_date: nextDate.toISOString().split('T')[0],
+        method: 'Pix',
+        description: '',
+      },
+    ])
+  }
+
+  const handleUpdateInstallment = (
+    index: number,
+    field: keyof PaymentInstallment,
+    value: any
+  ) => {
+    const updated = [...installments]
+    updated[index] = { ...updated[index], [field]: value }
+    setInstallments(updated)
+  }
+
+  const handleRemoveInstallment = (index: number) => {
+    const updated = installments
+      .filter((_, i) => i !== index)
+      .map((inst, i) => ({ ...inst, number: i + 1 }))
+    setInstallments(updated)
+  }
+
+  const totalInstallments = installments.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0)
+  const totalCalculado = (Number(downPayment) || 0) + totalInstallments
+  const diferencaPreco = totalAmount - totalCalculado
+
+  // -------------------------------------------------------------
+  // HANDLERS DE CLÁUSULAS
+  // -------------------------------------------------------------
+  const handleAddClause = () => {
+    const nextId = `cl-${Date.now()}`
+    setClauses([
+      ...clauses,
+      {
+        id: nextId,
+        title: `CLÁUSULA ADICIONAL – ESPECIFIQUE O TÍTULO`,
+        text: 'Descreva aqui as condições e obrigações adicionais pactuadas entre as partes.',
+      },
+    ])
+  }
+
+  const handleUpdateClause = (id: string, field: 'title' | 'text', val: string) => {
+    setClauses(clauses.map((c) => (c.id === id ? { ...c, [field]: val } : c)))
+  }
+
+  const handleRemoveClause = (id: string) => {
+    setClauses(clauses.filter((c) => c.id !== id))
+  }
+
+  // -------------------------------------------------------------
+  // VALIDAÇÕES ENTRE ETAPAS
+  // -------------------------------------------------------------
+  const validateStep = (s: number): boolean => {
+    if (s === 1) {
+      if (!buyer.name.trim()) {
+        toast.error('Informe o nome ou razão social do comprador.')
+        return false
+      }
+      if (!buyer.cpf_cnpj.trim() || buyer.cpf_cnpj.replace(/\D/g, '').length < 11) {
+        toast.error('Informe um CPF ou CNPJ válido para o comprador.')
+        return false
+      }
+      if (!buyer.phone.trim()) {
+        toast.error('Informe o telefone ou WhatsApp do comprador.')
+        return false
+      }
+    }
+
+    if (s === 2) {
+      if (!vehicle.brand.trim() || !vehicle.model.trim()) {
+        toast.error('Informe a marca e o modelo do veículo.')
+        return false
+      }
+      if (!vehicle.plate.trim() || vehicle.plate.length < 7) {
+        toast.error('Informe uma placa válida para o veículo.')
+        return false
+      }
+    }
+
+    if (s === 3) {
+      if (!totalAmount || totalAmount <= 0) {
+        toast.error('Informe o valor total da venda.')
+        return false
+      }
+    }
+
+    return true
+  }
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep((p) => Math.min(p + 1, 5))
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const handlePrev = () => {
+    setCurrentStep((p) => Math.max(p - 1, 1))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // -------------------------------------------------------------
+  // EMISSÃO FINAL DO CONTRATO (POST /api/contracts)
+  // -------------------------------------------------------------
+  const handleGenerateContract = async (status: 'rascunho' | 'enviado' = 'rascunho') => {
+    setGenerating(true)
+    try {
+      const financialPayload: FinancialData = {
+        total_amount: Number(totalAmount),
+        down_payment: Number(downPayment) || 0,
+        down_payment_date: downPayment ? downPaymentDate : undefined,
+        transfer_fee_amount: Number(transferFeeAmount) || 0,
+        transfer_responsible: transferResponsible,
+        installments: installments.map((inst) => ({
+          number: inst.number,
+          amount: Number(inst.amount) || 0,
+          due_date: inst.due_date,
+          method: inst.method,
+          description: inst.description || '',
+        })),
+        notes: financialNotes || undefined,
+      }
+
+      const res = await fetch('/api/contracts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          buyer: { ...buyer, type: buyerType },
+          vehicle,
+          financial: financialPayload,
+          clauses,
+          vehicle_id: selectedVehicleId,
+          status,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erro ao gerar o contrato.')
+      }
+
+      setGeneratedContract({ id: data.contract_id, number: data.number })
+      toast.success(`Contrato de Venda Nº ${data.number} gerado com sucesso! 🎉`)
+    } catch (err: any) {
+      toast.error(err.message || 'Falha ao gerar contrato.')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  // Filtro de estoque no modal
+  const filteredVehicles = vehicles.filter((v) => {
+    const term = stockSearch.toLowerCase()
+    return (
+      v.title.toLowerCase().includes(term) ||
+      v.brand.toLowerCase().includes(term) ||
+      v.model.toLowerCase().includes(term)
+    )
+  })
+
+  // Se já foi gerado com sucesso, exibe tela de conclusão e downloads
+  if (generatedContract) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6 py-6 font-sans">
+        <div className="p-8 rounded-3xl border border-surface bg-surface-1 text-center space-y-5 shadow-xl">
+          <div className="h-16 w-16 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Documento Criado com Sucesso
+            </span>
+            <h2 className="text-2xl font-black text-foreground">
+              Contrato de Venda Nº {generatedContract.number}
+            </h2>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              O contrato foi gravado no banco de dados com numeração sequencial atômica e já está pronto para impressão ou assinatura.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <a
+              href={`/api/contracts/${generatedContract.id}/pdf?print=true&download=true`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button className="btn-brand gap-2 text-xs font-bold rounded-xl h-11 w-full sm:w-auto">
+                <FileDown className="h-4 w-4" /> Baixar PDF para Impressão
+              </Button>
+            </a>
+            <a
+              href={`/api/contracts/${generatedContract.id}/pdf?print=true`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button
+                variant="outline"
+                className="gap-2 text-xs rounded-xl h-11 border-surface hover:bg-surface-2 w-full sm:w-auto"
+              >
+                <ExternalLink className="h-4 w-4" /> Visualizar PDF no Navegador
+              </Button>
+            </a>
+          </div>
+
+          <div className="pt-4 border-t border-surface flex items-center justify-center gap-3">
+            <Link href={`/${slug}/admin/contratos`}>
+              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
+                Ir para o Painel de Contratos
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setGeneratedContract(null)
+                setCurrentStep(1)
+                setBuyer({ ...buyer, name: '', cpf_cnpj: '' })
+              }}
+              className="text-xs text-brand hover:underline"
+            >
+              Criar Outro Contrato
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6 max-w-4xl mx-auto pb-16 font-sans">
+      {/* ── BARRA SUPERIOR DE PROGRESSO DO WIZARD ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-surface pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Link href={`/${slug}/admin/contratos`}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+              Novo Contrato de Venda de Veículo
+            </h1>
+          </div>
+          <p className="text-xs text-muted-foreground ml-10">
+            Passo {currentStep} de 5: {STEPS[currentStep - 1].title} – {STEPS[currentStep - 1].desc}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+          {STEPS.map((s) => {
+            const Icon = s.icon
+            const isCompleted = currentStep > s.id
+            const isCurrent = currentStep === s.id
+
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  if (s.id < currentStep || validateStep(currentStep)) {
+                    setCurrentStep(s.id)
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  isCurrent
+                    ? 'bg-brand text-white shadow-xs'
+                    : isCompleted
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                    : 'bg-surface-2 text-muted-foreground hover:text-foreground opacity-60'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">{s.title}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PASSO 1: QUALIFICAÇÃO DAS PARTES                              */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {currentStep === 1 && (
+        <div className="space-y-6 animate-in fade-in-50 duration-200">
+          {/* Card Vendedor (Loja) */}
+          <Card className="border-surface bg-surface-1">
+            <CardHeader className="pb-3 border-b border-surface">
+              <CardTitle className="text-sm font-bold text-foreground flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-brand" /> Dados do Vendedor (Sua Loja)
+                </span>
+                <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                  Preenchimento Automático
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 text-xs space-y-1.5 text-muted-foreground">
+              <p>
+                <strong className="text-foreground">Razão Social:</strong>{' '}
+                {store.contract_razao_social || store.name}
+              </p>
+              <p>
+                <strong className="text-foreground">CNPJ:</strong>{' '}
+                {store.contract_cnpj || 'Não configurado (configure em Ajustes)'}
+              </p>
+              <p>
+                <strong className="text-foreground">Endereço:</strong>{' '}
+                {store.contract_address || store.address || 'Não configurado'}
+              </p>
+              <p>
+                <strong className="text-foreground">Foro Padrão:</strong>{' '}
+                {store.contract_foro_cidade || 'São Paulo'} - {store.contract_foro_estado || 'SP'}
+              </p>
+              {store.contract_rep_nome && (
+                <p>
+                  <strong className="text-foreground">Responsável Legal:</strong>{' '}
+                  {store.contract_rep_nome} (CPF: {store.contract_rep_cpf || 'Não informado'})
+                </p>
+              )}
+              <div className="pt-2">
+                <Link
+                  href={`/${slug}/admin/configuracoes`}
+                  className="text-brand hover:underline font-semibold"
+                >
+                  Alterar dados da loja em Configurações &rarr;
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card Comprador */}
+          <Card className="border-surface bg-surface-1">
+            <CardHeader className="pb-3 border-b border-surface flex flex-row items-center justify-between">
+              <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                <User className="h-4 w-4 text-brand" /> Qualificação do Comprador
+              </CardTitle>
+              <div className="flex bg-surface-2 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBuyerType('pf')
+                    setBuyer({ ...buyer, type: 'pf' })
+                  }}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    buyerType === 'pf' ? 'bg-surface-1 text-foreground shadow-xs' : 'text-muted-foreground'
+                  }`}
+                >
+                  Pessoa Física (PF)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBuyerType('pj')
+                    setBuyer({ ...buyer, type: 'pj' })
+                  }}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    buyerType === 'pj' ? 'bg-surface-1 text-foreground shadow-xs' : 'text-muted-foreground'
+                  }`}
+                >
+                  Pessoa Jurídica (PJ)
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-4">
+              {buyerType === 'pf' ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">Nome Completo do Comprador *</Label>
+                      <Input
+                        placeholder="Ex: Roberto Carlos Pereira"
+                        value={buyer.name}
+                        onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">CPF do Comprador *</Label>
+                      <Input
+                        placeholder="000.000.000-00"
+                        value={buyer.cpf_cnpj}
+                        onChange={(e) => setBuyer({ ...buyer, cpf_cnpj: maskCpfCnpj(e.target.value) })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">RG / RNE / Órgão</Label>
+                      <Input
+                        placeholder="Ex: 12.345.678-9 SSP/SP"
+                        value={buyer.rg_ie || ''}
+                        onChange={(e) => setBuyer({ ...buyer, rg_ie: e.target.value })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">CNH (opcional)</Label>
+                      <Input
+                        placeholder="Nº da CNH"
+                        value={buyer.cnh || ''}
+                        onChange={(e) => setBuyer({ ...buyer, cnh: e.target.value })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">Data de Nascimento</Label>
+                      <Input
+                        type="date"
+                        value={buyer.birth_date || ''}
+                        onChange={(e) => setBuyer({ ...buyer, birth_date: e.target.value })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">Razão Social da Empresa *</Label>
+                      <Input
+                        placeholder="Ex: Comercial Automotiva Ltda"
+                        value={buyer.name}
+                        onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">CNPJ *</Label>
+                      <Input
+                        placeholder="00.000.000/0001-00"
+                        value={buyer.cpf_cnpj}
+                        onChange={(e) => setBuyer({ ...buyer, cpf_cnpj: maskCpfCnpj(e.target.value) })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">Nome do Representante Legal</Label>
+                      <Input
+                        placeholder="Representante que assina pela PJ"
+                        value={buyer.rep_name || ''}
+                        onChange={(e) => setBuyer({ ...buyer, rep_name: e.target.value })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-foreground">CPF do Representante</Label>
+                      <Input
+                        placeholder="000.000.000-00"
+                        value={buyer.rep_cpf || ''}
+                        onChange={(e) => setBuyer({ ...buyer, rep_cpf: maskCpfCnpj(e.target.value) })}
+                        className="bg-surface-1 border-surface"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Contato do Comprador */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-surface">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Telefone / WhatsApp *</Label>
+                  <Input
+                    placeholder="(11) 99999-9999"
+                    value={buyer.phone}
+                    onChange={(e) => setBuyer({ ...buyer, phone: maskPhone(e.target.value) })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">E-mail do Comprador</Label>
+                  <Input
+                    type="email"
+                    placeholder="comprador@email.com"
+                    value={buyer.email}
+                    onChange={(e) => setBuyer({ ...buyer, email: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Necessário para envio do link e código OTP na assinatura eletrônica (Fase 4).
+                  </p>
+                </div>
+              </div>
+
+              {/* Endereço do Comprador */}
+              <div className="space-y-1.5 pt-2 border-t border-surface">
+                <Label className="text-xs font-semibold text-foreground">Endereço Completo (Rua, Número, Bairro)</Label>
+                <Input
+                  placeholder="Ex: Rua das Flores, 123, Apto 45 - Jardim Paulista"
+                  value={buyer.address}
+                  onChange={(e) => setBuyer({ ...buyer, address: e.target.value })}
+                  className="bg-surface-1 border-surface"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Cidade</Label>
+                  <Input
+                    placeholder="São Paulo"
+                    value={buyer.city}
+                    onChange={(e) => setBuyer({ ...buyer, city: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Estado (UF)</Label>
+                  <Input
+                    placeholder="SP"
+                    maxLength={2}
+                    value={buyer.state}
+                    onChange={(e) => setBuyer({ ...buyer, state: e.target.value.toUpperCase() })}
+                    className="bg-surface-1 border-surface uppercase"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">CEP</Label>
+                  <Input
+                    placeholder="00000-000"
+                    value={buyer.zip}
+                    onChange={(e) => setBuyer({ ...buyer, zip: maskCep(e.target.value) })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PASSO 2: VEÍCULO                                              */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {currentStep === 2 && (
+        <div className="space-y-6 animate-in fade-in-50 duration-200">
+          <Card className="border-surface bg-surface-1">
+            <CardHeader className="pb-3 border-b border-surface flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Car className="h-4 w-4 text-brand" /> Dados do Veículo Automotor
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Selecione um carro cadastrado no estoque ou preencha os dados manualmente.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStockModalOpen(true)}
+                className="gap-2 text-xs border-surface hover:bg-surface-2 shrink-0 rounded-xl"
+              >
+                <Search className="h-3.5 w-3.5 text-brand" /> Puxar do Estoque da Loja
+              </Button>
+            </CardHeader>
+
+            <CardContent className="pt-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Marca / Fabricante *</Label>
+                  <Input
+                    placeholder="Ex: Honda, Toyota, Volkswagen"
+                    value={vehicle.brand}
+                    onChange={(e) => setVehicle({ ...vehicle, brand: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Modelo e Versão *</Label>
+                  <Input
+                    placeholder="Ex: Civic Touring 1.5 Turbo CVT"
+                    value={vehicle.model}
+                    onChange={(e) => setVehicle({ ...vehicle, model: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Ano Fabricação</Label>
+                  <Input
+                    type="number"
+                    placeholder="2022"
+                    value={vehicle.year_fab}
+                    onChange={(e) => setVehicle({ ...vehicle, year_fab: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Ano Modelo</Label>
+                  <Input
+                    type="number"
+                    placeholder="2023"
+                    value={vehicle.year_model}
+                    onChange={(e) => setVehicle({ ...vehicle, year_model: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Placa *</Label>
+                  <Input
+                    placeholder="ABC1D23"
+                    value={vehicle.plate}
+                    onChange={(e) => setVehicle({ ...vehicle, plate: maskPlaca(e.target.value) })}
+                    className="bg-surface-1 border-surface uppercase"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Renavam</Label>
+                  <Input
+                    placeholder="00000000000"
+                    value={vehicle.renavam}
+                    onChange={(e) => setVehicle({ ...vehicle, renavam: maskRenavam(e.target.value) })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Chassi (VIN)</Label>
+                  <Input
+                    placeholder="9BWCA..."
+                    maxLength={17}
+                    value={vehicle.chassis}
+                    onChange={(e) => setVehicle({ ...vehicle, chassis: e.target.value.toUpperCase() })}
+                    className="bg-surface-1 border-surface uppercase"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Cor</Label>
+                  <Input
+                    placeholder="Preto, Prata, Branco..."
+                    value={vehicle.color}
+                    onChange={(e) => setVehicle({ ...vehicle, color: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Combustível</Label>
+                  <select
+                    value={vehicle.fuel}
+                    onChange={(e) => setVehicle({ ...vehicle, fuel: e.target.value })}
+                    className="w-full h-10 rounded-xl border border-surface bg-surface-1 px-3 text-xs text-foreground outline-none"
+                  >
+                    <option value="Flex">Flex (Álcool/Gasolina)</option>
+                    <option value="Gasolina">Gasolina</option>
+                    <option value="Etanol">Etanol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Híbrido">Híbrido</option>
+                    <option value="Elétrico">Elétrico</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Quilometragem (Km)</Label>
+                  <Input
+                    placeholder="Ex: 45000"
+                    value={vehicle.mileage}
+                    onChange={(e) => setVehicle({ ...vehicle, mileage: e.target.value.replace(/\D/g, '') })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Motorização (opcional)</Label>
+                  <Input
+                    placeholder="Ex: 1.0 Turbo 3 Cilindros"
+                    value={vehicle.engine || ''}
+                    onChange={(e) => setVehicle({ ...vehicle, engine: e.target.value })}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5 pt-2 border-t border-surface">
+                <Label className="text-xs font-semibold text-foreground">Opcionais e Acessórios Relevantes</Label>
+                <Input
+                  placeholder="Ex: Teto solar, bancos em couro, câmera 360, rodas de liga leve 18"
+                  value={vehicle.features || ''}
+                  onChange={(e) => setVehicle({ ...vehicle, features: e.target.value })}
+                  className="bg-surface-1 border-surface"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PASSO 3: VALORES E CONDIÇÕES DE PAGAMENTO                     */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {currentStep === 3 && (
+        <div className="space-y-6 animate-in fade-in-50 duration-200">
+          <Card className="border-surface bg-surface-1">
+            <CardHeader className="pb-3 border-b border-surface">
+              <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-brand" /> Preço e Pagamento do Veículo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-5">
+              {/* Valor Total + Extenso Automático */}
+              <div className="p-4 rounded-2xl bg-surface-2/60 border border-surface space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <Label className="text-xs font-bold text-foreground">Valor Total da Venda (R$) *</Label>
+                  <span className="text-xs font-mono font-bold text-brand">
+                    {formatCurrency(totalAmount)}
+                  </span>
+                </div>
+                <Input
+                  type="number"
+                  min="0"
+                  step="100"
+                  placeholder="Ex: 85000"
+                  value={totalAmount || ''}
+                  onChange={(e) => setTotalAmount(parseFloat(e.target.value) || 0)}
+                  className="text-lg font-bold bg-surface-1 border-surface"
+                />
+                <p className="text-xs text-muted-foreground italic">
+                  <strong>Por extenso automático:</strong> {valorPorExtenso(totalAmount)}
+                </p>
+              </div>
+
+              {/* Sinal e Transferência */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Sinal / Entrada (Arras) - R$</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 5000"
+                    value={downPayment || ''}
+                    onChange={(e) => setDownPayment(parseFloat(e.target.value) || 0)}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Data do Pagamento do Sinal</Label>
+                  <Input
+                    type="date"
+                    value={downPaymentDate}
+                    onChange={(e) => setDownPaymentDate(e.target.value)}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Responsável pela Transferência</Label>
+                  <select
+                    value={transferResponsible}
+                    onChange={(e) => setTransferResponsible(e.target.value as any)}
+                    className="w-full h-10 rounded-xl border border-surface bg-surface-1 px-3 text-xs text-foreground outline-none"
+                  >
+                    <option value="comprador">Comprador</option>
+                    <option value="vendedor">Vendedor (Loja)</option>
+                    <option value="dividido">Dividido (50% Comprador / 50% Loja)</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Valor Estimado das Taxas / Documento (R$)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Ex: 650"
+                    value={transferFeeAmount || ''}
+                    onChange={(e) => setTransferFeeAmount(parseFloat(e.target.value) || 0)}
+                    className="bg-surface-1 border-surface"
+                  />
+                </div>
+              </div>
+
+              {/* Tabela de Parcelas */}
+              <div className="pt-4 border-t border-surface space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold text-foreground">Cronograma de Parcelas / Formas de Pagamento</h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Financiamento, Pix, Cartão, Veículo na Troca ou Parcelas Diretas.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleAddInstallment}
+                    className="text-xs rounded-xl border-surface hover:bg-surface-2 gap-1.5"
+                  >
+                    <Plus className="h-3.5 w-3.5 text-brand" /> Adicionar Pagamento
+                  </Button>
+                </div>
+
+                {installments.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic py-3 text-center border border-dashed border-surface rounded-xl">
+                    Nenhuma parcela cadastrada. Caso a venda seja quitada à vista ou via sinal integral, pode avançar.
+                  </p>
+                ) : (
+                  <div className="space-y-2.5">
+                    {installments.map((inst, index) => (
+                      <div
+                        key={index}
+                        className="p-3 rounded-xl border border-surface bg-surface-2/40 grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center"
+                      >
+                        <div className="sm:col-span-1 text-center font-bold text-xs text-muted-foreground">
+                          #{inst.number}
+                        </div>
+                        <div className="sm:col-span-3">
+                          <Label className="text-[10px] text-muted-foreground">Valor (R$)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="0.00"
+                            value={inst.amount || ''}
+                            onChange={(e) =>
+                              handleUpdateInstallment(index, 'amount', parseFloat(e.target.value) || 0)
+                            }
+                            className="h-9 text-xs bg-surface-1 border-surface"
+                          />
+                        </div>
+                        <div className="sm:col-span-3">
+                          <Label className="text-[10px] text-muted-foreground">Vencimento</Label>
+                          <Input
+                            type="date"
+                            value={inst.due_date}
+                            onChange={(e) => handleUpdateInstallment(index, 'due_date', e.target.value)}
+                            className="h-9 text-xs bg-surface-1 border-surface"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label className="text-[10px] text-muted-foreground">Forma</Label>
+                          <select
+                            value={inst.method}
+                            onChange={(e) => handleUpdateInstallment(index, 'method', e.target.value)}
+                            className="w-full h-9 rounded-lg border border-surface bg-surface-1 px-2 text-xs text-foreground outline-none"
+                          >
+                            <option value="Pix">Pix</option>
+                            <option value="TED">TED</option>
+                            <option value="Financiamento">Financiamento</option>
+                            <option value="Veículo na Troca">Veículo Troca</option>
+                            <option value="Cartão de Crédito">Cartão Crédito</option>
+                            <option value="Boleto">Boleto</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label className="text-[10px] text-muted-foreground">Detalhes</Label>
+                          <Input
+                            placeholder="Ex: BV Financeira"
+                            value={inst.description || ''}
+                            onChange={(e) => handleUpdateInstallment(index, 'description', e.target.value)}
+                            className="h-9 text-xs bg-surface-1 border-surface"
+                          />
+                        </div>
+                        <div className="sm:col-span-1 text-right">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveInstallment(index)}
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            title="Remover parcela"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Conferência de Soma */}
+                {installments.length > 0 && (
+                  <div className="p-3 rounded-xl bg-surface-2/60 border border-surface flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs gap-2">
+                    <div>
+                      <span>Sinal: <strong>{formatCurrency(downPayment)}</strong></span>
+                      {' + '}
+                      <span>Parcelas: <strong>{formatCurrency(totalInstallments)}</strong></span>
+                      {' = '}
+                      <span>Total Computado: <strong>{formatCurrency(totalCalculado)}</strong></span>
+                    </div>
+                    {diferencaPreco !== 0 && (
+                      <span className="font-semibold text-amber-600 dark:text-amber-400">
+                        {diferencaPreco > 0
+                          ? `Restam ${formatCurrency(diferencaPreco)} para atingir o valor total.`
+                          : `Soma excede o valor total em ${formatCurrency(Math.abs(diferencaPreco))}.`}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Observações Livres */}
+              <div className="space-y-1.5 pt-2 border-t border-surface">
+                <Label className="text-xs font-semibold text-foreground">Observações Financeiras Adicionais</Label>
+                <textarea
+                  rows={2}
+                  placeholder="Ex: Veículo dado na troca será entregue no ato da liberação do saldo do financiamento..."
+                  value={financialNotes}
+                  onChange={(e) => setFinancialNotes(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-surface bg-surface-1 text-xs text-foreground outline-none resize-none"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PASSO 4: CLÁUSULAS CONTRATUAIS                                */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {currentStep === 4 && (
+        <div className="space-y-6 animate-in fade-in-50 duration-200">
+          <Card className="border-surface bg-surface-1">
+            <CardHeader className="pb-3 border-b border-surface flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-brand" /> Cláusulas Contratuais
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Personalize ou adicione cláusulas específicas para esta negociação.
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setClauses(DEFAULT_SALE_CLAUSES)}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Restaurar Padrão
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={handleAddClause}
+                  className="gap-1.5 text-xs border-surface hover:bg-surface-2 rounded-xl"
+                >
+                  <Plus className="h-3.5 w-3.5 text-brand" /> Nova Cláusula
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-5 space-y-4">
+              {/* Aviso Jurídico */}
+              <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 flex items-start gap-3">
+                <Scale className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                  <strong>Aviso legal:</strong> Este é um modelo padrão sugerido para compra e venda de veículos seminovos. Recomendamos revisar as cláusulas com a assessoria jurídica da sua empresa antes de utilizar.
+                </p>
+              </div>
+
+              {/* Lista de Cláusulas */}
+              <div className="space-y-4">
+                {clauses.map((clause, index) => (
+                  <div
+                    key={clause.id}
+                    className="p-4 rounded-xl border border-surface bg-surface-2/30 space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <Input
+                        value={clause.title}
+                        onChange={(e) => handleUpdateClause(clause.id, 'title', e.target.value)}
+                        className="text-xs font-bold bg-surface-1 border-surface h-8"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveClause(clause.id)}
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0"
+                        title="Remover cláusula"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+
+                    <textarea
+                      rows={3}
+                      value={clause.text}
+                      onChange={(e) => handleUpdateClause(clause.id, 'text', e.target.value)}
+                      className="w-full p-2.5 rounded-lg border border-surface bg-surface-1 text-xs text-foreground outline-none resize-y leading-relaxed"
+                    />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PASSO 5: REVISÃO & EMISSÃO DO CONTRATO                        */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {currentStep === 5 && (
+        <div className="space-y-6 animate-in fade-in-50 duration-200">
+          <Card className="border-surface bg-surface-1">
+            <CardHeader className="pb-3 border-b border-surface">
+              <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Revisão Final do Documento
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-4 text-xs">
+              {/* Resumo das 4 áreas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Comprador */}
+                <div className="p-4 rounded-2xl border border-surface bg-surface-2/40 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 text-brand" /> Comprador ({buyerType.toUpperCase()})
+                  </span>
+                  <p className="font-bold text-sm text-foreground">{buyer.name}</p>
+                  <p className="text-muted-foreground">Documento: {buyer.cpf_cnpj}</p>
+                  <p className="text-muted-foreground">Contato: {buyer.phone} • {buyer.email}</p>
+                  <p className="text-muted-foreground">Endereço: {buyer.address}, {buyer.city} - {buyer.state}</p>
+                </div>
+
+                {/* Veículo */}
+                <div className="p-4 rounded-2xl border border-surface bg-surface-2/40 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Car className="h-3.5 w-3.5 text-brand" /> Veículo Automotor
+                  </span>
+                  <p className="font-bold text-sm text-foreground">
+                    {vehicle.brand} {vehicle.model}
+                  </p>
+                  <p className="text-muted-foreground">
+                    Ano: {vehicle.year_fab}/{vehicle.year_model} • Cor: {vehicle.color} • Combustível: {vehicle.fuel}
+                  </p>
+                  <p className="text-muted-foreground font-mono">
+                    Placa: {vehicle.plate} • Renavam: {vehicle.renavam || '-'}
+                  </p>
+                  <p className="text-muted-foreground font-mono text-[11px]">
+                    Chassi: {vehicle.chassis || '-'}
+                  </p>
+                </div>
+
+                {/* Financeiro */}
+                <div className="p-4 rounded-2xl border border-surface bg-surface-2/40 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <DollarSign className="h-3.5 w-3.5 text-brand" /> Condições Financeiras
+                  </span>
+                  <p className="font-bold text-base text-foreground">{formatCurrency(totalAmount)}</p>
+                  <p className="text-muted-foreground italic">{valorPorExtenso(totalAmount)}</p>
+                  {downPayment > 0 && (
+                    <p className="text-muted-foreground">Sinal / Arras: {formatCurrency(downPayment)}</p>
+                  )}
+                  <p className="text-muted-foreground">
+                    Parcelas: {installments.length} parcela(s) cadastrada(s)
+                  </p>
+                  <p className="text-muted-foreground">
+                    Transferência: por conta do{' '}
+                    <span className="font-bold uppercase text-foreground">{transferResponsible}</span>
+                  </p>
+                </div>
+
+                {/* Jurídico */}
+                <div className="p-4 rounded-2xl border border-surface bg-surface-2/40 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Scale className="h-3.5 w-3.5 text-brand" /> Termos & Foro
+                  </span>
+                  <p className="font-semibold text-foreground">
+                    {clauses.length} Cláusulas Contratuais Definidas
+                  </p>
+                  <p className="text-muted-foreground">
+                    Foro de Eleição: Comarca de {store.contract_foro_cidade || 'São Paulo'} - {store.contract_foro_estado || 'SP'}
+                  </p>
+                  <p className="text-muted-foreground">
+                    Assinatura Vendedor: {store.contract_rep_nome || store.name}
+                  </p>
+                </div>
+              </div>
+
+              {/* Botões Finais de Emissão */}
+              <div className="pt-6 border-t border-surface flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleGenerateContract('rascunho')}
+                  disabled={generating}
+                  className="rounded-xl border-surface hover:bg-surface-2 text-xs h-11"
+                >
+                  {generating && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
+                  Salvar Apenas Rascunho
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleGenerateContract('enviado')}
+                  disabled={generating}
+                  className="btn-brand rounded-xl font-bold text-xs h-11 gap-2 px-6 shadow-md"
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Gerando Documento Oficial...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" /> Gerar Contrato & Emitir PDF
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ── BOTÕES DE NAVEGAÇÃO ENTRE PASSOS (ANTERIOR / PRÓXIMO) ── */}
+      <div className="flex items-center justify-between pt-4 border-t border-surface">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handlePrev}
+          disabled={currentStep === 1 || generating}
+          className="rounded-xl border-surface hover:bg-surface-2 text-xs gap-1.5"
+        >
+          <ChevronLeft className="h-4 w-4" /> Anterior
+        </Button>
+
+        {currentStep < 5 && (
+          <Button
+            type="button"
+            onClick={handleNext}
+            className="btn-brand rounded-xl text-xs font-bold gap-1.5 px-6"
+          >
+            Próximo <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* ── MODAL: PUXAR DO ESTOQUE DA LOJA ── */}
+      {stockModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-surface-1 border border-surface rounded-2xl p-5 w-full max-w-lg shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-surface pb-3">
+              <div className="flex items-center gap-2">
+                <Car className="h-5 w-5 text-brand" />
+                <h3 className="text-sm font-bold text-foreground">Selecionar do Catálogo da Loja</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStockModalOpen(false)}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por marca, modelo ou título..."
+                value={stockSearch}
+                onChange={(e) => setStockSearch(e.target.value)}
+                className="pl-9 h-10 text-xs bg-surface-2/60 border-surface"
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 divide-y divide-surface">
+              {filteredVehicles.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-8">
+                  Nenhum veículo encontrado no estoque da loja.
+                </p>
+              ) : (
+                filteredVehicles.map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => handleSelectFromStock(v)}
+                    className="w-full text-left p-3 rounded-xl hover:bg-surface-2 transition-colors flex items-center justify-between gap-3 group"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-xs text-foreground group-hover:text-brand truncate">
+                        {v.title}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {v.brand} {v.model} • {v.year} • {v.color || 'Cor não inf.'}
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold text-foreground shrink-0 font-mono">
+                      {formatCurrency(v.price)}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
