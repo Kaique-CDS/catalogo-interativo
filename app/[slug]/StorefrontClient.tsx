@@ -133,11 +133,11 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
 
       {/* ── Brand Banner ── */}
       {(store.banner_url || store.banner_mobile_url || brand.banners.desktop || brand.banners.mobile) && (
-        <section className="container mx-auto px-3 sm:px-4 mt-6 max-w-7xl">
+        <section className="container mx-auto px-3 sm:px-4 mt-4 sm:mt-6 max-w-7xl">
           <BrandBanner
             altText={`Bem-vindo à ${store.name}`}
-            desktopBanner={store.banner_url || brand.banners.desktop}
-            mobileBanner={store.banner_mobile_url || brand.banners.mobile || store.banner_url}
+            desktopBanner={store.banner_url || brand.banners.desktop || null}
+            mobileBanner={store.banner_mobile_url || brand.banners.mobile || null}
           />
         </section>
       )}

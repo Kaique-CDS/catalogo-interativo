@@ -146,6 +146,7 @@ export async function saveStoreWithContacts(payload: {
       whatsapp_financeiro: payload.whatsapp_financeiro || null,
       logo_url: payload.logo_url,
       banner_url: payload.banner_url,
+      banner_mobile_url: payload.banner_mobile_url || null,
     })
     .eq('id', payload.store_id)
 

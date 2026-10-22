@@ -107,18 +107,19 @@ export default function FloatingWhatsApp({ storeId, slug, storeName, whatsapp, c
   return (
     <aside
       aria-label="Atendimento via WhatsApp"
-      style={{
-        bottom:
-          bottomOffset > 0
-            ? `${bottomOffset}px`
-            : 'max(1.25rem, env(safe-area-inset-bottom, 1.25rem))',
-        right: 'max(1.25rem, env(safe-area-inset-right, 1.25rem))',
-      }}
-      className={`fixed z-30 transition-all duration-200 ease-out ${
-        isModalOpen
-          ? 'opacity-0 pointer-events-none scale-75'
-          : 'opacity-100 pointer-events-auto scale-100'
-      }`}
+      style={
+        bottomOffset > 0
+          ? { bottom: `${bottomOffset}px` }
+          : undefined
+      }
+      className={`fixed z-30 transition-all duration-200 ease-out
+        ${bottomOffset > 0 ? '' : 'bottom-[max(5rem,calc(env(safe-area-inset-bottom,0.75rem)+4.25rem))] sm:bottom-[max(1.5rem,env(safe-area-inset-bottom,1.5rem))]'}
+        right-[max(1rem,env(safe-area-inset-right,1rem))] sm:right-[max(1.5rem,env(safe-area-inset-right,1.5rem))]
+        ${
+          isModalOpen
+            ? 'opacity-0 pointer-events-none scale-75'
+            : 'opacity-100 pointer-events-auto scale-100'
+        }`}
     >
       <a
         href={url}
