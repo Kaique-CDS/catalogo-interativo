@@ -111,6 +111,8 @@ export async function POST(req: NextRequest) {
       notes,
       vehicle_id,
       status: reqStatus,
+      crlv_data,
+      crlv_file_url,
     } = body as {
       slug: string
       buyer: BuyerData
@@ -120,6 +122,8 @@ export async function POST(req: NextRequest) {
       notes?: string
       vehicle_id?: string
       status?: string
+      crlv_data?: any
+      crlv_file_url?: string
     }
 
     if (!slug) {
@@ -203,6 +207,8 @@ export async function POST(req: NextRequest) {
       financial_data: financial,
       clauses: contractClauses,
       notes: notes || null,
+      crlv_data: crlv_data || null,
+      crlv_file_url: crlv_file_url || null,
       pdf_draft_url: `/${slug}/admin/contratos/pdf?id=${nextNumber}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

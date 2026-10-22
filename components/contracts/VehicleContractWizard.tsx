@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -24,6 +24,10 @@ import {
   Calendar,
   CreditCard,
   X,
+  Upload,
+  FileCheck,
+  AlertOctagon,
+  ShieldAlert,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -48,6 +52,7 @@ import type {
   FinancialData,
   PaymentInstallment,
 } from '@/lib/contracts/pdf-generator'
+import type { CrlvParsedData } from '@/lib/contracts/crlv-parser'
 
 interface Props {
   store: Store
@@ -115,6 +120,17 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
   const [stockSearch, setStockSearch] = useState('')
 
   // -------------------------------------------------------------
+  // CRLV DIGITAL (FASE 3)
+  // -------------------------------------------------------------
+  const [crlvLoading, setCrlvLoading] = useState(false)
+  const [crlvModalOpen, setCrlvModalOpen] = useState(false)
+  const [crlvData, setCrlvData] = useState<CrlvParsedData | null>(null)
+  const [crlvFileUrl, setCrlvFileUrl] = useState<string | null>(null)
+  const [crlvFileName, setCrlvFileName] = useState<string | null>(null)
+  const [fillOwnerAsBuyer, setFillOwnerAsBuyer] = useState(false)
+  const crlvFileInputRef = useRef<HTMLInputElement>(null)
+
+  // -------------------------------------------------------------
   // PASSO 3: VALORES E PAGAMENTO
   // -------------------------------------------------------------
   const [totalAmount, setTotalAmount] = useState<number>(0)
@@ -158,6 +174,89 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
     }
     setStockModalOpen(false)
     toast.success(`Veículo "${v.title}" carregado do estoque com sucesso!`)
+  }
+
+  // -------------------------------------------------------------
+  // HANDLERS DO CRLV (FASE 3)
+  // -------------------------------------------------------------
+  const handleCrlvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setCrlvLoading(true)
+    const toastId = toast.loading('Lendo CRLV Digital e processando dados com IA...')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('slug', slug)
+
+      const res = await fetch('/api/contracts/crlv', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Não foi possível ler os dados do CRLV.')
+      }
+
+      setCrlvData(data.data)
+      setCrlvFileUrl(data.fileUrl || null)
+      setCrlvFileName(data.fileName || file.name)
+      setCrlvModalOpen(true)
+      toast.success('CRLV processado! Confira e confirme os dados extraídos.', { id: toastId })
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao processar CRLV. Você pode preencher manualmente.', {
+        id: toastId,
+      })
+    } finally {
+      setCrlvLoading(false)
+      if (e.target) e.target.value = ''
+    }
+  }
+
+  const handleApplyCrlvData = () => {
+    if (!crlvData) return
+
+    let brand = vehicle.brand
+    let model = vehicle.model
+    if (crlvData.brand_model) {
+      if (crlvData.brand_model.includes('/')) {
+        const parts = crlvData.brand_model.split('/')
+        brand = parts[0].trim()
+        model = parts.slice(1).join('/').trim()
+      } else {
+        const parts = crlvData.brand_model.split(' ')
+        brand = parts[0].trim()
+        model = parts.slice(1).join(' ').trim()
+      }
+    }
+
+    setVehicle((prev) => ({
+      ...prev,
+      brand: brand || prev.brand,
+      model: model || prev.model,
+      plate: crlvData.plate ? maskPlaca(crlvData.plate) : prev.plate,
+      renavam: crlvData.renavam ? maskRenavam(crlvData.renavam) : prev.renavam,
+      chassis: crlvData.chassis || prev.chassis,
+      year_fab: crlvData.year_fab || prev.year_fab,
+      year_model: crlvData.year_model || prev.year_model,
+      color: crlvData.color || prev.color,
+      fuel: crlvData.fuel || prev.fuel,
+      engine: crlvData.engine || prev.engine,
+    }))
+
+    if (fillOwnerAsBuyer && crlvData.owner_name) {
+      setBuyer((prev) => ({
+        ...prev,
+        name: crlvData.owner_name || prev.name,
+        cpf_cnpj: crlvData.owner_cpf_cnpj ? maskCpfCnpj(crlvData.owner_cpf_cnpj) : prev.cpf_cnpj,
+      }))
+    }
+
+    setCrlvModalOpen(false)
+    toast.success('Dados do CRLV aplicados com sucesso no veículo!')
   }
 
   // -------------------------------------------------------------
@@ -309,6 +408,8 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
           clauses,
           vehicle_id: selectedVehicleId,
           status,
+          crlv_data: crlvData,
+          crlv_file_url: crlvFileUrl,
         }),
       })
 
@@ -724,21 +825,138 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                   <Car className="h-4 w-4 text-brand" /> Dados do Veículo Automotor
                 </CardTitle>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Selecione um carro cadastrado no estoque ou preencha os dados manualmente.
+                  Importe pelo CRLV digital, selecione do estoque ou preencha manualmente.
                 </p>
               </div>
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStockModalOpen(true)}
-                className="gap-2 text-xs border-surface hover:bg-surface-2 shrink-0 rounded-xl"
-              >
-                <Search className="h-3.5 w-3.5 text-brand" /> Puxar do Estoque da Loja
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Input de arquivo CRLV (PDF ou Foto) */}
+                <input
+                  ref={crlvFileInputRef}
+                  type="file"
+                  accept=".pdf,image/png,image/jpeg,image/jpg,image/webp"
+                  className="hidden"
+                  onChange={handleCrlvUpload}
+                />
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => crlvFileInputRef.current?.click()}
+                  disabled={crlvLoading}
+                  className="gap-2 text-xs border-brand/40 bg-brand/5 hover:bg-brand/10 text-brand font-semibold shrink-0 rounded-xl"
+                >
+                  {crlvLoading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />
+                      Lendo CRLV...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3.5 w-3.5 text-brand" />
+                      Ler CRLV Digital (PDF/Foto)
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStockModalOpen(true)}
+                  className="gap-2 text-xs border-surface hover:bg-surface-2 shrink-0 rounded-xl"
+                >
+                  <Search className="h-3.5 w-3.5 text-brand" /> Puxar do Estoque
+                </Button>
+              </div>
             </CardHeader>
 
-            <CardContent className="pt-5 space-y-4">
+            <CardContent className="pt-5 space-y-5">
+              {/* Card de Importação / Status do CRLV */}
+              {!crlvData ? (
+                <div
+                  onClick={() => crlvFileInputRef.current?.click()}
+                  className="group relative cursor-pointer border-2 border-dashed border-surface hover:border-brand/50 rounded-2xl p-4 sm:p-5 transition-all bg-surface-2/30 hover:bg-brand/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="h-10 w-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <Upload className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground group-hover:text-brand transition-colors">
+                        Importar CRLV Digital (PDF) ou Foto do Documento
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        Detectamos placa, Renavam, chassi, ano, proprietário e alertamos sobre gravame/alienação fiduciária.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl bg-surface border border-surface text-foreground group-hover:border-brand/40 group-hover:text-brand transition-colors">
+                    Selecionar Arquivo
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <FileCheck className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-foreground">
+                            CRLV Digital Carregado
+                          </span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                            {crlvData.source === 'text_layer' ? 'Camada de Texto' : 'OCR IA'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 truncate max-w-xs sm:max-w-md">
+                          {crlvFileName || 'Documento CRLV'} • Placa: {crlvData.plate || 'Não detectada'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCrlvModalOpen(true)}
+                        className="text-xs border-surface hover:bg-surface-2 rounded-xl h-8"
+                      >
+                        Conferir Dados Lidos
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => crlvFileInputRef.current?.click()}
+                        className="text-xs text-muted-foreground hover:text-foreground h-8"
+                      >
+                        Trocar Arquivo
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Alerta de Alienação Fiduciária se detectada */}
+                  {crlvData.has_alienacao && (
+                    <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 flex items-start gap-3 text-xs">
+                      <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                          Atenção: Consta Alienação Fiduciária / Gravame Ativo no CRLV
+                        </p>
+                        <p className="text-muted-foreground">
+                          {crlvData.alienacao_details || 'Restrição financeira ou alienação fiduciária registrada.'}
+                        </p>
+                        <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                          Verifique a quitação e baixa do gravame perante o agente financeiro antes de efetuar a entrega e transferência do veículo.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Marca / Fabricante *</Label>
@@ -1370,6 +1588,241 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                   </button>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: CONFERIR E EDITAR DADOS DO CRLV (FASE 3) ── */}
+      {crlvModalOpen && crlvData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-surface-1 border border-surface rounded-2xl p-5 w-full max-w-2xl shadow-2xl space-y-4 max-h-[90vh] flex flex-col animate-in fade-in-50 zoom-in-95 duration-200">
+            {/* Cabeçalho do Modal */}
+            <div className="flex items-center justify-between border-b border-surface pb-3 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-xl bg-brand/15 text-brand flex items-center justify-center">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">Conferir Dados Lidos do CRLV</h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    Origem:{' '}
+                    <span className="font-semibold text-brand">
+                      {crlvData.source === 'text_layer'
+                        ? 'Camada de Texto Nativa (PDF)'
+                        : 'OCR Multimodal Inteligente'}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCrlvModalOpen(false)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-2 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Conteúdo com rolagem */}
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {/* Alerta de Alienação Fiduciária se detectada */}
+              {crlvData.has_alienacao && (
+                <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3.5 flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div className="text-xs space-y-1">
+                    <p className="font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                      Atenção: Consta Alienação Fiduciária / Gravame no CRLV
+                    </p>
+                    <p className="text-muted-foreground">
+                      {crlvData.alienacao_details || 'Restrição financeira ou arrendamento mercantil ativo.'}
+                    </p>
+                    <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                      O veículo precisa de quitação e baixa de gravame antes da transferência de titularidade.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Dados do Veículo */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Car className="h-3.5 w-3.5 text-brand" /> Dados do Veículo
+                </h4>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-foreground">Marca / Modelo</Label>
+                  <Input
+                    value={crlvData.brand_model || ''}
+                    onChange={(e) => setCrlvData({ ...crlvData, brand_model: e.target.value })}
+                    placeholder="Ex: HONDA/CIVIC TOURING"
+                    className="bg-surface-2/60 border-surface text-xs h-9"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Placa</Label>
+                    <Input
+                      value={crlvData.plate || ''}
+                      onChange={(e) =>
+                        setCrlvData({ ...crlvData, plate: maskPlaca(e.target.value) })
+                      }
+                      placeholder="ABC1D23"
+                      className="bg-surface-2/60 border-surface text-xs h-9 uppercase"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Renavam</Label>
+                    <Input
+                      value={crlvData.renavam || ''}
+                      onChange={(e) =>
+                        setCrlvData({ ...crlvData, renavam: maskRenavam(e.target.value) })
+                      }
+                      placeholder="00000000000"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Ano Fab.</Label>
+                    <Input
+                      type="number"
+                      value={crlvData.year_fab || ''}
+                      onChange={(e) =>
+                        setCrlvData({ ...crlvData, year_fab: Number(e.target.value) || undefined })
+                      }
+                      placeholder="2022"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Ano Mod.</Label>
+                    <Input
+                      type="number"
+                      value={crlvData.year_model || ''}
+                      onChange={(e) =>
+                        setCrlvData({ ...crlvData, year_model: Number(e.target.value) || undefined })
+                      }
+                      placeholder="2023"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Chassi (VIN)</Label>
+                    <Input
+                      value={crlvData.chassis || ''}
+                      maxLength={17}
+                      onChange={(e) =>
+                        setCrlvData({ ...crlvData, chassis: e.target.value.toUpperCase() })
+                      }
+                      placeholder="9BWCA..."
+                      className="bg-surface-2/60 border-surface text-xs h-9 uppercase"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Cor Predominante</Label>
+                    <Input
+                      value={crlvData.color || ''}
+                      onChange={(e) => setCrlvData({ ...crlvData, color: e.target.value })}
+                      placeholder="Ex: Preto"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Combustível</Label>
+                    <Input
+                      value={crlvData.fuel || ''}
+                      onChange={(e) => setCrlvData({ ...crlvData, fuel: e.target.value })}
+                      placeholder="Ex: Flex"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                </div>
+
+                {crlvData.engine && (
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Motor / Cilindrada</Label>
+                    <Input
+                      value={crlvData.engine || ''}
+                      onChange={(e) => setCrlvData({ ...crlvData, engine: e.target.value })}
+                      placeholder="Ex: 1.5 Turbo"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Dados do Proprietário no CRLV */}
+              <div className="pt-3 border-t border-surface space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5 text-brand" /> Proprietário Registrado no Documento
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">Nome Completo</Label>
+                    <Input
+                      value={crlvData.owner_name || ''}
+                      onChange={(e) => setCrlvData({ ...crlvData, owner_name: e.target.value })}
+                      placeholder="Nome do proprietário no CRLV"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-foreground">CPF / CNPJ</Label>
+                    <Input
+                      value={crlvData.owner_cpf_cnpj ? maskCpfCnpj(crlvData.owner_cpf_cnpj) : ''}
+                      onChange={(e) =>
+                        setCrlvData({ ...crlvData, owner_cpf_cnpj: e.target.value })
+                      }
+                      placeholder="000.000.000-00"
+                      className="bg-surface-2/60 border-surface text-xs h-9"
+                    />
+                  </div>
+                </div>
+
+                {/* Opção de preencher comprador */}
+                <label className="flex items-center gap-2.5 p-3 rounded-xl border border-surface bg-surface-2/40 cursor-pointer hover:bg-surface-2 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={fillOwnerAsBuyer}
+                    onChange={(e) => setFillOwnerAsBuyer(e.target.checked)}
+                    className="h-4 w-4 rounded border-surface text-brand focus:ring-brand"
+                  />
+                  <div className="text-xs">
+                    <span className="font-semibold text-foreground">
+                      Preencher comprador com os dados deste proprietário
+                    </span>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Útil caso o contrato seja de compra/consignação ou venda direta com o titular do documento.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Rodapé do Modal */}
+            <div className="pt-3 border-t border-surface flex items-center justify-end gap-2 shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCrlvModalOpen(false)}
+                className="rounded-xl text-xs border-surface hover:bg-surface-2"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleApplyCrlvData}
+                className="btn-brand rounded-xl text-xs font-bold gap-1.5 px-4"
+              >
+                <CheckCircle2 className="h-4 w-4" /> Aplicar Dados no Veículo
+              </Button>
             </div>
           </div>
         </div>
