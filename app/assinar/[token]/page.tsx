@@ -370,24 +370,44 @@ export default function PublicSigningPage() {
                 </div>
               </div>
 
-              {/* Card Financeiro */}
-              <div className="rounded-xl border border-surface bg-surface-2/40 p-3.5 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">Valor Total</span>
-                  <p className="text-sm font-bold text-foreground">
-                    {formatCurrency(contract?.financial?.total_amount || 0)}
-                  </p>
+              {/* Card Financeiro / Documento */}
+              {contract?.financial?.total_amount ? (
+                <div className="rounded-xl border border-surface bg-surface-2/40 p-3.5 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Valor Total</span>
+                    <p className="text-sm font-bold text-foreground">
+                      {formatCurrency(contract.financial.total_amount)}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(contract?.pdf_url, '_blank')}
+                    className="gap-1.5 text-xs rounded-xl border-surface hover:bg-surface-2 h-8"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-brand" /> Ler PDF Completo
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(contract?.pdf_url, '_blank')}
-                  className="gap-1.5 text-xs rounded-xl border-surface hover:bg-surface-2 h-8"
-                >
-                  <FileText className="h-3.5 w-3.5 text-brand" /> Ler PDF Completo
-                </Button>
-              </div>
+              ) : (
+                <div className="rounded-xl border border-surface bg-surface-2/40 p-3.5 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Documento</span>
+                    <p className="text-xs font-bold text-foreground">
+                      Procuração de Gestão e Venda de Veículo
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(contract?.pdf_url, '_blank')}
+                    className="gap-1.5 text-xs rounded-xl border-surface hover:bg-surface-2 h-8"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-brand" /> Ler PDF Completo
+                  </Button>
+                </div>
+              )}
 
               {/* Confirmação de Identidade */}
               <div className="rounded-xl border border-brand/20 bg-brand/5 p-4 space-y-2">
@@ -397,10 +417,17 @@ export default function PublicSigningPage() {
                 <p className="text-xs text-foreground">
                   Você está assinando como{' '}
                   <span className="font-bold text-brand uppercase">
-                    {signer?.role === 'buyer' ? 'Comprador' : 'Vendedor'}
+                    {signer?.role === 'outorgante'
+                      ? 'Outorgante (Proprietário)'
+                      : signer?.role === 'outorgado'
+                      ? 'Outorgado(a)'
+                      : signer?.role === 'buyer'
+                      ? 'Comprador'
+                      : 'Vendedor'}
                   </span>
                   :
                 </p>
+
                 <div className="space-y-0.5 text-xs text-muted-foreground bg-surface-1 p-2.5 rounded-lg border border-surface">
                   <p>
                     Nome: <strong className="text-foreground">{signer?.name}</strong>

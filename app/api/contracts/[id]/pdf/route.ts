@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { generateVehicleSaleContractPdf } from '@/lib/contracts/pdf-generator'
+import { generateVehicleSaleContractPdf, generatePowerOfAttorneyPdf } from '@/lib/contracts/pdf-generator'
 import { getTenantDemoStore } from '@/lib/tenants'
 
 import { getLocalContractById } from '@/lib/contracts/cache'
@@ -78,20 +78,42 @@ export async function GET(
       otpVerifiedAt: s.otp_verified_at || s.otpVerifiedAt,
     }))
 
-    const pdfBytes = await generateVehicleSaleContractPdf({
-      number: contract.number,
-      store,
-      buyer: contract.buyer_data as any,
-      vehicle: contract.vehicle_data as any,
-      financial: contract.financial_data as any,
-      clauses: contract.clauses as any,
-      isPrintVersion: isPrint,
-      isFinalSigned: isSigned,
-      signers: signersList,
-      sha256Hash: contract.pdf_sha256,
-    })
+    let pdfBytes: Uint8Array
+    let filename: string
+    const isPoa = contract.type === 'procuracao'
 
-    const filename = `Contrato-Venda-N${contract.number}-${isPrint ? 'Impressao' : isSigned ? 'Assinado' : 'Digital'}.pdf`
+    if (isPoa) {
+      pdfBytes = await generatePowerOfAttorneyPdf({
+        number: contract.number,
+        store,
+        grantor: contract.buyer_data as any,
+        grantee: contract.seller_data as any,
+        vehicle: contract.vehicle_data as any,
+        validityDays: contract.validity_days || 365,
+        additionalPowers: contract.additional_powers,
+        observations: contract.notes,
+        isPrintVersion: isPrint,
+        isFinalSigned: isSigned,
+        signers: signersList,
+        sha256Hash: contract.pdf_sha256,
+      })
+      filename = `Procuracao-N${contract.number}-${isPrint ? 'Impressao' : isSigned ? 'Assinado' : 'Digital'}.pdf`
+    } else {
+      pdfBytes = await generateVehicleSaleContractPdf({
+        number: contract.number,
+        store,
+        buyer: contract.buyer_data as any,
+        vehicle: contract.vehicle_data as any,
+        financial: contract.financial_data as any,
+        clauses: contract.clauses as any,
+        isPrintVersion: isPrint,
+        isFinalSigned: isSigned,
+        signers: signersList,
+        sha256Hash: contract.pdf_sha256,
+      })
+      filename = `Contrato-Venda-N${contract.number}-${isPrint ? 'Impressao' : isSigned ? 'Assinado' : 'Digital'}.pdf`
+    }
+
     const disposition = isDownload ? `attachment; filename="${filename}"` : `inline; filename="${filename}"`
 
     const buffer = Buffer.from(pdfBytes)

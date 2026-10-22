@@ -1,6 +1,50 @@
 import { PDFDocument, StandardFonts, rgb, grayscale } from 'pdf-lib'
-import { formatCurrency, valorPorExtenso, type ContractClause } from './utils'
+import {
+  formatCurrency,
+  valorPorExtenso,
+  type ContractClause,
+  DEFAULT_POA_FIXED_POWERS,
+  DEFAULT_POA_LIABILITY,
+  DEFAULT_POA_LEGAL_NOTICE,
+} from './utils'
 import type { Store } from '@/lib/supabase/types'
+
+export interface PowerOfAttorneyParty {
+  type: 'pf' | 'pj'
+  name: string
+  cpf_cnpj: string
+  rg_ie?: string
+  cnh?: string
+  nationality?: string
+  marital_status?: string
+  profession?: string
+  phone: string
+  email: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  rep_name?: string
+  rep_cpf?: string
+  rep_role?: string
+}
+
+export interface GeneratePowerOfAttorneyPdfOptions {
+  number: number
+  store: Store
+  grantor: PowerOfAttorneyParty // Outorgante
+  grantee: PowerOfAttorneyParty // Outorgado
+  vehicle: VehicleData
+  validityDays?: number
+  additionalPowers?: string
+  observations?: string
+  date?: string
+  isPrintVersion?: boolean
+  signers?: ContractSignerEvidence[]
+  isFinalSigned?: boolean
+  sha256Hash?: string
+}
+
 
 export interface BuyerData {
   type: 'pf' | 'pj'
@@ -1156,4 +1200,868 @@ export async function generateVehicleSaleContractPdf(
 }
 
 export const generateContractPdf = generateVehicleSaleContractPdf
+
+/**
+ * Motor de geração de PDF para Procuração Particular de Venda e Gestão de Veículo.
+ */
+export async function generatePowerOfAttorneyPdf(
+  opts: GeneratePowerOfAttorneyPdfOptions
+): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create()
+
+  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+
+  const PAGE_WIDTH = 595.28 // A4
+  const PAGE_HEIGHT = 841.89
+  const MARGIN_X = 40
+  const MARGIN_BOTTOM = 50
+  const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_X * 2
+
+  const brandColor = hexToRgb(opts.store.primary_color || '#18181b')
+  const grayLight = rgb(0.95, 0.95, 0.96)
+  const grayBorder = rgb(0.82, 0.82, 0.85)
+  const textColor = rgb(0.12, 0.12, 0.14)
+  const textMuted = rgb(0.4, 0.4, 0.45)
+  const amberBg = rgb(0.99, 0.97, 0.92)
+  const amberBorder = rgb(0.85, 0.7, 0.4)
+  const amberText = rgb(0.55, 0.35, 0.05)
+
+  let currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
+  let cursorY = PAGE_HEIGHT - 40
+  const pages = [currentPage]
+
+  const checkPageBreak = (neededHeight: number) => {
+    if (cursorY - neededHeight < MARGIN_BOTTOM) {
+      currentPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
+      pages.push(currentPage)
+      cursorY = PAGE_HEIGHT - 45
+    }
+  }
+
+  // Tenta baixar e embutir o logo da loja (se houver)
+  let embeddedLogo: any = null
+  if (opts.store.logo_url) {
+    try {
+      const res = await fetch(opts.store.logo_url)
+      if (res.ok) {
+        const logoBytes = await res.arrayBuffer()
+        if (opts.store.logo_url.toLowerCase().endsWith('.png')) {
+          embeddedLogo = await pdfDoc.embedPng(logoBytes)
+        } else {
+          embeddedLogo = await pdfDoc.embedJpg(logoBytes)
+        }
+      }
+    } catch {
+      // Segue sem logo se falhar o download
+    }
+  }
+
+  // -------------------------------------------------------------
+  // CABEÇALHO DO DOCUMENTO
+  // -------------------------------------------------------------
+  const headerHeight = 55
+  if (embeddedLogo) {
+    const scale = Math.min(42 / embeddedLogo.height, 100 / embeddedLogo.width)
+    const lw = embeddedLogo.width * scale
+    const lh = embeddedLogo.height * scale
+    currentPage.drawImage(embeddedLogo, {
+      x: MARGIN_X,
+      y: cursorY - lh,
+      width: lw,
+      height: lh,
+    })
+  }
+
+  const headerTextX = embeddedLogo ? MARGIN_X + 115 : MARGIN_X
+  const storeLegalName = cleanText(opts.store.contract_razao_social || opts.store.name)
+  currentPage.drawText(storeLegalName, {
+    x: headerTextX,
+    y: cursorY - 4,
+    size: 11,
+    font: fontBold,
+    color: textColor,
+  })
+
+  let storeInfoLine = ''
+  if (opts.store.contract_cnpj) storeInfoLine += `CNPJ: ${cleanText(opts.store.contract_cnpj)}  •  `
+  if (opts.store.contract_phone || opts.store.whatsapp) {
+    storeInfoLine += `Tel: ${cleanText(opts.store.contract_phone || opts.store.whatsapp)}  •  `
+  }
+  if (opts.store.contract_email || opts.store.email) {
+    storeInfoLine += `${cleanText(opts.store.contract_email || opts.store.email)}`
+  }
+
+  if (storeInfoLine) {
+    currentPage.drawText(storeInfoLine, {
+      x: headerTextX,
+      y: cursorY - 18,
+      size: 7.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+  }
+
+  const storeAddress = cleanText(opts.store.contract_address || opts.store.address)
+  if (storeAddress) {
+    currentPage.drawText(storeAddress, {
+      x: headerTextX,
+      y: cursorY - 30,
+      size: 7.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+  }
+
+  cursorY -= headerHeight
+
+  // Linha horizontal de destaque da marca
+  currentPage.drawRectangle({
+    x: MARGIN_X,
+    y: cursorY,
+    width: CONTENT_WIDTH,
+    height: 2.5,
+    color: brandColor,
+  })
+  cursorY -= 20
+
+  // -------------------------------------------------------------
+  // TÍTULO DA PROCURAÇÃO
+  // -------------------------------------------------------------
+  checkPageBreak(40)
+  currentPage.drawText('PROCURAÇÃO PARTICULAR DE VEÍCULO', {
+    x: MARGIN_X,
+    y: cursorY,
+    size: 13,
+    font: fontBold,
+    color: brandColor,
+  })
+  cursorY -= 14
+
+  currentPage.drawText(
+    `GESTÃO, VENDA E TRANSFERÊNCIA AUTOMOTIVA  •  PROCURAÇÃO Nº ${opts.number}`,
+    {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 8,
+      font: fontBold,
+      color: textMuted,
+    }
+  )
+  cursorY -= 22
+
+  // -------------------------------------------------------------
+  // SEÇÃO 1: OUTORGANTE
+  // -------------------------------------------------------------
+  const drawSectionHeader = (title: string) => {
+    checkPageBreak(30)
+    currentPage.drawRectangle({
+      x: MARGIN_X,
+      y: cursorY - 2,
+      width: CONTENT_WIDTH,
+      height: 17,
+      color: grayLight,
+    })
+    currentPage.drawRectangle({
+      x: MARGIN_X,
+      y: cursorY - 2,
+      width: 4,
+      height: 17,
+      color: brandColor,
+    })
+    currentPage.drawText(title, {
+      x: MARGIN_X + 10,
+      y: cursorY + 2.5,
+      size: 8.5,
+      font: fontBold,
+      color: textColor,
+    })
+    cursorY -= 24
+  }
+
+  drawSectionHeader('1. OUTORGANTE (QUEM CONCEDE OS PODERES)')
+
+  const formatPartyText = (p: PowerOfAttorneyParty, isOutorgante: boolean): string => {
+    if (p.type === 'pj') {
+      let t = `${cleanText(p.name)}, pessoa jurídica de direito privado inscrita no CNPJ sob o nº ${cleanText(p.cpf_cnpj)}`
+      if (p.address) t += `, estabelecida na ${cleanText(p.address)}, ${cleanText(p.city)} - ${cleanText(p.state)}`
+      if (p.zip) t += `, CEP ${cleanText(p.zip)}`
+      t += `, neste ato representada por seu(sua) representante legal ${cleanText(p.rep_name || 'representante legal')}`
+      if (p.rep_cpf) t += `, portador(a) do CPF nº ${cleanText(p.rep_cpf)}`
+      if (p.rep_role) t += `, cargo: ${cleanText(p.rep_role)}`
+      if (p.phone) t += `, telefone: ${cleanText(p.phone)}`
+      if (p.email) t += `, e-mail: ${cleanText(p.email)}`
+      return t + '.'
+    } else {
+      let t = `${cleanText(p.name)}, brasileiro(a)`
+      if (p.marital_status) t += `, ${cleanText(p.marital_status)}`
+      if (p.profession) t += `, ${cleanText(p.profession)}`
+      t += `, inscrito(a) no CPF/MF sob o nº ${cleanText(p.cpf_cnpj)}`
+      if (p.rg_ie) t += `, portador(a) do RG nº ${cleanText(p.rg_ie)}`
+      if (p.cnh) t += `, CNH nº ${cleanText(p.cnh)}`
+      if (p.address) t += `, residente e domiciliado(a) na ${cleanText(p.address)}, ${cleanText(p.city)} - ${cleanText(p.state)}`
+      if (p.zip) t += `, CEP ${cleanText(p.zip)}`
+      if (p.phone) t += `, telefone: ${cleanText(p.phone)}`
+      if (p.email) t += `, e-mail: ${cleanText(p.email)}`
+      return t + '.'
+    }
+  }
+
+  const outorganteLines = wrapText(formatPartyText(opts.grantor, true), CONTENT_WIDTH, fontRegular, 8)
+  for (const line of outorganteLines) {
+    checkPageBreak(12)
+    currentPage.drawText(line, {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 8,
+      font: fontRegular,
+      color: textColor,
+    })
+    cursorY -= 12
+  }
+  cursorY -= 10
+
+  // -------------------------------------------------------------
+  // SEÇÃO 2: OUTORGADO(A)
+  // -------------------------------------------------------------
+  drawSectionHeader('2. OUTORGADO(A) (QUEM RECEBE OS PODERES)')
+
+  const outorgadoLines = wrapText(formatPartyText(opts.grantee, false), CONTENT_WIDTH, fontRegular, 8)
+  for (const line of outorgadoLines) {
+    checkPageBreak(12)
+    currentPage.drawText(line, {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 8,
+      font: fontRegular,
+      color: textColor,
+    })
+    cursorY -= 12
+  }
+  cursorY -= 10
+
+  // -------------------------------------------------------------
+  // SEÇÃO 3: OBJETO - IDENTIFICAÇÃO DO VEÍCULO
+  // -------------------------------------------------------------
+  drawSectionHeader('3. OBJETO DO MANDATO (IDENTIFICAÇÃO DO VEÍCULO)')
+
+  checkPageBreak(75)
+  const vehBoxY = cursorY
+  const vehBoxHeight = 65
+
+  currentPage.drawRectangle({
+    x: MARGIN_X,
+    y: vehBoxY - vehBoxHeight,
+    width: CONTENT_WIDTH,
+    height: vehBoxHeight,
+    color: rgb(0.98, 0.98, 0.99),
+    borderColor: grayBorder,
+    borderWidth: 0.8,
+  })
+
+  const col1X = MARGIN_X + 12
+  const col2X = MARGIN_X + CONTENT_WIDTH / 3 + 10
+  const col3X = MARGIN_X + (CONTENT_WIDTH / 3) * 2 + 10
+
+  let vLineY = vehBoxY - 14
+  // Linha 1
+  currentPage.drawText('Marca / Modelo:', { x: col1X, y: vLineY, size: 7, font: fontRegular, color: textMuted })
+  currentPage.drawText(`${cleanText(opts.vehicle.brand)} ${cleanText(opts.vehicle.model)}`, {
+    x: col1X,
+    y: vLineY - 10,
+    size: 8.5,
+    font: fontBold,
+    color: textColor,
+  })
+
+  currentPage.drawText('Ano Fab. / Modelo:', { x: col2X, y: vLineY, size: 7, font: fontRegular, color: textMuted })
+  currentPage.drawText(`${cleanText(String(opts.vehicle.year_fab))}/${cleanText(String(opts.vehicle.year_model))}`, {
+    x: col2X,
+    y: vLineY - 10,
+    size: 8.5,
+    font: fontBold,
+    color: textColor,
+  })
+
+  currentPage.drawText('Placa:', { x: col3X, y: vLineY, size: 7, font: fontRegular, color: textMuted })
+  currentPage.drawText(cleanText(opts.vehicle.plate).toUpperCase(), {
+    x: col3X,
+    y: vLineY - 10,
+    size: 9,
+    font: fontBold,
+    color: brandColor,
+  })
+
+  vLineY -= 26
+  // Linha 2
+  currentPage.drawText('Renavam:', { x: col1X, y: vLineY, size: 7, font: fontRegular, color: textMuted })
+  currentPage.drawText(cleanText(opts.vehicle.renavam), {
+    x: col1X,
+    y: vLineY - 10,
+    size: 8,
+    font: fontBold,
+    color: textColor,
+  })
+
+  currentPage.drawText('Chassi:', { x: col2X, y: vLineY, size: 7, font: fontRegular, color: textMuted })
+  currentPage.drawText(cleanText(opts.vehicle.chassis).toUpperCase(), {
+    x: col2X,
+    y: vLineY - 10,
+    size: 8,
+    font: fontBold,
+    color: textColor,
+  })
+
+  currentPage.drawText('Cor / Combustível:', { x: col3X, y: vLineY, size: 7, font: fontRegular, color: textMuted })
+  currentPage.drawText(`${cleanText(opts.vehicle.color)} • ${cleanText(opts.vehicle.fuel)}`, {
+    x: col3X,
+    y: vLineY - 10,
+    size: 8,
+    font: fontRegular,
+    color: textColor,
+  })
+
+  cursorY = vehBoxY - vehBoxHeight - 16
+
+  // -------------------------------------------------------------
+  // SEÇÃO 4: PODERES FIXOS E EXPRESSOS
+  // -------------------------------------------------------------
+  drawSectionHeader('4. PODERES ESPECIAIS E EXPRESSOS')
+
+  const fixedPowersLines = wrapText(DEFAULT_POA_FIXED_POWERS, CONTENT_WIDTH, fontRegular, 8)
+  for (const line of fixedPowersLines) {
+    checkPageBreak(12)
+    currentPage.drawText(line, {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 8,
+      font: fontRegular,
+      color: textColor,
+    })
+    cursorY -= 11.5
+  }
+  cursorY -= 8
+
+  // -------------------------------------------------------------
+  // SEÇÃO 5: PODERES ADICIONAIS & OBSERVAÇÕES (SE HOUVER)
+  // -------------------------------------------------------------
+  if (opts.additionalPowers || opts.observations) {
+    drawSectionHeader('5. PODERES ADICIONAIS E OBSERVAÇÕES COMPLEMENTARES')
+
+    if (opts.additionalPowers) {
+      const addLines = wrapText(cleanText(opts.additionalPowers), CONTENT_WIDTH, fontRegular, 8)
+      for (const line of addLines) {
+        checkPageBreak(12)
+        currentPage.drawText(line, {
+          x: MARGIN_X,
+          y: cursorY,
+          size: 8,
+          font: fontRegular,
+          color: textColor,
+        })
+        cursorY -= 11.5
+      }
+      cursorY -= 6
+    }
+
+    if (opts.observations) {
+      const obsLines = wrapText(`Observações: ${cleanText(opts.observations)}`, CONTENT_WIDTH, fontRegular, 7.5)
+      for (const line of obsLines) {
+        checkPageBreak(12)
+        currentPage.drawText(line, {
+          x: MARGIN_X,
+          y: cursorY,
+          size: 7.5,
+          font: fontRegular,
+          color: textMuted,
+        })
+        cursorY -= 11
+      }
+      cursorY -= 6
+    }
+  }
+
+  // -------------------------------------------------------------
+  // SEÇÃO 6: RESPONSABILIDADE CIVIL E CRIMINAL
+  // -------------------------------------------------------------
+  drawSectionHeader('6. DA RESPONSABILIDADE CIVIL, CRIMINAL E ADMINISTRATIVA')
+
+  const liabilityLines = wrapText(DEFAULT_POA_LIABILITY, CONTENT_WIDTH, fontRegular, 8)
+  for (const line of liabilityLines) {
+    checkPageBreak(12)
+    currentPage.drawText(line, {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 8,
+      font: fontRegular,
+      color: textColor,
+    })
+    cursorY -= 11.5
+  }
+  cursorY -= 8
+
+  // -------------------------------------------------------------
+  // SEÇÃO 7: PRAZO DE VALIDADE DO MANDATO
+  // -------------------------------------------------------------
+  drawSectionHeader('7. DO PRAZO DE VALIDADE')
+
+  const validityDays = opts.validityDays || 365
+  const poaDate = opts.date ? new Date(opts.date) : new Date()
+  const expDate = new Date(poaDate.getTime() + validityDays * 24 * 60 * 60 * 1000)
+  const expDateBr = formatDateBr(expDate.toISOString().split('T')[0])
+
+  const validityText = `O presente instrumento de procuração tem prazo de validade determinado de ${validityDays} (${validityDays === 365 ? 'trezentos e sessenta e cinco' : validityDays}) dias a contar desta data, expirando-se em ${expDateBr}, findo o qual cessarão automaticamente todos os efeitos e poderes ora conferidos, salvo revogação expressa anterior ou conclusão dos atos de transferência.`
+
+  const validityLines = wrapText(validityText, CONTENT_WIDTH, fontRegular, 8)
+  for (const line of validityLines) {
+    checkPageBreak(12)
+    currentPage.drawText(line, {
+      x: MARGIN_X,
+      y: cursorY,
+      size: 8,
+      font: fontRegular,
+      color: textColor,
+    })
+    cursorY -= 11.5
+  }
+  cursorY -= 10
+
+  // -------------------------------------------------------------
+  // SEÇÃO 8: AVISO LEGAL E ADVERTÊNCIA (DESTACADO)
+  // -------------------------------------------------------------
+  const noticeLines = wrapText(DEFAULT_POA_LEGAL_NOTICE, CONTENT_WIDTH - 24, fontRegular, 7.5)
+  const noticeBoxHeight = noticeLines.length * 10.5 + 18
+  checkPageBreak(noticeBoxHeight + 15)
+
+  currentPage.drawRectangle({
+    x: MARGIN_X,
+    y: cursorY - noticeBoxHeight,
+    width: CONTENT_WIDTH,
+    height: noticeBoxHeight,
+    color: amberBg,
+    borderColor: amberBorder,
+    borderWidth: 0.8,
+  })
+
+  let noticeY = cursorY - 12
+  for (const line of noticeLines) {
+    currentPage.drawText(line, {
+      x: MARGIN_X + 12,
+      y: noticeY,
+      size: 7.5,
+      font: fontRegular,
+      color: amberText,
+    })
+    noticeY -= 10.5
+  }
+
+  cursorY -= noticeBoxHeight + 16
+
+  // -------------------------------------------------------------
+  // SEÇÃO 9: LOCAL, DATA E ASSINATURAS
+  // -------------------------------------------------------------
+  const foroCidade = cleanText(opts.store.contract_foro_cidade || opts.grantor.city || 'São Paulo')
+  const foroEstado = cleanText(opts.store.contract_foro_estado || opts.grantor.state || 'SP')
+  const dataHoje = new Date()
+  const meses = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ]
+  const dataExtenso = `${foroCidade} - ${foroEstado}, ${dataHoje.getDate()} de ${meses[dataHoje.getMonth()]} de ${dataHoje.getFullYear()}.`
+
+  checkPageBreak(130)
+  currentPage.drawText(dataExtenso, {
+    x: MARGIN_X,
+    y: cursorY,
+    size: 8.5,
+    font: fontBold,
+    color: textColor,
+  })
+  cursorY -= 25
+
+  const halfColWidth = (CONTENT_WIDTH - 20) / 2
+  const colLeftX = MARGIN_X
+  const colRightX = MARGIN_X + halfColWidth + 20
+
+  const grantorSigner = opts.signers?.find((s) => s.role === 'outorgante' || s.role === 'buyer')
+  const granteeSigner = opts.signers?.find((s) => s.role === 'outorgado' || s.role === 'seller')
+
+  if (opts.isPrintVersion) {
+    // Linha para assinatura física com aviso de reconhecimento de firma
+    checkPageBreak(70)
+    cursorY -= 35
+
+    currentPage.drawLine({
+      start: { x: colLeftX, y: cursorY },
+      end: { x: colLeftX + halfColWidth, y: cursorY },
+      thickness: 0.8,
+      color: textColor,
+    })
+    currentPage.drawLine({
+      start: { x: colRightX, y: cursorY },
+      end: { x: colRightX + halfColWidth, y: cursorY },
+      thickness: 0.8,
+      color: textColor,
+    })
+
+    cursorY -= 10
+    currentPage.drawText(cleanText(opts.grantor.name).toUpperCase(), {
+      x: colLeftX,
+      y: cursorY,
+      size: 8,
+      font: fontBold,
+      color: textColor,
+    })
+    currentPage.drawText(cleanText(opts.grantee.name).toUpperCase(), {
+      x: colRightX,
+      y: cursorY,
+      size: 8,
+      font: fontBold,
+      color: textColor,
+    })
+
+    cursorY -= 10
+    currentPage.drawText(`OUTORGANTE • CPF/CNPJ: ${cleanText(opts.grantor.cpf_cnpj)}`, {
+      x: colLeftX,
+      y: cursorY,
+      size: 7,
+      font: fontRegular,
+      color: textMuted,
+    })
+    currentPage.drawText(`OUTORGADO(A) • CPF/CNPJ: ${cleanText(opts.grantee.cpf_cnpj)}`, {
+      x: colRightX,
+      y: cursorY,
+      size: 7,
+      font: fontRegular,
+      color: textMuted,
+    })
+
+    cursorY -= 9
+    currentPage.drawText('(Reconhecer firma por autenticidade)', {
+      x: colLeftX,
+      y: cursorY,
+      size: 6.5,
+      font: fontRegular,
+      color: amberText,
+    })
+    currentPage.drawText('(Reconhecer firma quando exigido)', {
+      x: colRightX,
+      y: cursorY,
+      size: 6.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+  } else if (opts.isFinalSigned && opts.signers && opts.signers.length > 0) {
+    // Embutir assinaturas capturadas via canvas
+    checkPageBreak(90)
+    cursorY -= 10
+
+    if (grantorSigner?.signatureImageUrl) {
+      const gImg = await embedSignatureImage(pdfDoc, grantorSigner.signatureImageUrl)
+      if (gImg) {
+        const sScale = Math.min(35 / gImg.height, (halfColWidth - 20) / gImg.width)
+        currentPage.drawImage(gImg, {
+          x: colLeftX + 10,
+          y: cursorY - 5,
+          width: gImg.width * sScale,
+          height: gImg.height * sScale,
+        })
+      }
+    }
+
+    if (granteeSigner?.signatureImageUrl) {
+      const geImg = await embedSignatureImage(pdfDoc, granteeSigner.signatureImageUrl)
+      if (geImg) {
+        const sScale = Math.min(35 / geImg.height, (halfColWidth - 20) / geImg.width)
+        currentPage.drawImage(geImg, {
+          x: colRightX + 10,
+          y: cursorY - 5,
+          width: geImg.width * sScale,
+          height: geImg.height * sScale,
+        })
+      }
+    }
+
+    cursorY -= 20
+    currentPage.drawLine({
+      start: { x: colLeftX, y: cursorY },
+      end: { x: colLeftX + halfColWidth, y: cursorY },
+      thickness: 0.8,
+      color: brandColor,
+    })
+    currentPage.drawLine({
+      start: { x: colRightX, y: cursorY },
+      end: { x: colRightX + halfColWidth, y: cursorY },
+      thickness: 0.8,
+      color: brandColor,
+    })
+
+    cursorY -= 10
+    currentPage.drawText(`OUTORGANTE: ${cleanText(opts.grantor.name).toUpperCase()}`, {
+      x: colLeftX,
+      y: cursorY,
+      size: 7.5,
+      font: fontBold,
+      color: textColor,
+    })
+    currentPage.drawText(`OUTORGADO(A): ${cleanText(opts.grantee.name).toUpperCase()}`, {
+      x: colRightX,
+      y: cursorY,
+      size: 7.5,
+      font: fontBold,
+      color: textColor,
+    })
+
+    cursorY -= 9
+    const gDate = grantorSigner?.signedAt ? `Assinado em ${formatDateBr(grantorSigner.signedAt)}` : 'Assinado eletronicamente'
+    const geDate = granteeSigner?.signedAt ? `Assinado em ${formatDateBr(granteeSigner.signedAt)}` : 'Assinado eletronicamente'
+    currentPage.drawText(gDate, { x: colLeftX, y: cursorY, size: 6.5, font: fontRegular, color: textMuted })
+    currentPage.drawText(geDate, { x: colRightX, y: cursorY, size: 6.5, font: fontRegular, color: textMuted })
+  } else {
+    // Área indicativa de assinatura eletrônica online
+    currentPage.drawRectangle({
+      x: MARGIN_X,
+      y: cursorY - 48,
+      width: CONTENT_WIDTH,
+      height: 52,
+      color: grayLight,
+      borderColor: grayBorder,
+      borderWidth: 0.8,
+    })
+
+    currentPage.drawText('ASSINATURA ELETRÔNICA (LEI FEDERAL Nº 14.063/2020)', {
+      x: MARGIN_X + 12,
+      y: cursorY - 14,
+      size: 8,
+      font: fontBold,
+      color: brandColor,
+    })
+
+    currentPage.drawText(
+      'Esta procuração será assinada eletronicamente através de link único com verificação por código OTP e certificado de conformidade.',
+      {
+        x: MARGIN_X + 12,
+        y: cursorY - 26,
+        size: 7.5,
+        font: fontRegular,
+        color: textMuted,
+      }
+    )
+
+    currentPage.drawText(
+      `Partes Signatárias: ${cleanText(opts.grantor.name)} (Outorgante) e ${cleanText(opts.grantee.name)} (Outorgado).`,
+      {
+        x: MARGIN_X + 12,
+        y: cursorY - 38,
+        size: 7.5,
+        font: fontRegular,
+        color: textColor,
+      }
+    )
+  }
+
+  // -------------------------------------------------------------
+  // CERTIFICADO DE EVIDÊNCIAS DE ASSINATURA ELETRÔNICA
+  // -------------------------------------------------------------
+  if (opts.isFinalSigned && opts.signers && opts.signers.length > 0) {
+    const certPage = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
+    pages.push(certPage)
+
+    let certY = PAGE_HEIGHT - MARGIN_X
+
+    certPage.drawRectangle({
+      x: MARGIN_X,
+      y: certY - 2,
+      width: CONTENT_WIDTH,
+      height: 3,
+      color: brandColor,
+    })
+    certY -= 20
+
+    certPage.drawText('CERTIFICADO DE CONFORMIDADE E EVIDÊNCIAS', {
+      x: MARGIN_X,
+      y: certY,
+      size: 13,
+      font: fontBold,
+      color: brandColor,
+    })
+    certY -= 14
+
+    certPage.drawText('VALIDAÇÃO JURÍDICA DE ASSINATURA ELETRÔNICA • LEI FEDERAL Nº 14.063/2020', {
+      x: MARGIN_X,
+      y: certY,
+      size: 8,
+      font: fontBold,
+      color: textColor,
+    })
+    certY -= 16
+
+    certPage.drawText(
+      'As partes abaixo identificadas assinaram eletronicamente a presente Procuração após validação de identidade e código de uso único (OTP), com registro cronológico e integridade garantida por hash criptográfico.',
+      {
+        x: MARGIN_X,
+        y: certY,
+        size: 7.5,
+        font: fontRegular,
+        color: textMuted,
+      }
+    )
+    certY -= 22
+
+    // Card do Documento
+    certPage.drawRectangle({
+      x: MARGIN_X,
+      y: certY - 50,
+      width: CONTENT_WIDTH,
+      height: 50,
+      color: grayLight,
+      borderColor: grayBorder,
+      borderWidth: 0.8,
+    })
+
+    certPage.drawText('DADOS DO DOCUMENTO', {
+      x: MARGIN_X + 10,
+      y: certY - 12,
+      size: 8,
+      font: fontBold,
+      color: brandColor,
+    })
+    certPage.drawText(`Título: Procuração Particular de Veículo Nº ${opts.number}`, {
+      x: MARGIN_X + 10,
+      y: certY - 23,
+      size: 7.5,
+      font: fontRegular,
+      color: textColor,
+    })
+    certPage.drawText(`Veículo: ${cleanText(opts.vehicle.brand)} ${cleanText(opts.vehicle.model)} • Placa: ${cleanText(opts.vehicle.plate)}`, {
+      x: MARGIN_X + 10,
+      y: certY - 33,
+      size: 7.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+    certPage.drawText(`Hash SHA-256: ${opts.sha256Hash || 'Verificado e íntegro na conclusão'}`, {
+      x: MARGIN_X + 10,
+      y: certY - 43,
+      size: 6.5,
+      font: fontRegular,
+      color: textMuted,
+    })
+    certY -= 65
+
+    // Signatários
+    for (const signer of opts.signers) {
+      const isGrantor = signer.role === 'outorgante' || signer.role === 'buyer'
+      const roleLabel = isGrantor ? 'OUTORGANTE' : 'OUTORGADO(A)'
+      const cardHeight = 78
+
+      certPage.drawRectangle({
+        x: MARGIN_X,
+        y: certY - cardHeight,
+        width: CONTENT_WIDTH,
+        height: cardHeight,
+        color: rgb(0.99, 0.99, 1),
+        borderColor: grayBorder,
+        borderWidth: 0.8,
+      })
+
+      certPage.drawText(`SIGNATÁRIO: ${roleLabel} • ${cleanText(signer.name).toUpperCase()}`, {
+        x: MARGIN_X + 10,
+        y: certY - 13,
+        size: 8.5,
+        font: fontBold,
+        color: brandColor,
+      })
+
+      const infoLines = [
+        `CPF/CNPJ: ${cleanText(signer.document)}  |  E-mail: ${cleanText(signer.email || 'Não informado')}`,
+        `Data e Hora: ${signer.signedAt ? new Date(signer.signedAt).toLocaleString('pt-BR') : 'Data não registrada'}`,
+        `Endereço IP: ${cleanText(signer.ip || '127.0.0.1')}  |  Validação OTP: ${signer.otpVerifiedAt ? 'Código verificado via e-mail' : 'Autenticado'}`,
+        `Navegador / User-Agent: ${cleanText((signer.userAgent || 'Web/Mobile Browser').slice(0, 80))}`,
+      ]
+
+      let infoY = certY - 26
+      for (const line of infoLines) {
+        certPage.drawText(line, {
+          x: MARGIN_X + 10,
+          y: infoY,
+          size: 7,
+          font: fontRegular,
+          color: textMuted,
+        })
+        infoY -= 10
+      }
+
+      // Miniatura da assinatura se disponível
+      if (signer.signatureImageUrl) {
+        const thumb = await embedSignatureImage(pdfDoc, signer.signatureImageUrl)
+        if (thumb) {
+          const tScale = Math.min(32 / thumb.height, 90 / thumb.width)
+          certPage.drawImage(thumb, {
+            x: MARGIN_X + CONTENT_WIDTH - (thumb.width * tScale) - 15,
+            y: certY - cardHeight + 15,
+            width: thumb.width * tScale,
+            height: thumb.height * tScale,
+          })
+          certPage.drawText('Assinatura Capturada', {
+            x: MARGIN_X + CONTENT_WIDTH - (thumb.width * tScale) - 15,
+            y: certY - cardHeight + 6,
+            size: 5.5,
+            font: fontRegular,
+            color: textMuted,
+          })
+        }
+      }
+
+      certY -= cardHeight + 12
+    }
+  }
+
+  // -------------------------------------------------------------
+  // RODAPÉ E NUMERAÇÃO DE PÁGINAS EM TODAS AS PÁGINAS
+  // -------------------------------------------------------------
+  const totalPages = pages.length
+  for (let i = 0; i < totalPages; i++) {
+    const p = pages[i]
+
+    p.drawLine({
+      start: { x: MARGIN_X, y: 32 },
+      end: { x: MARGIN_X + CONTENT_WIDTH, y: 32 },
+      thickness: 0.5,
+      color: grayBorder,
+    })
+
+    const footerLeft = `Procuração Particular Nº ${opts.number}  •  ${cleanText(opts.store.name)}`
+    p.drawText(footerLeft, {
+      x: MARGIN_X,
+      y: 22,
+      size: 7,
+      font: fontRegular,
+      color: textMuted,
+    })
+
+    const pageStr = `Página ${i + 1} de ${totalPages}`
+    const pageStrWidth = fontRegular.widthOfTextAtSize(pageStr, 7)
+    p.drawText(pageStr, {
+      x: MARGIN_X + CONTENT_WIDTH - pageStrWidth,
+      y: 22,
+      size: 7,
+      font: fontRegular,
+      color: textMuted,
+    })
+  }
+
+  return await pdfDoc.save()
+}
+
 

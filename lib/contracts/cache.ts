@@ -61,6 +61,24 @@ export function getLocalContracts(storeId?: string): any[] {
 }
 
 /**
+ * Calcula o próximo número sequencial atômico para o cache local por tipo.
+ */
+export function getNextLocalContractNumber(type: string, storeId?: string): number {
+  try {
+    const list = getLocalContracts(storeId)
+    const matching = list.filter((c: any) => {
+      if (type === 'procuracao') return c.type === 'procuracao'
+      return c.type === 'venda_veiculo' || c.type === 'venda' || !c.type
+    })
+    const maxNum = matching.reduce((max: number, c: any) => Math.max(max, Number(c.number) || 0), 0)
+    return maxNum + 1
+  } catch {
+    return 1
+  }
+}
+
+
+/**
  * Marca contrato como cancelado/excluído no cache local.
  */
 export function deleteLocalContract(id: string): boolean {

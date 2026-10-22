@@ -14,6 +14,7 @@ import {
 } from '@/lib/contracts/mailer'
 import {
   generateContractPdf,
+  generatePowerOfAttorneyPdf,
   type ContractSignerEvidence,
 } from '@/lib/contracts/pdf-generator'
 
@@ -35,50 +36,71 @@ export async function setupContractSigners({
   slug,
   expiresInDays = 7,
   originUrl = 'http://localhost:3000',
+  type = 'venda',
+  grantor,
+  grantee,
 }: {
   contractId: string
-  buyer: { name: string; cpf_cnpj: string; email: string; phone: string }
+  buyer?: { name: string; cpf_cnpj: string; email: string; phone: string }
   store: { name: string; contract_rep_nome?: string; contract_rep_cpf?: string; contract_cnpj?: string; email?: string; whatsapp?: string }
   slug: string
   expiresInDays?: number
   originUrl?: string
+  type?: 'venda' | 'procuracao' | string
+  grantor?: { name: string; cpf_cnpj: string; email: string; phone: string }
+  grantee?: { name: string; cpf_cnpj: string; email: string; phone: string }
 }): Promise<{
   buyerToken: string
   sellerToken: string
   buyerSigningUrl: string
   sellerSigningUrl: string
+  grantorSigningUrl?: string
+  granteeSigningUrl?: string
 }> {
   const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString()
 
-  const buyerRawToken = generateSecureToken()
-  const buyerTokenHash = hashToken(buyerRawToken)
+  const isPoa = type === 'procuracao'
 
-  const sellerRawToken = generateSecureToken()
-  const sellerTokenHash = hashToken(sellerRawToken)
+  const party1 = isPoa && grantor ? grantor : (buyer || { name: 'Comprador', cpf_cnpj: '', email: '', phone: '' })
+  const party2 = isPoa && grantee ? grantee : {
+    name: store.contract_rep_nome || store.name,
+    cpf_cnpj: store.contract_rep_cpf || store.contract_cnpj || '',
+    email: store.email || '',
+    phone: store.whatsapp || '',
+  }
 
-  const buyerSignerData = {
-    id: `sgn-buyer-${Date.now()}`,
+  const role1 = isPoa ? 'outorgante' : 'buyer'
+  const role2 = isPoa ? 'outorgado' : 'seller'
+
+  const token1Raw = generateSecureToken()
+  const token1Hash = hashToken(token1Raw)
+
+  const token2Raw = generateSecureToken()
+  const token2Hash = hashToken(token2Raw)
+
+  const signer1Data = {
+    id: `sgn-1-${Date.now()}`,
     contract_id: contractId,
-    role: 'buyer',
-    name: buyer.name,
-    document: buyer.cpf_cnpj,
-    email: buyer.email || '',
-    phone: buyer.phone || '',
-    token_hash: buyerTokenHash,
+    role: role1,
+    name: party1.name,
+    document: party1.cpf_cnpj,
+    email: party1.email || '',
+    phone: party1.phone || '',
+    token_hash: token1Hash,
     token_expires_at: expiresAt,
     status: 'pending',
     created_at: new Date().toISOString(),
   }
 
-  const sellerSignerData = {
-    id: `sgn-seller-${Date.now()}`,
+  const signer2Data = {
+    id: `sgn-2-${Date.now()}`,
     contract_id: contractId,
-    role: 'seller',
-    name: store.contract_rep_nome || store.name,
-    document: store.contract_rep_cpf || store.contract_cnpj || '',
-    email: store.email || '',
-    phone: store.whatsapp || '',
-    token_hash: sellerTokenHash,
+    role: role2,
+    name: party2.name,
+    document: party2.cpf_cnpj,
+    email: party2.email || '',
+    phone: party2.phone || '',
+    token_hash: token2Hash,
     token_expires_at: expiresAt,
     status: 'pending',
     created_at: new Date().toISOString(),
@@ -87,7 +109,7 @@ export async function setupContractSigners({
   // 1. Tenta salvar no Supabase
   try {
     const supabase = createAdminClient()
-    await supabase.from('contract_signers').insert([buyerSignerData, sellerSignerData])
+    await supabase.from('contract_signers').insert([signer1Data, signer2Data])
   } catch (err) {
     console.warn('Fallback: salvando signatários no cache local:', err)
   }
@@ -95,29 +117,31 @@ export async function setupContractSigners({
   // 2. Salva no cache local para resiliência offline e dev
   const localContract = getLocalContractById(contractId)
   if (localContract) {
-    localContract.signers = [buyerSignerData, sellerSignerData]
+    localContract.signers = [signer1Data, signer2Data]
     saveLocalContract(localContract)
   }
 
-  const buyerSigningUrl = `${originUrl}/assinar/${buyerRawToken}`
-  const sellerSigningUrl = `${originUrl}/assinar/${sellerRawToken}`
+  const signingUrl1 = `${originUrl}/assinar/${token1Raw}`
+  const signingUrl2 = `${originUrl}/assinar/${token2Raw}`
 
-  // Envia e-mail de convite para o comprador se houver e-mail válido
-  if (buyer.email && buyer.email.includes('@')) {
+  // Envia e-mail de convite para a primeira parte se houver e-mail válido
+  if (party1.email && party1.email.includes('@')) {
     sendSigningLinkEmail({
-      to: buyer.email,
-      signerName: buyer.name,
+      to: party1.email,
+      signerName: party1.name,
       storeName: store.name,
-      contractTitle: localContract?.title || `Contrato Nº ${localContract?.number || ''}`,
-      signingUrl: buyerSigningUrl,
+      contractTitle: localContract?.title || `${isPoa ? 'Procuração' : 'Contrato'} Nº ${localContract?.number || ''}`,
+      signingUrl: signingUrl1,
     }).catch(() => {})
   }
 
   return {
-    buyerToken: buyerRawToken,
-    sellerToken: sellerRawToken,
-    buyerSigningUrl,
-    sellerSigningUrl,
+    buyerToken: token1Raw,
+    sellerToken: token2Raw,
+    buyerSigningUrl: signingUrl1,
+    sellerSigningUrl: signingUrl2,
+    grantorSigningUrl: signingUrl1,
+    granteeSigningUrl: signingUrl2,
   }
 }
 
@@ -392,18 +416,36 @@ export async function completeSignerSignature({
       .digest('hex')
 
     try {
-      const finalPdfBytes = await generateContractPdf({
-        number: updatedContract.number,
-        store: updatedContract.seller_data,
-        buyer: updatedContract.buyer_data,
-        vehicle: updatedContract.vehicle_data,
-        financial: updatedContract.financial_data,
-        clauses: updatedContract.clauses || [],
-        isPrintVersion: false,
-        isFinalSigned: true,
-        signers: signersEvidence,
-        sha256Hash: docHash,
-      })
+      let finalPdfBytes: Uint8Array
+      if (updatedContract.type === 'procuracao') {
+        finalPdfBytes = await generatePowerOfAttorneyPdf({
+          number: updatedContract.number,
+          store: updatedContract.seller_data,
+          grantor: updatedContract.buyer_data,
+          grantee: updatedContract.seller_data,
+          vehicle: updatedContract.vehicle_data,
+          validityDays: updatedContract.validity_days || 365,
+          additionalPowers: updatedContract.additional_powers || '',
+          observations: updatedContract.notes || '',
+          isPrintVersion: false,
+          isFinalSigned: true,
+          signers: signersEvidence,
+          sha256Hash: docHash,
+        })
+      } else {
+        finalPdfBytes = await generateContractPdf({
+          number: updatedContract.number,
+          store: updatedContract.seller_data,
+          buyer: updatedContract.buyer_data,
+          vehicle: updatedContract.vehicle_data,
+          financial: updatedContract.financial_data,
+          clauses: updatedContract.clauses || [],
+          isPrintVersion: false,
+          isFinalSigned: true,
+          signers: signersEvidence,
+          sha256Hash: docHash,
+        })
+      }
 
       updatedContract.status = 'signed'
       updatedContract.signed_at = now

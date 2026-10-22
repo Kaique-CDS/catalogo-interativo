@@ -241,3 +241,14 @@ export const DEFAULT_SALE_CLAUSES: ContractClause[] = [
     text: 'As partes elegem, de comum acordo, o Foro da Comarca de {cidade_foro} - {estado_foro}, com renúncia expressa a qualquer outro por mais privilegiado que seja, para dirimir quaisquer dúvidas ou litígios decorrentes do presente instrumento.',
   },
 ]
+
+// -------------------------------------------------------------
+// 4. MODELO PADRÃO PARA PROCURAÇÃO DE VENDA DE VEÍCULOS
+// -------------------------------------------------------------
+
+export const DEFAULT_POA_FIXED_POWERS = `Por este instrumento particular de procuração e mandato, o(a) OUTORGANTE nomeia e constitui seu bastante procurador o(a) OUTORGADO(A), conferindo-lhe poderes especiais e expressos para, isoladamente ou em conjunto: vender, ceder, transferir, alienar ou compromissar a venda a quem quiser e pelo preço e condições que convencionar, o veículo automotor individualizado neste documento; representá-lo(a) perante os Departamentos Estaduais de Trânsito (DETRAN), CIRETRAN, Polícia Rodoviária Federal, Secretarias da Fazenda Estadual (SEFAZ), Receita Federal do Brasil, Cartórios de Notas e Registros Públicos, despachantes, seguradoras, bancos, administradoras de consórcio e instituições financeiras em geral; assinar e requerer a Autorização para Transferência de Propriedade de Veículo (ATPV-e), Certificado de Registro de Veículo (CRV/DUT) e respectivos recibos de transferência; requerer, emitir e retirar 2ª via de documentos; proceder à baixa ou inclusão de gravames, restrições financeiras, alienações fiduciárias, arrendamentos mercantis, reservas de domínio e bloqueios judiciais ou administrativos; solicitar extratos, emitir e recolher guias de IPVA, seguro DPVAT, licenciamento, taxas e multas de trânsito em atraso ou vincendas; prestar declarações, firmar termos, juntar e desentranhar documentos; substabelecer esta no todo ou em parte, com ou sem reserva de iguais poderes, e praticar todos os demais atos indispensáveis e complementares ao fiel e perfeito cumprimento deste mandato.`
+
+export const DEFAULT_POA_LIABILITY = `O(A) OUTORGADO(A) assume neste ato integral e exclusiva responsabilidade civil, administrativa e criminal pela posse física, guarda, conservação, tráfego, condução e eventuais infrações de trânsito relativas ao veículo identificado, a partir da presente data e hora da outorga, isentando o(a) OUTORGANTE de quaisquer responsabilidades futuras.`
+
+export const DEFAULT_POA_LEGAL_NOTICE = `Nota Legal e Advertência: A presente procuração particular é formalizada nos termos dos artigos 653 e seguintes do Código Civil Brasileiro. Cientifica-se aos signatários que os órgãos executivos de trânsito (DETRAN) e serventias notariais usualmente exigem o reconhecimento de firma por autenticidade das assinaturas para a efetivação da transferência veicular perante o prontuário público.`
+

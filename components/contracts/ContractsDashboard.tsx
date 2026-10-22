@@ -48,9 +48,12 @@ interface ContractItem {
   status: 'rascunho' | 'enviado' | 'parcialmente_assinado' | 'assinado' | 'cancelado'
   buyer_type: 'pf' | 'pj'
   buyer_data: any
+  seller_data?: any
   vehicle_data: any
-  financial_data: any
-  clauses: any[]
+  financial_data?: any
+  validity_days?: number
+  additional_powers?: string
+  clauses?: any[]
   pdf_draft_url?: string
   pdf_final_url?: string
   signed_pdf_url?: string
@@ -105,6 +108,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('todos')
+  const [typeFilter, setTypeFilter] = useState<'todos' | 'vendas' | 'procuracoes'>('todos')
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   // Modal de Assinaturas e Envio
@@ -216,9 +220,11 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
     const rawPhone = c.buyer_data?.phone ? c.buyer_data.phone.replace(/\D/g, '') : ''
     const buyerName = c.buyer_data?.name || 'Cliente'
     const vehicleName = `${c.vehicle_data?.brand || ''} ${c.vehicle_data?.model || ''}`.trim()
+    const isPoa = c.type === 'procuracao'
+    const docTitle = isPoa ? `a sua Procuração Nº ${c.number}` : `o seu Contrato de Compra e Venda Nº ${c.number}`
 
     const text = encodeURIComponent(
-      `Olá, *${buyerName}*! Segue o link para assinar eletronicamente o seu Contrato de Compra e Venda Nº ${c.number} (${vehicleName}) com a *${store.name}*:\n\n${signingUrl}\n\nAcesse pelo celular para assinar com segurança.`
+      `Olá, *${buyerName}*! Segue o link para assinar eletronicamente ${docTitle} (${vehicleName}) com a *${store.name}*:\n\n${signingUrl}\n\nAcesse pelo celular para assinar com segurança.`
     )
 
     const whatsappUrl = rawPhone
@@ -227,6 +233,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
 
     window.open(whatsappUrl, '_blank')
   }
+
 
   // -------------------------------------------------------------
   // REGISTRO DE ASSINATURA PRESENCIAL
@@ -291,13 +298,22 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
   const draftCount = contracts.filter((c) => c.status === 'rascunho').length
 
   const filtered = contracts.filter((c) => {
+    const isPoa = c.type === 'procuracao'
+    if (typeFilter === 'vendas' && isPoa) return false
+    if (typeFilter === 'procuracoes' && !isPoa) return false
     if (statusFilter !== 'todos' && c.status !== statusFilter) return false
     if (!search.trim()) return true
     const term = search.toLowerCase()
     const buyerName = String(c.buyer_data?.name || '').toLowerCase()
+    const sellerName = String(c.seller_data?.name || '').toLowerCase()
     const plate = String(c.vehicle_data?.plate || '').toLowerCase()
     const model = String(c.vehicle_data?.model || '').toLowerCase()
-    return buyerName.includes(term) || plate.includes(term) || model.includes(term)
+    return (
+      buyerName.includes(term) ||
+      sellerName.includes(term) ||
+      plate.includes(term) ||
+      model.includes(term)
+    )
   })
 
   return (
@@ -310,11 +326,11 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
               Módulo de Contratos
             </h1>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand">
-              Fase 4
+              Fase 5
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Geração de contratos de venda, leitura de CRLV, assinatura online e presencial.
+            Geração de contratos de venda, procurações, leitura de CRLV e assinatura digital/física.
           </p>
         </div>
 
@@ -330,6 +346,16 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
             </Button>
           </Link>
 
+          <Link href={`/${slug}/admin/contratos/procuracao/novo`}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs font-bold rounded-xl gap-1.5 border-brand/40 text-brand hover:bg-brand/10 shadow-xs"
+            >
+              <Scale className="h-4 w-4" /> Nova Procuração
+            </Button>
+          </Link>
+
           <Link href={`/${slug}/admin/contratos/novo`}>
             <Button
               size="sm"
@@ -340,6 +366,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
           </Link>
         </div>
       </div>
+
 
       {/* ── ALERTA DE CONFIGURAÇÃO DA LOJA (se faltar dados) ── */}
       {!isConfigured && (
@@ -417,14 +444,36 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
         ))}
       </div>
 
-      {/* ── BARRA DE BUSCA E ABAS DE STATUS ── */}
+      {/* ── BARRA DE BUSCA E ABAS DE FILTRO ── */}
       <div className="bg-surface-1 border border-surface rounded-2xl p-3 sm:p-4 shadow-xs space-y-3">
+        {/* Filtro por Tipo de Documento */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-surface">
+          {[
+            { id: 'todos', label: 'Todos os Documentos' },
+            { id: 'vendas', label: 'Contratos de Venda' },
+            { id: 'procuracoes', label: 'Procurações' },
+          ].map((tp) => (
+            <button
+              key={tp.id}
+              type="button"
+              onClick={() => setTypeFilter(tp.id as any)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                typeFilter === tp.id
+                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs'
+                  : 'bg-surface-2 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tp.label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Buscar por comprador, placa ou modelo do veículo..."
+              placeholder="Buscar por nome, placa ou modelo do veículo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-10 text-xs bg-surface-2 border-surface rounded-xl"
@@ -467,7 +516,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
         </div>
       </div>
 
-      {/* ── LISTAGEM DE CONTRATOS ── */}
+      {/* ── LISTAGEM DE CONTRATOS E PROCURAÇÕES ── */}
       <div className="bg-surface-1 border border-surface rounded-2xl shadow-xs overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-12 text-center space-y-4">
@@ -475,19 +524,26 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
               <FileSignature className="h-7 w-7" />
             </div>
             <div className="max-w-sm mx-auto space-y-1">
-              <h3 className="font-bold text-sm text-foreground">Nenhum contrato encontrado</h3>
+              <h3 className="font-bold text-sm text-foreground">Nenhum documento encontrado</h3>
               <p className="text-xs text-muted-foreground">
-                {search || statusFilter !== 'todos'
+                {search || statusFilter !== 'todos' || typeFilter !== 'todos'
                   ? 'Nenhum resultado corresponde aos filtros aplicados.'
-                  : 'Crie seu primeiro contrato de venda com geração instantânea de PDF e numeração atômica.'}
+                  : 'Crie seu primeiro contrato de venda ou procuração com geração instantânea de PDF e assinatura.'}
               </p>
             </div>
             {!search && statusFilter === 'todos' && (
-              <Link href={`/${slug}/admin/contratos/novo`}>
-                <Button className="btn-brand text-xs font-bold rounded-xl gap-1.5 mt-2">
-                  <Plus className="h-4 w-4" /> Criar Primeiro Contrato
-                </Button>
-              </Link>
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <Link href={`/${slug}/admin/contratos/novo`}>
+                  <Button className="btn-brand text-xs font-bold rounded-xl gap-1.5">
+                    <Plus className="h-4 w-4" /> Novo Contrato de Venda
+                  </Button>
+                </Link>
+                <Link href={`/${slug}/admin/contratos/procuracao/novo`}>
+                  <Button variant="outline" className="text-xs font-bold rounded-xl gap-1.5 border-brand/40 text-brand">
+                    <Scale className="h-4 w-4" /> Nova Procuração
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
         ) : (
@@ -495,8 +551,9 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
             {filtered.map((c) => {
               const statusCfg = STATUS_CONFIG[c.status] || STATUS_CONFIG.rascunho
               const StatusIcon = statusCfg.icon
+              const isPoa = c.type === 'procuracao'
               const totalAmount = c.financial_data?.total_amount || 0
-              const buyerName = c.buyer_data?.name || 'Comprador'
+              const buyerName = c.buyer_data?.name || (isPoa ? 'Outorgante' : 'Comprador')
               const buyerDoc = c.buyer_data?.cpf_cnpj || ''
               const vehicleName =
                 `${c.vehicle_data?.brand || ''} ${c.vehicle_data?.model || ''}`.trim() || 'Veículo'
@@ -509,15 +566,26 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                   className="p-4 sm:p-5 hover:bg-surface-2/40 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                 >
                   <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                    <div className="h-10 w-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0 mt-0.5">
-                      <FileText className="h-5 w-5" />
+                    <div
+                      className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                        isPoa
+                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                          : 'bg-brand/10 text-brand'
+                      }`}
+                    >
+                      {isPoa ? <Scale className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono font-bold text-xs text-brand">
-                          Nº {c.number}
+                          {isPoa ? 'Procuração' : 'Contrato'} Nº {c.number}
                         </span>
+                        {isPoa && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                            Procuração
+                          </span>
+                        )}
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${statusCfg.badge}`}
                         >
@@ -542,19 +610,28 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                       </p>
 
                       <p className="text-xs text-muted-foreground truncate">
-                        Comprador: <strong className="text-foreground">{buyerName}</strong> ({buyerDoc})
+                        {isPoa ? (
+                          <>
+                            Outorgante: <strong className="text-foreground">{buyerName}</strong> • Outorgado: <strong className="text-foreground">{c.seller_data?.name || store.name}</strong>
+                          </>
+                        ) : (
+                          <>
+                            Comprador: <strong className="text-foreground">{buyerName}</strong> ({buyerDoc})
+                          </>
+                        )}
                       </p>
                     </div>
                   </div>
 
-                  {/* Valor e Ações */}
+                  {/* Valor ou Validade e Ações */}
                   <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-t-0 border-surface pt-2.5 sm:pt-0">
                     <div className="text-left sm:text-right">
-                      <p className="text-xs text-muted-foreground">Valor Total</p>
+                      <p className="text-xs text-muted-foreground">{isPoa ? 'Validade' : 'Valor Total'}</p>
                       <p className="font-black text-sm text-foreground font-mono">
-                        {formatCurrency(totalAmount)}
+                        {isPoa ? `${c.validity_days || 365} dias` : formatCurrency(totalAmount)}
                       </p>
                     </div>
+
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       {/* Botão de Assinaturas & Envio */}
@@ -633,7 +710,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-foreground">
-                    Assinaturas • Contrato Nº {shareModalContract.number}
+                    Assinaturas • {shareModalContract.type === 'procuracao' ? 'Procuração' : 'Contrato'} Nº {shareModalContract.number}
                   </h3>
                   <p className="text-[11px] text-muted-foreground">
                     Links únicos e assinatura online ou presencial.
@@ -663,7 +740,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                       <ShieldCheck className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                       <div className="text-xs space-y-0.5">
                         <p className="font-bold text-emerald-700 dark:text-emerald-300">
-                          Contrato 100% Concluído e Assinado!
+                          {shareModalContract.type === 'procuracao' ? 'Procuração' : 'Contrato'} 100% Concluído e Assinado!
                         </p>
                         <p className="text-muted-foreground">
                           {shareModalContract.is_manual_signed
@@ -674,21 +751,26 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                     </div>
                   ) : (
                     <div className="rounded-xl border border-brand/20 bg-brand/5 p-3.5 text-xs text-muted-foreground">
-                      Envie o link seguro para o comprador assinar eletronicamente ou realize a assinatura física presencial na loja.
+                      {shareModalContract.type === 'procuracao'
+                        ? 'Envie o link seguro para o outorgante assinar eletronicamente ou realize a assinatura física presencial.'
+                        : 'Envie o link seguro para o comprador assinar eletronicamente ou realize a assinatura física presencial na loja.'}
                     </div>
                   )}
 
-                  {/* Card do Comprador */}
+                  {/* Card do Comprador / Outorgante */}
                   <div className="rounded-xl border border-surface bg-surface-2/40 p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <UserCheck className="h-4 w-4 text-brand" />
-                        <span className="text-xs font-bold text-foreground">Comprador</span>
+                        <span className="text-xs font-bold text-foreground">
+                          {shareModalContract.type === 'procuracao' ? 'Outorgante' : 'Comprador'}
+                        </span>
                       </div>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-2 text-foreground">
                         {shareModalContract.buyer_data?.name}
                       </span>
                     </div>
+
 
                     <div className="text-xs text-muted-foreground space-y-0.5">
                       <p>CPF/CNPJ: {shareModalContract.buyer_data?.cpf_cnpj}</p>
@@ -734,16 +816,25 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-brand" />
-                        <span className="text-xs font-bold text-foreground">Vendedor (Loja)</span>
+                        <span className="text-xs font-bold text-foreground">
+                          {shareModalContract.type === 'procuracao'
+                            ? 'Outorgado(a) (Loja / Representante)'
+                            : 'Vendedor (Loja)'}
+                        </span>
                       </div>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-2 text-foreground">
-                        {store.contract_rep_nome || store.name}
+                        {shareModalContract.type === 'procuracao'
+                          ? shareModalContract.seller_data?.name || store.contract_rep_nome || store.name
+                          : store.contract_rep_nome || store.name}
                       </span>
                     </div>
 
                     <p className="text-xs text-muted-foreground">
-                      A loja assina pelo painel administrativo ou através do link seguro enviado aos sócios.
+                      {shareModalContract.type === 'procuracao'
+                        ? 'O outorgado assina via link único de signatário ou presencialmente.'
+                        : 'A loja assina pelo painel administrativo ou através do link seguro enviado aos sócios.'}
                     </p>
+
                   </div>
 
                   {/* Opção Presencial */}

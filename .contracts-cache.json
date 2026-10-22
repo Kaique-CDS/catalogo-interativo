@@ -1,160 +1,90 @@
 [
   {
     "store_id": "demo-store-id",
-    "type": "venda_veiculo",
+    "type": "procuracao",
     "number": 1,
-    "title": "Contrato de Venda Nº 1 - Toyota Corolla Altis Hybrid (XYZ9K88)",
-    "status": "partially_signed",
+    "title": "Procuração Nº 1 - Toyota Corolla Altis 2.0 (BRA2E19)",
+    "status": "rascunho",
     "buyer_type": "pf",
     "buyer_data": {
       "type": "pf",
-      "name": "Ana Carolina Santos",
-      "cpf_cnpj": "987.654.321-00",
+      "name": "Roberto Carlos da Silva",
+      "cpf_cnpj": "123.456.789-00",
+      "rg_ie": "12.345.678-9 SSP/SP",
+      "cnh": "01234567890",
+      "nationality": "brasileira",
+      "marital_status": "casado(a)",
+      "profession": "Empresário",
       "phone": "(11) 98888-7777",
-      "email": "ana.santos@exemplo.com",
-      "address": "Av Paulista 1000",
-      "city": "Sao Paulo",
+      "email": "roberto@teste.com",
+      "address": "Rua das Palmeiras, 100",
+      "city": "São Paulo",
       "state": "SP",
-      "zip": "01310-100"
+      "zip": "01234-567"
     },
     "seller_data": {
+      "type": "pj",
       "name": "Milhaticar Veículos Ltda",
-      "cnpj": "00.000.000/0001-00",
-      "address": "Av. Gov. Adhemar de Barros, 2618 – Braz Cubas – Mogi das Cruzes/SP",
-      "phone": "(11) 4729-4937",
+      "cpf_cnpj": "12.345.678/0001-90",
+      "rep_name": "Julia Milhati",
+      "rep_cpf": "234.567.890-12",
+      "phone": "(11) 99999-8888",
       "email": "contato@milhaticar.com.br",
-      "rep_name": "Responsável Milhaticar",
-      "rep_cpf": "000.000.000-00",
-      "foro_cidade": "Mogi das Cruzes",
-      "foro_estado": "SP"
+      "address": "Av. das Nações Unidas, 2000",
+      "city": "São Paulo",
+      "state": "SP",
+      "zip": "04578-000"
     },
     "vehicle_data": {
       "brand": "Toyota",
-      "model": "Corolla Altis Hybrid",
+      "model": "Corolla Altis 2.0",
       "year_fab": 2023,
       "year_model": 2024,
-      "plate": "XYZ9K88",
-      "chassis": "9BRBL42EXPP123456",
-      "renavam": "01234567890",
-      "color": "Prata",
-      "fuel": "Hibrido"
+      "plate": "BRA2E19",
+      "renavam": "12345678901",
+      "chassis": "9BRBL42EX9P123456",
+      "color": "Preto",
+      "fuel": "Flex",
+      "mileage": "18500"
     },
     "vehicle_id": null,
-    "financial_data": {
-      "total_amount": 145000,
-      "down_payment": 30000,
-      "transfer_responsible": "comprador",
-      "installments": [
-        {
-          "number": 1,
-          "amount": 115000,
-          "due_date": "2026-11-20",
-          "method": "Financiamento"
-        }
-      ]
-    },
-    "clauses": [
-      {
-        "id": "cl-1",
-        "title": "CLÁUSULA PRIMEIRA – DO ESTADO E VISTORIA DO VEÍCULO",
-        "text": "O COMPRADOR declara que vistoriou pessoalmente o veículo objeto deste contrato, testando seu funcionamento, verificando seu estado geral de conservação, pintura, tapeçaria, mecânica, elétrica e acessórios, aceitando-o no estado em que se encontra, nada tendo a reclamar quanto a avarias aparentes ou desgaste natural decorrente do tempo de uso."
-      },
-      {
-        "id": "cl-2",
-        "title": "CLÁUSULA SEGUNDA – DO SINAL E RESCISÃO",
-        "text": "A quantia paga a título de sinal e princípio de pagamento (arras) tem caráter confirmatório nos termos dos artigos 417 a 420 do Código Civil Brasileiro. Em caso de desistência imotivada por parte do COMPRADOR, o valor do sinal será retido integralmente pelo VENDEDOR como compensação pelas despesas administrativas e reserva do bem."
-      },
-      {
-        "id": "cl-3",
-        "title": "CLÁUSULA TERCEIRA – DA TRADIÇÃO E PRAZO DE ENTREGA",
-        "text": "A entrega física do veículo dar-se-á em até {prazo_entrega_dias} dias úteis contados a partir da quitação integral do preço pactuado ou da confirmação da liberação dos recursos de financiamento/consórcio pelas respectivas instituições financeiras."
-      },
-      {
-        "id": "cl-4",
-        "title": "CLÁUSULA QUARTA – DOS DÉBITOS, MULTAS E TRANSFERÊNCIA",
-        "text": "O VENDEDOR declara sob as penas da lei que o veículo encontra-se livre e desembaraçado de quaisquer ônus, multas, impostos ou gravames financeiros constituídos até a data da entrega. Todas as infrações de trânsito, multas, taxas, IPVA e demais encargos ocorridos a partir da data e hora da efetiva entrega física do veículo serão de exclusiva responsabilidade do COMPRADOR."
-      },
-      {
-        "id": "cl-5",
-        "title": "CLÁUSULA QUINTA – DO PRAZO DE TRANSFERÊNCIA DE PROPRIEDADE",
-        "text": "O COMPRADOR compromete-se a efetivar a transferência de propriedade do veículo junto ao órgão de trânsito competente (Detran) no prazo improrrogável de 30 (trinta) dias a contar do preenchimento e assinatura da Autorização para Transferência de Propriedade do Veículo (ATPV-e), arcando com os custos e taxas aplicáveis."
-      },
-      {
-        "id": "cl-6",
-        "title": "CLÁUSULA SEXTA – DA GARANTIA LEGAL",
-        "text": "O veículo seminovo ora transacionado conta com a garantia legal de 90 (noventa) dias para motor e caixa de câmbio (itens internos lubrificados), nos termos do Artigo 26, inciso II do Código de Defesa do Consumidor, não cobrindo itens de desgaste natural (pneus, pastilhas, lâmpadas, filtros, fluidos, suspensão) nem danos causados por mau uso, sinistros ou manutenção inadequada."
-      },
-      {
-        "id": "cl-7",
-        "title": "CLÁUSULA SÉTIMA – DO FORO DE ELEIÇÃO",
-        "text": "As partes elegem, de comum acordo, o Foro da Comarca de {cidade_foro} - {estado_foro}, com renúncia expressa a qualquer outro por mais privilegiado que seja, para dirimir quaisquer dúvidas ou litígios decorrentes do presente instrumento."
-      }
-    ],
+    "financial_data": null,
+    "clauses": [],
+    "validity_days": 365,
+    "additional_powers": "Poderes específicos perante a Cia de Seguros Porto Seguro para liquidação de sinistro.",
     "notes": null,
     "crlv_data": null,
     "crlv_file_url": null,
     "pdf_draft_url": "/milhaticar/admin/contratos/pdf?id=1",
-    "created_at": "2026-10-22T04:40:47.486Z",
-    "updated_at": "2026-10-22T04:40:47.486Z",
+    "created_at": "2026-10-22T05:09:52.013Z",
+    "updated_at": "2026-10-22T05:09:52.013Z",
     "id": "local-1",
     "signers": [
       {
-        "id": "sgn-buyer-1792644047705",
+        "id": "sgn-1-1792645792262",
         "contract_id": "local-1",
-        "role": "buyer",
-        "name": "Ana Carolina Santos",
-        "document": "987.654.321-00",
-        "email": "ana.santos@exemplo.com",
+        "role": "outorgante",
+        "name": "Roberto Carlos da Silva",
+        "document": "123.456.789-00",
+        "email": "roberto@teste.com",
         "phone": "(11) 98888-7777",
-        "token_hash": "bd886896c01c0353aa5e9b99dca919584274e072a2237ee3ebdbf8d8a5e6fec7",
-        "token_expires_at": "2026-10-29T04:40:47.704Z",
-        "status": "signed",
-        "created_at": "2026-10-22T04:40:47.705Z",
-        "otp_code_hash": "96e857ead835e1bcce89a05f7982d82742d3dde98bb191a6c0d88c799d9105a6",
-        "otp_sent_at": "2026-10-22T04:40:51.035Z",
-        "otp_expires_at": "2026-10-22T04:55:51.035Z",
-        "otp_attempts": 1,
-        "otp_verified_at": "2026-10-22T04:41:32.347Z",
-        "signed_at": "2026-10-22T04:41:33.044Z",
-        "signature_image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK8AAAAyCAYAAADd8Lq+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADxSURBVHhe7dJBEYAgEADA72nFBAc/QeBgp9U0wTsz7+VdrZ0Zz+WcrWfHc/R8jp6753P03D2fo+fu+Rw9d8/n6Ll7PkfP3fM5eu6ez9Fz93yOnrvnc/Tcff18f/fcfV187p7P0XP3fI6eu+dz9Nw9n6Pn7vkcPXfP5+i5ez5Hz93zOXrunvf5/u65+7r43D2fo+fu+Rw9d8/n6Ll7PkfP3fM5eu6ez9Fz93yOnrvnc/Tcff18f/fcfV187p7P0XP3fI6eu+dz9Nw9n6Pn7vkcPXfP5+i5ez5Hz93zOXru/vT5fv6ee1587p7P0XP3fI6eu+dz9Nw9n6Pn7vkcPY/6A+m4Z8pGkQ+TAAAAAElFTkSuQmCC",
-        "ip": "::1",
-        "user_agent": "node"
-      },
-      {
-        "id": "sgn-seller-1792644047705",
-        "contract_id": "local-1",
-        "role": "seller",
-        "name": "Responsável Milhaticar",
-        "document": "000.000.000-00",
-        "email": "contato@milhaticar.com.br",
-        "phone": "(11) 4729-4937",
-        "token_hash": "856de9ddc229295a501a8702f43016706331c890ee777568f5468f4536bf9b5a",
-        "token_expires_at": "2026-10-29T04:40:47.704Z",
+        "token_hash": "c41c6edb527f47f7e00b82c658cb8ac9efe0c0cfce145428903f24dbcc77b29e",
+        "token_expires_at": "2026-10-29T05:09:52.261Z",
         "status": "pending",
-        "created_at": "2026-10-22T04:40:47.705Z"
-      }
-    ],
-    "events": [
-      {
-        "id": "ev-1792644051296-pf68j",
-        "contract_id": "local-1",
-        "signer_id": "sgn-buyer-1792644047705",
-        "event_type": "otp_sent",
-        "ip": "::1",
-        "user_agent": "node",
-        "metadata": {
-          "email": "ana.santos@exemplo.com"
-        },
-        "created_at": "2026-10-22T04:40:51.296Z"
+        "created_at": "2026-10-22T05:09:52.262Z"
       },
       {
-        "id": "ev-1792644093275-6g7sv",
+        "id": "sgn-2-1792645792262",
         "contract_id": "local-1",
-        "signer_id": "sgn-buyer-1792644047705",
-        "event_type": "signed",
-        "ip": "::1",
-        "user_agent": "node",
-        "created_at": "2026-10-22T04:41:33.275Z"
+        "role": "outorgado",
+        "name": "Milhaticar Veículos Ltda",
+        "document": "12.345.678/0001-90",
+        "email": "contato@milhaticar.com.br",
+        "phone": "(11) 99999-8888",
+        "token_hash": "978467e00c985a3e7c467216fea29a87ed3b1e4d7d2dd7198ba5eb98683c75af",
+        "token_expires_at": "2026-10-29T05:09:52.261Z",
+        "status": "pending",
+        "created_at": "2026-10-22T05:09:52.262Z"
       }
     ]
   }
