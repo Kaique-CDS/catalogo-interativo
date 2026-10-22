@@ -57,7 +57,7 @@ export default function Footer({ store, variant = 'full', className = '' }: Foot
                   href={instagramInfo.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-10 w-10 rounded-full bg-surface-2 flex items-center justify-center text-white/90 hover:text-white hover:bg-surface-3 transition-colors"
+                  className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-full bg-surface-2 flex items-center justify-center text-white/90 hover:text-white hover:bg-surface-3 transition-colors"
                   title={instagramInfo.handle}
                   aria-label={`Instagram ${instagramInfo.handle}`}
                 >
@@ -71,7 +71,7 @@ export default function Footer({ store, variant = 'full', className = '' }: Foot
                   href={`https://wa.me/${whatsappInfo.number}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-10 w-10 rounded-full bg-surface-2 flex items-center justify-center text-white/90 hover:text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
+                  className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-full bg-surface-2 flex items-center justify-center text-white/90 hover:text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
                   title={`WhatsApp ${whatsappInfo.display}`}
                   aria-label={`WhatsApp ${whatsappInfo.display}`}
                 >
@@ -86,18 +86,18 @@ export default function Footer({ store, variant = 'full', className = '' }: Foot
           {/* Coluna 2 — Institucional */}
           <div className="md:text-right">
             <h4 className="font-heading text-white text-lg uppercase tracking-wide mb-4">Institucional</h4>
-            <ul className="space-y-3 text-sm text-white/90">
-              <li><Link href={`/${store.slug}`} className="text-white/90 hover:text-white transition-colors">Nosso Estoque</Link></li>
-              <li><Link href={`/${store.slug}/quem-somos`} className="text-white/90 hover:text-white transition-colors">Quem Somos</Link></li>
-              <li><Link href={`/${store.slug}/termos`} className="text-white/90 hover:text-white transition-colors">Termos e Condições</Link></li>
-              <li><Link href={`/${store.slug}/privacidade`} className="text-white/90 hover:text-white transition-colors">Política de Privacidade</Link></li>
+            <ul className="space-y-1 text-sm text-white/90">
+              <li><Link href={`/${store.slug}`} className="py-1.5 inline-block text-white/90 hover:text-white transition-colors">Nosso Estoque</Link></li>
+              <li><Link href={`/${store.slug}/quem-somos`} className="py-1.5 inline-block text-white/90 hover:text-white transition-colors">Quem Somos</Link></li>
+              <li><Link href={`/${store.slug}/termos`} className="py-1.5 inline-block text-white/90 hover:text-white transition-colors">Termos e Condições</Link></li>
+              <li><Link href={`/${store.slug}/privacidade`} className="py-1.5 inline-block text-white/90 hover:text-white transition-colors">Política de Privacidade</Link></li>
             </ul>
           </div>
         </div>
       )}
 
       {/* ── Barra Inferior OBRIGATÓRIA em todas as variantes e rotas ── */}
-      <div className={`container mx-auto px-4 max-w-7xl ${variant === 'compact' ? 'py-6' : 'py-5 border-t border-white/10'} text-center flex flex-col sm:flex-row justify-between items-center gap-3.5`}>
+      <div className={`container mx-auto px-4 max-w-7xl ${variant === 'compact' ? 'py-6' : 'py-5 border-t border-white/10'} pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center flex flex-col sm:flex-row justify-between items-center gap-3.5`}>
         <p className="text-xs text-white/80 font-medium">
           {copyrightText}
         </p>

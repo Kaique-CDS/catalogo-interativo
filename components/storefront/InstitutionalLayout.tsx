@@ -54,7 +54,7 @@ export default async function InstitutionalLayout({
           </Link>
           <Link
             href={`/${slug}`}
-            className="flex items-center justify-center gap-1.5 h-10 px-3 sm:px-4 rounded-[10px] border border-surface text-xs sm:text-sm font-semibold text-foreground hover:border-brand hover:text-brand transition-colors flex-shrink-0"
+            className="flex items-center justify-center gap-1.5 min-h-[44px] h-11 px-3 sm:px-4 rounded-[10px] border border-surface text-xs sm:text-sm font-semibold text-foreground hover:border-brand hover:text-brand transition-colors flex-shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Voltar ao estoque</span>

@@ -30,7 +30,7 @@ export default function CookieBanner({ storageKey = 'catalogo_lgpd_accepted' }: 
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6 pointer-events-none">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-6 pointer-events-none">
       <div
         className="pointer-events-auto mx-auto max-w-2xl bg-zinc-900 text-white rounded-2xl shadow-2xl
                    flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-5
@@ -55,7 +55,7 @@ export default function CookieBanner({ storageKey = 'catalogo_lgpd_accepted' }: 
           <Button
             size="sm"
             onClick={accept}
-            className="flex-1 sm:flex-none bg-amber-400 hover:bg-amber-300 text-zinc-900 font-semibold rounded-xl"
+            className="flex-1 sm:flex-none min-h-[44px] h-11 sm:h-9 bg-amber-400 hover:bg-amber-300 text-zinc-900 font-semibold rounded-xl px-5"
           >
             Aceitar
           </Button>

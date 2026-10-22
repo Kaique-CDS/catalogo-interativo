@@ -246,7 +246,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
                   key={item.key}
                   type="button"
                   onClick={() => copyTrackingLink(item.key, item.label)}
-                  className="flex items-center justify-center gap-1 px-2 py-2 rounded-lg bg-surface-2 hover:bg-surface-3 border border-surface text-[11px] font-semibold text-foreground active:scale-95 transition-all"
+                  className="min-h-[44px] flex items-center justify-center gap-1 px-2 py-2.5 rounded-lg bg-surface-2 hover:bg-surface-3 border border-surface text-[11px] font-semibold text-foreground active:scale-95 transition-all"
                 >
                   {copiedSource === item.key ? (
                     <Check className="h-3 w-3 text-emerald-500 shrink-0" />

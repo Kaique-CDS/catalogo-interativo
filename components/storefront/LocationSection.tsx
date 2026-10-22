@@ -107,7 +107,7 @@ export default function LocationSection({ store, className = '', title }: Props)
                         href={searchMapsUrl || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-foreground hover:text-brand transition-colors font-medium leading-relaxed"
+                        className="text-foreground hover:text-brand transition-colors font-medium leading-relaxed break-words"
                         title="Ver no Google Maps"
                       >
                         {address}
@@ -145,11 +145,11 @@ export default function LocationSection({ store, className = '', title }: Props)
 
                   {/* E-mail da loja */}
                   {store.email && (
-                    <li className="flex items-center gap-3 text-foreground">
+                    <li className="flex items-center gap-3 text-foreground min-w-0">
                       <Mail className="h-4 w-4 text-brand shrink-0" />
                       <a
                         href={`mailto:${store.email}`}
-                        className="text-foreground hover:text-brand transition-colors font-medium truncate"
+                        className="text-foreground hover:text-brand transition-colors font-medium truncate break-all"
                       >
                         {store.email}
                       </a>
@@ -190,15 +190,15 @@ export default function LocationSection({ store, className = '', title }: Props)
               </div>
 
               {/* Botões de Ação */}
-              <div className="pt-4 border-t border-surface flex flex-wrap gap-2.5">
+              <div className="pt-4 border-t border-surface flex flex-col sm:flex-row flex-wrap gap-2.5">
                 {directionsUrl && (
                   <a
                     href={directionsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 min-w-[130px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand hover:opacity-95 text-white text-xs sm:text-sm font-bold shadow-xs transition-opacity"
+                    className="w-full sm:w-auto sm:flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:opacity-95 text-white text-xs sm:text-sm font-bold shadow-xs transition-opacity"
                   >
-                    <Navigation className="h-3.5 w-3.5" />
+                    <Navigation className="h-4 w-4" />
                     <span>Como chegar</span>
                   </a>
                 )}
@@ -207,9 +207,9 @@ export default function LocationSection({ store, className = '', title }: Props)
                     href={searchMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs sm:text-sm font-semibold transition-colors"
+                    className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs sm:text-sm font-semibold transition-colors"
                   >
-                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     <span>Abrir no Maps</span>
                   </a>
                 )}
@@ -217,9 +217,9 @@ export default function LocationSection({ store, className = '', title }: Props)
                   href={`https://wa.me/${whatsappInfo.number}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-semibold transition-colors"
+                  className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-semibold transition-colors"
                 >
-                  <MessageCircle className="h-3.5 w-3.5 text-[#25D366]" />
+                  <MessageCircle className="h-4 w-4 text-[#25D366]" />
                   <span>Falar no WhatsApp</span>
                 </a>
               </div>
@@ -279,7 +279,7 @@ export default function LocationSection({ store, className = '', title }: Props)
                 href={`https://wa.me/${whatsappInfo.number}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-bold shadow-xs hover:opacity-95 transition-opacity"
+                className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-bold shadow-xs hover:opacity-95 transition-opacity"
               >
                 <MessageCircle className="h-4 w-4" />
                 <span>Conversar no WhatsApp</span>

@@ -357,13 +357,13 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                 )}
 
                 {logoUrl && (
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
                       onClick={() => document.getElementById('input-logo-file')?.click()}
-                      className="text-xs h-8 rounded-lg gap-1.5"
+                      className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg gap-1.5 w-full sm:w-auto"
                     >
                       <Upload className="h-3.5 w-3.5 text-brand" /> Trocar logo
                     </Button>
@@ -372,7 +372,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                       size="sm"
                       variant="ghost"
                       onClick={() => promptDeleteAsset('logo', 'Logo da Loja')}
-                      className="text-xs h-8 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5"
+                      className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 w-full sm:w-auto"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Remover logo
                     </Button>
@@ -412,13 +412,13 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                     className="object-cover"
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
                     onClick={() => document.getElementById('input-banner-desktop')?.click()}
-                    className="text-xs h-8 rounded-lg gap-1.5"
+                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg gap-1.5 w-full sm:w-auto"
                   >
                     <Upload className="h-3.5 w-3.5 text-brand" /> Trocar banner desktop
                   </Button>
@@ -427,7 +427,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                     size="sm"
                     variant="ghost"
                     onClick={() => promptDeleteAsset('banner_desktop', 'Banner Desktop')}
-                    className="text-xs h-8 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5"
+                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 w-full sm:w-auto"
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Remover banner
                   </Button>
@@ -509,13 +509,13 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                     className="object-cover"
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
                     onClick={() => document.getElementById('input-banner-mobile')?.click()}
-                    className="text-xs h-8 rounded-lg gap-1.5"
+                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg gap-1.5 w-full sm:w-auto"
                   >
                     <Upload className="h-3.5 w-3.5 text-brand" /> Trocar banner mobile
                   </Button>
@@ -524,7 +524,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                     size="sm"
                     variant="ghost"
                     onClick={() => promptDeleteAsset('banner_mobile', 'Banner Mobile')}
-                    className="text-xs h-8 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5"
+                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 w-full sm:w-auto"
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Remover banner
                   </Button>
@@ -757,14 +757,14 @@ export default function StoreSettingsForm({ store, slug }: Props) {
             <p className="text-xs text-muted-foreground leading-relaxed">
               Tem certeza que deseja remover esta imagem? O banco de dados da loja será atualizado e o arquivo será excluído do Cloudinary de forma segura.
             </p>
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setDeleteModal({ isOpen: false, type: null, title: '' })}
                 disabled={deleting}
-                className="text-xs h-9 rounded-xl"
+                className="text-xs sm:text-sm min-h-[44px] h-11 rounded-xl px-4 w-full sm:w-auto"
               >
                 Cancelar
               </Button>
@@ -774,7 +774,7 @@ export default function StoreSettingsForm({ store, slug }: Props) {
                 size="sm"
                 onClick={handleConfirmDelete}
                 disabled={deleting}
-                className="text-xs h-9 rounded-xl gap-1.5"
+                className="text-xs sm:text-sm min-h-[44px] h-11 rounded-xl gap-1.5 px-4 w-full sm:w-auto"
               >
                 {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Sim, remover imagem
