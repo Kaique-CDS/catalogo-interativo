@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { getLocalContractById, deleteLocalContract } from '@/lib/contracts/cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,13 +10,27 @@ export async function GET(
     const { id } = await params
     const supabase = createAdminClient()
 
-    const { data: contract, error } = await supabase
-      .from('contracts')
-      .select('*, contract_signers(*), contract_events(*)')
-      .eq('id', id)
-      .maybeSingle()
+    let contract: any = null
 
-    if (error || !contract) {
+    if (!id.startsWith('local-')) {
+      try {
+        const { data, error } = await supabase
+          .from('contracts')
+          .select('*, contract_signers(*), contract_events(*)')
+          .eq('id', id)
+          .maybeSingle()
+
+        if (!error && data) {
+          contract = data
+        }
+      } catch {}
+    }
+
+    if (!contract) {
+      contract = getLocalContractById(id)
+    }
+
+    if (!contract) {
       return NextResponse.json({ error: 'Contrato não encontrado.' }, { status: 404 })
     }
 
@@ -70,6 +83,8 @@ export async function DELETE(
   try {
     const { id } = await params
     const supabase = createAdminClient()
+
+    deleteLocalContract(id)
 
     // Soft delete para não violar integridade nem histórico
     const { error } = await supabase

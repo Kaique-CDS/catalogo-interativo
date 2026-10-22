@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { generateVehicleSaleContractPdf } from '@/lib/contracts/pdf-generator'
 import { getTenantDemoStore } from '@/lib/tenants'
 
+import { getLocalContractById } from '@/lib/contracts/cache'
+
 export const dynamic = 'force-dynamic'
 
 export async function GET(
@@ -17,18 +19,46 @@ export async function GET(
 
     const supabase = createAdminClient()
 
-    // 1. Busca dados do contrato
-    const { data: contract, error } = await supabase
-      .from('contracts')
-      .select('*, stores(*)')
-      .eq('id', id)
-      .maybeSingle()
+    let contract: any = null
+    let store: any = null
 
-    if (error || !contract) {
+    // 1. Tenta buscar no Supabase se não for ID local
+    if (!id.startsWith('local-')) {
+      try {
+        const { data, error } = await supabase
+          .from('contracts')
+          .select('*, stores(*)')
+          .eq('id', id)
+          .maybeSingle()
+
+        if (!error && data) {
+          contract = data
+          store = data.stores
+        }
+      } catch {
+        // Fallback para cache local
+      }
+    }
+
+    // 2. Fallback para cache local (suporta testes locais antes do deploy de migrations)
+    if (!contract) {
+      contract = getLocalContractById(id)
+      if (contract?.seller_data) {
+        store = {
+          ...getTenantDemoStore('milhaticar'),
+          ...contract.seller_data,
+          name: contract.seller_data.name || 'Milhaticar',
+        }
+      }
+    }
+
+    if (!contract) {
       return NextResponse.json({ error: 'Contrato não encontrado.' }, { status: 404 })
     }
 
-    const store = contract.stores || getTenantDemoStore('milhaticar')
+    if (!store) {
+      store = getTenantDemoStore('milhaticar')
+    }
 
     // 2. Gera os bytes do PDF no servidor
     const pdfBytes = await generateVehicleSaleContractPdf({

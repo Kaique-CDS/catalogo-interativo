@@ -1,0 +1,103 @@
+[
+  {
+    "id": "local-1",
+    "store_id": "demo-store-id",
+    "type": "venda_veiculo",
+    "number": 1,
+    "title": "Contrato de Venda Nº 1 - Honda Civic (CIV2307)",
+    "status": "enviado",
+    "buyer_type": "pf",
+    "buyer_data": {
+      "type": "pf",
+      "name": "Comprador de Teste",
+      "cpf_cnpj": "123.456.789-00",
+      "rg_ie": "12.345.678-9",
+      "phone": "(11) 99999-9999",
+      "email": "comprador@email.com",
+      "address": "Av. Paulista, 1000",
+      "city": "São Paulo",
+      "state": "SP",
+      "zip": "01310-100"
+    },
+    "seller_data": {
+      "name": "Milhaticar Veículos Ltda",
+      "cnpj": "00.000.000/0001-00",
+      "address": "Av. Gov. Adhemar de Barros, 2618 – Braz Cubas – Mogi das Cruzes/SP",
+      "phone": "(11) 4729-4937",
+      "email": "contato@milhaticar.com.br",
+      "foro_cidade": "Mogi das Cruzes",
+      "foro_estado": "SP",
+      "rep_nome": "Responsável Milhaticar",
+      "rep_cpf": "000.000.000-00"
+    },
+    "vehicle_data": {
+      "brand": "Honda",
+      "model": "Civic Touring 1.5 Turbo CVT",
+      "year_fab": "2023",
+      "year_model": "2023",
+      "plate": "CIV2307",
+      "chassis": "9BWCA123456789012",
+      "renavam": "12345678901",
+      "color": "Branco Pérola",
+      "fuel": "Gasolina",
+      "mileage": "26000",
+      "engine": "1.5 Turbo",
+      "features": "Teto Solar, Bancos em Couro, Painel TFT"
+    },
+    "financial_data": {
+      "total_amount": 154900,
+      "down_payment": 20000,
+      "down_payment_date": "2026-10-22",
+      "transfer_responsible": "comprador",
+      "transfer_fee_amount": 650,
+      "installments": [
+        {
+          "number": 1,
+          "amount": 134900,
+          "due_date": "2026-11-22",
+          "method": "Financiamento",
+          "description": "Banco BV"
+        }
+      ]
+    },
+    "clauses": [
+      {
+        "id": "cl-1",
+        "title": "CLÁUSULA PRIMEIRA – DO ESTADO E VISTORIA DO VEÍCULO",
+        "text": "O COMPRADOR declara que vistoriou pessoalmente o veículo objeto deste contrato, testando seu funcionamento, verificando seu estado geral de conservação, pintura, tapeçaria, mecânica, elétrica e acessórios, aceitando-o no estado em que se encontra."
+      },
+      {
+        "id": "cl-2",
+        "title": "CLÁUSULA SEGUNDA – DO SINAL E RESCISÃO",
+        "text": "A quantia paga a título de sinal e princípio de pagamento (arras) tem caráter confirmatório nos termos dos artigos 417 a 420 do Código Civil Brasileiro."
+      },
+      {
+        "id": "cl-3",
+        "title": "CLÁUSULA TERCEIRA – DA TRADIÇÃO E PRAZO DE ENTREGA",
+        "text": "A entrega física do veículo dar-se-á em até 5 dias úteis contados a partir da quitação integral do preço pactuado."
+      },
+      {
+        "id": "cl-4",
+        "title": "CLÁUSULA QUARTA – DOS DÉBITOS, MULTAS E TRANSFERÊNCIA",
+        "text": "O VENDEDOR declara sob as penas da lei que o veículo encontra-se livre e desembaraçado de quaisquer ônus, multas, impostos ou gravames financeiros constituídos até a data da entrega."
+      },
+      {
+        "id": "cl-5",
+        "title": "CLÁUSULA QUINTA – DO PRAZO DE TRANSFERÊNCIA DE PROPRIEDADE",
+        "text": "O COMPRADOR compromete-se a efetivar a transferência de propriedade do veículo junto ao órgão de trânsito competente (Detran) no prazo improrrogável de 30 (trinta) dias."
+      },
+      {
+        "id": "cl-6",
+        "title": "CLÁUSULA SEXTA – DA GARANTIA LEGAL",
+        "text": "O veículo seminovo ora transacionado conta com a garantia legal de 90 (noventa) dias para motor e caixa de câmbio (itens internos lubrificados), nos termos do Artigo 26, inciso II do CDC."
+      },
+      {
+        "id": "cl-7",
+        "title": "CLÁUSULA SÉTIMA – DO FORO DE ELEIÇÃO",
+        "text": "As partes elegem o Foro da Comarca de Mogi das Cruzes - SP para dirimir quaisquer dúvidas decorrentes do presente instrumento."
+      }
+    ],
+    "created_at": "2026-10-22T03:30:00.000Z",
+    "updated_at": "2026-10-22T03:30:00.000Z"
+  }
+]
