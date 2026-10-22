@@ -19,6 +19,8 @@ import {
   FileCheck,
   AlertOctagon,
   ShieldAlert,
+  ShieldCheck,
+  Shield,
   Search,
   ExternalLink,
   Printer,
@@ -30,14 +32,34 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import ModernDatePicker from '@/components/ui/date-picker'
+import {
+  validateCpf,
+  validateCnpj,
+  validateCpfOrCnpj,
+  validateCnh,
+  validateRenavam,
+  validatePlaca,
+  validateChassi,
+  validateCep,
+  validateEmail,
+  validatePhoneBr,
+  validateRg,
+  validateDate,
+  maskCpf,
+  maskCnpj,
+  maskCpfCnpj,
+  maskPhoneBr,
+  maskDateBr,
+  maskPlaca,
+  maskChassi,
+  maskRenavam,
+  maskCep,
+  onlyDigits,
+} from '@/lib/validations'
 import { toast } from 'sonner'
 import type { Store, Vehicle } from '@/lib/supabase/types'
 import {
-  maskCpfCnpj,
-  maskPhone,
-  maskCep,
-  maskPlaca,
-  maskRenavam,
   DEFAULT_POA_FIXED_POWERS,
   DEFAULT_POA_LIABILITY,
   DEFAULT_POA_LEGAL_NOTICE,
@@ -319,22 +341,95 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
   // -------------------------------------------------------------
   const validateStep = (step: number): boolean => {
     if (step === 1) {
-      if (!grantor.name.trim()) {
-        toast.error('Informe o nome do Outorgante.')
+      if (!grantor.name.trim() || grantor.name.trim().length < 3) {
+        toast.error('Informe o nome completo ou razão social do Outorgante.')
         return false
       }
-      if (!grantor.cpf_cnpj.trim()) {
-        toast.error('Informe o CPF/CNPJ do Outorgante.')
+
+      const grantorDoc = validateCpfOrCnpj(grantor.cpf_cnpj)
+      if (!grantorDoc.valid) {
+        toast.error(`Outorgante: ${grantorDoc.message || 'CPF ou CNPJ inválido'}`)
         return false
       }
-      if (!grantee.name.trim()) {
-        toast.error('Informe o nome do Outorgado.')
+
+      if (grantor.rg_ie && grantor.rg_ie.trim()) {
+        const rgVal = validateRg(grantor.rg_ie)
+        if (!rgVal.valid) {
+          toast.warning(`Outorgante: ${rgVal.warning || rgVal.message}`)
+        }
+      }
+
+      if (grantor.phone && grantor.phone.trim()) {
+        const phoneVal = validatePhoneBr(grantor.phone)
+        if (!phoneVal.valid) {
+          toast.error(`Outorgante: ${phoneVal.message}`)
+          return false
+        }
+      } else {
+        toast.error('Informe o telefone / WhatsApp do Outorgante.')
         return false
       }
-      if (!grantee.cpf_cnpj.trim()) {
-        toast.error('Informe o CPF/CNPJ do Outorgado.')
+
+      if (grantor.email && grantor.email.trim()) {
+        const emailVal = validateEmail(grantor.email)
+        if (!emailVal.valid) {
+          toast.error(`Outorgante: ${emailVal.message}`)
+          return false
+        }
+      } else {
+        toast.error('Informe o e-mail do Outorgante para assinatura digital.')
         return false
       }
+
+      if (grantor.zip && grantor.zip.trim()) {
+        const cepVal = validateCep(grantor.zip)
+        if (!cepVal.valid) {
+          toast.error(`Outorgante: ${cepVal.message}`)
+          return false
+        }
+      }
+
+      if (!grantee.name.trim() || grantee.name.trim().length < 3) {
+        toast.error('Informe o nome completo ou razão social do Outorgado.')
+        return false
+      }
+
+      const granteeDoc = validateCpfOrCnpj(grantee.cpf_cnpj)
+      if (!granteeDoc.valid) {
+        toast.error(`Outorgado: ${granteeDoc.message || 'CPF ou CNPJ inválido'}`)
+        return false
+      }
+
+      if (grantee.phone && grantee.phone.trim()) {
+        const phoneVal = validatePhoneBr(grantee.phone)
+        if (!phoneVal.valid) {
+          toast.error(`Outorgado: ${phoneVal.message}`)
+          return false
+        }
+      } else {
+        toast.error('Informe o telefone / WhatsApp do Outorgado.')
+        return false
+      }
+
+      if (grantee.email && grantee.email.trim()) {
+        const emailVal = validateEmail(grantee.email)
+        if (!emailVal.valid) {
+          toast.error(`Outorgado: ${emailVal.message}`)
+          return false
+        }
+      } else {
+        toast.error('Informe o e-mail do Outorgado.')
+        return false
+      }
+
+      if (grantee.zip && grantee.zip.trim()) {
+        const cepVal = validateCep(grantee.zip)
+        if (!cepVal.valid) {
+          toast.error(`Outorgado: ${cepVal.message}`)
+          return false
+        }
+      }
+
       return true
     }
 
@@ -343,16 +438,35 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         toast.error('Informe a marca e o modelo do veículo.')
         return false
       }
-      if (!vehicle.plate.trim() || vehicle.plate.replace(/[^a-zA-Z0-9]/g, '').length < 7) {
-        toast.error('Informe uma placa válida para o veículo.')
+
+      const plateVal = validatePlaca(vehicle.plate)
+      if (!plateVal.valid) {
+        toast.error(plateVal.message || 'Placa do veículo inválida.')
         return false
       }
+
+      if (vehicle.renavam && vehicle.renavam.trim()) {
+        const renavamVal = validateRenavam(vehicle.renavam)
+        if (!renavamVal.valid) {
+          toast.error(renavamVal.message || 'Renavam inválido.')
+          return false
+        }
+      }
+
+      if (vehicle.chassis && vehicle.chassis.trim()) {
+        const chassisVal = validateChassi(vehicle.chassis)
+        if (!chassisVal.valid) {
+          toast.error(chassisVal.message || 'Chassi inválido.')
+          return false
+        }
+      }
+
       return true
     }
 
     if (step === 3) {
-      if (!validityDays || validityDays <= 0) {
-        toast.error('Informe um prazo de validade válido em dias.')
+      if (!validityDays || validityDays <= 0 || validityDays > 1825) {
+        toast.error('Informe um prazo de validade válido (entre 1 e 1825 dias).')
         return false
       }
       return true
@@ -476,6 +590,12 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
 
       {/* Conteúdo dos Passos */}
       <div className="space-y-6">
+        {/* Banner discreto de conformidade com documentos */}
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 text-[11px] text-zinc-500 dark:text-zinc-400">
+          <ShieldCheck className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
+          <span>A validação confere o formato do documento, não a existência do titular.</span>
+        </div>
+
         {/* ========================================================= */}
         {/* PASSO 1: PARTES (OUTORGANTE E OUTORGADO)                   */}
         {/* ========================================================= */}
@@ -553,12 +673,13 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       value={grantor.cpf_cnpj}
+                      inputMode="numeric"
                       onChange={(e) =>
                         setGrantor((p) => ({ ...p, cpf_cnpj: maskCpfCnpj(e.target.value) }))
                       }
                       placeholder={grantor.type === 'pf' ? '000.000.000-00' : '00.000.000/0001-00'}
                       maxLength={18}
-                      className="rounded-xl dark:bg-zinc-800 dark:border-zinc-700"
+                      className="rounded-xl font-mono dark:bg-zinc-800 dark:border-zinc-700"
                     />
                   </div>
 
@@ -630,7 +751,8 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       value={grantor.phone}
-                      onChange={(e) => setGrantor((p) => ({ ...p, phone: maskPhone(e.target.value) }))}
+                      inputMode="tel"
+                      onChange={(e) => setGrantor((p) => ({ ...p, phone: maskPhoneBr(e.target.value) }))}
                       placeholder="(11) 99999-9999"
                       maxLength={15}
                       className="rounded-xl dark:bg-zinc-800 dark:border-zinc-700"
@@ -643,8 +765,9 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       type="email"
+                      inputMode="email"
                       value={grantor.email}
-                      onChange={(e) => setGrantor((p) => ({ ...p, email: e.target.value }))}
+                      onChange={(e) => setGrantor((p) => ({ ...p, email: e.target.value.toLowerCase().trim() }))}
                       placeholder="outorgante@email.com"
                       className="rounded-xl dark:bg-zinc-800 dark:border-zinc-700"
                     />
@@ -692,10 +815,11 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       </Label>
                       <Input
                         value={grantor.zip}
+                        inputMode="numeric"
                         onChange={(e) => setGrantor((p) => ({ ...p, zip: maskCep(e.target.value) }))}
                         placeholder="00000-000"
                         maxLength={9}
-                        className="rounded-xl dark:bg-zinc-800 dark:border-zinc-700"
+                        className="rounded-xl font-mono dark:bg-zinc-800 dark:border-zinc-700"
                       />
                     </div>
                   </div>
@@ -775,12 +899,13 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       value={grantee.cpf_cnpj}
+                      inputMode="numeric"
                       onChange={(e) =>
                         setGrantee((p) => ({ ...p, cpf_cnpj: maskCpfCnpj(e.target.value) }))
                       }
                       placeholder={grantee.type === 'pf' ? '000.000.000-00' : '00.000.000/0001-00'}
                       maxLength={18}
-                      className="rounded-xl dark:bg-zinc-800 dark:border-zinc-700"
+                      className="rounded-xl font-mono dark:bg-zinc-800 dark:border-zinc-700"
                     />
                   </div>
 
@@ -816,7 +941,8 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       value={grantee.phone}
-                      onChange={(e) => setGrantee((p) => ({ ...p, phone: maskPhone(e.target.value) }))}
+                      inputMode="tel"
+                      onChange={(e) => setGrantee((p) => ({ ...p, phone: maskPhoneBr(e.target.value) }))}
                       placeholder="(11) 99999-9999"
                       maxLength={15}
                       className="rounded-xl dark:bg-zinc-800 dark:border-zinc-700"
@@ -829,8 +955,9 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       type="email"
+                      inputMode="email"
                       value={grantee.email}
-                      onChange={(e) => setGrantee((p) => ({ ...p, email: e.target.value }))}
+                      onChange={(e) => setGrantee((p) => ({ ...p, email: e.target.value.toLowerCase().trim() }))}
                       placeholder="outorgado@empresa.com"
                       className="rounded-xl dark:bg-zinc-800 dark:border-zinc-700"
                     />
@@ -956,6 +1083,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       value={vehicle.plate}
+                      inputMode="text"
                       onChange={(e) =>
                         setVehicle((p) => ({ ...p, plate: maskPlaca(e.target.value) }))
                       }
@@ -971,6 +1099,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       value={vehicle.renavam}
+                      inputMode="numeric"
                       onChange={(e) =>
                         setVehicle((p) => ({ ...p, renavam: maskRenavam(e.target.value) }))
                       }
@@ -986,8 +1115,9 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <Input
                       value={vehicle.chassis}
+                      inputMode="text"
                       onChange={(e) =>
-                        setVehicle((p) => ({ ...p, chassis: e.target.value.toUpperCase() }))
+                        setVehicle((p) => ({ ...p, chassis: maskChassi(e.target.value) }))
                       }
                       placeholder="9BWCA..."
                       maxLength={17}

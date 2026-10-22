@@ -28,21 +28,42 @@ import {
   FileCheck,
   AlertOctagon,
   ShieldAlert,
+  ShieldCheck,
+  Shield,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import ModernDatePicker from '@/components/ui/date-picker'
+import {
+  validateCpf,
+  validateCnpj,
+  validateCnh,
+  validateRenavam,
+  validatePlaca,
+  validateChassi,
+  validateCep,
+  validateEmail,
+  validatePhoneBr,
+  validateRg,
+  validateDate,
+  maskCpf,
+  maskCnpj,
+  maskCpfCnpj,
+  maskPhoneBr,
+  maskDateBr,
+  maskPlaca,
+  maskChassi,
+  maskRenavam,
+  maskCep,
+  onlyDigits,
+} from '@/lib/validations'
 import { toast } from 'sonner'
 import type { Store, Vehicle } from '@/lib/supabase/types'
 import {
   valorPorExtenso,
   formatCurrency,
-  maskCpfCnpj,
-  maskPhone,
-  maskCep,
-  maskPlaca,
-  maskRenavam,
   DEFAULT_SALE_CLAUSES,
   type ContractClause,
 } from '@/lib/contracts/utils'
@@ -324,7 +345,7 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
   }
 
   // -------------------------------------------------------------
-  // VALIDAÇÕES ENTRE ETAPAS
+  // VALIDAÇÕES ENTRE ETAPAS (Fase 3: Validações Estritas)
   // -------------------------------------------------------------
   const validateStep = (s: number): boolean => {
     if (s === 1) {
@@ -332,13 +353,61 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
         toast.error('Informe o nome ou razão social do comprador.')
         return false
       }
-      if (!buyer.cpf_cnpj.trim() || buyer.cpf_cnpj.replace(/\D/g, '').length < 11) {
-        toast.error('Informe um CPF ou CNPJ válido para o comprador.')
+      if (buyerType === 'pf') {
+        const cpfVal = validateCpf(buyer.cpf_cnpj)
+        if (!cpfVal.valid) {
+          toast.error(cpfVal.message || 'CPF do comprador inválido.')
+          return false
+        }
+        if (buyer.cnh && buyer.cnh.trim()) {
+          const cnhVal = validateCnh(buyer.cnh)
+          if (!cnhVal.valid) {
+            toast.error(cnhVal.message || 'CNH inválida.')
+            return false
+          }
+        }
+        if (buyer.birth_date && buyer.birth_date.trim()) {
+          const dateVal = validateDate(buyer.birth_date, { isBirthDate: true })
+          if (!dateVal.valid) {
+            toast.error(dateVal.message || 'Data de nascimento inválida.')
+            return false
+          }
+        }
+      } else {
+        const cnpjVal = validateCnpj(buyer.cpf_cnpj)
+        if (!cnpjVal.valid) {
+          toast.error(cnpjVal.message || 'CNPJ da empresa inválido.')
+          return false
+        }
+        if (buyer.rep_cpf && buyer.rep_cpf.trim()) {
+          const repVal = validateCpf(buyer.rep_cpf)
+          if (!repVal.valid) {
+            toast.error(`Representante: ${repVal.message}`)
+            return false
+          }
+        }
+      }
+
+      const phoneVal = validatePhoneBr(buyer.phone)
+      if (!phoneVal.valid) {
+        toast.error(phoneVal.message || 'Informe um telefone ou WhatsApp válido.')
         return false
       }
-      if (!buyer.phone.trim()) {
-        toast.error('Informe o telefone ou WhatsApp do comprador.')
-        return false
+
+      if (buyer.email && buyer.email.trim()) {
+        const emailVal = validateEmail(buyer.email)
+        if (!emailVal.valid) {
+          toast.error(emailVal.message || 'E-mail do comprador inválido.')
+          return false
+        }
+      }
+
+      if (buyer.zip && buyer.zip.trim()) {
+        const cepVal = validateCep(buyer.zip)
+        if (!cepVal.valid) {
+          toast.error(cepVal.message || 'CEP inválido.')
+          return false
+        }
       }
     }
 
@@ -347,9 +416,24 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
         toast.error('Informe a marca e o modelo do veículo.')
         return false
       }
-      if (!vehicle.plate.trim() || vehicle.plate.length < 7) {
-        toast.error('Informe uma placa válida para o veículo.')
+      const plateVal = validatePlaca(vehicle.plate)
+      if (!plateVal.valid) {
+        toast.error(plateVal.message || 'Informe uma placa válida para o veículo.')
         return false
+      }
+      if (vehicle.chassis && vehicle.chassis.trim()) {
+        const chassiVal = validateChassi(vehicle.chassis)
+        if (!chassiVal.valid) {
+          toast.error(chassiVal.message || 'Chassi inválido.')
+          return false
+        }
+      }
+      if (vehicle.renavam && vehicle.renavam.trim()) {
+        const renVal = validateRenavam(vehicle.renavam)
+        if (!renVal.valid) {
+          toast.error(renVal.message || 'Renavam inválido.')
+          return false
+        }
       }
     }
 
@@ -357,6 +441,22 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
       if (!totalAmount || totalAmount <= 0) {
         toast.error('Informe o valor total da venda.')
         return false
+      }
+      if (downPayment && Number(downPayment) > 0 && downPaymentDate) {
+        const dpVal = validateDate(downPaymentDate)
+        if (!dpVal.valid) {
+          toast.error(`Data do sinal: ${dpVal.message}`)
+          return false
+        }
+      }
+      for (const inst of installments) {
+        if (inst.due_date && inst.due_date.trim()) {
+          const instVal = validateDate(inst.due_date)
+          if (!instVal.valid) {
+            toast.error(`Parcela #${inst.number}: ${instVal.message}`)
+            return false
+          }
+        }
       }
     }
 
@@ -642,6 +742,12 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
               </div>
             </CardHeader>
             <CardContent className="pt-5 space-y-4">
+              {/* Aviso Discreto de Conformidade */}
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-2/60 border border-surface text-xs text-muted-foreground">
+                <ShieldCheck className="h-4 w-4 text-brand shrink-0" />
+                <span>A validação confere o formato do documento, não a existência do titular.</span>
+              </div>
+
               {buyerType === 'pf' ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -657,10 +763,12 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CPF do Comprador *</Label>
                       <Input
+                        inputMode="numeric"
                         placeholder="000.000.000-00"
+                        maxLength={14}
                         value={buyer.cpf_cnpj}
-                        onChange={(e) => setBuyer({ ...buyer, cpf_cnpj: maskCpfCnpj(e.target.value) })}
-                        className="bg-surface-1 border-surface"
+                        onChange={(e) => setBuyer({ ...buyer, cpf_cnpj: maskCpf(e.target.value) })}
+                        className="bg-surface-1 border-surface font-mono"
                       />
                     </div>
                   </div>
@@ -678,21 +786,21 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CNH (opcional)</Label>
                       <Input
-                        placeholder="Nº da CNH"
+                        inputMode="numeric"
+                        placeholder="Nº da CNH (11 dígitos)"
+                        maxLength={11}
                         value={buyer.cnh || ''}
-                        onChange={(e) => setBuyer({ ...buyer, cnh: e.target.value })}
-                        className="bg-surface-1 border-surface"
+                        onChange={(e) => setBuyer({ ...buyer, cnh: onlyDigits(e.target.value).slice(0, 11) })}
+                        className="bg-surface-1 border-surface font-mono"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-foreground">Data de Nascimento</Label>
-                      <Input
-                        type="date"
-                        value={buyer.birth_date || ''}
-                        onChange={(e) => setBuyer({ ...buyer, birth_date: e.target.value })}
-                        className="bg-surface-1 border-surface"
-                      />
-                    </div>
+                    <ModernDatePicker
+                      label="Data de Nascimento"
+                      value={buyer.birth_date || ''}
+                      onChange={(val) => setBuyer({ ...buyer, birth_date: val })}
+                      isBirthDate={true}
+                      placeholder="DD/MM/AAAA"
+                    />
                   </div>
                 </>
               ) : (
@@ -710,10 +818,12 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CNPJ *</Label>
                       <Input
+                        inputMode="numeric"
                         placeholder="00.000.000/0001-00"
+                        maxLength={18}
                         value={buyer.cpf_cnpj}
-                        onChange={(e) => setBuyer({ ...buyer, cpf_cnpj: maskCpfCnpj(e.target.value) })}
-                        className="bg-surface-1 border-surface"
+                        onChange={(e) => setBuyer({ ...buyer, cpf_cnpj: maskCnpj(e.target.value) })}
+                        className="bg-surface-1 border-surface font-mono"
                       />
                     </div>
                   </div>
@@ -731,10 +841,12 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CPF do Representante</Label>
                       <Input
+                        inputMode="numeric"
                         placeholder="000.000.000-00"
+                        maxLength={14}
                         value={buyer.rep_cpf || ''}
-                        onChange={(e) => setBuyer({ ...buyer, rep_cpf: maskCpfCnpj(e.target.value) })}
-                        className="bg-surface-1 border-surface"
+                        onChange={(e) => setBuyer({ ...buyer, rep_cpf: maskCpf(e.target.value) })}
+                        className="bg-surface-1 border-surface font-mono"
                       />
                     </div>
                   </div>
@@ -746,23 +858,26 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Telefone / WhatsApp *</Label>
                   <Input
+                    inputMode="tel"
                     placeholder="(11) 99999-9999"
+                    maxLength={15}
                     value={buyer.phone}
-                    onChange={(e) => setBuyer({ ...buyer, phone: maskPhone(e.target.value) })}
-                    className="bg-surface-1 border-surface"
+                    onChange={(e) => setBuyer({ ...buyer, phone: maskPhoneBr(e.target.value) })}
+                    className="bg-surface-1 border-surface font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">E-mail do Comprador</Label>
                   <Input
                     type="email"
+                    inputMode="email"
                     placeholder="comprador@email.com"
                     value={buyer.email}
-                    onChange={(e) => setBuyer({ ...buyer, email: e.target.value })}
+                    onChange={(e) => setBuyer({ ...buyer, email: e.target.value.trim().toLowerCase() })}
                     className="bg-surface-1 border-surface"
                   />
                   <p className="text-[10px] text-muted-foreground">
-                    Necessário para envio do link e código OTP na assinatura eletrônica (Fase 4).
+                    Necessário para envio do link e código OTP na assinatura eletrônica.
                   </p>
                 </div>
               </div>
@@ -1002,19 +1117,23 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Placa *</Label>
                   <Input
+                    autoCapitalize="characters"
                     placeholder="ABC1D23"
+                    maxLength={8}
                     value={vehicle.plate}
                     onChange={(e) => setVehicle({ ...vehicle, plate: maskPlaca(e.target.value) })}
-                    className="bg-surface-1 border-surface uppercase"
+                    className="bg-surface-1 border-surface uppercase font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Renavam</Label>
                   <Input
+                    inputMode="numeric"
                     placeholder="00000000000"
+                    maxLength={11}
                     value={vehicle.renavam}
                     onChange={(e) => setVehicle({ ...vehicle, renavam: maskRenavam(e.target.value) })}
-                    className="bg-surface-1 border-surface"
+                    className="bg-surface-1 border-surface font-mono"
                   />
                 </div>
               </div>
@@ -1023,11 +1142,12 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Chassi (VIN)</Label>
                   <Input
-                    placeholder="9BWCA..."
+                    autoCapitalize="characters"
+                    placeholder="9BWCA... (17 chars)"
                     maxLength={17}
                     value={vehicle.chassis}
-                    onChange={(e) => setVehicle({ ...vehicle, chassis: e.target.value.toUpperCase() })}
-                    className="bg-surface-1 border-surface uppercase"
+                    onChange={(e) => setVehicle({ ...vehicle, chassis: maskChassi(e.target.value) })}
+                    className="bg-surface-1 border-surface uppercase font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -1138,15 +1258,12 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                     className="bg-surface-1 border-surface"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-foreground">Data do Pagamento do Sinal</Label>
-                  <Input
-                    type="date"
-                    value={downPaymentDate}
-                    onChange={(e) => setDownPaymentDate(e.target.value)}
-                    className="bg-surface-1 border-surface"
-                  />
-                </div>
+                <ModernDatePicker
+                  label="Data do Pagamento do Sinal"
+                  value={downPaymentDate}
+                  onChange={setDownPaymentDate}
+                  placeholder="DD/MM/AAAA"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1223,12 +1340,11 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
                           />
                         </div>
                         <div className="sm:col-span-3">
-                          <Label className="text-[10px] text-muted-foreground">Vencimento</Label>
-                          <Input
-                            type="date"
+                          <Label className="text-[10px] text-muted-foreground block mb-1">Vencimento</Label>
+                          <ModernDatePicker
                             value={inst.due_date}
-                            onChange={(e) => handleUpdateInstallment(index, 'due_date', e.target.value)}
-                            className="h-9 text-xs bg-surface-1 border-surface"
+                            onChange={(val) => handleUpdateInstallment(index, 'due_date', val)}
+                            placeholder="DD/MM/AAAA"
                           />
                         </div>
                         <div className="sm:col-span-2">

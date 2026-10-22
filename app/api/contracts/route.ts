@@ -1,4 +1,13 @@
 import { normalizeDigits, normalizePlate, normalizeEmail, normalizeText, parseBrlCurrency, normalizeDateToSaoPaulo } from '@/lib/normalization'
+import {
+  validateCpfOrCnpj,
+  validatePlaca,
+  validateChassi,
+  validateRenavam,
+  validatePhoneBr,
+  validateEmail,
+  validateCep,
+} from '@/lib/validations'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getStoreContractSettings, isContractsEnabled } from '@/lib/contracts/module-guard'
@@ -163,6 +172,67 @@ export async function POST(req: NextRequest) {
 
     if (!vehicle || !vehicle.brand || !vehicle.model || !vehicle.plate) {
       return NextResponse.json({ error: 'Dados do veículo incompletos.' }, { status: 400 })
+    }
+
+    // Validações estritas de documentos no servidor (Fase 3)
+    if (!isPoa) {
+      if (buyer?.cpf_cnpj) {
+        const docVal = validateCpfOrCnpj(buyer.cpf_cnpj)
+        if (!docVal.valid) {
+          return NextResponse.json({ error: docVal.message }, { status: 400 })
+        }
+      }
+      if (buyer?.phone) {
+        const phoneVal = validatePhoneBr(buyer.phone)
+        if (!phoneVal.valid) {
+          return NextResponse.json({ error: phoneVal.message }, { status: 400 })
+        }
+      }
+      if (buyer?.email && buyer.email.trim()) {
+        const emailVal = validateEmail(buyer.email)
+        if (!emailVal.valid) {
+          return NextResponse.json({ error: emailVal.message }, { status: 400 })
+        }
+      }
+      if (buyer?.zip && buyer.zip.trim()) {
+        const cepVal = validateCep(buyer.zip)
+        if (!cepVal.valid) {
+          return NextResponse.json({ error: cepVal.message }, { status: 400 })
+        }
+      }
+    } else {
+      const activeGrantor = grantor || buyer
+      if (activeGrantor?.cpf_cnpj) {
+        const gVal = validateCpfOrCnpj(activeGrantor.cpf_cnpj)
+        if (!gVal.valid) {
+          return NextResponse.json({ error: `Outorgante: ${gVal.message}` }, { status: 400 })
+        }
+      }
+      if (grantee?.cpf_cnpj) {
+        const geVal = validateCpfOrCnpj(grantee.cpf_cnpj)
+        if (!geVal.valid) {
+          return NextResponse.json({ error: `Outorgado: ${geVal.message}` }, { status: 400 })
+        }
+      }
+    }
+
+    if (vehicle?.plate) {
+      const plateVal = validatePlaca(vehicle.plate)
+      if (!plateVal.valid) {
+        return NextResponse.json({ error: plateVal.message }, { status: 400 })
+      }
+    }
+    if (vehicle?.chassis && vehicle.chassis.trim()) {
+      const chassiVal = validateChassi(vehicle.chassis)
+      if (!chassiVal.valid) {
+        return NextResponse.json({ error: chassiVal.message }, { status: 400 })
+      }
+    }
+    if (vehicle?.renavam && vehicle.renavam.trim()) {
+      const renVal = validateRenavam(vehicle.renavam)
+      if (!renVal.valid) {
+        return NextResponse.json({ error: renVal.message }, { status: 400 })
+      }
     }
 
     const enabled = await isContractsEnabled(slug)

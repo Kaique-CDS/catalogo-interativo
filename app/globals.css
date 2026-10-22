@@ -421,3 +421,64 @@
     display: none;
   }
 }
+
+/* DatePicker moderno (react-day-picker pt-BR com tema da loja) */
+.modern-calendar-wrapper .rdp {
+  --rdp-accent-color: var(--brand);
+  --rdp-background-color: var(--brand);
+  margin: 0;
+}
+.modern-calendar-wrapper .rdp-month {
+  width: 100%;
+}
+.modern-calendar-wrapper .rdp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.modern-calendar-wrapper .rdp-weekday {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--muted-foreground);
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+}
+.modern-calendar-wrapper .rdp-day {
+  text-align: center;
+  padding: 0.125rem;
+}
+.modern-calendar-wrapper .rdp-day_button {
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 0.8125rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+.modern-calendar-wrapper .rdp-day_button:hover:not([disabled]) {
+  background-color: var(--surface-2);
+  color: var(--foreground);
+}
+.modern-calendar-wrapper .rdp-selected .rdp-day_button {
+  background-color: var(--brand) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+.modern-calendar-wrapper .rdp-today:not(.rdp-selected) .rdp-day_button {
+  border-color: var(--brand);
+  font-weight: 700;
+  color: var(--brand);
+}
+.modern-calendar-wrapper .rdp-disabled .rdp-day_button {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.modern-calendar-wrapper .rdp-nav {
+  display: none;
+}
+.modern-calendar-wrapper .rdp-caption_label {
+  display: none;
+}
