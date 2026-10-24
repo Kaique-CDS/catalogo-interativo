@@ -40,3 +40,61 @@ export function generateVideoPosterUrl(videoUrl: string): string {
   }
   return videoUrl.replace(/\.(mp4|webm|mov|mkv)$/i, '.jpg')
 }
+
+export interface PlayableVideoOptions {
+  width?: number
+}
+
+/**
+ * Converte URLs de vídeo do Cloudinary para entrega universal em MP4 (codec H.264 e áudio AAC).
+ * Resolve problemas de vídeos gravados em iPhone (.mov / HEVC) que não tocam em navegadores desktop/Android.
+ * Transforma /video/upload/ para /video/upload/f_mp4,vc_h264,ac_aac,q_auto[,w_{width}]/ e troca a extensão final para .mp4.
+ */
+export function playableVideoUrl(
+  url?: string | null,
+  options?: PlayableVideoOptions
+): string {
+  if (!url || typeof url !== 'string') return ''
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+
+  // Se não for do Cloudinary ou não for vídeo do Cloudinary, retorna a URL original
+  if (!trimmed.includes('cloudinary.com') || !trimmed.includes('/video/upload')) {
+    return trimmed
+  }
+
+  const widthParam = options?.width ? `,w_${options.width}` : ''
+  const transform = `f_mp4,vc_h264,ac_aac,q_auto${widthParam}`
+
+  // 1. Troca a extensão de arquivo (.mov, .webm, .mkv, etc.) para .mp4
+  let result = trimmed.replace(/\.(mov|webm|mkv|mp4|avi|m4v)(\?.*)?$/i, '.mp4$2')
+
+  // 2. Injeta ou atualiza a cadeia de transformação após /video/upload/
+  const marker = '/video/upload/'
+  const uploadIndex = result.indexOf(marker)
+
+  if (uploadIndex !== -1) {
+    const prefix = result.slice(0, uploadIndex + marker.length)
+    const suffix = result.slice(uploadIndex + marker.length)
+
+    // Segmentos após /video/upload/
+    const segments = suffix.split('/')
+
+    // Se o primeiro segmento contiver transformações (ex: q_auto, f_auto, etc.)
+    // identificamos por não ser versão ('v' + dígitos) e conter parâmetros típicos
+    if (
+      segments.length > 1 &&
+      !/^v\d+$/i.test(segments[0]) &&
+      /^([a-z0-9_-]+:[a-z0-9_-]+|[a-z]_[a-z0-9_-]+,?)+$/i.test(segments[0])
+    ) {
+      // Substitui o segmento de transformação existente
+      segments[0] = transform
+      result = prefix + segments.join('/')
+    } else {
+      // Não há transformações prévias, adiciona a transformação antes do próximo segmento
+      result = prefix + `${transform}/` + suffix
+    }
+  }
+
+  return result
+}

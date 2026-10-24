@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import type { TenantBanner } from '@/lib/supabase/types'
+import { playableVideoUrl } from '@/lib/cloudinary-utils'
 
 interface BrandBannerProps {
   altText?: string
@@ -210,16 +211,28 @@ export default function BrandBanner({
     const content = (
       <div className={`w-full relative rounded-2xl overflow-hidden border border-surface bg-surface-1 shadow-xs ${containerAspectClass}`}>
         {banner.media_type === 'video' ? (
-          <video
-            src={optimizeMediaUrl(banner.url, true)}
-            poster={banner.poster_url || undefined}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover object-center"
-          />
+          <>
+            {banner.poster_url && (
+              <img
+                src={banner.poster_url}
+                alt={altText}
+                className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+              />
+            )}
+            <video
+              src={playableVideoUrl(banner.url, { width: banner.device === 'desktop' ? 1920 : 720 })}
+              poster={banner.poster_url || undefined}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              onError={(e) => {
+                console.error('[BrandBanner] Erro ao reproduzir vídeo do banner:', e)
+              }}
+              className="relative w-full h-full object-cover object-center"
+            />
+          </>
         ) : (
           <img
             src={optimizeMediaUrl(banner.url)}
@@ -281,17 +294,30 @@ export default function BrandBanner({
               aria-hidden={!isActive}
             >
               {banner.media_type === 'video' ? (
-                <video
-                  ref={isActive ? videoRef : undefined}
-                  src={optimizeMediaUrl(banner.url, true)}
-                  poster={banner.poster_url || undefined}
-                  autoPlay={isActive}
-                  muted
-                  playsInline
-                  preload={isActive ? 'metadata' : 'none'}
-                  onEnded={goToNext}
-                  className="w-full h-full object-cover object-center"
-                />
+                <>
+                  {banner.poster_url && (
+                    <img
+                      src={banner.poster_url}
+                      alt={`${altText} - Banner ${idx + 1}`}
+                      className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+                    />
+                  )}
+                  <video
+                    ref={isActive ? videoRef : undefined}
+                    src={playableVideoUrl(banner.url, { width: banner.device === 'desktop' ? 1920 : 720 })}
+                    poster={banner.poster_url || undefined}
+                    autoPlay={isActive}
+                    muted
+                    playsInline
+                    preload={isActive ? 'auto' : 'none'}
+                    onEnded={goToNext}
+                    onError={(e) => {
+                      console.error('[BrandBanner] Erro no vídeo do carrossel:', e)
+                      goToNext()
+                    }}
+                    className="relative w-full h-full object-cover object-center"
+                  />
+                </>
               ) : (
                 <img
                   src={optimizeMediaUrl(banner.url)}

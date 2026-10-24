@@ -50,6 +50,7 @@ export async function deleteCloudinaryAsset(
 }
 
 // Re-exporta utilitários client-safe
-export { normalizeCustomerPhotoUrl, generateVideoPosterUrl } from './cloudinary-utils'
+export { normalizeCustomerPhotoUrl, generateVideoPosterUrl, playableVideoUrl } from './cloudinary-utils'
+export type { PlayableVideoOptions } from './cloudinary-utils'
 
 

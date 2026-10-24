@@ -28,6 +28,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import type { TenantBanner } from '@/lib/supabase/types'
+import { playableVideoUrl } from '@/lib/cloudinary-utils'
 
 interface BannerManagementProps {
   slug: string
@@ -527,7 +528,7 @@ export default function BannerManagement({ slug, storeId }: BannerManagementProp
                             {banner.poster_url ? (
                               <img src={banner.poster_url} alt="Banner" className="w-full h-full object-cover" />
                             ) : (
-                              <video src={banner.url} className="w-full h-full object-cover" preload="metadata" />
+                              <video src={playableVideoUrl(banner.url, { width: 480 })} className="w-full h-full object-cover" preload="metadata" />
                             )}
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                               <Play className="h-5 w-5 text-white fill-white" />

@@ -13,9 +13,10 @@ function isValidVideoFormat(mimeType, filename) {
 
 assert.strictEqual(isValidVideoFormat('video/mp4', 'apresentacao.mp4'), true);
 assert.strictEqual(isValidVideoFormat('video/webm', 'loja.webm'), true);
+assert.strictEqual(isValidVideoFormat('video/quicktime', 'gravacao_iphone.mov'), true);
 assert.strictEqual(isValidVideoFormat('image/jpeg', 'foto.jpg'), false);
 assert.strictEqual(isValidVideoFormat('application/pdf', 'contrato.pdf'), false);
-console.log('✅ Teste 1: Validação de formatos suportados (MP4/WebM) e rejeição de formatos impróprios.');
+console.log('✅ Teste 1: Validação de formatos suportados (MP4/WebM/MOV) e rejeição de formatos impróprios.');
 
 // 2. Validação do limite de tamanho (30 MB)
 const MAX_VIDEO_BYTES = 30 * 1024 * 1024;

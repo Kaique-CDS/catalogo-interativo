@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     if (!isValidVideoFormat(file.type, file.name)) {
       return NextResponse.json(
-        { error: 'Formato inválido. Envie um vídeo nos formatos MP4 ou WebM.' },
+        { error: 'Formato inválido. Envie um vídeo nos formatos MP4, WebM ou MOV.' },
         { status: 400 }
       )
     }
@@ -82,6 +82,10 @@ export async function POST(req: NextRequest) {
     const folder = `${tenantSlug}/institucional`
     const publicId = `welcome_vid_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
 
+    const isMovOrHevc =
+      file.name.toLowerCase().endsWith('.mov') ||
+      file.type === 'video/quicktime'
+
     const uploadResult = await new Promise<{
       secure_url: string
       public_id: string
@@ -94,6 +98,12 @@ export async function POST(req: NextRequest) {
           public_id: publicId,
           resource_type: 'video',
           overwrite: true,
+          // Transcodificação eager em segundo plano para máxima compatibilidade com H.264 / AAC
+          eager: [
+            { format: 'mp4', video_codec: 'h264', audio_codec: 'aac', width: 720, quality: 'auto' },
+            { format: 'mp4', video_codec: 'h264', audio_codec: 'aac', width: 320, quality: 'auto' },
+          ],
+          eager_async: true,
         },
         (error, result) => {
           if (error || !result) {
@@ -107,11 +117,16 @@ export async function POST(req: NextRequest) {
     })
 
     const posterUrl = generateVideoPosterUrl(uploadResult.secure_url)
+    const isOriginalMov = isMovOrHevc || uploadResult.format?.toLowerCase() === 'mov'
 
     return NextResponse.json({
       url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
       poster_url: posterUrl,
+      is_mov_or_hevc: isOriginalMov,
+      warning: isOriginalMov
+        ? 'Vídeo enviado em formato Apple (.MOV / HEVC). O catálogo aplicará entrega transcodificada em MP4 H.264 para reprodução garantida em todos os navegadores e celulares.'
+        : null,
     })
   } catch (err: any) {
     console.error('Erro em POST /api/welcome-video/upload:', err)

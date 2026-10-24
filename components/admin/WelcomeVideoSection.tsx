@@ -14,12 +14,14 @@ import {
   ToggleRight,
   X,
   ExternalLink,
+  Info,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import type { Store } from '@/lib/supabase/types'
+import { playableVideoUrl } from '@/lib/cloudinary-utils'
 
 interface WelcomeVideoSectionProps {
   store: Store
@@ -119,6 +121,9 @@ export default function WelcomeVideoSection({ store, slug }: WelcomeVideoSection
           setEnabled(true)
           setUploadProgress(100)
           toast.success('Vídeo institucional publicado com sucesso!')
+          if (uploadData.warning) {
+            toast.info(uploadData.warning, { duration: 6000 })
+          }
           if (fileInputRef.current) fileInputRef.current.value = ''
         } catch {
           setUploadError('Erro ao salvar vídeo nas configurações da loja.')
@@ -239,16 +244,30 @@ export default function WelcomeVideoSection({ store, slug }: WelcomeVideoSection
         {/* Se já existe vídeo cadastrado: Player de Pré-visualização + Ações */}
         {videoUrl ? (
           <div className="space-y-4">
+            {/* Aviso quando o vídeo original for .mov/HEVC */}
+            {(videoUrl.toLowerCase().includes('.mov') || videoUrl.toLowerCase().includes('quicktime')) && (
+              <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-900 dark:text-blue-300 text-xs flex items-start gap-2.5">
+                <Info className="h-4 w-4 shrink-0 mt-0.5 text-blue-500" />
+                <div className="space-y-0.5">
+                  <p className="font-bold text-foreground">Vídeo original gravado em iPhone/Apple (.MOV / HEVC)</p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    O catálogo converte a entrega automaticamente para <strong>MP4 (H.264 / AAC)</strong> para que toque perfeitamente em loop em todos os navegadores (Chrome, Brave, Edge, Safari, Android e Windows).
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl bg-surface-2/50 border border-surface">
               {/* Miniatura do player */}
               <div className="relative w-28 h-40 sm:w-32 sm:h-44 rounded-xl overflow-hidden bg-black border border-surface shrink-0 shadow-md">
                 <video
-                  src={videoUrl}
+                  src={playableVideoUrl(videoUrl, { width: 320 })}
                   poster={posterUrl || undefined}
                   muted
                   playsInline
                   autoPlay
                   loop
+                  preload="auto"
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-1.5 left-1.5 bg-black/70 backdrop-blur-xs text-[9px] font-bold text-white px-1.5 py-0.5 rounded flex items-center gap-1">

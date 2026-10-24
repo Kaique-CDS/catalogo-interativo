@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { X, Play, Volume2, Sparkles } from 'lucide-react'
+import { X, Play, Volume2, Sparkles, RefreshCw } from 'lucide-react'
+import { playableVideoUrl } from '@/lib/cloudinary-utils'
 
 interface FloatingWelcomeVideoProps {
   slug: string
@@ -24,10 +25,16 @@ export default function FloatingWelcomeVideo({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [bottomOffset, setBottomOffset] = useState<number>(0)
   const [isPageLoaded, setIsPageLoaded] = useState(false)
+  const [thumbHasError, setThumbHasError] = useState(false)
+  const [modalHasError, setModalHasError] = useState(false)
 
   const thumbVideoRef = useRef<HTMLVideoElement | null>(null)
   const modalVideoRef = useRef<HTMLVideoElement | null>(null)
   const modalCloseBtnRef = useRef<HTMLButtonElement | null>(null)
+
+  // URLs transcodificadas para MP4 H.264
+  const playableThumbUrl = playableVideoUrl(videoUrl, { width: 320 })
+  const playableModalUrl = playableVideoUrl(videoUrl, { width: 720 })
 
   // 1. Verifica localStorage para saber se o usuário dispensou a miniatura recentemente
   useEffect(() => {
@@ -61,6 +68,22 @@ export default function FloatingWelcomeVideo({
       return () => window.removeEventListener('load', onLoaded)
     }
   }, [])
+
+  // 2.1 Reativa autoplay da miniatura quando a aba do navegador volta a ficar visível
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (
+        typeof document !== 'undefined' &&
+        document.visibilityState === 'visible' &&
+        !isModalOpen &&
+        thumbVideoRef.current
+      ) {
+        thumbVideoRef.current.play().catch(() => {})
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [isModalOpen])
 
   // 3. Posicionamento dinâmico: evita cobrir rodapé e respeita safe-area
   useEffect(() => {
@@ -200,18 +223,34 @@ export default function FloatingWelcomeVideo({
             <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </button>
 
-          {/* Vídeo em autoplay mudo na miniatura */}
-          {isPageLoaded && (
+          {/* Poster como plano de fundo fixo: impede qualquer quadro vazio ou tela preta */}
+          {posterUrl && (
+            <img
+              src={posterUrl}
+              alt={storeName}
+              className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+            />
+          )}
+
+          {/* Vídeo em autoplay mudo na miniatura (MP4 H.264 leve w_320) */}
+          {isPageLoaded && !thumbHasError && (
             <video
               ref={thumbVideoRef}
-              src={videoUrl}
+              src={playableThumbUrl}
               poster={posterUrl || undefined}
               autoPlay
               muted
               loop
               playsInline
-              preload="metadata"
-              className="w-full h-full object-cover object-center pointer-events-none"
+              preload="auto"
+              onCanPlay={() => {
+                thumbVideoRef.current?.play().catch(() => {})
+              }}
+              onError={(e) => {
+                console.error('[FloatingWelcomeVideo] Erro na miniatura do vídeo institucional:', e)
+                setThumbHasError(true)
+              }}
+              className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
             />
           )}
 
@@ -264,17 +303,49 @@ export default function FloatingWelcomeVideo({
               </button>
             </div>
 
-            {/* Player de Vídeo em Alta Resolução */}
+            {/* Player de Vídeo em Alta Resolução (MP4 H.264 w_720) */}
             <div className="relative w-full aspect-[9/16] max-h-[80vh] flex items-center justify-center bg-black">
-              <video
-                ref={modalVideoRef}
-                src={videoUrl}
-                poster={posterUrl || undefined}
-                controls
-                playsInline
-                preload="metadata"
-                className="w-full h-full object-contain"
-              />
+              {modalHasError && posterUrl ? (
+                <div className="relative w-full h-full flex flex-col items-center justify-center">
+                  <img
+                    src={posterUrl}
+                    alt={storeName}
+                    className="w-full h-full object-contain opacity-60"
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white bg-black/60 space-y-3">
+                    <p className="text-xs font-medium text-zinc-300">
+                      Não foi possível reproduzir este vídeo diretamente.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setModalHasError(false)
+                        if (modalVideoRef.current) {
+                          modalVideoRef.current.load()
+                          modalVideoRef.current.play().catch(() => {})
+                        }
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-brand text-white text-xs font-bold flex items-center gap-1.5 shadow-md hover:opacity-90"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" /> Tentar Novamente
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <video
+                  ref={modalVideoRef}
+                  src={playableModalUrl}
+                  poster={posterUrl || undefined}
+                  controls
+                  playsInline
+                  preload="auto"
+                  onError={(e) => {
+                    console.error('[FloatingWelcomeVideo] Erro no player do modal:', e)
+                    setModalHasError(true)
+                  }}
+                  className="w-full h-full object-contain"
+                />
+              )}
             </div>
           </div>
         </div>
