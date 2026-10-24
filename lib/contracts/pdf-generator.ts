@@ -124,17 +124,154 @@ export interface GenerateContractPdfOptions {
   sha256Hash?: string
 }
 
+const CHAR_REPLACEMENTS: Record<string, string> = {
+  '\t': '   ',
+  '\r': '',
+  '…': '...',
+  '“': '"',
+  '”': '"',
+  '„': '"',
+  '«': '"',
+  '»': '"',
+  '‘': "'",
+  '’': "'",
+  '‚': "'",
+  '‹': "'",
+  '›': "'",
+  '–': '-',
+  '—': '-',
+  '―': '-',
+  '−': '-',
+  '✓': '[X]',
+  '✔': '[X]',
+  '☑': '[X]',
+  '✗': '[ ]',
+  '✘': '[ ]',
+  '☒': '[ ]',
+  '→': '->',
+  '➔': '->',
+  '➜': '->',
+  '←': '<-',
+  '⬅': '<-',
+  '•': '-',
+  '◦': '-',
+  '‣': '-',
+  '⁃': '-',
+  '™': '(TM)',
+  '©': '(C)',
+  '®': '(R)',
+  'Ł': 'L',
+  'ł': 'l',
+  'ś': 's',
+  'Ś': 'S',
+  'ź': 'z',
+  'Ź': 'Z',
+  'ż': 'z',
+  'Ż': 'Z',
+  'ć': 'c',
+  'Ć': 'C',
+  'ń': 'n',
+  'Ń': 'N',
+  'đ': 'd',
+  'Đ': 'D',
+  'ı': 'i',
+  'İ': 'I',
+  'ğ': 'g',
+  'Ğ': 'G',
+  'ş': 's',
+  'Ş': 'S',
+}
+
+const WIN_ANSI_ALLOWED = new Set([
+  10, // \n
+  ...Array.from({ length: 0x7e - 0x20 + 1 }, (_, i) => 0x20 + i), // 32..126 ASCII imprimível
+  0x20ac, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021, 0x02c6,
+  0x2030, 0x0160, 0x2039, 0x0152, 0x017d, 0x2018, 0x2019, 0x201c,
+  0x201d, 0x2022, 0x2013, 0x2014, 0x02dc, 0x2122, 0x0161, 0x203a,
+  0x0153, 0x017e, 0x0178,
+  ...Array.from({ length: 0xff - 0xa0 + 1 }, (_, i) => 0xa0 + i), // Latin-1 suplementar (á, é, í, ó, ú, ç, etc)
+])
+
 /**
- * Remove caracteres incompatíveis com WinAnsiEncoding do pdf-lib.
+ * Remove e higieniza qualquer caractere incompatível com WinAnsiEncoding do pdf-lib,
+ * garantindo que a geração do PDF NUNCA lance exceção de codificação.
  */
-function cleanText(text: string | null | undefined): string {
-  if (!text) return ''
-  return String(text)
-    .replace(/[–—]/g, '-')
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/[\u2022\u2023\u25E6\u2043\u2219]/g, '-')
-    .trim()
+export function cleanText(text: string | null | undefined): string {
+  if (!text && text !== '0') return ''
+  let s = String(text).replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, '')
+
+  for (const [target, repl] of Object.entries(CHAR_REPLACEMENTS)) {
+    s = s.split(target).join(repl)
+  }
+
+  let result = ''
+  for (const char of s) {
+    const cp = char.codePointAt(0) || 0
+    if (WIN_ANSI_ALLOWED.has(cp)) {
+      result += char
+    } else {
+      // Decomposição Unicode NFD para remover diacríticos incompatíveis
+      const decomposed = char.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      for (const dChar of decomposed) {
+        const dCp = dChar.codePointAt(0) || 0
+        if (WIN_ANSI_ALLOWED.has(dCp)) {
+          result += dChar
+        }
+      }
+    }
+  }
+  return result
+}
+
+function patchPageDrawText(page: any) {
+  const originalDrawText = page.drawText.bind(page)
+  page.drawText = function (text: string, options: any = {}) {
+    const cleaned = cleanText(text)
+    if (!cleaned && cleaned !== '0') return
+    try {
+      originalDrawText(cleaned, options)
+    } catch (err: any) {
+      // Fallback de contingência extrema: mantém apenas ASCII imprimível e quebra de linha
+      const asciiFallback = cleaned.replace(/[^\x20-\x7E\n]/g, '')
+      if (asciiFallback) {
+        try {
+          originalDrawText(asciiFallback, options)
+        } catch {}
+      }
+    }
+  }
+  return page
+}
+
+function patchFont(font: any) {
+  const originalWidth = font.widthOfTextAtSize.bind(font)
+  font.widthOfTextAtSize = function (text: string, size: number) {
+    const cleaned = cleanText(text)
+    if (!cleaned) return 0
+    const lines = cleaned.split('\n')
+    let maxW = 0
+    for (const line of lines) {
+      if (!line) continue
+      try {
+        const w = originalWidth(line, size)
+        if (w > maxW) maxW = w
+      } catch {
+        const approx = line.length * (size * 0.55)
+        if (approx > maxW) maxW = approx
+      }
+    }
+    return maxW
+  }
+  return font
+}
+
+function setupSafePdfDoc(pdfDoc: PDFDocument) {
+  const originalAddPage = pdfDoc.addPage.bind(pdfDoc)
+  pdfDoc.addPage = function (...args: any[]) {
+    const page = originalAddPage(...args)
+    return patchPageDrawText(page)
+  }
+  return pdfDoc
 }
 
 /**
@@ -240,10 +377,10 @@ function hexToRgb(hex: string | null | undefined) {
 export async function generateVehicleSaleContractPdf(
   opts: GenerateContractPdfOptions
 ): Promise<Uint8Array> {
-  const pdfDoc = await PDFDocument.create()
+  const pdfDoc = setupSafePdfDoc(await PDFDocument.create())
 
-  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const fontRegular = patchFont(await pdfDoc.embedFont(StandardFonts.Helvetica))
+  const fontBold = patchFont(await pdfDoc.embedFont(StandardFonts.HelveticaBold))
 
   const PAGE_WIDTH = 595.28 // A4
   const PAGE_HEIGHT = 841.89
@@ -653,10 +790,16 @@ export async function generateVehicleSaleContractPdf(
     cursorY -= 10.5
 
     // Substitui placeholders caso existam
+    const deliveryDays = String(
+      (opts as any).deliveryDays ||
+      (opts.financial as any)?.delivery_days ||
+      (opts as any).prazo_entrega_dias ||
+      '5'
+    )
     let text = clause.text
       .replace(/{cidade_foro}/g, foroCidade)
       .replace(/{estado_foro}/g, foroEstado)
-      .replace(/{prazo_entrega_dias}/g, '5')
+      .replace(/{prazo_entrega_dias}/g, deliveryDays)
 
     const lines = wrapText(text, CONTENT_WIDTH - 8, fontRegular, 7.5)
     for (const line of lines) {
@@ -1208,10 +1351,10 @@ export const generateContractPdf = generateVehicleSaleContractPdf
 export async function generatePowerOfAttorneyPdf(
   opts: GeneratePowerOfAttorneyPdfOptions
 ): Promise<Uint8Array> {
-  const pdfDoc = await PDFDocument.create()
+  const pdfDoc = setupSafePdfDoc(await PDFDocument.create())
 
-  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  const fontRegular = patchFont(await pdfDoc.embedFont(StandardFonts.Helvetica))
+  const fontBold = patchFont(await pdfDoc.embedFont(StandardFonts.HelveticaBold))
 
   const PAGE_WIDTH = 595.28 // A4
   const PAGE_HEIGHT = 841.89

@@ -27,6 +27,7 @@ import {
   Copy,
   Check,
   MessageCircle,
+  FileText,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -93,6 +94,11 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
     signers?: any
   } | null>(null)
   const [copiedLink, setCopiedLink] = useState(false)
+
+  // Feedback e pré-visualização de PDF (Fase 1)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
+  const [viewingPdf, setViewingPdf] = useState(false)
+  const [generatingPreview, setGeneratingPreview] = useState(false)
 
   // -------------------------------------------------------------
   // PASSO 1: OUTORGANTE (QUEM CONCEDE) E OUTORGADO (QUEM RECEBE)
@@ -530,6 +536,96 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
       toast.error(err.message || 'Falha ao emitir procuração.', { id: toastId })
     } finally {
       setGenerating(false)
+    }
+  }
+
+  const handleDownloadPdf = async (contractId: string, isPrint: boolean = true) => {
+    setDownloadingPdf(true)
+    try {
+      const res = await fetch(`/api/contracts/${contractId}/pdf?download=true${isPrint ? '&print=true' : ''}`)
+      if (!res.ok) {
+        throw new Error('Não foi possível gerar o arquivo PDF para download.')
+      }
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Procuracao-${contractId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success('Download do PDF concluído com sucesso!')
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao baixar o PDF.')
+    } finally {
+      setDownloadingPdf(false)
+    }
+  }
+
+  const handleViewPdf = async (contractId: string, isPrint: boolean = false) => {
+    setViewingPdf(true)
+    try {
+      const res = await fetch(`/api/contracts/${contractId}/pdf${isPrint ? '?print=true' : ''}`)
+      if (!res.ok) {
+        throw new Error('Falha ao abrir visualização do PDF.')
+      }
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const newWin = window.open(url, '_blank')
+      if (!newWin) {
+        toast.info('Popup bloqueado pelo navegador. Baixando PDF diretamente...')
+        handleDownloadPdf(contractId, isPrint)
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao carregar o PDF. Iniciando download...')
+      handleDownloadPdf(contractId, isPrint)
+    } finally {
+      setViewingPdf(false)
+    }
+  }
+
+  const handlePreviewPdf = async () => {
+    setGeneratingPreview(true)
+    try {
+      const res = await fetch('/api/contracts/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          type: 'procuracao',
+          grantor,
+          grantee,
+          vehicle,
+          validity_days: Number(validityDays) || 365,
+          additional_powers: additionalPowers.trim() || undefined,
+          notes: observations.trim() || undefined,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Falha ao compilar pré-visualização da procuração.')
+      }
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const newWin = window.open(url, '_blank')
+      if (!newWin) {
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `Previa-Procuracao-${vehicle.plate || 'Veiculo'}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        toast.info('Popup bloqueado. A prévia foi baixada diretamente!')
+      } else {
+        toast.success('Prévia da procuração aberta com sucesso!')
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao gerar prévia.')
+    } finally {
+      setGeneratingPreview(false)
     }
   }
 
@@ -1422,12 +1518,31 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handlePreviewPdf}
+                        disabled={generatingPreview || generating}
+                        className="w-full sm:w-auto h-12 rounded-xl text-xs sm:text-sm font-semibold border-zinc-200 dark:border-zinc-700 gap-2"
+                      >
+                        {generatingPreview ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Gerando Prévia...
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="h-4 w-4 text-brand" />
+                            Visualizar Prévia do PDF
+                          </>
+                        )}
+                      </Button>
                       <Button
                         type="button"
                         onClick={handleGeneratePoa}
-                        disabled={generating}
-                        className="w-full h-12 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 font-bold rounded-xl text-sm gap-2 shadow-sm"
+                        disabled={generating || generatingPreview}
+                        className="w-full sm:flex-1 h-12 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-900 font-bold rounded-xl text-sm gap-2 shadow-sm"
                       >
                         {generating ? (
                           <>
@@ -1467,35 +1582,43 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
 
                   {/* Opções de Ação */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto">
-                    <a
-                      href={`/api/contracts/${generatedPoa.id}/pdf?print=true`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full"
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDownloadPdf(generatedPoa.id, true)}
+                      disabled={downloadingPdf}
+                      className="w-full h-11 text-xs font-bold rounded-xl gap-2 dark:border-zinc-700"
                     >
-                      <Button
-                        variant="outline"
-                        className="w-full h-11 text-xs font-bold rounded-xl gap-2 dark:border-zinc-700"
-                      >
-                        <Printer className="h-4 w-4" />
-                        PDF para Imprimir (Física)
-                      </Button>
-                    </a>
+                      {downloadingPdf ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Baixando PDF...
+                        </>
+                      ) : (
+                        <>
+                          <Printer className="h-4 w-4" />
+                          PDF para Imprimir (Física)
+                        </>
+                      )}
+                    </Button>
 
-                    <a
-                      href={`/api/contracts/${generatedPoa.id}/pdf`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full"
+                    <Button
+                      variant="outline"
+                      onClick={() => handleViewPdf(generatedPoa.id, false)}
+                      disabled={viewingPdf}
+                      className="w-full h-11 text-xs font-bold rounded-xl gap-2 dark:border-zinc-700"
                     >
-                      <Button
-                        variant="outline"
-                        className="w-full h-11 text-xs font-bold rounded-xl gap-2 dark:border-zinc-700"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Visualizar PDF Digital
-                      </Button>
-                    </a>
+                      {viewingPdf ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Abrindo PDF...
+                        </>
+                      ) : (
+                        <>
+                          <ExternalLink className="h-4 w-4" />
+                          Visualizar PDF Digital
+                        </>
+                      )}
+                    </Button>
                   </div>
 
                   {/* Links de Assinatura Online */}

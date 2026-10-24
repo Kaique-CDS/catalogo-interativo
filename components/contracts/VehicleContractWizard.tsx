@@ -104,6 +104,11 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
   const [soldStatusUpdated, setSoldStatusUpdated] = useState(false)
   const [updatingSold, setUpdatingSold] = useState(false)
 
+  // Feedback e pré-visualização de PDF (Fase 1)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
+  const [viewingPdf, setViewingPdf] = useState(false)
+  const [generatingPreview, setGeneratingPreview] = useState(false)
+
   // -------------------------------------------------------------
   // PASSO 1: DADOS DO COMPRADOR E VENDEDOR
   // -------------------------------------------------------------
@@ -233,6 +238,113 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
       toast.error('Erro ao atualizar status do veículo no estoque.')
     } finally {
       setUpdatingSold(false)
+    }
+  }
+
+  // -------------------------------------------------------------
+  // HANDLERS DE DOWNLOAD, VISUALIZAÇÃO E PRÉVIA (FASE 1)
+  // -------------------------------------------------------------
+  const handleDownloadPdf = async (contractId: string, isPrint: boolean = true) => {
+    setDownloadingPdf(true)
+    try {
+      const res = await fetch(`/api/contracts/${contractId}/pdf?download=true${isPrint ? '&print=true' : ''}`)
+      if (!res.ok) {
+        throw new Error('Não foi possível gerar o arquivo PDF para download.')
+      }
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Contrato-${contractId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success('Download do PDF concluído com sucesso!')
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao baixar o PDF.')
+    } finally {
+      setDownloadingPdf(false)
+    }
+  }
+
+  const handleViewPdf = async (contractId: string, isPrint: boolean = true) => {
+    setViewingPdf(true)
+    try {
+      const res = await fetch(`/api/contracts/${contractId}/pdf${isPrint ? '?print=true' : ''}`)
+      if (!res.ok) {
+        throw new Error('Falha ao abrir visualização do PDF.')
+      }
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const newWin = window.open(url, '_blank')
+      if (!newWin) {
+        toast.info('Popup bloqueado pelo navegador. Baixando PDF diretamente...')
+        handleDownloadPdf(contractId, isPrint)
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao carregar o PDF. Iniciando download...')
+      handleDownloadPdf(contractId, isPrint)
+    } finally {
+      setViewingPdf(false)
+    }
+  }
+
+  const handlePreviewPdf = async () => {
+    setGeneratingPreview(true)
+    try {
+      const financialPayload: FinancialData = {
+        total_amount: Number(totalAmount),
+        down_payment: Number(downPayment) || 0,
+        down_payment_date: downPayment ? downPaymentDate : undefined,
+        transfer_fee_amount: Number(transferFeeAmount) || 0,
+        transfer_responsible: transferResponsible,
+        installments: installments.map((inst) => ({
+          number: inst.number,
+          amount: Number(inst.amount) || 0,
+          due_date: inst.due_date,
+          method: inst.method,
+          description: inst.description || '',
+        })),
+        notes: financialNotes || undefined,
+      }
+
+      const res = await fetch('/api/contracts/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          type: 'venda_veiculo',
+          buyer: { ...buyer, type: buyerType },
+          vehicle,
+          financial: financialPayload,
+          clauses,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Falha ao compilar pré-visualização do contrato.')
+      }
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const newWin = window.open(url, '_blank')
+      if (!newWin) {
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `Previa-Contrato-${vehicle.model || 'Veiculo'}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        toast.info('Popup bloqueado. A prévia foi baixada diretamente!')
+      } else {
+        toast.success('Prévia do PDF aberta com sucesso!')
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao gerar prévia.')
+    } finally {
+      setGeneratingPreview(false)
     }
   }
 
@@ -642,27 +754,37 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
           )}
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            <a
-              href={`/api/contracts/${generatedContract.id}/pdf?print=true&download=true`}
-              target="_blank"
-              rel="noreferrer"
+            <Button
+              onClick={() => handleDownloadPdf(generatedContract.id, true)}
+              disabled={downloadingPdf}
+              className="btn-brand gap-2 text-xs font-bold rounded-xl h-11 w-full sm:w-auto"
             >
-              <Button className="btn-brand gap-2 text-xs font-bold rounded-xl h-11 w-full sm:w-auto">
-                <FileDown className="h-4 w-4" /> Baixar PDF para Impressão
-              </Button>
-            </a>
-            <a
-              href={`/api/contracts/${generatedContract.id}/pdf?print=true`}
-              target="_blank"
-              rel="noreferrer"
+              {downloadingPdf ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Baixando PDF...
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4" /> Baixar PDF para Impressão
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleViewPdf(generatedContract.id, true)}
+              disabled={viewingPdf}
+              className="gap-2 text-xs rounded-xl h-11 border-surface hover:bg-surface-2 w-full sm:w-auto"
             >
-              <Button
-                variant="outline"
-                className="gap-2 text-xs rounded-xl h-11 border-surface hover:bg-surface-2 w-full sm:w-auto"
-              >
-                <ExternalLink className="h-4 w-4" /> Visualizar PDF no Navegador
-              </Button>
-            </a>
+              {viewingPdf ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Abrindo PDF...
+                </>
+              ) : (
+                <>
+                  <ExternalLink className="h-4 w-4" /> Visualizar PDF no Navegador
+                </>
+              )}
+            </Button>
           </div>
 
           <div className="pt-4 border-t border-surface flex flex-wrap items-center justify-center gap-3">
@@ -1693,8 +1815,25 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <Button
                   type="button"
                   variant="outline"
+                  onClick={handlePreviewPdf}
+                  disabled={generatingPreview || generating}
+                  className="rounded-xl border-surface hover:bg-surface-2 text-xs h-11 gap-1.5"
+                >
+                  {generatingPreview ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Gerando Prévia...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="h-4 w-4 text-brand" /> Visualizar Prévia do PDF
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => handleGenerateContract('rascunho')}
-                  disabled={generating}
+                  disabled={generating || generatingPreview}
                   className="rounded-xl border-surface hover:bg-surface-2 text-xs h-11"
                 >
                   {generating && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}

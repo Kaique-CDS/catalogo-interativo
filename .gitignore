@@ -49,5 +49,7 @@ next-env.d.ts
 # supabase
 supabase/.temp/
 
-# local ai cache
+# local ai cache & contract caches
 .ai-usage-cache.json
+.contracts-cache.json
+*-cache.json

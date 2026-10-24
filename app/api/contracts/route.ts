@@ -20,6 +20,7 @@ import { type ContractClause, DEFAULT_SALE_CLAUSES } from '@/lib/contracts/utils
 
 import { saveLocalContract, getLocalContracts, getNextLocalContractNumber } from '@/lib/contracts/cache'
 import { setupContractSigners } from '@/lib/contracts/signature-service'
+import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -34,6 +35,11 @@ function getRequestIp(req: NextRequest): string {
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(req.url)
     const slug = searchParams.get('slug')
     const status = searchParams.get('status')
@@ -41,6 +47,24 @@ export async function GET(req: NextRequest) {
 
     if (!slug) {
       return NextResponse.json({ error: 'Slug é obrigatório.' }, { status: 400 })
+    }
+
+    if (!canAccessTenant(auth, slug)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para visualizar contratos desta loja.' },
+        { status: 403 }
+      )
+    }
+
+    if (!slug) {
+      return NextResponse.json({ error: 'Slug é obrigatório.' }, { status: 400 })
+    }
+
+    if (!canAccessTenant(auth, slug)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para emitir contratos para esta loja.' },
+        { status: 403 }
+      )
     }
 
     const enabled = await isContractsEnabled(slug)
@@ -51,45 +75,24 @@ export async function GET(req: NextRequest) {
     const { store } = await getStoreContractSettings(slug)
     const supabase = createAdminClient()
 
-    let dbContracts: any[] = []
-    try {
-      let query = supabase
-        .from('contracts')
-        .select('*')
-        .eq('store_id', store.id)
-        .is('deleted_at', null)
-        .order('number', { ascending: false })
+    let query = supabase
+      .from('contracts')
+      .select('*')
+      .eq('store_id', store.id)
+      .is('deleted_at', null)
+      .order('number', { ascending: false })
 
-      if (status && status !== 'todos') {
-        query = query.eq('status', status)
-      }
-
-      const { data, error } = await query
-      if (!error && data) {
-        dbContracts = data
-      }
-    } catch {
-      // Ignora erro e usa cache local
+    if (status && status !== 'todos') {
+      query = query.eq('status', status)
     }
 
-    // Mescla com cache local para suportar testes antes de migrations
-    const localContracts = getLocalContracts(store.id)
-    const allContractsMap = new Map<string, any>()
-
-    for (const c of dbContracts) {
-      allContractsMap.set(c.id, c)
-    }
-    for (const c of localContracts) {
-      if (!allContractsMap.has(c.id)) {
-        if (!status || status === 'todos' || c.status === status) {
-          allContractsMap.set(c.id, c)
-        }
-      }
+    const { data: dbContracts, error: dbErr } = await query
+    if (dbErr) {
+      console.error('Erro ao consultar contratos no banco:', dbErr.message)
+      return NextResponse.json({ error: 'Erro ao consultar contratos.' }, { status: 500 })
     }
 
-    const merged = Array.from(allContractsMap.values()).sort(
-      (a, b) => (b.number || 0) - (a.number || 0)
-    )
+    const merged = dbContracts || []
 
     // Filtro em memória para busca textual
     let filtered = merged
@@ -112,6 +115,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const body = await req.json()
     const {
       slug,
@@ -361,16 +369,21 @@ export async function POST(req: NextRequest) {
       updated_at: new Date().toISOString(),
     }
 
-    const { data: createdContract } = await supabase
+    const { data: createdContract, error: insertErr } = await supabase
       .from('contracts')
       .insert([insertPayload])
       .select('*')
       .single()
 
-    const contractResult = createdContract || { ...insertPayload, id: `local-${nextNumber}` }
+    if (insertErr || !createdContract) {
+      console.error('Falha ao salvar contrato no banco:', insertErr?.message || 'Dados nulos retornados')
+      return NextResponse.json(
+        { error: 'Não foi possível salvar o contrato. Verifique a conexão com o banco de dados.' },
+        { status: 500 }
+      )
+    }
 
-    // Salva no cache local para resiliência e suporte a testes locais
-    saveLocalContract(contractResult)
+    const contractResult = createdContract
 
     // Configura os signatários (Comprador/Vendedor ou Outorgante/Outorgado) e gera tokens seguros
     let signersInfo = null
