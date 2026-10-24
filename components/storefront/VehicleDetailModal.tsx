@@ -271,10 +271,17 @@ export default function VehicleDetailModal({ vehicle, store, onClose, initialSte
             <div>
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{vehicle.model}</span>
               <h2 className="font-heading text-xl sm:text-2xl text-heading uppercase leading-snug tracking-wide">{vehicle.brand} {vehicle.title.replace(`${vehicle.brand} `, '')}</h2>
-              <div className="flex items-center gap-3 mt-3">
+              <div className="flex flex-wrap items-baseline gap-2.5 mt-3">
+                {vehicle.old_price && vehicle.old_price > (vehicle.price || 0) && (
+                  <span className="text-sm sm:text-base text-muted-foreground line-through font-medium">
+                    <span className="sr-only">Preço anterior: </span>
+                    {formatCurrency(vehicle.old_price)}
+                  </span>
+                )}
                 {vehicle.price && vehicle.price > 0 ? (
                   <>
                     <span className="font-heading text-2xl sm:text-3xl text-price">
+                      <span className="sr-only">Preço atual: </span>
                       {formatCurrency(vehicle.price)}
                     </span>
                     <span className="text-xs font-bold text-muted-foreground bg-surface-1 border border-surface px-2.5 py-1 rounded-md uppercase tracking-wider">

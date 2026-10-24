@@ -34,6 +34,9 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Store } from '@/lib/supabase/types'
+import BannerManagement from './BannerManagement'
+import WelcomeVideoSection from './WelcomeVideoSection'
+import CustomerPhotosSection from './CustomerPhotosSection'
 import {
   validateStoreAsset,
   getBrowserImageDimensions,
@@ -425,199 +428,14 @@ export default function StoreSettingsForm({ store, slug }: Props) {
           </CardContent>
         </Card>
 
-        {/* ── CARD 2: BANNER DE CAPA — DESKTOP ── */}
-        <Card className="border-surface bg-surface-1">
-          <CardHeader className="pb-3 border-b border-surface">
-            <CardTitle className="text-sm font-bold text-heading flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Monitor className="h-4 w-4 text-brand" /> 2. Banner de Capa — Desktop
-              </span>
-              <span className="text-[11px] font-mono font-medium text-brand">2560 x 1097 px</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-5">
-            <div className="p-3 rounded-xl bg-surface-2/60 border border-surface text-xs text-muted-foreground flex items-start gap-2.5">
-              <AlertTriangle className="h-4 w-4 text-brand shrink-0 mt-0.5" />
-              <span>
-                <strong>Dimensão obrigatória exata: 2560 x 1097 px</strong> (proporção ~21:9). Tolerância zero de dimensão. Formatos: PNG, JPG ou WebP até 5 MB.
-              </span>
-            </div>
+        {/* ── BANNERS DA VITRINE (DESKTOP E MOBILE COM CARROSSEL) ── */}
+        <BannerManagement slug={slug} storeId={store.id} />
 
-            {/* Preview Desktop */}
-            {bannerUrl ? (
-              <div className="space-y-3">
-                <div className="relative aspect-[2560/1097] w-full rounded-xl overflow-hidden border border-surface bg-surface-2 shadow-xs">
-                  <Image
-                    src={bannerUrl}
-                    alt="Banner Desktop"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => document.getElementById('input-banner-desktop')?.click()}
-                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg gap-1.5 w-full sm:w-auto"
-                  >
-                    <Upload className="h-3.5 w-3.5 text-brand" /> Trocar banner desktop
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => promptDeleteAsset('banner_desktop', 'Banner Desktop')}
-                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 w-full sm:w-auto"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" /> Remover banner
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div
-                onDragOver={handleDragOver('banner_desktop')}
-                onDragLeave={handleDragLeave('banner_desktop')}
-                onDrop={handleDrop('banner_desktop')}
-                onClick={() => document.getElementById('input-banner-desktop')?.click()}
-                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-                  dragActive.banner_desktop
-                    ? 'border-brand bg-brand/5'
-                    : 'border-surface hover:border-brand/50 bg-surface-2/30'
-                }`}
-              >
-                <Monitor className="h-6 w-6 text-brand mx-auto mb-2" />
-                <p className="text-xs font-semibold text-foreground">
-                  Arraste o banner desktop aqui ou clique para selecionar
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  Resolução exigida: <strong>2560 x 1097 px</strong> (máx. 5 MB)
-                </p>
-              </div>
-            )}
+        {/* ── VÍDEO INSTITUCIONAL FLUTUANTE (PROMPT 2) ── */}
+        <WelcomeVideoSection store={store} slug={slug} />
 
-            <input
-              id="input-banner-desktop"
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={handleFileInputChange('banner_desktop')}
-            />
-
-            {uploadProgress.banner_desktop !== null && (
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px] text-brand font-semibold">
-                  <span>Enviando banner desktop...</span>
-                  <span>{uploadProgress.banner_desktop}%</span>
-                </div>
-                <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-brand rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress.banner_desktop}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* ── CARD 3: BANNER DE CAPA — MOBILE ── */}
-        <Card className="border-surface bg-surface-1">
-          <CardHeader className="pb-3 border-b border-surface">
-            <CardTitle className="text-sm font-bold text-heading flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4 text-brand" /> 3. Banner de Capa — Mobile
-              </span>
-              <span className="text-[11px] font-mono font-medium text-brand">1080 x 1350 px</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-5">
-            <div className="p-3 rounded-xl bg-surface-2/60 border border-surface text-xs text-muted-foreground flex items-start gap-2.5">
-              <AlertTriangle className="h-4 w-4 text-brand shrink-0 mt-0.5" />
-              <span>
-                <strong>Dimensão obrigatória exata: 1080 x 1350 px</strong> (proporção 4:5 vertical). Tolerância zero de dimensão. Formatos: PNG, JPG ou WebP até 5 MB.
-              </span>
-            </div>
-
-            {/* Preview Mobile */}
-            {bannerMobileUrl ? (
-              <div className="space-y-3">
-                <div className="relative aspect-[4/5] max-w-[240px] rounded-xl overflow-hidden border border-surface bg-surface-2 shadow-xs">
-                  <Image
-                    src={bannerMobileUrl}
-                    alt="Banner Mobile"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => document.getElementById('input-banner-mobile')?.click()}
-                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg gap-1.5 w-full sm:w-auto"
-                  >
-                    <Upload className="h-3.5 w-3.5 text-brand" /> Trocar banner mobile
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => promptDeleteAsset('banner_mobile', 'Banner Mobile')}
-                    className="text-xs min-h-[40px] sm:min-h-[36px] rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 w-full sm:w-auto"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" /> Remover banner
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div
-                onDragOver={handleDragOver('banner_mobile')}
-                onDragLeave={handleDragLeave('banner_mobile')}
-                onDrop={handleDrop('banner_mobile')}
-                onClick={() => document.getElementById('input-banner-mobile')?.click()}
-                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-                  dragActive.banner_mobile
-                    ? 'border-brand bg-brand/5'
-                    : 'border-surface hover:border-brand/50 bg-surface-2/30'
-                }`}
-              >
-                <Smartphone className="h-6 w-6 text-brand mx-auto mb-2" />
-                <p className="text-xs font-semibold text-foreground">
-                  Arraste o banner mobile aqui ou clique para selecionar
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  Resolução exigida: <strong>1080 x 1350 px</strong> (máx. 5 MB)
-                </p>
-              </div>
-            )}
-
-            <input
-              id="input-banner-mobile"
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={handleFileInputChange('banner_mobile')}
-            />
-
-            {uploadProgress.banner_mobile !== null && (
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px] text-brand font-semibold">
-                  <span>Enviando banner mobile...</span>
-                  <span>{uploadProgress.banner_mobile}%</span>
-                </div>
-                <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-brand rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress.banner_mobile}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* ── FOTOS DE CLIENTES FELIZES (PROMPT 3) ── */}
+        <CustomerPhotosSection slug={slug} storeId={store.id} />
 
         {/* ── 4. Informações Básicas & Redes Sociais ── */}
         <Card className="border-surface bg-surface-1">

@@ -13,12 +13,16 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles, Lock, Edit3, Star, GripHorizontal } from 'lucide-react'
+import { Upload, X, Loader2, Car, Check, Hash, Eye, EyeOff, Sparkles, Lock, Edit3, Star, GripHorizontal, Calendar, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import imageCompression from 'browser-image-compression'
 import type { Vehicle } from '@/lib/supabase/types'
 import { generateSKU } from '@/lib/sku'
 import { generateWithGemini, buildVehicleDescriptionPrompt, getGeminiApiKey } from '@/lib/gemini'
+import { parsePrecoBR, formatPrecoBR } from '@/lib/pricing'
+import { getTempoEmEstoque, formatDateBR } from '@/lib/date-utils'
+import MarkAsSoldModal from './MarkAsSoldModal'
+import { cn } from '@/lib/utils'
 import {
   DndContext,
   closestCenter,
@@ -259,7 +263,8 @@ const vehicleSchema = z.object({
   model: z.string().min(1, 'Modelo é obrigatório'),
   year: z.coerce.number().min(1950, 'Ano inválido').max(2030, 'Ano inválido'),
   mileage: z.coerce.number().min(0, 'Quilometragem inválida'),
-  price: z.coerce.number().min(0, 'Preço inválido'),
+  price: z.coerce.number().min(0.01, 'Informe um preço válido maior que zero'),
+  old_price: z.coerce.number().optional().nullable(),
   fuel: z.string().optional().nullable(),
   transmission: z.string().optional().nullable(),
   color: z.string().optional().nullable(),
@@ -405,6 +410,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       year: vehicle.year,
       mileage: vehicle.mileage,
       price: vehicle.price,
+      old_price: vehicle.old_price ?? null,
       fuel: vehicle.fuel ?? 'Flex',
       transmission: vehicle.transmission ?? 'Automático',
       color: vehicle.color ?? '',
@@ -462,6 +468,94 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
     const val = e.target.value
     setCustomColor(val)
     setValue('color', val, { shouldValidate: true })
+  }
+
+  // Estado local do veículo e modal de venda (Prompt 5)
+  const [currentVehicle, setCurrentVehicle] = useState<Vehicle | undefined>(vehicle)
+  const [showSoldModal, setShowSoldModal] = useState(false)
+
+  // Preço flexível com tolerância a múltiplos formatos pt-BR (Prompt 6)
+  const [priceInput, setPriceInput] = useState<string>(() => {
+    if (vehicle?.price && Number(vehicle.price) > 0) {
+      return formatPrecoBR(Number(vehicle.price))
+    }
+    return ''
+  })
+  const [priceCustomError, setPriceCustomError] = useState<string | null>(null)
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value
+    setPriceInput(raw)
+    setPriceCustomError(null)
+    const parsed = parsePrecoBR(raw)
+    if (parsed !== null && parsed > 0) {
+      setValue('price', parsed, { shouldValidate: false })
+    }
+  }
+
+  const handlePriceBlur = () => {
+    const raw = priceInput.trim()
+    if (!raw) {
+      setPriceCustomError('Informe o preço do veículo')
+      setValue('price', 0, { shouldValidate: true })
+      return
+    }
+    const parsed = parsePrecoBR(raw)
+    if (parsed === null || parsed <= 0) {
+      setPriceCustomError('Preço inválido. Aceita: 42900, 42.900, 42.900,00 ou R$ 42.900,00')
+      setValue('price', 0, { shouldValidate: true })
+    } else {
+      setPriceCustomError(null)
+      setPriceInput(formatPrecoBR(parsed))
+      setValue('price', parsed, { shouldValidate: true })
+    }
+  }
+
+  // Preço anterior / De (opcional - Prompt 7)
+  const [oldPriceInput, setOldPriceInput] = useState<string>(() => {
+    if (vehicle?.old_price && Number(vehicle.old_price) > 0) {
+      return formatPrecoBR(Number(vehicle.old_price))
+    }
+    return ''
+  })
+  const [oldPriceCustomError, setOldPriceCustomError] = useState<string | null>(null)
+
+  const handleOldPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value
+    setOldPriceInput(raw)
+    setOldPriceCustomError(null)
+    if (!raw.trim()) {
+      setValue('old_price', null, { shouldValidate: true })
+      return
+    }
+    const parsed = parsePrecoBR(raw)
+    if (parsed !== null && parsed > 0) {
+      setValue('old_price', parsed, { shouldValidate: false })
+    }
+  }
+
+  const handleOldPriceBlur = () => {
+    const raw = oldPriceInput.trim()
+    if (!raw) {
+      setOldPriceCustomError(null)
+      setValue('old_price', null, { shouldValidate: true })
+      return
+    }
+    const parsed = parsePrecoBR(raw)
+    if (parsed === null || parsed <= 0) {
+      setOldPriceCustomError('Preço anterior inválido. Aceita: 45000, 45.000 ou R$ 45.000,00')
+      setValue('old_price', null, { shouldValidate: true })
+      return
+    }
+    const currentPrice = parsePrecoBR(priceInput) || watchedValues.price || 0
+    if (parsed <= currentPrice) {
+      setOldPriceCustomError('O preço anterior deve ser maior que o preço atual')
+      setValue('old_price', null, { shouldValidate: true })
+      return
+    }
+    setOldPriceCustomError(null)
+    setOldPriceInput(formatPrecoBR(parsed))
+    setValue('old_price', parsed, { shouldValidate: true })
   }
 
   // Monitoramento reativo das especificações do carro para desbloqueio da I.A
@@ -724,6 +818,28 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
       return
     }
 
+    const parsedPrice = parsePrecoBR(priceInput)
+    if (!parsedPrice || parsedPrice <= 0) {
+      setPriceCustomError('Informe um preço válido maior que zero (ex.: R$ 42.900,00)')
+      toast.error('Informe um preço válido maior que zero.')
+      return
+    }
+
+    let parsedOldPrice: number | null = null
+    if (oldPriceInput.trim()) {
+      parsedOldPrice = parsePrecoBR(oldPriceInput)
+      if (!parsedOldPrice || parsedOldPrice <= 0) {
+        setOldPriceCustomError('Preço anterior inválido.')
+        toast.error('Preço anterior inválido.')
+        return
+      }
+      if (parsedOldPrice <= parsedPrice) {
+        setOldPriceCustomError('O preço anterior deve ser maior que o preço atual')
+        toast.error('O preço anterior deve ser maior que o preço atual.')
+        return
+      }
+    }
+
     setSaving(true)
     const finalPhotos =
       photos.length > 0
@@ -745,11 +861,15 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
     const payload = {
       ...data,
+      price: parsedPrice,
+      old_price: parsedOldPrice,
       id: vehicleId,
       sku: sku || generateSKU(),
       fuel,
       transmission,
       is_active: isActive,
+      status: currentVehicle?.status || (vehicle as any)?.status || 'disponivel',
+      sold_at: currentVehicle?.sold_at || (vehicle as any)?.sold_at || null,
       badge: null,
       features: selectedFeatures,
       slug,
@@ -798,6 +918,54 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6 max-w-3xl pb-12">
+      {/* Informação de cadastro e ação de venda (Prompt 4 e 5) */}
+      {isEditing && (currentVehicle?.created_at || currentVehicle?.id) && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-surface-1 border border-surface text-xs text-muted-foreground shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center text-brand shrink-0">
+              <Calendar className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-bold text-foreground text-sm">Status do Veículo</p>
+                {currentVehicle?.status === 'vendido' ? (
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" /> Vendido {currentVehicle?.sold_at ? `em ${formatDateBR(currentVehicle.sold_at)}` : ''}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-surface-2 border border-surface text-foreground">
+                    Disponível no Estoque
+                  </span>
+                )}
+              </div>
+              {currentVehicle?.created_at && (
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Entrada em <strong className="text-foreground">{getTempoEmEstoque(currentVehicle.created_at).dateBr}</strong> ({getTempoEmEstoque(currentVehicle.created_at).relative})
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={currentVehicle?.status === 'vendido' ? 'outline' : 'default'}
+              size="sm"
+              onClick={() => setShowSoldModal(true)}
+              className={cn(
+                'h-10 rounded-xl text-xs font-bold gap-1.5 px-3.5',
+                currentVehicle?.status === 'vendido'
+                  ? 'border-surface text-emerald-400 hover:bg-emerald-950/20'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+              )}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              <span>{currentVehicle?.status === 'vendido' ? 'Editar Venda' : 'Marcar como Vendido'}</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* 1. Fotos */}
       <Card className="rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-xs">
         <CardContent className="pt-6">
@@ -1027,7 +1195,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="year" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Ano Modelo *</Label>
               <Input id="year" type="number" placeholder="2023" className="text-sm rounded-xl" {...register('year')} />
@@ -1038,14 +1206,70 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
               <Input id="mileage" type="number" placeholder="32000" className="text-sm rounded-xl" {...register('mileage')} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="price" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Preço (R$) *</Label>
-              <Input id="price" type="number" step="0.01" placeholder="129900" className="text-sm rounded-xl font-bold text-zinc-900 dark:text-zinc-50" {...register('price')} />
-              {errors.price && <p className="text-xs text-red-500">{errors.price.message}</p>}
-            </div>
-            <div className="space-y-1.5">
               <Label htmlFor="plate_end" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Final da Placa</Label>
               <Input id="plate_end" placeholder="Ex: 8" maxLength={2} className="text-sm rounded-xl" {...register('plate_end')} />
             </div>
+          </div>
+
+          {/* Seção de Preços (Atual e De/Por - Prompt 7) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-surface-1 border border-surface">
+            <div className="space-y-1.5">
+              <Label htmlFor="price" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Preço Atual (R$) *</Label>
+              <Input
+                id="price"
+                type="text"
+                inputMode="numeric"
+                placeholder="Ex.: 42.900,00"
+                value={priceInput}
+                onChange={handlePriceChange}
+                onBlur={handlePriceBlur}
+                className="text-sm rounded-xl font-bold text-zinc-900 dark:text-zinc-50"
+              />
+              {(priceCustomError || errors.price) && (
+                <p className="text-xs text-red-500">{priceCustomError || errors.price?.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="old_price" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Preço Anterior / De (R$)
+                </Label>
+                <span className="text-[10px] text-muted-foreground uppercase font-semibold">Opcional</span>
+              </div>
+              <Input
+                id="old_price"
+                type="text"
+                inputMode="numeric"
+                placeholder="Ex.: 45.900,00"
+                value={oldPriceInput}
+                onChange={handleOldPriceChange}
+                onBlur={handleOldPriceBlur}
+                className="text-sm rounded-xl font-medium text-zinc-900 dark:text-zinc-50"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Aparece riscado ao lado do preço atual. Deixe em branco para não exibir.
+              </p>
+              {(oldPriceCustomError || (errors as any).old_price) && (
+                <p className="text-xs text-red-500">{oldPriceCustomError || (errors as any).old_price?.message}</p>
+              )}
+            </div>
+
+            {/* Pré-visualização da técnica De / Por (sem porcentagem conforme solicitado) */}
+            {(() => {
+              const pNow = parsePrecoBR(priceInput)
+              const pOld = parsePrecoBR(oldPriceInput)
+              if (pNow && pNow > 0 && pOld && pOld > pNow) {
+                return (
+                  <div className="sm:col-span-2 flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-2/80 border border-surface text-xs">
+                    <span className="font-semibold text-muted-foreground">Pré-visualização vitrine:</span>
+                    <span className="line-through text-muted-foreground font-medium">{formatPrecoBR(pOld)}</span>
+                    <span className="font-black text-price text-sm">{formatPrecoBR(pNow)}</span>
+                  </div>
+                )
+              }
+              return null
+            })()}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
@@ -1281,7 +1505,7 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
                               🛣️ {Number(mileageVal).toLocaleString('pt-BR')} km
                             </span>
                             <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
-                              💰 R$ {Number(priceVal).toLocaleString('pt-BR')}
+                              💰 {formatPrecoBR(Number(priceVal))}
                             </span>
                             <span className="px-2 py-0.5 rounded bg-white dark:bg-zinc-950/90 border border-purple-200 dark:border-purple-800/50 text-purple-900 dark:text-purple-300 font-medium">
                               🎨 {colorVal}
@@ -1409,6 +1633,18 @@ export default function VehicleForm({ slug, storeId, vehicle }: Props) {
           Cancelar
         </Button>
       </div>
+
+      {/* Modal de Marcar como Vendido na edição (Prompt 5) */}
+      {showSoldModal && currentVehicle && (
+        <MarkAsSoldModal
+          vehicle={currentVehicle}
+          onClose={() => setShowSoldModal(false)}
+          onSuccess={(updated) => {
+            setCurrentVehicle(updated)
+            toast.success('Status do veículo atualizado!')
+          }}
+        />
+      )}
     </form>
   )
 }

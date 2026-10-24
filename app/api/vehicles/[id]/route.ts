@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { deleteVehicleWithPhotos } from '@/lib/vehicle-service'
 import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
+import { parseBrlCurrency } from '@/lib/normalization'
 
 export async function PUT(
   req: NextRequest,
@@ -19,7 +20,7 @@ export async function PUT(
     // 1. Busca veículo para checar tenant de origem (IDOR protection)
     const { data: existingVehicle } = await supabase
       .from('vehicles')
-      .select('id, store_id, stores(slug)')
+      .select('id, store_id, price, old_price, stores(slug)')
       .eq('id', id)
       .maybeSingle()
 
@@ -42,6 +43,7 @@ export async function PUT(
       year,
       mileage,
       price,
+      old_price,
       fuel,
       transmission,
       color,
@@ -54,6 +56,8 @@ export async function PUT(
       fotos_urls,
       foto_capa_url,
       is_active,
+      status,
+      sold_at,
       sku,
     } = body
 
@@ -63,7 +67,22 @@ export async function PUT(
     if (model !== undefined) updatePayload.model = model
     if (year !== undefined) updatePayload.year = parseInt(String(year), 10)
     if (mileage !== undefined) updatePayload.mileage = parseInt(String(mileage || 0), 10)
-    if (price !== undefined) updatePayload.price = parseFloat(String(price || 0))
+    if (price !== undefined) updatePayload.price = parseBrlCurrency(price)
+    if (old_price !== undefined) {
+      if (!old_price || String(old_price).trim() === '') {
+        updatePayload.old_price = null
+      } else {
+        const parsedOldPrice = parseBrlCurrency(old_price)
+        const finalPrice = updatePayload.price !== undefined ? updatePayload.price : ((existingVehicle as any)?.price || 0)
+        if (parsedOldPrice <= finalPrice) {
+          return NextResponse.json(
+            { error: 'O preço anterior deve ser maior que o preço atual' },
+            { status: 400 }
+          )
+        }
+        updatePayload.old_price = parsedOldPrice
+      }
+    }
     if (fuel !== undefined) updatePayload.fuel = fuel
     if (transmission !== undefined) updatePayload.transmission = transmission
     if (color !== undefined) updatePayload.color = color
@@ -72,6 +91,22 @@ export async function PUT(
     if (badge !== undefined) updatePayload.badge = badge
     if (description !== undefined) updatePayload.description = description
     if (is_active !== undefined) updatePayload.is_active = is_active
+    if (status !== undefined) {
+      const validStatus = status === 'vendido' || status === 'reservado' ? status : 'disponivel'
+      updatePayload.status = validStatus
+      if (validStatus === 'vendido') {
+        updatePayload.sold_at = sold_at ? new Date(sold_at).toISOString() : new Date().toISOString()
+      } else {
+        updatePayload.sold_at = null
+      }
+    } else if (sold_at !== undefined) {
+      if (sold_at) {
+        updatePayload.sold_at = new Date(sold_at).toISOString()
+        updatePayload.status = 'vendido'
+      } else {
+        updatePayload.sold_at = null
+      }
+    }
     if (sku !== undefined) updatePayload.sku = sku
 
     if (images !== undefined || fotos_urls !== undefined) {

@@ -32,6 +32,10 @@ export type Database = {
           contract_rep_nome?: string | null
           contract_rep_cpf?: string | null
           contract_signature_url?: string | null
+          welcome_video_url?: string | null
+          welcome_video_public_id?: string | null
+          welcome_video_poster_url?: string | null
+          welcome_video_enabled?: boolean | null
           owner_id: string
           created_at: string
         }
@@ -113,6 +117,7 @@ export type Database = {
           year: number
           mileage: number
           price: number
+          old_price?: number | null
           fuel?: string | null
           transmission?: string | null
           color?: string | null
@@ -125,6 +130,8 @@ export type Database = {
           fotos_urls?: string[] | null
           foto_capa_url?: string | null
           is_active: boolean
+          status?: 'disponivel' | 'vendido' | 'reservado'
+          sold_at?: string | null
           created_at: string
         }
         Insert: {
@@ -137,6 +144,7 @@ export type Database = {
           year: number
           mileage?: number
           price: number
+          old_price?: number | null
           fuel?: string | null
           transmission?: string | null
           color?: string | null
@@ -149,6 +157,8 @@ export type Database = {
           fotos_urls?: string[] | null
           foto_capa_url?: string | null
           is_active?: boolean
+          status?: 'disponivel' | 'vendido' | 'reservado'
+          sold_at?: string | null
           created_at?: string
         }
         Update: {
@@ -161,6 +171,7 @@ export type Database = {
           year?: number
           mileage?: number
           price?: number
+          old_price?: number | null
           fuel?: string | null
           transmission?: string | null
           color?: string | null
@@ -173,6 +184,8 @@ export type Database = {
           fotos_urls?: string[] | null
           foto_capa_url?: string | null
           is_active?: boolean
+          status?: 'disponivel' | 'vendido' | 'reservado'
+          sold_at?: string | null
           created_at?: string
         }
       }
@@ -464,3 +477,27 @@ export type ContractSigner = Database['public']['Tables']['contract_signers']['R
 export type ContractEvent = Database['public']['Tables']['contract_events']['Row']
 export type ContractTemplate = Database['public']['Tables']['contract_templates']['Row']
 export type ContractCounter = Database['public']['Tables']['contract_counters']['Row']
+export type TenantBanner = {
+  id: string
+  tenant_id: string
+  device: 'desktop' | 'mobile'
+  media_type: 'image' | 'video'
+  url: string
+  public_id: string | null
+  poster_url: string | null
+  link_url: string | null
+  sort_order: number
+  is_active: boolean
+  created_at?: string
+}
+
+export type TenantCustomerPhoto = {
+  id: string
+  tenant_id: string
+  url: string
+  public_id: string | null
+  caption: string | null
+  sort_order: number
+  is_active: boolean
+  created_at?: string
+}

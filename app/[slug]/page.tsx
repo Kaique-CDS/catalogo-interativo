@@ -150,6 +150,8 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
 
   let store: Store | null = null
   let vehicles: Vehicle[] | null = null
+  let banners: any[] | null = null
+  let customerPhotos: any[] | null = null
 
   try {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
@@ -159,12 +161,30 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
 
       if (storeData) {
         store = await getStoreWithContacts(slug)
-        const { data: vData } = await supabase
-          .from('vehicles').select('*')
-          .eq('store_id', storeData.id).eq('is_active', true)
-          .order('created_at', { ascending: false })
+        const [vRes, bRes, cRes] = await Promise.all([
+          supabase
+            .from('vehicles').select('*')
+            .eq('store_id', storeData.id)
+            .eq('is_active', true)
+            .neq('status', 'vendido')
+            .order('created_at', { ascending: false }),
+          supabase
+            .from('tenant_banners').select('*')
+            .eq('tenant_id', storeData.id)
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: true }),
+          supabase
+            .from('tenant_customer_photos').select('*')
+            .eq('tenant_id', storeData.id)
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false }),
+        ])
         
-        vehicles = vData || []
+        vehicles = vRes.data || []
+        banners = bRes.data || []
+        customerPhotos = cRes.data || []
       }
     }
   } catch (err) {
@@ -180,6 +200,8 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
       searchParams={sParams} 
       initialStore={store} 
       initialVehicles={vehicles} 
+      initialBanners={banners}
+      initialCustomerPhotos={customerPhotos}
       DEMO_STORE={demoStore} 
     />
   )

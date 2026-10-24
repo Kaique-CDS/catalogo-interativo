@@ -19,6 +19,90 @@ exports.currencyToCents = currencyToCents;
 exports.centsToCurrency = centsToCurrency;
 exports.normalizeDateToSaoPaulo = normalizeDateToSaoPaulo;
 exports.formatDateBr = formatDateBr;
+exports.parsePrecoBR = parsePrecoBR;
+exports.formatPrecoBR = formatPrecoBR;
+exports.isValidPrecoBR = isValidPrecoBR;
+
+const MAX_PRECO_PERMITIDO = 999999999;
+
+function parsePrecoBR(input) {
+  if (input === undefined || input === null) return null;
+  if (typeof input === 'number') {
+    if (isNaN(input) || input <= 0 || input > MAX_PRECO_PERMITIDO) return null;
+    return Math.round(input * 100) / 100;
+  }
+  if (typeof input !== 'string') return null;
+  const raw = input.trim();
+  if (!raw) return null;
+
+  const clean = raw.replace(/^R\$\s*/i, '').replace(/\s+/g, '');
+  if (!clean) return null;
+
+  if (/[^0-9.,]/.test(clean)) return null;
+  if ((clean.match(/,/g) || []).length > 1) return null;
+
+  const lastDot = clean.lastIndexOf('.');
+  const lastComma = clean.lastIndexOf(',');
+  const lastSep = Math.max(lastDot, lastComma);
+
+  if (lastSep === -1) {
+    const num = Number(clean);
+    if (isNaN(num) || num <= 0 || num > MAX_PRECO_PERMITIDO) return null;
+    return num;
+  }
+
+  const charsAfter = clean.slice(lastSep + 1);
+  const sepChar = clean[lastSep];
+
+  if (charsAfter.length === 3 && sepChar === '.') {
+    const parts = clean.split('.');
+    for (let i = 1; i < parts.length; i++) {
+      if (parts[i].length !== 3) return null;
+    }
+    const num = Number(clean.replace(/\./g, ''));
+    if (isNaN(num) || num <= 0 || num > MAX_PRECO_PERMITIDO) return null;
+    return num;
+  }
+
+  if (charsAfter.length === 1 || charsAfter.length === 2) {
+    const intPartRaw = clean.slice(0, lastSep);
+    if (sepChar === ',') {
+      const dotParts = intPartRaw.split('.');
+      if (dotParts.length > 1) {
+        for (let i = 1; i < dotParts.length; i++) {
+          if (dotParts[i].length !== 3) return null;
+        }
+      }
+    } else {
+      if (intPartRaw.includes('.') || intPartRaw.includes(',')) return null;
+    }
+
+    const intPart = intPartRaw.replace(/[.,]/g, '');
+    if (!intPart) return null;
+
+    const num = Number(`${intPart}.${charsAfter}`);
+    if (isNaN(num) || num <= 0 || num > MAX_PRECO_PERMITIDO) return null;
+    return Math.round(num * 100) / 100;
+  }
+
+  return null;
+}
+
+function formatPrecoBR(value) {
+  if (value === undefined || value === null || isNaN(value)) return '';
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+    .format(value)
+    .replace(/\u00A0/g, ' ');
+}
+
+function isValidPrecoBR(input) {
+  return parsePrecoBR(input) !== null;
+}
 /**
  * Remove qualquer caractere que não seja dígito numérico (0-9).
  * Ideal para CPF, CNPJ, telefones, CEP e Renavam.

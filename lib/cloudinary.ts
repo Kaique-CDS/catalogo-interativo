@@ -30,3 +30,26 @@ export function isCloudinaryConfigured(): boolean {
     process.env.CLOUDINARY_API_SECRET?.trim()
   )
 }
+
+/**
+ * Remove com segurança um asset do Cloudinary por public_id
+ */
+export async function deleteCloudinaryAsset(
+  publicId: string,
+  resourceType: 'image' | 'video' = 'image'
+): Promise<boolean> {
+  const c = getCloudinary()
+  if (!c || !publicId) return false
+  try {
+    const res = await c.uploader.destroy(publicId, { resource_type: resourceType })
+    return res.result === 'ok' || res.result === 'not found'
+  } catch (err) {
+    console.warn(`Erro ao excluir ${resourceType} do Cloudinary (${publicId}):`, err)
+    return false
+  }
+}
+
+// Re-exporta utilitários client-safe
+export { normalizeCustomerPhotoUrl, generateVideoPosterUrl } from './cloudinary-utils'
+
+

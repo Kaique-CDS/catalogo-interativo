@@ -62,10 +62,17 @@ export default function VehicleCard({ vehicle, store, onSelect, onInterest }: Pr
           </p>
         </div>
 
-        {/* Preço do Veículo em destaque */}
-        <div className="flex items-baseline">
+        {/* Preço do Veículo em destaque (com suporte a De / Por) */}
+        <div className="flex flex-col justify-end min-h-[46px]">
+          {vehicle.old_price && vehicle.old_price > (vehicle.price || 0) && (
+            <span className="text-xs text-muted-foreground line-through font-medium mb-1 block">
+              <span className="sr-only">Preço anterior: </span>
+              {formatCurrency(vehicle.old_price)}
+            </span>
+          )}
           {vehicle.price && vehicle.price > 0 ? (
             <span className="font-heading text-price text-2xl sm:text-[26px] tracking-tight leading-none">
+              <span className="sr-only">Preço atual: </span>
               {formatCurrency(vehicle.price)}
             </span>
           ) : (

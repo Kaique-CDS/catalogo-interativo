@@ -5,6 +5,7 @@ import Image from 'next/image'
 import StoreHeader from '@/components/storefront/StoreHeader'
 import VehicleGrid from '@/components/storefront/VehicleGrid'
 import FloatingWhatsApp from '@/components/storefront/FloatingWhatsApp'
+import FloatingWelcomeVideo from '@/components/storefront/FloatingWelcomeVideo'
 import ClosedScreen from '@/components/storefront/ClosedScreen'
 import CookieBanner from '@/components/storefront/CookieBanner'
 import { isBusinessOpen, getNextOpenInfo, CONCESSIONARIA_HOURS } from '@/lib/businessHours'
@@ -13,6 +14,7 @@ import type { Store, Vehicle } from '@/lib/supabase/types'
 import { ShieldCheck, BadgeCheck, BadgePercent, Car, Clock, Phone as PhoneIcon, MessageCircle, MapPin } from 'lucide-react'
 import BrandBanner from '@/components/storefront/BrandBanner'
 import LocationSection from '@/components/storefront/LocationSection'
+import CustomerPhotosSection from '@/components/storefront/CustomerPhotosSection'
 import Footer from '@/components/storefront/Footer'
 import { getClientTrafficInfo } from '@/lib/analytics-source'
 import { getTenantBrand } from '@/lib/tenants'
@@ -23,10 +25,12 @@ interface StorefrontClientProps {
   searchParams: { q?: string; brand?: string; minPrice?: string; maxPrice?: string; year?: string; v?: string; veiculo?: string }
   initialStore: Store | null
   initialVehicles: Vehicle[] | null
+  initialBanners?: any[] | null
+  initialCustomerPhotos?: any[] | null
   DEMO_STORE: Store
 }
 
-export default function StorefrontClient({ slug, searchParams, initialStore, initialVehicles, DEMO_STORE }: StorefrontClientProps) {
+export default function StorefrontClient({ slug, searchParams, initialStore, initialVehicles, initialBanners, initialCustomerPhotos, DEMO_STORE }: StorefrontClientProps) {
   const brand = getTenantBrand(slug)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [store, setStore] = useState<Store>(initialStore || { ...DEMO_STORE, slug })
@@ -64,13 +68,13 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
   }, [slug, store.id])
 
   useEffect(() => {
-    let currentVehicles = initialVehicles || []
+    let currentVehicles = (initialVehicles || []).filter(v => v.status !== 'vendido')
     
     // Fallback to local storage only for tenants configured with demo vehicles (milhaticar)
     if (initialVehicles === null) {
       setIsDemoMode(true)
       currentVehicles = brand.allowLocalDemoVehicles
-        ? getVehicles().filter(v => v.is_active)
+        ? getVehicles().filter(v => v.is_active && v.status !== 'vendido')
         : []
     }
 
@@ -131,11 +135,12 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
 
       <StoreHeader store={store} />
 
-      {/* ── Brand Banner ── */}
-      {(store.banner_url || store.banner_mobile_url || brand.banners.desktop || brand.banners.mobile) && (
+      {/* ── Brand Banner (Carrossel Imagens / Vídeos) ── */}
+      {(initialBanners?.length || store.banner_url || store.banner_mobile_url || brand.banners.desktop || brand.banners.mobile) && (
         <section className="container mx-auto px-3 sm:px-4 mt-4 sm:mt-6 max-w-7xl">
           <BrandBanner
             altText={`Bem-vindo à ${store.name}`}
+            banners={initialBanners || undefined}
             desktopBanner={store.banner_url || brand.banners.desktop || null}
             mobileBanner={store.banner_mobile_url || brand.banners.mobile || null}
           />
@@ -153,6 +158,13 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
         />
       </main>
 
+      {/* ── Clientes que levaram o carro pra casa (Prompt 3: entre listagem de carros e mapa/contato) ── */}
+      <CustomerPhotosSection
+        photos={initialCustomerPhotos}
+        store={store}
+        slug={slug}
+      />
+
       {/* ── Localização e Bloco de Contato ── */}
       <div className="container mx-auto px-3 sm:px-4 pb-12 max-w-7xl">
         <LocationSection store={store} />
@@ -168,6 +180,16 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
         whatsapp={whatsappInfo.number}
         customMessage={`Olá! Estou no catálogo *${store.name}* e gostaria de informações.`}
       />
+
+      {/* ── Vídeo Institucional Flutuante (Prompt 2) ── */}
+      <FloatingWelcomeVideo
+        slug={slug}
+        storeName={store.name}
+        videoUrl={store.welcome_video_url}
+        posterUrl={store.welcome_video_poster_url}
+        enabled={store.welcome_video_enabled}
+      />
+
       <CookieBanner />
     </div>
   )

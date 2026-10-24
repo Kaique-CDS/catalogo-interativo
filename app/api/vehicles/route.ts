@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       year,
       mileage,
       price,
+      old_price,
       fuel,
       transmission,
       color,
@@ -31,6 +32,8 @@ export async function POST(req: NextRequest) {
       fotos_urls,
       foto_capa_url,
       is_active,
+      status,
+      sold_at,
       sku,
     } = body
 
@@ -67,6 +70,18 @@ export async function POST(req: NextRequest) {
         }))
       : orderedImages.map((url, idx) => ({ url, public_id: null, is_capa: idx === 0 }))
 
+    const parsedPrice = parseBrlCurrency(price)
+    let parsedOldPrice: number | null = null
+    if (old_price !== undefined && old_price !== null && String(old_price).trim() !== '') {
+      parsedOldPrice = parseBrlCurrency(old_price)
+      if (parsedOldPrice <= parsedPrice) {
+        return NextResponse.json(
+          { error: 'O preço anterior deve ser maior que o preço atual' },
+          { status: 400 }
+        )
+      }
+    }
+
     const baseRow: Record<string, any> = {
       store_id: finalStoreId,
       title: normalizeText(title),
@@ -74,7 +89,8 @@ export async function POST(req: NextRequest) {
       model: normalizeText(model),
       year: parseInt(String(year), 10),
       mileage: parseInt(String(mileage || 0), 10),
-      price: parseBrlCurrency(price),
+      price: parsedPrice,
+      old_price: parsedOldPrice,
       fuel: fuel ? normalizeText(fuel) : 'Flex',
       transmission: transmission ? normalizeText(transmission) : 'Manual',
       color: color ? normalizeText(color) : '',
@@ -84,6 +100,8 @@ export async function POST(req: NextRequest) {
       description: description ? normalizeText(description) : '',
       images: orderedImages,
       is_active: is_active ?? true,
+      status: status === 'vendido' || status === 'reservado' ? status : 'disponivel',
+      sold_at: status === 'vendido' ? (sold_at ? new Date(sold_at).toISOString() : new Date().toISOString()) : null,
       sku: sku ? normalizeText(sku) : `MHC-${Math.floor(1000 + Math.random() * 9000)}`,
     }
 

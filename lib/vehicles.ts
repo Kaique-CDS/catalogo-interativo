@@ -32,6 +32,7 @@ export const DEMO_VEHICLES: Vehicle[] = [
     year: 2023,
     mileage: 19800,
     price: 139900,
+    old_price: 147900,
     fuel: 'Flex',
     transmission: 'Automático Direct Shift',
     color: 'Prata Metálico',

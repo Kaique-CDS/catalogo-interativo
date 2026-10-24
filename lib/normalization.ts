@@ -49,6 +49,9 @@ export function normalizeText(val?: string | null): string {
     .replace(/javascript:/gi, '')
 }
 
+import { parsePrecoBR, formatPrecoBR, isValidPrecoBR } from './pricing'
+export { parsePrecoBR, formatPrecoBR, isValidPrecoBR }
+
 /**
  * Converte qualquer representação monetária brasileira (pt-BR) ou numérica para número float seguro
  * com precisão em centavos (2 casas decimais).
@@ -67,51 +70,14 @@ export function parseBrlCurrency(value?: string | number | null): number {
     return isNaN(value) ? 0 : Math.round(value * 100) / 100
   }
 
-  const clean = String(value)
-    .trim()
-    .replace(/^R\$\s*/i, '')
-    .replace(/\s+/g, '')
+  const parsed = parsePrecoBR(value)
+  if (parsed !== null) return parsed
 
-  if (!clean) return 0
+  // Fallback para caso seja 0 legítimo
+  const clean = String(value).trim().replace(/^R\$\s*/i, '').replace(/\s+/g, '')
+  if (clean === '0' || clean === '0,00' || clean === '0.00') return 0
 
-  // Caso 1: Tem ponto e vírgula (ex: 139.900,50 ou 1,234.56)
-  if (clean.includes('.') && clean.includes(',')) {
-    const lastDot = clean.lastIndexOf('.')
-    const lastComma = clean.lastIndexOf(',')
-    if (lastComma > lastDot) {
-      // Padrão pt-BR: 139.900,50
-      const normalized = clean.replace(/\./g, '').replace(',', '.')
-      const num = parseFloat(normalized)
-      return isNaN(num) ? 0 : Math.round(num * 100) / 100
-    } else {
-      // Padrão US: 139,900.50
-      const normalized = clean.replace(/,/g, '')
-      const num = parseFloat(normalized)
-      return isNaN(num) ? 0 : Math.round(num * 100) / 100
-    }
-  }
-
-  // Caso 2: Apenas vírgula (ex: 139900,50 ou 139,50)
-  if (clean.includes(',')) {
-    const num = parseFloat(clean.replace(',', '.'))
-    return isNaN(num) ? 0 : Math.round(num * 100) / 100
-  }
-
-  // Caso 3: Apenas ponto
-  if (clean.includes('.')) {
-    // Se for formato de milhar pt-BR puro (ex: 139.900 ou 1.500)
-    if (/^\d{1,3}(\.\d{3})+$/.test(clean)) {
-      const num = parseFloat(clean.replace(/\./g, ''))
-      return isNaN(num) ? 0 : num
-    }
-    // Caso padrão decimal: 139900.50
-    const num = parseFloat(clean)
-    return isNaN(num) ? 0 : Math.round(num * 100) / 100
-  }
-
-  // Caso 4: Inteiro puro
-  const num = parseFloat(clean)
-  return isNaN(num) ? 0 : num
+  return 0
 }
 
 /**
