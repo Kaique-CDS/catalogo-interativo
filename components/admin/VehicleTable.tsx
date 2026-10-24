@@ -18,6 +18,8 @@ import {
   Clock,
   CheckCircle2,
   ArrowUpDown,
+  FileSignature,
+  FileText,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,12 +34,14 @@ import type { Vehicle } from '@/lib/supabase/types'
 interface Props {
   vehicles: Vehicle[]
   slug: string
+  contractsEnabled?: boolean
+  linkedContracts?: Record<string, { id: string; number: number }>
 }
 
 type ViewMode = 'completo' | 'simples'
 type SortOrder = 'recent' | 'oldest' | 'price_asc' | 'price_desc' | 'name_asc'
 
-export default function VehicleTable({ vehicles: initialVehicles, slug }: Props) {
+export default function VehicleTable({ vehicles: initialVehicles, slug, contractsEnabled = false, linkedContracts = {} }: Props) {
   const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles)
   const [viewMode, setViewMode] = useState<ViewMode>('completo')
   const [sortOrder, setSortOrder] = useState<SortOrder>('recent')
@@ -255,19 +259,50 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                   <p className="text-xs font-black text-price mt-0.5">{renderPrice(v.price)}</p>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  {/* Botão Marcar como Vendido (Prompt 5) */}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    title={isSold ? 'Editar venda' : 'Marcar como vendido'}
-                    className={cn(
-                      'h-10 w-10 rounded-xl',
-                      isSold ? 'text-emerald-400 hover:bg-emerald-950/30' : 'text-muted-foreground hover:text-emerald-400 hover:bg-surface-3'
-                    )}
-                    onClick={() => setVehicleForSaleModal(v)}
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                  </Button>
+                  {/* Botão Vender / gerar contrato (Prompt 8) */}
+                  {contractsEnabled && !isSold && (
+                    <Link href={`/${slug}/admin/contratos/novo?vehicle_id=${v.id}`}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title="Vender / gerar contrato"
+                        aria-label="Vender / gerar contrato"
+                        className="h-10 w-10 rounded-xl text-brand hover:text-brand hover:bg-brand/10"
+                      >
+                        <FileSignature className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
+                  {/* Atalho para contrato vinculado se vendido (Prompt 8) */}
+                  {isSold && linkedContracts[v.id] && (
+                    <Link href={`/${slug}/admin/contratos?q=${linkedContracts[v.id].number}`}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title={`Abrir contrato Nº ${linkedContracts[v.id].number}`}
+                        aria-label={`Abrir contrato Nº ${linkedContracts[v.id].number}`}
+                        className="h-10 w-10 rounded-xl text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
+                  {/* Fallback se contratos não estiverem ativos */}
+                  {!contractsEnabled && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title={isSold ? 'Editar venda' : 'Marcar como vendido'}
+                      aria-label={isSold ? 'Editar venda' : 'Marcar como vendido'}
+                      className={cn(
+                        'h-10 w-10 rounded-xl',
+                        isSold ? 'text-emerald-400 hover:bg-emerald-950/30' : 'text-muted-foreground hover:text-emerald-400 hover:bg-surface-3'
+                      )}
+                      onClick={() => setVehicleForSaleModal(v)}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
                     size="icon"
                     variant="ghost"
@@ -323,9 +358,22 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                         )}
                         <div className="flex items-center gap-1.5">
                           {isSold && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                              Vendido
-                            </span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                Vendido
+                              </span>
+                              {linkedContracts[v.id] && (
+                                <Link
+                                  href={`/${slug}/admin/contratos?q=${linkedContracts[v.id].number}`}
+                                  className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-brand/10 text-brand border border-brand/20 inline-flex items-center gap-1 hover:underline"
+                                  title={`Abrir contrato Nº ${linkedContracts[v.id].number}`}
+                                  aria-label={`Abrir contrato Nº ${linkedContracts[v.id].number}`}
+                                >
+                                  <FileText className="h-2.5 w-2.5" />
+                                  #${linkedContracts[v.id].number}
+                                </Link>
+                              )}
+                            </div>
                           )}
                           <span
                             className={cn(
@@ -388,20 +436,42 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                       )}
                     </button>
 
-                    {/* Botão Vender / Vendido (Prompt 5) */}
-                    <button
-                      type="button"
-                      onClick={() => setVehicleForSaleModal(v)}
-                      className={cn(
-                        'h-11 rounded-xl active:scale-[0.98] text-[11px] font-semibold flex items-center justify-center gap-1 transition-all',
-                        isSold
-                          ? 'bg-emerald-950/30 border border-emerald-900/40 text-emerald-400'
-                          : 'bg-surface-2 hover:bg-surface-3 text-muted-foreground hover:text-emerald-400'
-                      )}
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span>{isSold ? 'Vendido' : 'Vender'}</span>
-                    </button>
+                    {/* Botão Vender / Contrato (Prompt 8) */}
+                    {contractsEnabled && !isSold ? (
+                      <Link
+                        href={`/${slug}/admin/contratos/novo?vehicle_id=${v.id}`}
+                        title="Vender / gerar contrato"
+                        aria-label="Vender / gerar contrato"
+                        className="h-11 rounded-xl bg-brand/10 hover:bg-brand/20 active:scale-[0.98] text-[11px] font-semibold text-brand flex items-center justify-center gap-1 transition-all"
+                      >
+                        <FileSignature className="h-3.5 w-3.5" />
+                        <span>Vender</span>
+                      </Link>
+                    ) : isSold && linkedContracts[v.id] ? (
+                      <Link
+                        href={`/${slug}/admin/contratos?q=${linkedContracts[v.id].number}`}
+                        title={`Abrir contrato Nº ${linkedContracts[v.id].number}`}
+                        aria-label={`Abrir contrato Nº ${linkedContracts[v.id].number}`}
+                        className="h-11 rounded-xl bg-emerald-950/30 border border-emerald-900/40 active:scale-[0.98] text-[11px] font-semibold text-emerald-400 flex items-center justify-center gap-1 transition-all"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>Contrato</span>
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setVehicleForSaleModal(v)}
+                        className={cn(
+                          'h-11 rounded-xl active:scale-[0.98] text-[11px] font-semibold flex items-center justify-center gap-1 transition-all',
+                          isSold
+                            ? 'bg-emerald-950/30 border border-emerald-900/40 text-emerald-400'
+                            : 'bg-surface-2 hover:bg-surface-3 text-muted-foreground hover:text-emerald-400'
+                        )}
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span>{isSold ? 'Vendido' : 'Vender'}</span>
+                      </button>
+                    )}
 
                     <Link
                       href={`/${slug}/admin/estoque/${v.id}`}
@@ -490,9 +560,21 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
                       <TableCell>
                         <div className="flex flex-col gap-1 items-start">
                           {isSold ? (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1">
-                              <CheckCircle2 className="h-3 w-3" /> Vendido
-                            </span>
+                            <>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1">
+                                <CheckCircle2 className="h-3 w-3" /> Vendido
+                              </span>
+                              {linkedContracts[vehicle.id] && (
+                                <Link
+                                  href={`/${slug}/admin/contratos?q=${linkedContracts[vehicle.id].number}`}
+                                  className="inline-flex items-center gap-1 text-[10px] text-brand hover:underline font-semibold"
+                                  title={`Abrir contrato Nº ${linkedContracts[vehicle.id].number}`}
+                                  aria-label={`Abrir contrato Nº ${linkedContracts[vehicle.id].number}`}
+                                >
+                                  <FileText className="h-3 w-3" /> Contrato Nº ${linkedContracts[vehicle.id].number}
+                                </Link>
+                              )}
+                            </>
                           ) : (
                             <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-semibold border inline-flex', vehicle.is_active ? 'badge-status-published' : 'badge-status-hidden')}>
                               {vehicle.is_active ? 'Publicado' : 'Oculto'}
@@ -503,19 +585,52 @@ export default function VehicleTable({ vehicles: initialVehicles, slug }: Props)
 
                       <TableCell>
                         <div className="flex items-center justify-end gap-1">
-                          {/* Botão Marcar como Vendido (Prompt 5) */}
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            title={isSold ? 'Editar data da venda' : 'Marcar como vendido'}
-                            className={cn(
-                              'h-8 w-8',
-                              isSold ? 'text-emerald-400 hover:bg-emerald-950/30' : 'text-muted-foreground hover:text-emerald-400 hover:bg-surface-3'
-                            )}
-                            onClick={() => setVehicleForSaleModal(vehicle)}
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                          </Button>
+                          {/* Botão Vender / gerar contrato (Prompt 8) */}
+                          {contractsEnabled && !isSold && (
+                            <Link href={`/${slug}/admin/contratos/novo?vehicle_id=${vehicle.id}`}>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                title="Vender / gerar contrato"
+                                aria-label="Vender / gerar contrato"
+                                className="h-8 w-8 text-brand hover:text-brand hover:bg-brand/10"
+                              >
+                                <FileSignature className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          )}
+
+                          {/* Se veículo vendido e tem contrato: atalho direto na coluna ações (Prompt 8) */}
+                          {isSold && linkedContracts[vehicle.id] && (
+                            <Link href={`/${slug}/admin/contratos?q=${linkedContracts[vehicle.id].number}`}>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                title={`Abrir contrato Nº ${linkedContracts[vehicle.id].number}`}
+                                aria-label={`Abrir contrato Nº ${linkedContracts[vehicle.id].number}`}
+                                className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30"
+                              >
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          )}
+
+                          {/* Se contratos desativado: fallback modal rápido */}
+                          {!contractsEnabled && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              title={isSold ? 'Editar data da venda' : 'Marcar como vendido'}
+                              aria-label={isSold ? 'Editar data da venda' : 'Marcar como vendido'}
+                              className={cn(
+                                'h-8 w-8',
+                                isSold ? 'text-emerald-400 hover:bg-emerald-950/30' : 'text-muted-foreground hover:text-emerald-400 hover:bg-surface-3'
+                              )}
+                              onClick={() => setVehicleForSaleModal(vehicle)}
+                            >
+                              <CheckCircle2 className="h-4 w-4" />
+                            </Button>
+                          )}
 
                           <Button
                             size="icon"

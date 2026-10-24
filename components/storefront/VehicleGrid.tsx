@@ -19,10 +19,10 @@ interface Props {
 export default function VehicleGrid({ vehicles, store, brands, years, searchParams }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [modalStep, setModalStep] = useState<'detail' | 'interest'>('detail')
-  const [visibleCount, setVisibleCount] = useState(4)
+  const [visibleCount, setVisibleCount] = useState(6)
 
   useEffect(() => {
-    setVisibleCount(4)
+    setVisibleCount(6)
   }, [searchParams])
 
   // Auto-open vehicle modal if ?v=ID or ?veiculo=ID is present in URL
@@ -96,7 +96,8 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+          {/* Grid de Veículos: 1 coluna no mobile, 2 colunas no tablet, 3 colunas no desktop com gap generoso */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7 lg:gap-8">
             {vehicles.slice(0, visibleCount).map((vehicle) => (
               <VehicleCard
                 key={vehicle.id}
@@ -109,11 +110,11 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
           </div>
 
           {vehicles.length > visibleCount && (
-            <div className="mt-8 mb-4 text-center">
+            <div className="mt-10 mb-4 text-center">
               <Button
-                onClick={() => setVisibleCount((prev) => prev + 4)}
+                onClick={() => setVisibleCount((prev) => prev + 6)}
                 variant="outline"
-                className="h-11 px-6 rounded-full border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs sm:text-sm font-bold gap-2 shadow-sm transition-all hover:border-brand"
+                className="h-12 px-7 rounded-full border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs sm:text-sm font-bold gap-2 shadow-sm transition-all hover:border-brand"
               >
                 <span>Ver mais veículos</span>
                 <ChevronDown className="h-4 w-4 text-brand" />

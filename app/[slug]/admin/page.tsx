@@ -108,6 +108,8 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
 
   const totalVehicles = vehicles.length
   const activeVehicles = vehicles.filter(v => v.is_active).length
+  const inactiveVehicles = totalVehicles - activeVehicles
+  const totalPhotos = vehicles.reduce((sum, v) => sum + (v.images?.length || 0), 0)
   
   // Alertas reais
   const noPhotos = vehicles.filter(v => !v.images || v.images.length === 0)
@@ -621,40 +623,76 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
       </div>
 
       {/* Operacional & Estoque Geral */}
-      <h2 className="text-xs sm:text-sm font-bold text-heading pt-2 border-t border-surface uppercase tracking-wider">
-        Visão Geral do Estoque &amp; Alertas
-      </h2>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs">
-          <div className="h-8 w-8 rounded-lg bg-surface-3 text-brand flex items-center justify-center mb-2"><Car className="h-4 w-4" /></div>
-          <p className="font-heading text-2xl sm:text-3xl text-heading tracking-wide">{totalVehicles}/50</p>
-          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-1">Carros Cadastrados</p>
-        </div>
-        <div className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs">
-          <div className="h-8 w-8 rounded-lg bg-surface-3 text-brand flex items-center justify-center mb-2"><CheckCircle2 className="h-4 w-4" /></div>
-          <p className="font-heading text-2xl sm:text-3xl text-heading tracking-wide">{activeVehicles}</p>
-          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-1">Publicados na Vitrine</p>
-        </div>
-        <div className="bg-surface-1 border border-surface rounded-xl p-4 shadow-xs col-span-2 flex flex-col justify-center">
-          {noPhotos.length === 0 && noDescription.length === 0 ? (
-            <div className="flex items-center gap-2 text-foreground text-sm font-semibold bg-surface-2 border border-surface/50 p-3 rounded-xl">
-              <CheckCircle2 className="h-5 w-5 text-brand shrink-0" /> Vitrine 100% Otimizada!
+      <div className="space-y-3 pt-2 border-t border-surface">
+        <h2 className="text-xs sm:text-sm font-bold text-heading uppercase tracking-wider">
+          Visão Geral do Estoque
+        </h2>
+
+        {/* 4 Cards de Estoque Perfeitamente Alinhados (2 cols mobile, 4 cols desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-surface-1 border border-surface rounded-xl p-3.5 sm:p-4 shadow-xs">
+            <div className="h-8 w-8 rounded-lg bg-surface-3 text-brand flex items-center justify-center mb-2.5">
+              <Car className="h-4 w-4" />
             </div>
-          ) : (
-            <div className="space-y-2">
+            <p className="font-heading text-2xl sm:text-3xl text-heading tracking-wide leading-none">
+              {totalVehicles}<span className="text-sm font-sans font-normal text-muted-foreground">/50</span>
+            </p>
+            <p className="text-xs font-semibold text-foreground mt-1.5 leading-snug">Carros Cadastrados</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{Math.max(50 - totalVehicles, 0)} vagas disponíveis</p>
+          </div>
+
+          <div className="bg-surface-1 border border-surface rounded-xl p-3.5 sm:p-4 shadow-xs">
+            <div className="h-8 w-8 rounded-lg bg-surface-3 text-emerald-500 flex items-center justify-center mb-2.5">
+              <CheckCircle2 className="h-4 w-4" />
+            </div>
+            <p className="font-heading text-2xl sm:text-3xl text-heading tracking-wide leading-none">{activeVehicles}</p>
+            <p className="text-xs font-semibold text-foreground mt-1.5 leading-snug">Publicados na Vitrine</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Visíveis para compradores</p>
+          </div>
+
+          <div className="bg-surface-1 border border-surface rounded-xl p-3.5 sm:p-4 shadow-xs">
+            <div className="h-8 w-8 rounded-lg bg-surface-3 text-zinc-400 flex items-center justify-center mb-2.5">
+              <EyeOff className="h-4 w-4" />
+            </div>
+            <p className="font-heading text-2xl sm:text-3xl text-heading tracking-wide leading-none">{inactiveVehicles}</p>
+            <p className="text-xs font-semibold text-foreground mt-1.5 leading-snug">Ocultos / Pausados</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Fora da vitrine pública</p>
+          </div>
+
+          <div className="bg-surface-1 border border-surface rounded-xl p-3.5 sm:p-4 shadow-xs">
+            <div className="h-8 w-8 rounded-lg bg-surface-3 text-brand flex items-center justify-center mb-2.5">
+              <Camera className="h-4 w-4" />
+            </div>
+            <p className="font-heading text-2xl sm:text-3xl text-heading tracking-wide leading-none">{totalPhotos}</p>
+            <p className="text-xs font-semibold text-foreground mt-1.5 leading-snug">Fotos Cadastradas</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Média: {totalVehicles > 0 ? (totalPhotos / totalVehicles).toFixed(1) : 0} por carro
+            </p>
+          </div>
+        </div>
+
+        {/* Alertas Reais de Pendências - Renderiza SOMENTE se houver pendências (sem mensagem de otimizada) */}
+        {(noPhotos.length > 0 || noDescription.length > 0) && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5 sm:p-4 space-y-2.5 mt-3">
+            <h3 className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0" /> Pendências no Estoque
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               {noPhotos.length > 0 && (
-                <div className="flex items-center gap-2 text-xs text-amber-600 font-medium bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg">
-                  <ImageOff className="h-4 w-4 shrink-0" /> {noPhotos.length} veículo(s) sem foto
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 bg-surface-1/80 border border-amber-500/20 p-2.5 rounded-lg">
+                  <ImageOff className="h-4 w-4 shrink-0 text-amber-500" />
+                  <span>{noPhotos.length} veículo(s) sem foto cadastrada</span>
                 </div>
               )}
               {noDescription.length > 0 && (
-                <div className="flex items-center gap-2 text-xs text-amber-600 font-medium bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg">
-                  <FileText className="h-4 w-4 shrink-0" /> {noDescription.length} veículo(s) sem descrição
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 bg-surface-1/80 border border-amber-500/20 p-2.5 rounded-lg">
+                  <FileText className="h-4 w-4 shrink-0 text-amber-500" />
+                  <span>{noDescription.length} veículo(s) sem descrição</span>
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )

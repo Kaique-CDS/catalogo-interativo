@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { MapPin, Phone, MessageCircle, Mail, Clock, ExternalLink, Navigation } from 'lucide-react'
+import { MapPin, Phone, MessageCircle, Mail, Clock, Navigation } from 'lucide-react'
 import type { Store } from '@/lib/supabase/types'
 import { getStorePhone, getStoreInstagram, getStoreWhatsApp, getStoreAddress, getStoreOpeningHours } from '@/lib/store-contact'
 
@@ -48,7 +48,7 @@ export default function LocationSection({ store, className = '', title }: Props)
   // Extrai embed customizado ou gera o padrão a partir do endereço
   const customEmbed = extractMapsEmbedSrc(store.maps_embed_url)
   const defaultEmbed = address
-    ? `https://www.google.com/maps?q=${encodeURIComponent(address)}&hl=pt-BR&output=embed`
+    ? `https://www.google.com/maps?q=${encodeURIComponent(address)}&hl=pt-BR&t=&z=15&ie=UTF8&iwloc=&output=embed`
     : null
   const embedUrl = customEmbed || defaultEmbed
 
@@ -58,9 +58,6 @@ export default function LocationSection({ store, className = '', title }: Props)
   const encodedAddress = address ? encodeURIComponent(address) : ''
   const directionsUrl = address
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`
-    : null
-  const searchMapsUrl = address
-    ? `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`
     : null
 
   // Quebra horários de funcionamento por "|" ou "\n"
@@ -75,14 +72,15 @@ export default function LocationSection({ store, className = '', title }: Props)
         {hasMap ? (
           /* Desktop (≥1024px): 2 colunas (~58% mapa, ~42% contato). Mobile: Coluna única (mapa primeiro) */
           <div className="flex flex-col lg:flex-row items-stretch">
-            {/* Mapa à esquerda (~58% no desktop, altura mín. 380px no desktop e 280px no mobile) */}
-            <div className="w-full lg:w-[58%] min-h-[280px] sm:min-h-[320px] lg:min-h-[420px] relative bg-surface-2 border-b lg:border-b-0 lg:border-r border-surface">
+            {/* Mapa à esquerda (~58% no desktop, altura mín. 380px no desktop e 280px no mobile).
+                overflow-hidden com -top-[76px] oculta o balão/card do canto superior esquerdo sem esconder a marca Google na base */}
+            <div className="w-full lg:w-[58%] min-h-[280px] sm:min-h-[320px] lg:min-h-[420px] relative bg-surface-2 border-b lg:border-b-0 lg:border-r border-surface overflow-hidden">
               <iframe
                 src={embedUrl!}
                 title={`Localização de ${store.name}`}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-full min-h-[280px] sm:min-h-[320px] lg:min-h-[420px] border-0 block"
+                className="absolute -top-[76px] left-0 w-full h-[calc(100%+76px)] border-0 block"
                 allowFullScreen={false}
               />
             </div>
@@ -105,11 +103,11 @@ export default function LocationSection({ store, className = '', title }: Props)
                     <li className="flex items-start gap-3 text-foreground">
                       <MapPin className="h-4 w-4 text-brand shrink-0 mt-0.5" />
                       <a
-                        href={searchMapsUrl || '#'}
+                        href={directionsUrl || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-foreground hover:text-brand transition-colors font-medium leading-relaxed break-words"
-                        title="Ver no Google Maps"
+                        title="Ver como chegar no mapa"
                       >
                         {address}
                       </a>
@@ -190,39 +188,32 @@ export default function LocationSection({ store, className = '', title }: Props)
                 </ul>
               </div>
 
-              {/* Botões de Ação */}
-              <div className="pt-4 border-t border-surface flex flex-col sm:flex-row flex-wrap gap-2.5">
+              {/* Botões de Ação - Apenas "Como chegar" e "Falar no WhatsApp" */}
+              <div className="pt-4 border-t border-surface grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {directionsUrl && (
                   <a
                     href={directionsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full sm:w-auto sm:flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand hover:opacity-95 text-white text-xs sm:text-sm font-bold shadow-xs transition-opacity"
+                    className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-brand hover:opacity-95 text-white text-xs sm:text-sm font-bold shadow-xs transition-opacity text-center"
                   >
-                    <Navigation className="h-4 w-4" />
+                    <Navigation className="h-4 w-4 shrink-0" />
                     <span>Como chegar</span>
                   </a>
                 )}
-                {searchMapsUrl && (
+                {whatsappInfo.number && (
                   <a
-                    href={searchMapsUrl}
+                    href={`https://wa.me/${whatsappInfo.number}?text=${encodeURIComponent(
+                      `Olá! Estou na vitrine da ${store.name} e gostaria de mais informações.`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-surface bg-surface-2 hover:bg-surface-3 text-foreground text-xs sm:text-sm font-semibold transition-colors"
+                    className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs sm:text-sm font-bold shadow-xs transition-colors text-center"
                   >
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    <span>Abrir no Maps</span>
+                    <MessageCircle className="h-4 w-4 shrink-0 fill-current" />
+                    <span>Falar no WhatsApp</span>
                   </a>
                 )}
-                <a
-                  href={`https://wa.me/${whatsappInfo.number}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-semibold transition-colors"
-                >
-                  <MessageCircle className="h-4 w-4 text-[#25D366]" />
-                  <span>Falar no WhatsApp</span>
-                </a>
               </div>
             </div>
           </div>

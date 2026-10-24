@@ -247,6 +247,7 @@ export type Database = {
           buyer_data: any
           seller_data: any
           vehicle_data: any
+          vehicle_id?: string | null
           payment_data: any
           clauses: any[]
           observations: string | null
@@ -280,6 +281,7 @@ export type Database = {
           buyer_data?: any
           seller_data?: any
           vehicle_data?: any
+          vehicle_id?: string | null
           payment_data?: any
           clauses?: any[]
           observations?: string | null

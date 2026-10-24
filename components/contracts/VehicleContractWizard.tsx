@@ -79,6 +79,7 @@ interface Props {
   store: Store
   slug: string
   vehicles: Vehicle[]
+  preselectedVehicleId?: string | null
 }
 
 const STEPS = [
@@ -89,7 +90,7 @@ const STEPS = [
   { id: 5, title: 'Revisão', icon: CheckCircle2, desc: 'Emissão e PDF' },
 ]
 
-export default function VehicleContractWizard({ store, slug, vehicles }: Props) {
+export default function VehicleContractWizard({ store, slug, vehicles, preselectedVehicleId }: Props) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [generating, setGenerating] = useState(false)
@@ -97,6 +98,11 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
     id: string
     number: number
   } | null>(null)
+
+  // Controle de marcação como vendido após gerar contrato (Prompt 8)
+  const [soldPromptVisible, setSoldPromptVisible] = useState(true)
+  const [soldStatusUpdated, setSoldStatusUpdated] = useState(false)
+  const [updatingSold, setUpdatingSold] = useState(false)
 
   // -------------------------------------------------------------
   // PASSO 1: DADOS DO COMPRADOR E VENDEDOR
@@ -181,13 +187,13 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
       model: v.model || v.title,
       year_fab: v.year || new Date().getFullYear(),
       year_model: v.year || new Date().getFullYear(),
-      plate: v.plate_end ? `ABC1D2${v.plate_end}` : '',
-      chassis: '',
-      renavam: '',
-      color: v.color || 'Branco',
+      plate: (v as any).plate || (v.plate_end ? `ABC1D2${v.plate_end}` : ''),
+      chassis: (v as any).chassis || '',
+      renavam: (v as any).renavam || '',
+      color: (v as any).color || 'Branco',
       fuel: v.fuel || 'Flex',
       mileage: v.mileage || '',
-      engine: '',
+      engine: (v as any).engine || '',
       features: (v.features || []).join(', '),
     })
     if (v.price && totalAmount === 0) {
@@ -195,6 +201,39 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
     }
     setStockModalOpen(false)
     toast.success(`Veículo "${v.title}" carregado do estoque com sucesso!`)
+  }
+
+  // Pré-seleciona veículo caso venha por rota/query param (Prompt 8)
+  React.useEffect(() => {
+    if (preselectedVehicleId && vehicles.length > 0) {
+      const match = vehicles.find((v) => v.id === preselectedVehicleId)
+      if (match) {
+        handleSelectFromStock(match)
+      }
+    }
+  }, [preselectedVehicleId, vehicles])
+
+  // Marcar como vendido ao concluir o contrato (Prompt 8)
+  const handleMarkVehicleAsSold = async () => {
+    if (!selectedVehicleId) return
+    setUpdatingSold(true)
+    try {
+      const res = await fetch(`/api/vehicles/${selectedVehicleId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'vendido',
+          sold_at: new Date().toISOString(),
+        }),
+      })
+      if (!res.ok) throw new Error()
+      setSoldStatusUpdated(true)
+      toast.success('Veículo marcado como vendido no estoque!')
+    } catch {
+      toast.error('Erro ao atualizar status do veículo no estoque.')
+    } finally {
+      setUpdatingSold(false)
+    }
   }
 
   // -------------------------------------------------------------
@@ -558,6 +597,50 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
             </p>
           </div>
 
+          {/* Confirmação de marcação de veículo como vendido (Prompt 8) */}
+          {selectedVehicleId && !soldStatusUpdated && soldPromptVisible && (
+            <div className="p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-left space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="h-9 w-9 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+                  <Car className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-foreground">
+                    Marcar este veículo como vendido no estoque?
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                    {vehicle.brand} {vehicle.model} ({vehicle.year_model})
+                    {vehicle.plate ? ' · Placa: ' + vehicle.plate : ''}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <Button
+                  onClick={handleMarkVehicleAsSold}
+                  disabled={updatingSold}
+                  className="btn-brand h-9 text-xs font-bold rounded-xl gap-1.5"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  {updatingSold ? 'Atualizando...' : 'Sim, marcar como vendido'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setSoldPromptVisible(false)}
+                  className="h-9 text-xs rounded-xl text-muted-foreground hover:text-foreground"
+                >
+                  Não marcar agora
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {soldStatusUpdated && (
+            <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-semibold flex items-center justify-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              <span>Veículo marcado com status Vendido no estoque com sucesso!</span>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <a
               href={`/api/contracts/${generatedContract.id}/pdf?print=true&download=true`}
@@ -582,7 +665,15 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
             </a>
           </div>
 
-          <div className="pt-4 border-t border-surface flex items-center justify-center gap-3">
+          <div className="pt-4 border-t border-surface flex flex-wrap items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.back()}
+              className="text-xs rounded-xl border-surface hover:bg-surface-2"
+            >
+              Voltar ao Estoque
+            </Button>
             <Link href={`/${slug}/admin/contratos`}>
               <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
                 Ir para o Painel de Contratos
@@ -612,11 +703,16 @@ export default function VehicleContractWizard({ store, slug, vehicles }: Props) 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-surface pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <Link href={`/${slug}/admin/contratos`}>
-              <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground" aria-label="Voltar aos contratos">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground"
+              aria-label="Voltar"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
             <h1 className="text-xl sm:text-2xl font-bold text-foreground">
               Novo Contrato de Venda de Veículo
             </h1>

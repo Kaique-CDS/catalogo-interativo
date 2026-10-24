@@ -8,10 +8,14 @@ export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams?: Promise<{ vehicle_id?: string; veiculo?: string }>
 }
 
-export default async function NovoContratoPage({ params }: Props) {
+export default async function NovoContratoPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const sParams = (await searchParams) || {}
+  const preselectedVehicleId = sParams.vehicle_id || sParams.veiculo || null
+
   const { store } = await getStoreContractSettings(slug)
 
   let vehicles: Vehicle[] = []
@@ -37,5 +41,12 @@ export default async function NovoContratoPage({ params }: Props) {
     vehicles = DEMO_VEHICLES
   }
 
-  return <VehicleContractWizard store={store} slug={slug} vehicles={vehicles} />
+  return (
+    <VehicleContractWizard
+      store={store}
+      slug={slug}
+      vehicles={vehicles}
+      preselectedVehicleId={preselectedVehicleId}
+    />
+  )
 }

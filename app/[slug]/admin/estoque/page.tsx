@@ -14,6 +14,8 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
   const [slug, setSlug] = useState<string>('')
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [showBulkUpload, setShowBulkUpload] = useState(false)
+  const [contractsEnabled, setContractsEnabled] = useState(false)
+  const [linkedContracts, setLinkedContracts] = useState<Record<string, { id: string; number: number }>>({})
 
   useEffect(() => {
     params.then(p => setSlug(p.slug))
@@ -43,6 +45,33 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
     if (slug) {
       loadVehicles()
     }
+  }, [slug])
+
+  useEffect(() => {
+    async function checkContracts() {
+      if (!slug) return
+      try {
+        const res = await fetch(`/api/contracts?slug=${slug}`)
+        if (res.ok) {
+          setContractsEnabled(true)
+          const data = await res.json()
+          const contracts = data.contracts || []
+          const map: Record<string, { id: string; number: number }> = {}
+          for (const c of contracts) {
+            const vId = c.vehicle_id || c.vehicle_data?.id
+            if (vId) {
+              map[vId] = { id: c.id, number: c.number }
+            }
+          }
+          setLinkedContracts(map)
+        } else {
+          setContractsEnabled(false)
+        }
+      } catch {
+        setContractsEnabled(false)
+      }
+    }
+    checkContracts()
   }, [slug])
 
   if (!slug) return null
@@ -142,7 +171,12 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
         </div>
       </div>
 
-      <VehicleTable vehicles={vehicles} slug={slug} />
+      <VehicleTable
+        vehicles={vehicles}
+        slug={slug}
+        contractsEnabled={contractsEnabled}
+        linkedContracts={linkedContracts}
+      />
     </div>
   )
 }
