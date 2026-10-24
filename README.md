@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🚀 Vitrine SaaS — Catálogos Interativos Multi-Tenant
 
@@ -150,7 +150,7 @@ Este projeto está sob a licença [MIT](LICENSE).
 ## 🤖 Governança de IA (Google Gemini 100% Gratuito)
 
 > [!IMPORTANT]
-> **Regra Obrigatória:** A chave `GEMINI_API_KEY` (ou `NEXT_PUBLIC_GEMINI_API_KEY`) **DEVE OBRIGATORIAMENTE vir de um projeto do Google AI Studio com faturamento (billing) DESATIVADO**.
+> **Regra Obrigatória:** A chave `GEMINI_API_KEY` **DEVE OBRIGATORIAMENTE vir de um projeto do Google AI Studio com faturamento (billing) DESATIVADO** e configurada apenas no servidor (`.env.local`), nunca como `NEXT_PUBLIC_*`.
 >
 > 1. Obtenha sua chave no [Google AI Studio](https://aistudio.google.com/) garantindo que o projeto **não possui cartão de crédito ou plano pago vinculado**.
 > 2. O catálogo utiliza o modelo gratuito `gemini-2.5-flash-lite` (ou configurável via `GEMINI_MODEL`), que possui cota gratuita de 15 RPM e 1.500 requisições/dia.

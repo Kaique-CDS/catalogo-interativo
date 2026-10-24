@@ -6,30 +6,13 @@ import {
   type TicketType,
   type TicketStatus,
 } from '@/lib/tickets-service'
-import { v2 as cloudinary } from 'cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
 import { getTenantBrand } from '@/lib/tenants'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 const MAX_PRINT_SIZE_BYTES = 2 * 1024 * 1024 // 2 MB
-
-function getCloudinary() {
-  const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || 'prnrnxaw').trim()
-  const apiKey = (process.env.CLOUDINARY_API_KEY || '311883981717173').trim()
-  const apiSecret = (process.env.CLOUDINARY_API_SECRET || 'SaJiLBB4hgByAIWoSYRtgqcGFUc').trim()
-
-  if (cloudName && apiKey && apiSecret) {
-    cloudinary.config({
-      cloud_name: cloudName,
-      api_key: apiKey,
-      api_secret: apiSecret,
-      secure: true,
-    })
-    return cloudinary
-  }
-  return null
-}
 
 export async function GET(req: NextRequest) {
   try {

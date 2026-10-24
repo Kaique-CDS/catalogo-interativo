@@ -5,14 +5,42 @@ import {
 } from '@/lib/auth-lojista'
 import { SUPER_ADMIN_COOKIE, signSuperAdminToken } from '@/lib/admin-auth'
 import { insertAuditLog } from '@/lib/supabase/erp-db'
+import {
+  checkRateLimit,
+  recordFailedAttempt,
+  clearFailedAttempts,
+} from '@/lib/security/rate-limit'
+import { verifyTotpToken } from '@/lib/security/totp'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    '127.0.0.1'
+  )
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req)
+    const rateLimitKey = `login_${ip}`
+
+    // 1. Checagem de Rate Limit / Bloqueio Temporário por IP
+    const rateCheck = checkRateLimit(rateLimitKey, 15, 60)
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: `Muitas tentativas de login. Aguarde ${rateCheck.retryAfter || 60} segundos antes de tentar novamente.`,
+        },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
-    const { identifier, password } = body
+    const { identifier, password, totpCode } = body
 
     if (!identifier || !password) {
       return NextResponse.json(
@@ -24,20 +52,55 @@ export async function POST(req: NextRequest) {
     const result = await authenticateLojista(String(identifier), String(password))
 
     if (!result.success) {
+      const failStatus = recordFailedAttempt(rateLimitKey, 5, 15 * 60)
+      if (failStatus.locked) {
+        return NextResponse.json(
+          {
+            error:
+              'Conta temporariamente bloqueada por excesso de tentativas incorretas. Tente novamente em 15 minutos.',
+          },
+          { status: 429 }
+        )
+      }
+
       return NextResponse.json(
-        { error: result.error || 'Credenciais inválidas.' },
+        {
+          error:
+            result.error ||
+            `Credenciais inválidas. Restam ${failStatus.remainingAttempts} tentativas antes do bloqueio temporário.`,
+        },
         { status: 401 }
       )
     }
 
-    // Se for o Super Admin da plataforma, autentica e direciona para /admin
+    // Se for o Super Admin da plataforma
     if (result.isSuperAdmin) {
+      // Checa se o Super Admin possui MFA (TOTP) configurado
+      const superAdminMfaSecret = process.env.MFA_SUPER_ADMIN_SECRET?.trim()
+      if (superAdminMfaSecret) {
+        if (!totpCode) {
+          return NextResponse.json(
+            {
+              requiresMfa: true,
+              message: 'Código de autenticação em duas etapas (2FA) obrigatório.',
+            },
+            { status: 200 }
+          )
+        }
+
+        const isTotpValid = verifyTotpToken(String(totpCode), superAdminMfaSecret)
+        if (!isTotpValid) {
+          recordFailedAttempt(rateLimitKey, 5, 15 * 60)
+          return NextResponse.json(
+            { error: 'Código de autenticação (MFA/TOTP) incorreto ou expirado.' },
+            { status: 401 }
+          )
+        }
+      }
+
+      clearFailedAttempts(rateLimitKey)
       const username = result.user?.email || 'super_admin'
       const token = await signSuperAdminToken(username)
-      const ip =
-        req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-        req.headers.get('x-real-ip') ||
-        '127.0.0.1'
 
       try {
         await insertAuditLog({
@@ -69,9 +132,12 @@ export async function POST(req: NextRequest) {
       return res
     }
 
+    // Sucesso para lojista: limpa contadores de falhas
+    clearFailedAttempts(rateLimitKey)
+
     // Se possui exatamente 1 loja, já ativa o cookie e retorna a URL de destino
     if (result.stores && result.stores.length === 1) {
-      await setLojistaSessionCookie(result.stores[0].tenant_id)
+      await setLojistaSessionCookie(result.stores[0].tenant_id, result.user?.id)
       return NextResponse.json(
         {
           success: true,
@@ -95,7 +161,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('[API LOGIN CENTRAL POST]', err)
     return NextResponse.json(
-      { error: err?.message || 'Erro interno ao realizar login.' },
+      { error: 'Erro interno ao realizar autenticação.' },
       { status: 500 }
     )
   }

@@ -1,14 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { deleteVehicleWithPhotos } from '@/lib/vehicle-service'
+import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { id } = await params
     const supabase = createAdminClient()
+
+    // 1. Busca veículo para checar tenant de origem (IDOR protection)
+    const { data: existingVehicle } = await supabase
+      .from('vehicles')
+      .select('id, store_id, stores(slug)')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (existingVehicle) {
+      const storeSlug = (existingVehicle as any).stores?.slug || auth.tenantId
+      if (storeSlug && !canAccessTenant(auth, storeSlug)) {
+        return NextResponse.json(
+          { error: 'Acesso negado: você não tem permissão para editar veículos de outra loja.' },
+          { status: 403 }
+        )
+      }
+    }
+
     const body = await req.json()
 
     const {
@@ -114,6 +138,30 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await validateRequestAuth(req)
+  if (!auth.isAuthenticated) {
+    return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+  }
+
   const { id } = await params
+  const supabase = createAdminClient()
+
+  // Checa permissão antes de delegar exclusão
+  const { data: vehicle } = await supabase
+    .from('vehicles')
+    .select('id, stores(slug)')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (vehicle) {
+    const storeSlug = (vehicle as any).stores?.slug || auth.tenantId
+    if (storeSlug && !canAccessTenant(auth, storeSlug)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para excluir veículos de outra loja.' },
+        { status: 403 }
+      )
+    }
+  }
+
   return deleteVehicleWithPhotos(id, req)
 }

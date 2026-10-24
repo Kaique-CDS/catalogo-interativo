@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 2. Chave lida EXCLUSIVAMENTE de variável de ambiente (sem fallback hardcoded)
-    const apiKey = (process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '').trim()
+    // 2. Chave lida EXCLUSIVAMENTE de variável de ambiente no servidor (sem prefixo NEXT_PUBLIC para evitar vazamento)
+    const apiKey = (process.env.GEMINI_API_KEY || '').trim()
     if (!apiKey) {
       return NextResponse.json(
         { error: 'Chave da API do Gemini não configurada no servidor (.env.local).' },

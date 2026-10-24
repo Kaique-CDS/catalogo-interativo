@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocalContractById, deleteLocalContract } from '@/lib/contracts/cache'
+import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,6 +10,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { id } = await params
     const supabase = createAdminClient()
 
@@ -36,6 +42,14 @@ export async function GET(
       return NextResponse.json({ error: 'Contrato não encontrado.' }, { status: 404 })
     }
 
+    const contractTenant = contract.tenant_id || contract.store?.slug || 'll-multimarcas'
+    if (!canAccessTenant(auth, contractTenant)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para visualizar contratos de outra loja.' },
+        { status: 403 }
+      )
+    }
+
     return NextResponse.json({ contract })
   } catch (err: any) {
     console.error('Error in GET /api/contracts/[id]:', err)
@@ -48,9 +62,33 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { id } = await params
     const body = await req.json()
     const supabase = createAdminClient()
+
+    // 1. Busca contrato para validar tenant antes de modificar
+    let existing: any = null
+    if (!id.startsWith('local-')) {
+      const { data } = await supabase.from('contracts').select('tenant_id').eq('id', id).maybeSingle()
+      existing = data
+    } else {
+      existing = getLocalContractById(id)
+    }
+
+    if (existing) {
+      const contractTenant = existing.tenant_id || 'll-multimarcas'
+      if (!canAccessTenant(auth, contractTenant)) {
+        return NextResponse.json(
+          { error: 'Acesso negado: você não tem permissão para alterar contratos de outra loja.' },
+          { status: 403 }
+        )
+      }
+    }
 
     const updatePayload: any = {
       updated_at: new Date().toISOString(),
@@ -83,8 +121,32 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { id } = await params
     const supabase = createAdminClient()
+
+    // Valida permissão do tenant antes de deletar
+    let existing: any = null
+    if (!id.startsWith('local-')) {
+      const { data } = await supabase.from('contracts').select('tenant_id').eq('id', id).maybeSingle()
+      existing = data
+    } else {
+      existing = getLocalContractById(id)
+    }
+
+    if (existing) {
+      const contractTenant = existing.tenant_id || 'll-multimarcas'
+      if (!canAccessTenant(auth, contractTenant)) {
+        return NextResponse.json(
+          { error: 'Acesso negado: você não tem permissão para excluir contratos de outra loja.' },
+          { status: 403 }
+        )
+      }
+    }
 
     deleteLocalContract(id)
 

@@ -9,7 +9,7 @@ const memoryCache = new Map<string, string>()
  */
 export function getGeminiApiKey(): string {
   if (typeof process !== 'undefined' && process.env) {
-    const key = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    const key = process.env.GEMINI_API_KEY
     if (key) return key.trim()
   }
   return ''

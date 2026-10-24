@@ -6,7 +6,7 @@ import { ChevronLeft } from 'lucide-react'
 export default async function NovoVeiculoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const supabase = await createClient()
-  const { data: store } = await supabase.from('stores').select('id').eq('slug', slug).maybeSingle()
+  const { data: store } = (await supabase.from('stores').select('id').eq('slug', slug).maybeSingle()) as { data: { id?: string } | null }
 
   return (
     <div className="space-y-4">

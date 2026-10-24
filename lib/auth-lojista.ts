@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getTenantBrand } from '@/lib/tenants'
 import { cookies } from 'next/headers'
@@ -11,6 +12,8 @@ export interface StoreUser {
   name?: string | null
   role: string
   is_active: boolean
+  totp_secret?: string | null
+  totp_enabled?: boolean
   created_at: string
   updated_at: string
   last_login_at?: string | null
@@ -416,25 +419,67 @@ async function migrateLegacyLojistaToBcrypt(input: {
   }
 }
 
+function getSessionSecret(): string {
+  return process.env.SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || 'vz_secure_session_key_32chars_min'
+}
+
+export async function signLojistaSession(data: { userId?: string; tenantId: string }): Promise<string> {
+  const payload = {
+    userId: data.userId || 'lojista',
+    tenantId: data.tenantId,
+    exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  }
+  const serialized = Buffer.from(JSON.stringify(payload)).toString('base64url')
+  const sig = crypto.createHmac('sha256', getSessionSecret()).update(serialized).digest('base64url')
+  return `${serialized}.${sig}`
+}
+
+export async function verifyLojistaSession(token: string): Promise<{ userId: string; tenantId: string } | null> {
+  if (!token || !token.includes('.')) return null
+  const [serialized, sig] = token.split('.')
+  const expectedSig = crypto.createHmac('sha256', getSessionSecret()).update(serialized).digest('base64url')
+  if (sig !== expectedSig) return null
+
+  try {
+    const payload = JSON.parse(Buffer.from(serialized, 'base64url').toString('utf8'))
+    if (!payload.exp || payload.exp < Date.now()) return null
+    return { userId: payload.userId, tenantId: payload.tenantId }
+  } catch {
+    return null
+  }
+}
+
 // ============================================================
-// COOKIE DE SESSÃO COM ISOLAMENTO POR TENANT
+// COOKIE DE SESSÃO COM ISOLAMENTO POR TENANT E ASSINATURA HMAC
 // ============================================================
-export async function setLojistaSessionCookie(tenant_id: string): Promise<void> {
+export async function setLojistaSessionCookie(tenant_id: string, userId?: string): Promise<void> {
   const cookieStore = await cookies()
   const normalized = tenant_id.trim().toLowerCase()
+  const isProd = process.env.NODE_ENV === 'production'
+
+  // Emite token de sessão criptograficamente assinado
+  const sessionToken = await signLojistaSession({ tenantId: normalized, userId })
+  cookieStore.set('lojista_session', sessionToken, {
+    path: '/',
+    sameSite: 'lax',
+    httpOnly: true,
+    secure: isProd,
+    maxAge: 60 * 60 * 24 * 7, // 7 dias
+  })
 
   // Seta a autenticação para este tenant específico
   cookieStore.set(`admin_auth_${normalized}`, 'true', {
     path: '/',
     sameSite: 'lax',
     httpOnly: true,
+    secure: isProd,
     maxAge: 60 * 60 * 24 * 7, // 7 dias
   })
 
   // Se for milhaticar, mantém compatibilidade com os slugs de exemplo
   if (normalized === 'milhaticar') {
-    cookieStore.set('admin_auth_loja-exemplo', 'true', { path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 * 24 * 7 })
-    cookieStore.set('admin_auth', 'true', { path: '/', sameSite: 'lax', httpOnly: true, maxAge: 60 * 60 * 24 * 7 })
+    cookieStore.set('admin_auth_loja-exemplo', 'true', { path: '/', sameSite: 'lax', httpOnly: true, secure: isProd, maxAge: 60 * 60 * 24 * 7 })
+    cookieStore.set('admin_auth', 'true', { path: '/', sameSite: 'lax', httpOnly: true, secure: isProd, maxAge: 60 * 60 * 24 * 7 })
     cookieStore.set('admin_auth_ll-multimarcas', '', { path: '/', maxAge: 0 })
   } else if (normalized === 'll-multimarcas') {
     cookieStore.set('admin_auth_milhaticar', '', { path: '/', maxAge: 0 })

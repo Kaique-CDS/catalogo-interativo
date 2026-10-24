@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { v2 as cloudinary } from 'cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
 import { IMAGE_SPECS, type AssetType, BANNER_SIZE_TOLERANCE_PX } from '@/lib/image-specs'
+import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,25 +16,35 @@ function slugify(raw: string): string {
     .replace(/^-+|-+$/g, '') || 'sem-slug'
 }
 
+function isValidImageMagicBytes(buffer: Buffer): boolean {
+  if (buffer.length < 4) return false
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return true
+  // PNG: 89 50 4E 47
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return true
+  // WEBP: RIFF ... WEBP
+  if (
+    buffer.length >= 12 &&
+    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
+  ) return true
+  return false
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || 'prnrnxaw').trim()
-    const apiKey = (process.env.CLOUDINARY_API_KEY || '311883981717173').trim()
-    const apiSecret = (process.env.CLOUDINARY_API_SECRET || 'SaJiLBB4hgByAIWoSYRtgqcGFUc').trim()
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
 
-    if (!cloudName || !apiKey || !apiSecret) {
+    const cloudinary = getCloudinary()
+    if (!cloudinary) {
       return NextResponse.json(
         { error: 'Credenciais do Cloudinary não configuradas no servidor.' },
         { status: 500 }
       )
     }
-
-    cloudinary.config({
-      cloud_name: cloudName,
-      api_key: apiKey,
-      api_secret: apiSecret,
-      secure: true,
-    })
 
     const formData = await req.formData()
     const file = formData.get('file')
@@ -47,11 +59,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Slug da loja é obrigatório.' }, { status: 400 })
     }
 
+    const tenantSlug = slugify(rawSlug)
+
+    // Barreira contra IDOR: lojista só pode subir assets na sua própria loja
+    if (!canAccessTenant(auth, tenantSlug)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para alterar arquivos de outra loja.' },
+        { status: 403 }
+      )
+    }
+
     if (rawType !== 'logo' && rawType !== 'banner_desktop' && rawType !== 'banner_mobile' && rawType !== 'signature') {
       return NextResponse.json({ error: 'Tipo de asset inválido.' }, { status: 400 })
     }
 
-    const tenantSlug = slugify(rawSlug)
     let folder = `${tenantSlug}/logo`
     if (rawType === 'banner_desktop') folder = `${tenantSlug}/banners/desktop`
     if (rawType === 'banner_mobile') folder = `${tenantSlug}/banners/mobile`
@@ -78,7 +99,16 @@ export async function POST(req: NextRequest) {
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    const publicId = `${rawType}_${Date.now()}`
+
+    // Validação de tipo real por Magic Bytes (impede arquivos executáveis/maliciosos)
+    if (!isValidImageMagicBytes(buffer)) {
+      return NextResponse.json(
+        { error: 'Arquivo inválido. O conteúdo real do arquivo não corresponde a uma imagem suportada (JPG, PNG ou WEBP).' },
+        { status: 400 }
+      )
+    }
+
+    const publicId = `${rawType}_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
 
     const uploadResult = await new Promise<{
       secure_url: string
@@ -130,7 +160,6 @@ export async function POST(req: NextRequest) {
         Math.abs(uploadResult.width - expected.width) > BANNER_SIZE_TOLERANCE_PX ||
         Math.abs(uploadResult.height - expected.height) > BANNER_SIZE_TOLERANCE_PX
       ) {
-        // Remove asset inválido que acabou de subir
         await cloudinary.uploader.destroy(uploadResult.public_id).catch(() => {})
         return NextResponse.json(
           {
@@ -141,22 +170,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        secure_url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-        width: uploadResult.width,
-        height: uploadResult.height,
-        format: uploadResult.format,
-      },
-      { status: 200 }
-    )
+    return NextResponse.json({
+      success: true,
+      url: uploadResult.secure_url,
+      public_id: uploadResult.public_id,
+      width: uploadResult.width,
+      height: uploadResult.height,
+      bytes: uploadResult.bytes,
+      format: uploadResult.format,
+    })
   } catch (err: any) {
     console.error('Erro em POST /api/store-assets/upload:', err)
-    return NextResponse.json(
-      { error: err?.message || 'Erro ao processar upload do asset.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: err.message || 'Erro interno no upload' }, { status: 500 })
   }
 }

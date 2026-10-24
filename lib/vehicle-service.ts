@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { v2 as cloudinary } from 'cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { insertAuditLog } from '@/lib/supabase/erp-db'
 
@@ -47,18 +47,9 @@ export async function deleteVehicleWithPhotos(id: string, req: NextRequest) {
 
     if (publicIds.length > 0) {
       try {
-        const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || 'prnrnxaw').trim()
-        const apiKey = (process.env.CLOUDINARY_API_KEY || '311883981717173').trim()
-        const apiSecret = (process.env.CLOUDINARY_API_SECRET || 'SaJiLBB4hgByAIWoSYRtgqcGFUc').trim()
+        const cloudinary = getCloudinary()
 
-        if (cloudName && apiKey && apiSecret) {
-          cloudinary.config({
-            cloud_name: cloudName,
-            api_key: apiKey,
-            api_secret: apiSecret,
-            secure: true,
-          })
-
+        if (cloudinary) {
           const delRes = await cloudinary.api.delete_resources(publicIds)
           if (delRes && delRes.deleted) {
             photosDeletedCount = Object.values(delRes.deleted).filter(

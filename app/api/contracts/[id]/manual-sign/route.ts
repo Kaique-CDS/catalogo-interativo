@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { registerManualPhysicalSignature } from '@/lib/contracts/signature-service'
-import { v2 as cloudinary } from 'cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
+import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,12 +18,23 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ success: false, error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { id } = await params
     const formData = await req.formData()
     const file = formData.get('file')
-    const signedBy = (formData.get('signed_by') || '') as string
-    const notes = (formData.get('notes') || '') as string
+    const signedBy = (formData.get('signedBy') || '') as string
     const slug = (formData.get('slug') || 'loja') as string
+
+    if (!canAccessTenant(auth, slug)) {
+      return NextResponse.json(
+        { success: false, error: 'Acesso negado: você não tem permissão para assinar contratos de outra loja.' },
+        { status: 403 }
+      )
+    }
 
     if (!signedBy.trim()) {
       return NextResponse.json(
@@ -36,18 +48,9 @@ export async function POST(
     if (file && file instanceof File) {
       // Faz upload do arquivo assinado (PDF ou Foto) para Cloudinary
       try {
-        const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || 'prnrnxaw').trim()
-        const apiKey = (process.env.CLOUDINARY_API_KEY || '311883981717173').trim()
-        const apiSecret = (process.env.CLOUDINARY_API_SECRET || 'SaJiLBB4hgByAIWoSYRtgqcGFUc').trim()
+        const cloudinary = getCloudinary()
 
-        if (cloudName && apiKey && apiSecret) {
-          cloudinary.config({
-            cloud_name: cloudName,
-            api_key: apiKey,
-            api_secret: apiSecret,
-            secure: true,
-          })
-
+        if (cloudinary) {
           const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
           const arrayBuffer = await file.arrayBuffer()
           const buffer = Buffer.from(arrayBuffer)
@@ -81,31 +84,31 @@ export async function POST(
       fileUrl = `/api/contracts/${id}/pdf`
     }
 
-    const clientIp = getClientIp(req)
-    const userAgent = req.headers.get('user-agent') || 'Admin'
+    const ip = getClientIp(req)
 
-    const res = await registerManualPhysicalSignature({
+    const result = await registerManualPhysicalSignature({
       contractId: id,
-      fileUrl,
       signedBy: signedBy.trim(),
-      notes: notes.trim(),
-      clientIp,
-      userAgent,
+      fileUrl,
+      clientIp: ip,
     })
 
-    if (!res.success) {
-      return NextResponse.json({ success: false, error: res.error }, { status: 400 })
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.error || 'Falha ao registrar assinatura física.' },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Contrato marcado como assinado presencialmente com sucesso!',
+      message: 'Assinatura física registrada com sucesso.',
       fileUrl,
     })
   } catch (err: any) {
     console.error('Erro em POST /api/contracts/[id]/manual-sign:', err)
     return NextResponse.json(
-      { success: false, error: err.message || 'Erro ao registrar assinatura presencial.' },
+      { success: false, error: err.message || 'Erro interno ao registrar assinatura' },
       { status: 500 }
     )
   }

@@ -2,20 +2,40 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   updateTicket,
   deleteTicket,
+  getTicketById,
   notifyClientTicketUpdate,
   type TicketStatus,
 } from '@/lib/tickets-service'
 import { getTenantBrand } from '@/lib/tenants'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { id } = await params
     if (!id) {
       return NextResponse.json({ error: 'id é obrigatório.' }, { status: 400 })
+    }
+
+    // Busca ticket para validar permissão de tenant
+    const existing = await getTicketById(id)
+    if (!existing) {
+      return NextResponse.json({ error: 'Ticket não encontrado.' }, { status: 404 })
+    }
+
+    if (!canAccessTenant(auth, existing.tenant_id)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para alterar tickets de outra loja.' },
+        { status: 403 }
+      )
     }
 
     const body = await req.json()
@@ -31,7 +51,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const updated = await updateTicket(id, {
       status: status as TicketStatus | undefined,
       resolution_note: resolution_note !== undefined ? resolution_note : undefined,
-      actor: actor || 'Super Admin',
+      actor: actor || (auth.isSuperAdmin ? 'Super Admin' : 'Lojista'),
     })
 
     // Dispara notificação por e-mail para a loja se houve atualização relevante
@@ -61,9 +81,26 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
+
     const { id } = await params
     if (!id) {
       return NextResponse.json({ error: 'id é obrigatório.' }, { status: 400 })
+    }
+
+    const existing = await getTicketById(id)
+    if (!existing) {
+      return NextResponse.json({ error: 'Ticket não encontrado.' }, { status: 404 })
+    }
+
+    if (!canAccessTenant(auth, existing.tenant_id)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para excluir tickets de outra loja.' },
+        { status: 403 }
+      )
     }
 
     const result = await deleteTicket(id)

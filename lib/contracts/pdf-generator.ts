@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb, grayscale } from 'pdf-lib'
+import { safeFetch } from '@/lib/security/ssrf'
 import {
   formatCurrency,
   valorPorExtenso,
@@ -147,7 +148,7 @@ async function embedSignatureImage(pdfDoc: PDFDocument, base64OrUrl?: string) {
       const b64Data = base64OrUrl.split(',')[1] || ''
       buf = Buffer.from(b64Data, 'base64')
     } else if (base64OrUrl.startsWith('http')) {
-      const res = await fetch(base64OrUrl)
+      const res = await safeFetch(base64OrUrl)
       if (res.ok) buf = Buffer.from(await res.arrayBuffer())
     }
     if (!buf) return null
@@ -273,7 +274,7 @@ export async function generateVehicleSaleContractPdf(
   let embeddedLogo: any = null
   if (opts.store.logo_url) {
     try {
-      const res = await fetch(opts.store.logo_url)
+      const res = await safeFetch(opts.store.logo_url)
       if (res.ok) {
         const logoBytes = await res.arrayBuffer()
         if (opts.store.logo_url.toLowerCase().endsWith('.png')) {
@@ -1243,7 +1244,7 @@ export async function generatePowerOfAttorneyPdf(
   let embeddedLogo: any = null
   if (opts.store.logo_url) {
     try {
-      const res = await fetch(opts.store.logo_url)
+      const res = await safeFetch(opts.store.logo_url)
       if (res.ok) {
         const logoBytes = await res.arrayBuffer()
         if (opts.store.logo_url.toLowerCase().endsWith('.png')) {

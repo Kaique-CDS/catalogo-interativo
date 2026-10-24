@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { v2 as cloudinary } from 'cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
 import { Resend } from 'resend'
 import {
   type TicketType,
@@ -17,26 +17,6 @@ export {
   type TicketEvent,
   type Ticket,
   generateTicketMarkdown,
-}
-
-// ============================================================
-// CONFIGURAÇÃO CLOUDINARY
-// ============================================================
-function getCloudinary() {
-  const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || 'prnrnxaw').trim()
-  const apiKey = (process.env.CLOUDINARY_API_KEY || '311883981717173').trim()
-  const apiSecret = (process.env.CLOUDINARY_API_SECRET || 'SaJiLBB4hgByAIWoSYRtgqcGFUc').trim()
-
-  if (cloudName && apiKey && apiSecret) {
-    cloudinary.config({
-      cloud_name: cloudName,
-      api_key: apiKey,
-      api_secret: apiSecret,
-      secure: true,
-    })
-    return cloudinary
-  }
-  return null
 }
 
 export async function deleteCloudinaryAttachments(publicIds: string[]): Promise<number> {
@@ -375,6 +355,33 @@ export async function listTickets(filters?: {
       return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
     throw err
+  }
+}
+
+/**
+ * Busca um ticket específico por ID (Supabase ou Fallback)
+ */
+export async function getTicketById(id: string): Promise<Ticket | null> {
+  const supabase = createAdminClient()
+
+  try {
+    const { data, error } = await supabase
+      .from('tickets')
+      .select('*, attachments:ticket_attachments(*), events:ticket_events(*)')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (!error && data) {
+      return data as Ticket
+    }
+  } catch {}
+
+  try {
+    const state = await getFallbackState()
+    const found = (state.tickets || []).find((t: any) => t.id === id)
+    return (found as Ticket) || null
+  } catch {
+    return null
   }
 }
 

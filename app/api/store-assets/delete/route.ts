@@ -1,30 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { v2 as cloudinary } from 'cloudinary'
+import { getCloudinary } from '@/lib/cloudinary'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { extractCloudinaryPublicId, type AssetType } from '@/lib/image-specs'
+import { validateRequestAuth, canAccessTenant } from '@/lib/security/auth-guard'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
   try {
-    const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || 'prnrnxaw').trim()
-    const apiKey = (process.env.CLOUDINARY_API_KEY || '311883981717173').trim()
-    const apiSecret = (process.env.CLOUDINARY_API_SECRET || 'SaJiLBB4hgByAIWoSYRtgqcGFUc').trim()
+    const auth = await validateRequestAuth(req)
+    if (!auth.isAuthenticated) {
+      return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    }
 
-    if (!cloudName || !apiKey || !apiSecret) {
+    const cloudinary = getCloudinary()
+    if (!cloudinary) {
       return NextResponse.json(
         { error: 'Credenciais do Cloudinary não configuradas no servidor.' },
         { status: 500 }
       )
     }
-
-    cloudinary.config({
-      cloud_name: cloudName,
-      api_key: apiKey,
-      api_secret: apiSecret,
-      secure: true,
-    })
 
     const body = await req.json()
     const { store_id, slug, asset_type, public_id, current_url } = body as {
@@ -39,6 +35,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'store_id, slug e asset_type são obrigatórios.' },
         { status: 400 }
+      )
+    }
+
+    if (!canAccessTenant(auth, slug)) {
+      return NextResponse.json(
+        { error: 'Acesso negado: você não tem permissão para remover assets de outra loja.' },
+        { status: 403 }
       )
     }
 
