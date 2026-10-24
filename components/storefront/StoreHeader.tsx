@@ -1,9 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Phone } from 'lucide-react'
+import { Phone } from 'lucide-react'
 import type { Store } from '@/lib/supabase/types'
 import { getTenantBrand } from '@/lib/tenants'
-import { getStorePhone, getStoreInstagram, getStoreAddress } from '@/lib/store-contact'
+import { getStorePhone, getStoreInstagram } from '@/lib/store-contact'
 
 interface Props { store: Store }
 
@@ -11,52 +11,41 @@ export default function StoreHeader({ store }: Props) {
   const brand = getTenantBrand(store.slug)
   const phoneInfo = getStorePhone(store)
   const instagramInfo = getStoreInstagram(store)
-  const storeAddress = getStoreAddress(store)
   const logoUrl = store.logo_url || brand.logo.header
 
   return (
     <header className="bg-surface-0/95 border-b border-surface sticky top-0 z-40 backdrop-blur-md">
       <div className="container mx-auto px-2.5 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 max-w-7xl">
 
-        {/* Logo + Nome */}
+        {/* Logo exclusivo */}
         <Link
           href={`/${store.slug}`}
-          className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial group"
+          className="flex items-center min-w-0 shrink-0 group py-1"
           aria-label={`Voltar para ${store.name}`}
         >
           {logoUrl ? (
-            <div className="brand-logo-container flex items-center justify-center shrink-0">
+            <div className="brand-logo-container flex items-center justify-start shrink-0">
               <Image
                 src={logoUrl}
                 alt={store.name}
-                width={80}
-                height={44}
+                width={160}
+                height={50}
                 priority
-                className="h-8 sm:h-11 w-auto max-w-[120px] sm:max-w-[140px] object-contain flex-shrink-0"
+                className="h-9 sm:h-12 w-auto max-w-[160px] sm:max-w-[200px] object-contain flex-shrink-0 transition-transform group-hover:scale-105"
               />
+              <span className="sr-only">{store.name}</span>
             </div>
           ) : (
-            /* Fallback: inicial da loja */
-            <div className="h-8 w-8 sm:h-11 sm:w-11 bg-brand rounded-[10px] flex items-center justify-center font-heading text-white text-lg sm:text-2xl flex-shrink-0 select-none">
-              {store.name.charAt(0).toUpperCase()}
+            /* Fallback apenas quando não houver imagem de logo cadastrada */
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 sm:h-11 sm:w-11 bg-brand rounded-xl flex items-center justify-center font-heading text-white text-lg sm:text-2xl flex-shrink-0 select-none shadow-xs">
+                {store.name.charAt(0).toUpperCase()}
+              </div>
+              <h1 className="font-heading text-heading text-sm sm:text-base md:text-xl uppercase tracking-wide leading-tight truncate">
+                {store.name}
+              </h1>
             </div>
           )}
-          <div className="min-w-0">
-            <h1 className="font-heading text-heading text-sm sm:text-base md:text-xl uppercase tracking-wide leading-tight truncate">
-              {store.name}
-            </h1>
-            {store.slogan && (
-              <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate font-medium">
-                {store.slogan}
-              </p>
-            )}
-            {!store.slogan && storeAddress && (
-              <p className="text-[10px] sm:text-[11px] text-muted-foreground flex items-center gap-1 truncate">
-                <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0 text-brand" />
-                <span className="truncate">{storeAddress}</span>
-              </p>
-            )}
-          </div>
         </Link>
 
         {/* Ações direita — 100% Mobile First */}
