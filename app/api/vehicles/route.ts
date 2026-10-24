@@ -131,6 +131,19 @@ export async function POST(req: NextRequest) {
         .single()
       data = retry.data
       error = retry.error
+
+      if (error && (error.message?.includes('column') || error.code === 'PGRST204' || error.code === '42703')) {
+        const minimalRow = { ...baseRow }
+        delete minimalRow.status
+        delete minimalRow.sold_at
+        const retry2 = await supabase
+          .from('vehicles')
+          .insert([minimalRow])
+          .select()
+          .single()
+        data = retry2.data
+        error = retry2.error
+      }
     }
 
     if (error) {

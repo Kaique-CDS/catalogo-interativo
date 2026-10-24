@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import {
   Monitor,
   Smartphone,
@@ -37,6 +38,7 @@ export default function BannerManagement({ slug, storeId }: BannerManagementProp
   const [deviceTab, setDeviceTab] = useState<'desktop' | 'mobile'>('desktop')
   const [banners, setBanners] = useState<TenantBanner[]>([])
   const [loading, setLoading] = useState(true)
+  const [missingMigration, setMissingMigration] = useState<string | null>(null)
 
   // Estados de upload
   const [uploadType, setUploadType] = useState<'image' | 'video'>('image')
@@ -63,6 +65,12 @@ export default function BannerManagement({ slug, storeId }: BannerManagementProp
       if (res.ok) {
         const data = await res.json()
         setBanners(data || [])
+        const pending = res.headers.get('X-Migration-Pending')
+        if (pending) {
+          setMissingMigration(pending)
+        } else {
+          setMissingMigration(null)
+        }
       }
     } catch (e) {
       console.error('Falha ao carregar banners:', e)
@@ -322,6 +330,22 @@ export default function BannerManagement({ slug, storeId }: BannerManagementProp
       </CardHeader>
 
       <CardContent className="space-y-6 pt-5">
+        {missingMigration && (
+          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in-50">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
+              <span>
+                <strong>Banco de dados desatualizado:</strong> A tabela <code>tenant_banners</code> não existe no Supabase (falta aplicar a <strong>Migration 023</strong>). Os banners legados da loja estão sendo exibidos como fallback.
+              </span>
+            </div>
+            <Link href={`/${slug}/admin/diagnostico`}>
+              <Button size="sm" variant="outline" className="text-xs border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 h-7 rounded-lg shrink-0 font-bold">
+                Ver Diagnóstico
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Caixa de Especificação Rígida do Dispositivo */}
         <div className="p-3.5 rounded-xl bg-surface-2/60 border border-surface text-xs text-muted-foreground flex items-start gap-3">
           <AlertTriangle className="h-4 w-4 text-brand shrink-0 mt-0.5" />

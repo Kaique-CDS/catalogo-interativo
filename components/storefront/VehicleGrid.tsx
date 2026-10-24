@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import VehicleCard from './VehicleCard'
 import SearchFilters from './SearchFilters'
 import VehicleDetailModal from './VehicleDetailModal'
-import { Car, ChevronDown } from 'lucide-react'
+import { Car, ChevronDown, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Vehicle, Store } from '@/lib/supabase/types'
 
@@ -14,9 +14,10 @@ interface Props {
   brands: string[]
   years: number[]
   searchParams: { q?: string; brand?: string; minPrice?: string; maxPrice?: string; year?: string; v?: string; veiculo?: string }
+  hasDbError?: boolean
 }
 
-export default function VehicleGrid({ vehicles, store, brands, years, searchParams }: Props) {
+export default function VehicleGrid({ vehicles, store, brands, years, searchParams, hasDbError }: Props) {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [modalStep, setModalStep] = useState<'detail' | 'interest'>('detail')
   const [visibleCount, setVisibleCount] = useState(6)
@@ -75,15 +76,27 @@ export default function VehicleGrid({ vehicles, store, brands, years, searchPara
       <SearchFilters brands={brands} years={years} searchParams={searchParams} />
 
       {vehicles.length === 0 ? (
-        <div className="text-center py-20 bg-surface-1 rounded-2xl border border-surface p-8 max-w-md mx-auto">
-          <Car className="h-14 w-14 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-heading text-heading text-xl uppercase tracking-wide mb-2">
-            Nenhum Veículo Encontrado
-          </h3>
-          <p className="text-muted-foreground text-sm">
-            Tente alterar os filtros ou limpar a pesquisa para ver mais opções.
-          </p>
-        </div>
+        hasDbError ? (
+          <div className="text-center py-20 bg-surface-1 rounded-2xl border border-rose-500/30 p-8 max-w-md mx-auto">
+            <AlertTriangle className="h-14 w-14 text-rose-500/70 mx-auto mb-4" />
+            <h3 className="font-heading text-heading text-xl uppercase tracking-wide mb-2 text-rose-600 dark:text-rose-400">
+              Catálogo em Atualização
+            </h3>
+            <p className="text-muted-foreground text-sm">
+              Estamos restabelecendo a comunicação com o estoque de veículos. Por favor, recarregue a página ou entre em contato diretamente pelo WhatsApp da loja.
+            </p>
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-surface-1 rounded-2xl border border-surface p-8 max-w-md mx-auto">
+            <Car className="h-14 w-14 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="font-heading text-heading text-xl uppercase tracking-wide mb-2">
+              Nenhum Veículo Encontrado
+            </h3>
+            <p className="text-muted-foreground text-sm">
+              Tente alterar os filtros ou limpar a pesquisa para ver mais opções.
+            </p>
+          </div>
+        )
       ) : (
         <>
           <div className="flex items-center justify-between mb-4">

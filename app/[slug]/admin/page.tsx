@@ -45,6 +45,7 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
   const [slug, setSlug] = useState<string>('')
   const [copiedSource, setCopiedSource] = useState<string | null>(null)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [dbError, setDbError] = useState<string | null>(null)
   const [salesPeriod, setSalesPeriod] = useState<'30d' | '90d' | '12m' | 'all'>('all')
   const [salesBrand, setSalesBrand] = useState<string>('all')
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>('all')
@@ -82,9 +83,22 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
           if (res.ok) {
             const data = await res.json()
             setVehicles(data || [])
+            setDbError(null)
+          } else {
+            const errData = await res.json().catch(() => ({}))
+            console.error('Falha ao buscar veículos para dashboard:', errData)
+            const msg = errData.error || 'Erro na consulta do banco de dados'
+            if (msg.includes('status') || errData.code === '42703') {
+              setDbError('Banco desatualizado: falta aplicar a Migration 022 (colunas status e sold_at).')
+            } else {
+              setDbError(`Falha na consulta do catálogo: ${msg}`)
+            }
           }
         })
-        .catch(console.error)
+        .catch((err) => {
+          console.error(err)
+          setDbError('Erro de conexão ao carregar estoque do banco de dados.')
+        })
         
       // Fetch analytics
       const fetchAnalytics = async () => {
@@ -192,6 +206,25 @@ export default function AdminDashboardPage({ params }: { params: Promise<{ slug:
           </Button>
         </Link>
       </div>
+
+      {dbError && (
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in-50">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
+            <div>
+              <p className="font-bold text-sm text-rose-700 dark:text-rose-300">
+                Atenção: Banco de dados com pendência ou erro de consulta
+              </p>
+              <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5">{dbError}</p>
+            </div>
+          </div>
+          <Link href={`/${slug}/admin/diagnostico`}>
+            <Button size="sm" variant="outline" className="text-xs border-rose-500/40 text-rose-600 dark:text-rose-300 hover:bg-rose-500/15 h-8 rounded-xl shrink-0 font-bold">
+              Ver Diagnóstico
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Métricas de Marketing (KPIs) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

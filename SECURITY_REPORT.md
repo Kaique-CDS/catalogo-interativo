@@ -11,7 +11,7 @@
 | Item / Vetor de Risco | Status | Evidência / Correção Implementada |
 | :--- | :---: | :--- |
 | **Visibilidade do Repositório GitHub** | **Precisa Ação Manual** | O repositório `Kaique-CDS/catalogo-interativo` está atualmente **PÚBLICO** (retornou HTTP 200). Qualquer pessoa na internet pode ler o código e o histórico de commits. Deve ser alterado para **Privado** imediatamente no GitHub. |
-| **Vazamento de Segredo do Cloudinary no Git** | **Corrigido** / **Precisa Ação Manual** | Removidos os fallbacks literais de `CLOUDINARY_API_SECRET` (`SaJiLBB4...`) que estavam em 8 arquivos (`app/api/contracts/crlv`, `app/api/tickets`, etc.). Centralizado em `lib/cloudinary.ts`. Como o repositório é público, **o segredo deve ser rotacionado no painel do Cloudinary**. |
+| **Vazamento de Segredo do Cloudinary no Git** | **Corrigido** / **Precisa Ação Manual** | Removidos os fallbacks literais de `CLOUDINARY_API_SECRET` que estavam em 8 arquivos (`app/api/contracts/crlv`, `app/api/tickets`, etc.). Centralizado em `lib/cloudinary.ts`. Como o repositório é público, **o segredo deve ser rotacionado no painel do Cloudinary**. |
 | **Senhas em Texto Puro e Fallbacks** | **Corrigido** | Removidos os fallbacks padrão de senhas (`kaique`, `llmultimarcas`, `milhati`) do código de produção. O sistema agora exige variáveis de ambiente ou autentica via hash `bcrypt` (10 rounds) na tabela `store_users`. |
 | **Proteção de Arquivos Sensíveis (.gitignore)** | **Corrigido** | Atualizado `.gitignore` para bloquear `.env*`, planilhas (`*.xlsx`, `*.xls`, `*.csv`), documentos (`*.pdf`), dumps de banco (`*.dump`, `*.sql.bak`) e exports (`backup*.json`). |
 | **Arquivo de Exemplo de Variáveis (.env.example)** | **Corrigido** | Criado `.env.example` completo, contendo todos os nomes de variáveis do sistema acompanhados de comentários explicativos, com **zero** valores preenchidos. |
@@ -38,7 +38,7 @@ Como o repositório é público no GitHub, qualquer segredo que esteve em commit
 
 | Chave / Segredo | Onde esteve exposto | Onde trocar / Como rotacionar |
 | :--- | :--- | :--- |
-| **Cloudinary API Secret** | Código-fonte (fallback literal em 8 rotas) | Acesse o [Cloudinary Console](https://console.cloudinary.com) > **Settings** > **Access Keys** > Clique em **Generate New Key** e delete a chave antiga (`SaJiL...`). Atualize na Vercel a variável `CLOUDINARY_API_SECRET`. |
+| **Cloudinary API Secret** | Código-fonte (fallback literal em 8 rotas) | Acesse o [Cloudinary Console](https://console.cloudinary.com) > **Settings** > **Access Keys** > Clique em **Generate New Key** e delete a chave antiga. Atualize na Vercel a variável `CLOUDINARY_API_SECRET`. |
 | **Senha do Super Admin** | Fallback `'kaique'` no código | Altere a variável `ADMIN_PASS` na Vercel para uma senha forte (mínimo 16 caracteres alfanuméricos com símbolos). |
 | **Senha Legada L&L Multimarcas** | Fallback `'llmultimarcas'` no código | Atualize `LL_ADMIN_PASS` na Vercel e/ou redefina a senha do usuário `admin@llmultimarcas.com.br` no banco de dados via hash bcrypt. |
 | **Senha Legada Milhaticar** | Fallback `'milhati'` no código | Atualize `CAR_ADMIN_PASS` na Vercel e/ou redefina a senha de `julia@milhaticar.com.br` no banco via bcrypt. |

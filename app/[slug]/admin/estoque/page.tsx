@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Plus, Upload } from 'lucide-react'
+import { Plus, Upload, AlertTriangle } from 'lucide-react'
 import VehicleTable from '@/components/admin/VehicleTable'
 import BulkUploadModal from '@/components/admin/BulkUploadModal'
 import type { Vehicle } from '@/lib/supabase/types'
@@ -13,6 +13,7 @@ import { getVehicles } from '@/lib/vehicles'
 export default function EstoquePage({ params }: { params: Promise<{ slug: string }> }) {
   const [slug, setSlug] = useState<string>('')
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [dbError, setDbError] = useState<string | null>(null)
   const [showBulkUpload, setShowBulkUpload] = useState(false)
   const [contractsEnabled, setContractsEnabled] = useState(false)
   const [linkedContracts, setLinkedContracts] = useState<Record<string, { id: string; number: number }>>({})
@@ -28,14 +29,21 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
         if (res.ok) {
           const data = await res.json()
           setVehicles(data || [])
+          setDbError(null)
           return
         } else {
-          const errData = await res.json()
+          const errData = await res.json().catch(() => ({}))
           console.error("API GET Error:", errData)
-          // throw new Error(errData.error || 'Erro desconhecido')
+          const errMsg = errData.error || 'Erro ao consultar banco de dados'
+          if (errMsg.includes('status') || errData.code === '42703') {
+            setDbError('Banco desatualizado: falta aplicar a Migration 022 (colunas status e sold_at).')
+          } else {
+            setDbError(`Falha na consulta ao banco: ${errMsg}`)
+          }
         }
       } catch (e: any) {
         console.error('Falha ao buscar veículos da API:', e)
+        setDbError(`Erro de conexão com a API de veículos: ${e?.message || 'Falha de rede'}`)
       }
       
       // Fallback local só em caso de erro na rede ou API (Supabase não configurado)
@@ -170,6 +178,25 @@ export default function EstoquePage({ params }: { params: Promise<{ slug: string
           />
         </div>
       </div>
+
+      {dbError && (
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in-50">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-rose-500" />
+            <div>
+              <p className="font-bold text-sm text-rose-700 dark:text-rose-300">
+                Atenção: Banco de dados desatualizado ou erro na consulta
+              </p>
+              <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5">{dbError}</p>
+            </div>
+          </div>
+          <Link href={`/${slug}/admin/diagnostico`}>
+            <Button size="sm" variant="outline" className="text-xs border-rose-500/40 text-rose-600 dark:text-rose-300 hover:bg-rose-500/15 h-8 rounded-xl shrink-0 font-bold">
+              Ver Diagnóstico
+            </Button>
+          </Link>
+        </div>
+      )}
 
       <VehicleTable
         vehicles={vehicles}

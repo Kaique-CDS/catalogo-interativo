@@ -97,7 +97,12 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(banners, { status: 200 })
+    const response = NextResponse.json(banners, { status: 200 })
+    if (error) {
+      response.headers.set('X-Db-Warning', error.message)
+      response.headers.set('X-Migration-Pending', '023_tenant_banners.sql')
+    }
+    return response
   } catch (err: any) {
     console.error('Erro em GET /api/banners:', err)
     return NextResponse.json({ error: 'Erro interno ao consultar banners.' }, { status: 500 })

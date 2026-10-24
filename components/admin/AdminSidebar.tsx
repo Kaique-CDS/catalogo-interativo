@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Ticket, FileSignature } from 'lucide-react'
+import { LayoutDashboard, Car, Settings, LogOut, ExternalLink, Ticket, FileSignature, Wrench } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -28,6 +28,7 @@ const navItems = (slug: string, contractsEnabled: boolean = false) => [
   { href: `/${slug}/admin/estoque`,       label: 'Estoque',       icon: Car },
   ...(contractsEnabled ? [{ href: `/${slug}/admin/contratos`, label: 'Contratos', icon: FileSignature }] : []),
   { href: `/${slug}/admin/configuracoes`, label: 'Configurações', icon: Settings },
+  { href: `/${slug}/admin/diagnostico`,   label: 'Diagnóstico',   icon: Wrench },
   { href: `/${slug}/admin/melhorias`,     label: 'Tickets',       icon: Ticket },
 ]
 
@@ -98,13 +99,19 @@ export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {
 
       {/* 2. Bottom Nav Mobile (Fixed Bottom — iOS & Android Native Tab Bar) */}
       <nav
-        className={cn(
-          'md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface pt-1.5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-40 grid gap-1 shadow-2xl',
-          items.length === 5 ? 'grid-cols-5' : 'grid-cols-4'
-        )}
+        style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-surface pt-1.5 px-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] z-40 grid gap-1 shadow-2xl"
       >
         {items.map((item) => {
           const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
+          const shortLabel =
+            item.label === 'Configurações'
+              ? 'Ajustes'
+              : item.label === 'Diagnóstico'
+              ? 'Diag.'
+              : item.label === 'Contratos'
+              ? 'Doc.'
+              : item.label
           return (
             <Link
               key={item.href}
@@ -112,7 +119,7 @@ export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {
               aria-label={item.label}
               title={item.label}
               className={cn(
-                'flex flex-col items-center justify-center min-h-[48px] py-1 px-1 rounded-xl transition-all active:scale-95',
+                'flex flex-col items-center justify-center min-h-[48px] py-1 px-0.5 rounded-xl transition-all active:scale-95',
                 isActive
                   ? 'bg-brand/15 text-brand font-bold'
                   : 'text-muted-foreground hover:text-foreground hover:bg-surface-2 font-medium'
@@ -120,7 +127,7 @@ export default function AdminSidebar({ store, slug, contractsEnabled }: Props) {
             >
               <item.icon className="h-5 w-5 mb-0.5 text-brand" />
               <span className="text-[10px] leading-tight truncate max-w-full">
-                {item.label === 'Configurações' ? 'Ajustes' : item.label}
+                {shortLabel}
               </span>
             </Link>
           )

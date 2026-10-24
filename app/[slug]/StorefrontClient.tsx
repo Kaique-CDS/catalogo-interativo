@@ -27,10 +27,11 @@ interface StorefrontClientProps {
   initialVehicles: Vehicle[] | null
   initialBanners?: any[] | null
   initialCustomerPhotos?: any[] | null
+  initialDbError?: string | null
   DEMO_STORE: Store
 }
 
-export default function StorefrontClient({ slug, searchParams, initialStore, initialVehicles, initialBanners, initialCustomerPhotos, DEMO_STORE }: StorefrontClientProps) {
+export default function StorefrontClient({ slug, searchParams, initialStore, initialVehicles, initialBanners, initialCustomerPhotos, initialDbError, DEMO_STORE }: StorefrontClientProps) {
   const brand = getTenantBrand(slug)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [store, setStore] = useState<Store>(initialStore || { ...DEMO_STORE, slug })
@@ -155,6 +156,7 @@ export default function StorefrontClient({ slug, searchParams, initialStore, ini
           brands={brands}
           years={years}
           searchParams={searchParams}
+          hasDbError={Boolean(initialDbError)}
         />
       </main>
 

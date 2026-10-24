@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
     const cloudinary = getCloudinary()
     if (!cloudinary) {
       return NextResponse.json(
-        { error: 'Credenciais do Cloudinary não configuradas no servidor.' },
-        { status: 500 }
+        { error: 'O servidor ainda não tem as chaves do Cloudinary. Avise o administrador da plataforma.' },
+        { status: 503 }
       )
     }
 

@@ -152,43 +152,123 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
   let vehicles: Vehicle[] | null = null
   let banners: any[] | null = null
   let customerPhotos: any[] | null = null
+  let dbError: string | null = null
 
   try {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
       const supabase = await createClient()
-      const { data: storeData } = await supabase
+      const { data: storeData, error: storeError } = await supabase
         .from('stores').select('id').eq('slug', slug).maybeSingle()
+
+      if (storeError) {
+        console.error('[Vitrine] Erro ao buscar loja por slug:', storeError.message)
+        dbError = storeError.message
+      }
 
       if (storeData) {
         store = await getStoreWithContacts(slug)
-        const [vRes, bRes, cRes] = await Promise.all([
-          supabase
-            .from('vehicles').select('*')
-            .eq('store_id', storeData.id)
-            .eq('is_active', true)
-            .neq('status', 'vendido')
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('tenant_banners').select('*')
-            .eq('tenant_id', storeData.id)
-            .eq('is_active', true)
-            .order('sort_order', { ascending: true })
-            .order('created_at', { ascending: true }),
-          supabase
-            .from('tenant_customer_photos').select('*')
-            .eq('tenant_id', storeData.id)
-            .eq('is_active', true)
-            .order('sort_order', { ascending: true })
-            .order('created_at', { ascending: false }),
-        ])
-        
-        vehicles = vRes.data || []
-        banners = bRes.data || []
-        customerPhotos = cRes.data || []
+
+        // 1. Consulta de veículos com retry defensivo se a migration 022 (status) faltar
+        const vRes = await supabase
+          .from('vehicles').select('*')
+          .eq('store_id', storeData.id)
+          .eq('is_active', true)
+          .neq('status', 'vendido')
+          .order('created_at', { ascending: false })
+
+        if (vRes.error) {
+          console.error('[Vitrine] Erro na consulta de veículos com filtro de status:', vRes.error.message)
+          // Se a coluna status não existir (migration 022 pendente), refaz imediatamente sem o filtro
+          if (
+            vRes.error.code === '42703' ||
+            vRes.error.message?.includes('status') ||
+            vRes.error.code === 'PGRST204'
+          ) {
+            console.warn('[Vitrine] Coluna status inexistente no banco. Refazendo consulta sem filtro de status.')
+            const retryRes = await supabase
+              .from('vehicles').select('*')
+              .eq('store_id', storeData.id)
+              .eq('is_active', true)
+              .order('created_at', { ascending: false })
+
+            if (retryRes.error) {
+              console.error('[Vitrine] Erro no retry de veículos:', retryRes.error.message)
+              dbError = retryRes.error.message
+              vehicles = null
+            } else {
+              vehicles = retryRes.data || []
+            }
+          } else {
+            dbError = vRes.error.message
+            vehicles = null
+          }
+        } else {
+          vehicles = vRes.data || []
+        }
+
+        // 2. Consulta de banners com fallback para colunas legadas da tabela stores
+        const bRes = await supabase
+          .from('tenant_banners').select('*')
+          .eq('tenant_id', storeData.id)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true })
+          .order('created_at', { ascending: true })
+
+        let bannersList: any[] = []
+        if (bRes.error) {
+          console.warn('[Vitrine] Aviso ao consultar tenant_banners (Migration 023 pendente):', bRes.error.message)
+        } else {
+          bannersList = bRes.data || []
+        }
+
+        // Retrocompatibilidade: se não há banners em tenant_banners, recupera das colunas antigas de stores
+        if (bannersList.length === 0 && store) {
+          if (store.banner_url) {
+            bannersList.push({
+              id: 'legacy-desktop',
+              tenant_id: store.id,
+              device: 'desktop',
+              media_type: 'image',
+              url: store.banner_url,
+              sort_order: 0,
+              is_active: true,
+              created_at: new Date().toISOString(),
+            })
+          }
+          if (store.banner_mobile_url) {
+            bannersList.push({
+              id: 'legacy-mobile',
+              tenant_id: store.id,
+              device: 'mobile',
+              media_type: 'image',
+              url: store.banner_mobile_url,
+              sort_order: 0,
+              is_active: true,
+              created_at: new Date().toISOString(),
+            })
+          }
+        }
+        banners = bannersList
+
+        // 3. Consulta de fotos de clientes
+        const cRes = await supabase
+          .from('tenant_customer_photos').select('*')
+          .eq('tenant_id', storeData.id)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true })
+          .order('created_at', { ascending: false })
+
+        if (cRes.error) {
+          console.warn('[Vitrine] Aviso ao consultar tenant_customer_photos (Migration 025 pendente):', cRes.error.message)
+          customerPhotos = []
+        } else {
+          customerPhotos = cRes.data || []
+        }
       }
     }
-  } catch (err) {
-    console.error('Supabase query fallback:', err)
+  } catch (err: any) {
+    console.error('[Vitrine] Falha inesperada ao consultar Supabase:', err?.message || err)
+    dbError = err?.message || 'Erro inesperado de banco de dados'
   }
 
   // Import dynamically or normally (since it's a server component importing a client component)
@@ -202,6 +282,7 @@ export default async function StorefrontPage({ params, searchParams }: Props) {
       initialVehicles={vehicles} 
       initialBanners={banners}
       initialCustomerPhotos={customerPhotos}
+      initialDbError={dbError}
       DEMO_STORE={demoStore} 
     />
   )
