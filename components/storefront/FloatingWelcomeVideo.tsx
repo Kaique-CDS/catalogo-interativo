@@ -24,7 +24,6 @@ export default function FloatingWelcomeVideo({
   const [isDismissed, setIsDismissed] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [bottomOffset, setBottomOffset] = useState<number>(0)
-  const [isPageLoaded, setIsPageLoaded] = useState(false)
   const [thumbHasError, setThumbHasError] = useState(false)
   const [modalHasError, setModalHasError] = useState(false)
 
@@ -32,7 +31,7 @@ export default function FloatingWelcomeVideo({
   const modalVideoRef = useRef<HTMLVideoElement | null>(null)
   const modalCloseBtnRef = useRef<HTMLButtonElement | null>(null)
 
-  // URLs transcodificadas para MP4 H.264
+  // URLs transcodificadas para MP4 H.264 universal
   const playableThumbUrl = playableVideoUrl(videoUrl, { width: 320 })
   const playableModalUrl = playableVideoUrl(videoUrl, { width: 720 })
 
@@ -56,20 +55,61 @@ export default function FloatingWelcomeVideo({
     }
   }, [slug])
 
-  // 2. Performance: Carrega o vídeo apenas após a página estar pronta (idle/lazy)
+  // 2. Garantir reprodução contínua e contornar a política restritiva de autoplay do Chromium/React
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const onLoaded = () => setIsPageLoaded(true)
+    if (isModalOpen) return
 
-    if (document.readyState === 'complete') {
-      setIsPageLoaded(true)
-    } else {
-      window.addEventListener('load', onLoaded)
-      return () => window.removeEventListener('load', onLoaded)
+    const video = thumbVideoRef.current
+    if (!video) return
+
+    // Propriedades essenciais no elemento DOM para liberar autoplay sem interação prévia
+    video.defaultMuted = true
+    video.muted = true
+    video.playsInline = true
+
+    const playSafe = () => {
+      const v = thumbVideoRef.current
+      if (!v || isModalOpen) return
+      v.defaultMuted = true
+      v.muted = true
+      const p = v.play()
+      if (p !== undefined) {
+        p.catch(() => {
+          // Autoplay aguardando interação do usuário na página
+        })
+      }
     }
-  }, [])
 
-  // 2.1 Reativa autoplay da miniatura quando a aba do navegador volta a ficar visível
+    playSafe()
+
+    // Tenta novamente assim que os dados chegarem
+    video.addEventListener('loadeddata', playSafe)
+    video.addEventListener('canplay', playSafe)
+    video.addEventListener('loadedmetadata', playSafe)
+
+    // Se o navegador barrar o autoplay silencioso inicial, inicia no primeiro clique, toque ou scroll na página
+    const onFirstUserAction = () => {
+      playSafe()
+      window.removeEventListener('click', onFirstUserAction)
+      window.removeEventListener('touchstart', onFirstUserAction)
+      window.removeEventListener('scroll', onFirstUserAction)
+    }
+
+    window.addEventListener('click', onFirstUserAction, { passive: true })
+    window.addEventListener('touchstart', onFirstUserAction, { passive: true })
+    window.addEventListener('scroll', onFirstUserAction, { passive: true })
+
+    return () => {
+      video.removeEventListener('loadeddata', playSafe)
+      video.removeEventListener('canplay', playSafe)
+      video.removeEventListener('loadedmetadata', playSafe)
+      window.removeEventListener('click', onFirstUserAction)
+      window.removeEventListener('touchstart', onFirstUserAction)
+      window.removeEventListener('scroll', onFirstUserAction)
+    }
+  }, [playableThumbUrl, isModalOpen])
+
+  // 3. Reativa autoplay da miniatura quando a aba do navegador volta a ficar visível
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (
@@ -78,6 +118,8 @@ export default function FloatingWelcomeVideo({
         !isModalOpen &&
         thumbVideoRef.current
       ) {
+        thumbVideoRef.current.defaultMuted = true
+        thumbVideoRef.current.muted = true
         thumbVideoRef.current.play().catch(() => {})
       }
     }
@@ -85,7 +127,7 @@ export default function FloatingWelcomeVideo({
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [isModalOpen])
 
-  // 3. Posicionamento dinâmico: evita cobrir rodapé e respeita safe-area
+  // 4. Posicionamento dinâmico: evita cobrir rodapé e respeita safe-area
   useEffect(() => {
     const findFooter = () =>
       document.querySelector('footer.store-footer') ||
@@ -119,7 +161,7 @@ export default function FloatingWelcomeVideo({
     }
   }, [])
 
-  // 4. Acessibilidade: Tecla ESC fecha o modal
+  // 5. Acessibilidade: Tecla ESC fecha o modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isModalOpen) {
@@ -130,7 +172,7 @@ export default function FloatingWelcomeVideo({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isModalOpen])
 
-  // 5. Gerenciamento do foco no modal
+  // 6. Gerenciamento do foco no modal
   useEffect(() => {
     if (isModalOpen) {
       document.body.style.overflow = 'hidden'
@@ -166,20 +208,6 @@ export default function FloatingWelcomeVideo({
     if (thumbVideoRef.current) {
       thumbVideoRef.current.pause()
     }
-    setTimeout(() => {
-      if (modalVideoRef.current) {
-        modalVideoRef.current.currentTime = 0
-        modalVideoRef.current.muted = false
-        modalVideoRef.current.volume = 1
-        modalVideoRef.current.play().catch(() => {
-          // Se o navegador bloquear autoplay com som, libera muted para o usuário desmutar
-          if (modalVideoRef.current) {
-            modalVideoRef.current.muted = true
-            modalVideoRef.current.play().catch(() => {})
-          }
-        })
-      }
-    }, 150)
   }
 
   // Ação: Fechar modal e retomar miniatura
@@ -189,6 +217,8 @@ export default function FloatingWelcomeVideo({
     }
     setIsModalOpen(false)
     if (thumbVideoRef.current) {
+      thumbVideoRef.current.defaultMuted = true
+      thumbVideoRef.current.muted = true
       thumbVideoRef.current.play().catch(() => {})
     }
   }
@@ -228,34 +258,47 @@ export default function FloatingWelcomeVideo({
             <img
               src={posterUrl}
               alt={storeName}
-              className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none z-0"
             />
           )}
 
           {/* Vídeo em autoplay mudo na miniatura (MP4 H.264 leve w_320) */}
-          {isPageLoaded && !thumbHasError && (
+          {!thumbHasError && (
             <video
-              ref={thumbVideoRef}
-              src={playableThumbUrl}
-              poster={posterUrl || undefined}
+              ref={(el) => {
+                thumbVideoRef.current = el
+                if (el) {
+                  el.defaultMuted = true
+                  el.muted = true
+                  el.playsInline = true
+                  el.play().catch(() => {})
+                }
+              }}
               autoPlay
               muted
               loop
               playsInline
               preload="auto"
-              onCanPlay={() => {
-                thumbVideoRef.current?.play().catch(() => {})
+              onCanPlay={(e) => {
+                e.currentTarget.defaultMuted = true
+                e.currentTarget.muted = true
+                e.currentTarget.play().catch(() => {})
               }}
               onError={(e) => {
                 console.error('[FloatingWelcomeVideo] Erro na miniatura do vídeo institucional:', e)
                 setThumbHasError(true)
               }}
-              className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
-            />
+              className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none z-10"
+            >
+              <source src={playableThumbUrl} type="video/mp4" />
+              {videoUrl && videoUrl !== playableThumbUrl && (
+                <source src={videoUrl} type="video/mp4" />
+              )}
+            </video>
           )}
 
           {/* Indicador visual discreto de que é clicável com som */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none z-20" />
 
           <div className="absolute bottom-2 left-2 right-2 z-20 flex items-center justify-between text-white pointer-events-none">
             <span className="text-[10px] sm:text-xs font-bold truncate tracking-wide">
@@ -333,9 +376,22 @@ export default function FloatingWelcomeVideo({
                 </div>
               ) : (
                 <video
-                  ref={modalVideoRef}
-                  src={playableModalUrl}
-                  poster={posterUrl || undefined}
+                  ref={(el) => {
+                    modalVideoRef.current = el
+                    if (el) {
+                      el.playsInline = true
+                      el.volume = 1
+                      // Tenta tocar com som, fallback mudo se browser bloquear
+                      const playPromise = el.play()
+                      if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                          el.muted = true
+                          el.play().catch(() => {})
+                        })
+                      }
+                    }
+                  }}
+                  autoPlay
                   controls
                   playsInline
                   preload="auto"
@@ -344,7 +400,12 @@ export default function FloatingWelcomeVideo({
                     setModalHasError(true)
                   }}
                   className="w-full h-full object-contain"
-                />
+                >
+                  <source src={playableModalUrl} type="video/mp4" />
+                  {videoUrl && videoUrl !== playableModalUrl && (
+                    <source src={videoUrl} type="video/mp4" />
+                  )}
+                </video>
               )}
             </div>
           </div>
