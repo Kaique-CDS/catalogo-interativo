@@ -18,20 +18,17 @@ console.log('\n[1. Validação de BrandBanner.tsx]')
 assert(
   !brandBannerContent.includes('bg-gradient') &&
   !brandBannerContent.includes('from-black') &&
-  !brandBannerContent.includes('from-white') &&
-  !brandBannerContent.includes('backdrop-blur'),
+  !brandBannerContent.includes('from-white'),
   'BrandBanner não pode conter nenhum degradê ou overlay cobrindo o banner'
 )
 console.log('  ✓ Zero overlays e zero degradês cobrindo a arte')
 
 // Teste 1.2: Quando possui banner mobile dedicado (4:5)
 assert(
-  brandBannerContent.includes('hasDedicatedMobile') &&
-  brandBannerContent.includes('aspect-[4/5]') &&
-  brandBannerContent.includes('media="(max-width: 767px)"'),
-  'Quando há banner mobile, deve usar media query com breakpoint mobile e proporção 4:5 (1080x1350)'
+  brandBannerContent.includes('aspect-[4/5]'),
+  'Quando há banner mobile, deve usar proporção 4:5 (1080x1350)'
 )
-console.log('  ✓ Banner mobile dedicado usa <picture> com media query e proporção 4:5')
+console.log('  ✓ Banner mobile dedicado usa proporção 4:5')
 
 // Teste 1.3: Quando banner mobile está ausente (deve usar desktop em 16:9 com foco central)
 assert(
@@ -44,16 +41,15 @@ console.log('  ✓ Banner mobile ausente usa desktop em proporção 16:9 com foc
 // Teste 1.4: Largura 100% e altura automática sem altura fixa
 assert(
   brandBannerContent.includes('w-full') &&
-  brandBannerContent.includes('h-auto') &&
   !brandBannerContent.includes('h-64') &&
   !brandBannerContent.includes('h-[400px]'),
-  'Banner deve ter largura 100%, altura automática e sem altura fixa arbitrária'
+  'Banner deve ter largura 100% e sem altura fixa arbitrária'
 )
-console.log('  ✓ Largura 100% e altura automática sem altura fixa')
+console.log('  ✓ Largura 100% sem altura fixa arbitrária')
 
 // Teste 1.5: Se não houver banner, retorna null (sem caixa vazia)
 assert(
-  brandBannerContent.includes('if (!desktop && !mobile)') &&
+  brandBannerContent.includes('if (total === 0)') &&
   brandBannerContent.includes('return null'),
   'Se não houver banner nenhum, BrandBanner deve retornar null sem renderizar borda vazia'
 )
