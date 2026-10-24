@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Plus,
   Trash2,
   AlertTriangle,
@@ -30,6 +32,9 @@ import {
   ShieldAlert,
   ShieldCheck,
   Shield,
+  Check,
+  RotateCcw,
+  History,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -65,8 +70,18 @@ import {
   valorPorExtenso,
   formatCurrency,
   DEFAULT_SALE_CLAUSES,
+  getOrdinalFeminine,
+  stripClauseOrdinalPrefix,
+  formatClauseFullTitle,
   type ContractClause,
 } from '@/lib/contracts/utils'
+import { ContractClauseQuestionnaire } from './ContractClauseQuestionnaire'
+import {
+  DEFAULT_CLAUSE_ANSWERS,
+  buildAllClauses,
+  type ClauseAnswers,
+  type ClauseContext,
+} from '@/lib/contracts/clause-builders'
 import type {
   BuyerData,
   VehicleData,
@@ -108,6 +123,23 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
   const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [viewingPdf, setViewingPdf] = useState(false)
   const [generatingPreview, setGeneratingPreview] = useState(false)
+
+  // -------------------------------------------------------------
+  // RASCUNHO AUTOMÁTICO & AUTOSAVE (FASE 2)
+  // -------------------------------------------------------------
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
+  const [pendingDraft, setPendingDraft] = useState<{
+    id: string
+    step: number
+    updated_at: string
+    payload: any
+  } | null>(null)
+  const isDirtyRef = useRef(false)
+  const isSavingRef = useRef(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isDraftInitializedRef = useRef(false)
+  const lastClausesRef = useRef<ContractClause[]>(DEFAULT_SALE_CLAUSES)
 
   // -------------------------------------------------------------
   // PASSO 1: DADOS DO COMPRADOR E VENDEDOR
@@ -178,9 +210,55 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
   const [financialNotes, setFinancialNotes] = useState<string>('')
 
   // -------------------------------------------------------------
-  // PASSO 4: CLÁUSULAS
+  // PASSO 4: CLÁUSULAS & QUESTIONÁRIO GUIADO (FASE 3)
   // -------------------------------------------------------------
-  const [clauses, setClauses] = useState<ContractClause[]>(DEFAULT_SALE_CLAUSES)
+  const clauseContext: ClauseContext = React.useMemo(
+    () => ({
+      storeName: store.name || 'Concessionária',
+      storeCity: (store as any).city || 'São Paulo',
+      storeState: (store as any).state || 'SP',
+      hasDownPayment: downPayment > 0,
+      downPaymentAmount: downPayment,
+      transferResponsible,
+      hasTradeInVehicle: installments.some((i) => i.method === 'Troca / Usado'),
+      vehicleTradeInSummary: installments.find((i) => i.method === 'Troca / Usado')?.description,
+    }),
+    [store, downPayment, transferResponsible, installments]
+  )
+
+  const [clauseAnswers, setClauseAnswers] = useState<ClauseAnswers>(() =>
+    DEFAULT_CLAUSE_ANSWERS({
+      storeName: store.name || 'Concessionária',
+      storeCity: (store as any).city || 'São Paulo',
+      storeState: (store as any).state || 'SP',
+      hasDownPayment: false,
+      downPaymentAmount: 0,
+      transferResponsible: 'comprador',
+    })
+  )
+  const [clauseMode, setClauseMode] = useState<'questionario' | 'avancado'>('questionario')
+  const [manuallyEditedClauseIds, setManuallyEditedClauseIds] = useState<string[]>([])
+  const [savingTemplate, setSavingTemplate] = useState<boolean>(false)
+  const [clauses, setClauses] = useState<ContractClause[]>(() =>
+    buildAllClauses(
+      DEFAULT_CLAUSE_ANSWERS({
+        storeName: store.name || 'Concessionária',
+        storeCity: (store as any).city || 'São Paulo',
+        storeState: (store as any).state || 'SP',
+        hasDownPayment: false,
+        downPaymentAmount: 0,
+        transferResponsible: 'comprador',
+      }),
+      {
+        storeName: store.name || 'Concessionária',
+        storeCity: (store as any).city || 'São Paulo',
+        storeState: (store as any).state || 'SP',
+        hasDownPayment: false,
+        downPaymentAmount: 0,
+        transferResponsible: 'comprador',
+      }
+    )
+  )
 
   // -------------------------------------------------------------
   // HANDLERS DE ESTOQUE
@@ -238,6 +316,302 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
       toast.error('Erro ao atualizar status do veículo no estoque.')
     } finally {
       setUpdatingSold(false)
+    }
+  }
+
+  // -------------------------------------------------------------
+  // AUTOSAVE & GESTÃO DE RASCUNHOS (FASE 2)
+  // -------------------------------------------------------------
+
+  const saveDraftToServer = useCallback(
+    async (stepToSave?: number) => {
+      const targetStep = stepToSave || currentStep
+      try {
+        isSavingRef.current = true
+        setSaveStatus('saving')
+
+        // Fallback local em sessionStorage (estritamente não-sensível, sem PII)
+        try {
+          const nonPiiPayload = {
+            step: targetStep,
+            vehicle,
+            selectedVehicleId,
+            totalAmount,
+            downPayment,
+            downPaymentDate,
+            transferResponsible,
+            transferFeeAmount,
+            installments,
+            financialNotes,
+            clauses,
+            clauseAnswers,
+            clauseMode,
+            manuallyEditedClauseIds,
+            buyerType,
+          }
+          sessionStorage.setItem(`contract_draft_${slug}`, JSON.stringify(nonPiiPayload))
+        } catch {
+          // ignore storage error
+        }
+
+        const res = await fetch('/api/contracts/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug,
+            type: 'venda_veiculo',
+            step: targetStep,
+            payload: {
+              buyer: { ...buyer, type: buyerType },
+              vehicle,
+              selectedVehicleId,
+              crlvData,
+              crlvFileUrl,
+              totalAmount,
+              downPayment,
+              downPaymentDate,
+              transferResponsible,
+              transferFeeAmount,
+              installments,
+              financialNotes,
+              clauses,
+              clauseAnswers,
+              clauseMode,
+              manuallyEditedClauseIds,
+            },
+          }),
+        })
+
+        if (!res.ok) throw new Error('Falha ao salvar rascunho no servidor')
+
+        isDirtyRef.current = false
+        setSaveStatus('saved')
+        setLastSavedAt(
+          new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        )
+      } catch (err) {
+        console.warn('Erro ao salvar rascunho:', err)
+        setSaveStatus('error')
+      } finally {
+        isSavingRef.current = false
+      }
+    },
+    [
+      slug,
+      currentStep,
+      buyer,
+      buyerType,
+      vehicle,
+      selectedVehicleId,
+      crlvData,
+      crlvFileUrl,
+      totalAmount,
+      downPayment,
+      downPaymentDate,
+      transferResponsible,
+      transferFeeAmount,
+      installments,
+      financialNotes,
+      clauses,
+      clauseAnswers,
+      clauseMode,
+      manuallyEditedClauseIds,
+    ]
+  )
+
+  const queueAutosave = useCallback(() => {
+    if (!isDraftInitializedRef.current) return
+    isDirtyRef.current = true
+    setSaveStatus('saving')
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    saveTimeoutRef.current = setTimeout(() => {
+      saveDraftToServer()
+    }, 1500)
+  }, [saveDraftToServer])
+
+  // Sincroniza etapa na URL (?etapa=X) e salva imediatamente ao trocar
+  const changeStep = useCallback(
+    (newStep: number) => {
+      setCurrentStep(newStep)
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.set('etapa', String(newStep))
+        window.history.replaceState(null, '', url.toString())
+      }
+      saveDraftToServer(newStep)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    [saveDraftToServer]
+  )
+
+  // 1. Verificação de rascunho inicial no mount
+  useEffect(() => {
+    let isCancelled = false
+
+    const checkDraft = async () => {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const stepParam = Number(urlParams.get('etapa'))
+        if (stepParam >= 1 && stepParam <= 5) {
+          setCurrentStep(stepParam)
+        }
+      }
+
+      try {
+        const res = await fetch(`/api/contracts/drafts?slug=${slug}&type=venda_veiculo`)
+        if (!res.ok) throw new Error()
+        const data = await res.json()
+        if (data.draft && !isCancelled) {
+          setPendingDraft(data.draft)
+        }
+      } catch {
+        try {
+          const local = sessionStorage.getItem(`contract_draft_${slug}`)
+          if (local && !isCancelled) {
+            const parsed = JSON.parse(local)
+            if (parsed.vehicle) setVehicle(parsed.vehicle)
+            if (parsed.totalAmount) setTotalAmount(parsed.totalAmount)
+            if (parsed.downPayment) setDownPayment(parsed.downPayment)
+            if (parsed.installments) setInstallments(parsed.installments)
+            if (parsed.clauses) setClauses(parsed.clauses)
+            if (parsed.clauseAnswers) setClauseAnswers(parsed.clauseAnswers)
+            if (parsed.clauseMode) setClauseMode(parsed.clauseMode)
+            if (parsed.manuallyEditedClauseIds) setManuallyEditedClauseIds(parsed.manuallyEditedClauseIds)
+          }
+        } catch {}
+      } finally {
+        try {
+          const tRes = await fetch(`/api/contracts/templates?slug=${slug}&type=venda_veiculo`)
+          if (tRes.ok) {
+            const tData = await tRes.json()
+            if (tData?.template?.answers && !isCancelled) {
+              setClauseAnswers(tData.template.answers)
+              const tClauses = buildAllClauses(tData.template.answers, clauseContext)
+              setClauses(tClauses)
+            }
+          }
+        } catch {}
+
+        if (!isCancelled) {
+          isDraftInitializedRef.current = true
+        }
+      }
+    }
+
+    checkDraft()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [slug])
+
+  // 2. Efeito de Autosave disparado por alterações de formulário
+  useEffect(() => {
+    if (!isDraftInitializedRef.current) return
+    queueAutosave()
+  }, [
+    buyer,
+    buyerType,
+    vehicle,
+    totalAmount,
+    downPayment,
+    downPaymentDate,
+    transferResponsible,
+    transferFeeAmount,
+    installments,
+    financialNotes,
+    clauses,
+    clauseAnswers,
+    clauseMode,
+    manuallyEditedClauseIds,
+    queueAutosave,
+  ])
+
+  // 3. Proteção contra fechamento de aba com alterações não salvas
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirtyRef.current || isSavingRef.current) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
+
+  const handleRestoreDraft = () => {
+    if (!pendingDraft?.payload) return
+    const p = pendingDraft.payload
+    if (p.buyer) {
+      setBuyer((prev) => ({ ...prev, ...p.buyer }))
+      if (p.buyer.type) setBuyerType(p.buyer.type)
+    }
+    if (p.vehicle) setVehicle(p.vehicle)
+    if (p.selectedVehicleId) setSelectedVehicleId(p.selectedVehicleId)
+    if (p.crlvData) setCrlvData(p.crlvData)
+    if (p.crlvFileUrl) setCrlvFileUrl(p.crlvFileUrl)
+    if (p.totalAmount !== undefined) setTotalAmount(p.totalAmount)
+    if (p.downPayment !== undefined) setDownPayment(p.downPayment)
+    if (p.downPaymentDate) setDownPaymentDate(p.downPaymentDate)
+    if (p.transferResponsible) setTransferResponsible(p.transferResponsible)
+    if (p.transferFeeAmount !== undefined) setTransferFeeAmount(p.transferFeeAmount)
+    if (p.installments) setInstallments(p.installments)
+    if (p.financialNotes) setFinancialNotes(p.financialNotes)
+    if (p.clauses && p.clauses.length > 0) setClauses(p.clauses)
+    if (p.clauseAnswers) setClauseAnswers(p.clauseAnswers)
+    if (p.clauseMode) setClauseMode(p.clauseMode)
+    if (p.manuallyEditedClauseIds) setManuallyEditedClauseIds(p.manuallyEditedClauseIds)
+
+    const step = pendingDraft.step || 1
+    changeStep(step)
+    setPendingDraft(null)
+    setSaveStatus('saved')
+    setLastSavedAt(
+      new Date(pendingDraft.updated_at).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    )
+    toast.success('Rascunho recuperado com sucesso!')
+  }
+
+  const handleSaveTemplate = async () => {
+    try {
+      setSavingTemplate(true)
+      const res = await fetch('/api/contracts/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          name: 'Modelo Padrão da Loja',
+          type: 'venda_veiculo',
+          answers: clauseAnswers,
+        }),
+      })
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        throw new Error(errJson.error || 'Falha ao salvar modelo da loja')
+      }
+      toast.success(
+        'Modelo padrão da loja salvo com sucesso! Seus novos contratos iniciarão com estas respostas.'
+      )
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao salvar modelo padrão')
+    } finally {
+      setSavingTemplate(false)
+    }
+  }
+
+  const handleDiscardDraft = async () => {
+    try {
+      await fetch(`/api/contracts/drafts?slug=${slug}&type=venda_veiculo`, { method: 'DELETE' })
+      try {
+        sessionStorage.removeItem(`contract_draft_${slug}`)
+      } catch {}
+      setPendingDraft(null)
+      toast.info('Rascunho anterior descartado. Novo contrato iniciado.')
+    } catch {
+      setPendingDraft(null)
     }
   }
 
@@ -309,6 +683,11 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
         notes: financialNotes || undefined,
       }
 
+      const finalClauses = clauses.map((c, i) => ({
+        ...c,
+        title: formatClauseFullTitle(i, c.title),
+      }))
+
       const res = await fetch('/api/contracts/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -318,7 +697,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
           buyer: { ...buyer, type: buyerType },
           vehicle,
           financial: financialPayload,
-          clauses,
+          clauses: finalClauses,
         }),
       })
 
@@ -473,47 +852,135 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
   const diferencaPreco = totalAmount - totalCalculado
 
   // -------------------------------------------------------------
-  // HANDLERS DE CLÁUSULAS
+  // HANDLERS DE CLÁUSULAS (FASE 2: REORDENAÇÃO, NUMERAÇÃO DINÂMICA E UNDO)
   // -------------------------------------------------------------
+
   const handleAddClause = () => {
     const nextId = `cl-${Date.now()}`
-    setClauses([
-      ...clauses,
+    setClauses((prev) => [
+      ...prev,
       {
         id: nextId,
-        title: `CLÁUSULA ADICIONAL – ESPECIFIQUE O TÍTULO`,
-        text: 'Descreva aqui as condições e obrigações adicionais pactuadas entre as partes.',
+        title: '', // Título limpo sem "ESPECIFIQUE O TÍTULO"
+        text: '',
       },
     ])
+    queueAutosave()
   }
 
   const handleUpdateClause = (id: string, field: 'title' | 'text', val: string) => {
-    setClauses(clauses.map((c) => (c.id === id ? { ...c, [field]: val } : c)))
+    setClauses((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: val } : c)))
+    queueAutosave()
   }
 
-  const handleRemoveClause = (id: string) => {
-    setClauses(clauses.filter((c) => c.id !== id))
+  const handleMoveClause = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= clauses.length) return
+
+    setClauses((prev) => {
+      const copy = [...prev]
+      const [moved] = copy.splice(index, 1)
+      copy.splice(targetIndex, 0, moved)
+      return copy
+    })
+    queueAutosave()
+  }
+
+  const handleRemoveClause = (clauseId: string) => {
+    const clauseIndex = clauses.findIndex((c) => c.id === clauseId)
+    if (clauseIndex === -1) return
+    const removedClause = clauses[clauseIndex]
+
+    setClauses((prev) => prev.filter((c) => c.id !== clauseId))
+    queueAutosave()
+
+    toast('Cláusula excluída', {
+      action: {
+        label: 'Desfazer',
+        onClick: () => {
+          setClauses((prev) => {
+            const copy = [...prev]
+            copy.splice(clauseIndex, 0, removedClause)
+            return copy
+          })
+          queueAutosave()
+          toast.success('Cláusula restaurada com sucesso!')
+        },
+      },
+      duration: 10000,
+    })
+  }
+
+  const handleRestoreDefaultClauses = () => {
+    if (
+      !window.confirm(
+        'Isso substituirá suas cláusulas personalizadas pelo modelo padrão da loja. Deseja continuar?'
+      )
+    ) {
+      return
+    }
+
+    const previousClauses = [...clauses]
+    const previousAnswers = { ...clauseAnswers }
+    const previousManual = [...manuallyEditedClauseIds]
+
+    lastClausesRef.current = previousClauses
+
+    const defaultAnswers = DEFAULT_CLAUSE_ANSWERS(clauseContext)
+    setClauseAnswers(defaultAnswers)
+    setManuallyEditedClauseIds([])
+    const newClauses = buildAllClauses(defaultAnswers, clauseContext)
+    setClauses(newClauses)
+    queueAutosave()
+
+    toast('Cláusulas restauradas para o padrão', {
+      action: {
+        label: 'Desfazer',
+        onClick: () => {
+          setClauses(previousClauses)
+          setClauseAnswers(previousAnswers)
+          setManuallyEditedClauseIds(previousManual)
+          queueAutosave()
+          toast.success('Restauração desfeita com sucesso!')
+        },
+      },
+      duration: 10000,
+    })
   }
 
   // -------------------------------------------------------------
-  // VALIDAÇÕES ENTRE ETAPAS (Fase 3: Validações Estritas)
+  // VALIDAÇÕES ENTRE ETAPAS (Com Auto-Foco no Primeiro Erro)
   // -------------------------------------------------------------
+
+  const focusField = (id: string) => {
+    setTimeout(() => {
+      const el = document.getElementById(id)
+      if (el) {
+        el.focus()
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 50)
+  }
+
   const validateStep = (s: number): boolean => {
     if (s === 1) {
       if (!buyer.name.trim()) {
         toast.error('Informe o nome ou razão social do comprador.')
+        focusField('buyer-name')
         return false
       }
       if (buyerType === 'pf') {
         const cpfVal = validateCpf(buyer.cpf_cnpj)
         if (!cpfVal.valid) {
           toast.error(cpfVal.message || 'CPF do comprador inválido.')
+          focusField('buyer-cpf')
           return false
         }
         if (buyer.cnh && buyer.cnh.trim()) {
           const cnhVal = validateCnh(buyer.cnh)
           if (!cnhVal.valid) {
             toast.error(cnhVal.message || 'CNH inválida.')
+            focusField('buyer-cnh')
             return false
           }
         }
@@ -521,6 +988,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
           const dateVal = validateDate(buyer.birth_date, { isBirthDate: true })
           if (!dateVal.valid) {
             toast.error(dateVal.message || 'Data de nascimento inválida.')
+            focusField('buyer-birth-date')
             return false
           }
         }
@@ -528,12 +996,14 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
         const cnpjVal = validateCnpj(buyer.cpf_cnpj)
         if (!cnpjVal.valid) {
           toast.error(cnpjVal.message || 'CNPJ da empresa inválido.')
+          focusField('buyer-cpf')
           return false
         }
         if (buyer.rep_cpf && buyer.rep_cpf.trim()) {
           const repVal = validateCpf(buyer.rep_cpf)
           if (!repVal.valid) {
             toast.error(`Representante: ${repVal.message}`)
+            focusField('buyer-rep-cpf')
             return false
           }
         }
@@ -542,6 +1012,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
       const phoneVal = validatePhoneBr(buyer.phone)
       if (!phoneVal.valid) {
         toast.error(phoneVal.message || 'Informe um telefone ou WhatsApp válido.')
+        focusField('buyer-phone')
         return false
       }
 
@@ -549,6 +1020,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
         const emailVal = validateEmail(buyer.email)
         if (!emailVal.valid) {
           toast.error(emailVal.message || 'E-mail do comprador inválido.')
+          focusField('buyer-email')
           return false
         }
       }
@@ -557,6 +1029,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
         const cepVal = validateCep(buyer.zip)
         if (!cepVal.valid) {
           toast.error(cepVal.message || 'CEP inválido.')
+          focusField('buyer-zip')
           return false
         }
       }
@@ -565,17 +1038,21 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
     if (s === 2) {
       if (!vehicle.brand.trim() || !vehicle.model.trim()) {
         toast.error('Informe a marca e o modelo do veículo.')
+        if (!vehicle.brand.trim()) focusField('vehicle-brand')
+        else focusField('vehicle-model')
         return false
       }
       const plateVal = validatePlaca(vehicle.plate)
       if (!plateVal.valid) {
         toast.error(plateVal.message || 'Informe uma placa válida para o veículo.')
+        focusField('vehicle-plate')
         return false
       }
       if (vehicle.chassis && vehicle.chassis.trim()) {
         const chassiVal = validateChassi(vehicle.chassis)
         if (!chassiVal.valid) {
           toast.error(chassiVal.message || 'Chassi inválido.')
+          focusField('vehicle-chassis')
           return false
         }
       }
@@ -583,6 +1060,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
         const renVal = validateRenavam(vehicle.renavam)
         if (!renVal.valid) {
           toast.error(renVal.message || 'Renavam inválido.')
+          focusField('vehicle-renavam')
           return false
         }
       }
@@ -591,12 +1069,14 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
     if (s === 3) {
       if (!totalAmount || totalAmount <= 0) {
         toast.error('Informe o valor total da venda.')
+        focusField('fin-total-amount')
         return false
       }
       if (downPayment && Number(downPayment) > 0 && downPaymentDate) {
         const dpVal = validateDate(downPaymentDate)
         if (!dpVal.valid) {
           toast.error(`Data do sinal: ${dpVal.message}`)
+          focusField('fin-down-payment-date')
           return false
         }
       }
@@ -605,6 +1085,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
           const instVal = validateDate(inst.due_date)
           if (!instVal.valid) {
             toast.error(`Parcela #${inst.number}: ${instVal.message}`)
+            focusField(`inst-due-date-${inst.number}`)
             return false
           }
         }
@@ -616,14 +1097,14 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep((p) => Math.min(p + 1, 5))
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      const next = Math.min(currentStep + 1, 5)
+      changeStep(next)
     }
   }
 
   const handlePrev = () => {
-    setCurrentStep((p) => Math.max(p - 1, 1))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    const prev = Math.max(currentStep - 1, 1)
+    changeStep(prev)
   }
 
   // -------------------------------------------------------------
@@ -648,6 +1129,11 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
         notes: financialNotes || undefined,
       }
 
+      const finalClauses = clauses.map((c, i) => ({
+        ...c,
+        title: formatClauseFullTitle(i, c.title),
+      }))
+
       const res = await fetch('/api/contracts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -656,7 +1142,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
           buyer: { ...buyer, type: buyerType },
           vehicle,
           financial: financialPayload,
-          clauses,
+          clauses: finalClauses,
           vehicle_id: selectedVehicleId,
           status,
           crlv_data: crlvData,
@@ -668,6 +1154,12 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Erro ao gerar o contrato.')
       }
+
+      // Limpa rascunho salvo após emitir o contrato
+      try {
+        await fetch(`/api/contracts/drafts?slug=${slug}&type=venda_veiculo`, { method: 'DELETE' })
+        sessionStorage.removeItem(`contract_draft_${slug}`)
+      } catch {}
 
       setGeneratedContract({ id: data.contract_id, number: data.number })
       toast.success(`Contrato de Venda Nº ${data.number} gerado com sucesso! 🎉`)
@@ -839,9 +1331,27 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
               Novo Contrato de Venda de Veículo
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground ml-2 sm:ml-12">
-            Passo {currentStep} de 5: {STEPS[currentStep - 1].title} – {STEPS[currentStep - 1].desc}
-          </p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 ml-2 sm:ml-12 mt-0.5">
+            <p className="text-xs text-muted-foreground">
+              Passo {currentStep} de 5: {STEPS[currentStep - 1].title} – {STEPS[currentStep - 1].desc}
+            </p>
+            {/* Indicador discreto de autosave (Fase 2) */}
+            {saveStatus === 'saving' && (
+              <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin text-brand" /> Salvando...
+              </span>
+            )}
+            {saveStatus === 'saved' && lastSavedAt && (
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
+                <Check className="h-3 w-3" /> Rascunho salvo às {lastSavedAt}
+              </span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-[11px] text-rose-500 flex items-center gap-1 font-medium">
+                <AlertTriangle className="h-3 w-3" /> Erro ao salvar (tentando novamente...)
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 self-start sm:self-auto overflow-x-auto max-w-full pb-1 scrollbar-hide">
@@ -856,7 +1366,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 type="button"
                 onClick={() => {
                   if (s.id < currentStep || validateStep(currentStep)) {
-                    setCurrentStep(s.id)
+                    changeStep(s.id)
                   }
                 }}
                 className={`flex items-center justify-center gap-1.5 px-3 h-11 min-w-[44px] rounded-xl text-xs font-semibold transition-all shrink-0 ${
@@ -874,6 +1384,48 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
           })}
         </div>
       </div>
+
+      {/* ── BANNER DE CONTINUAR RASCUNHO SALVO (FASE 2) ── */}
+      {pendingDraft && (
+        <div className="p-4 sm:p-5 rounded-2xl border border-brand/40 bg-brand/5 backdrop-blur-xs shadow-sm space-y-3 animate-in fade-in-50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-brand/15 text-brand flex items-center justify-center shrink-0">
+                <History className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-bold text-foreground">
+                  Continuar de onde parou?
+                </h4>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Rascunho salvo em {new Date(pendingDraft.updated_at).toLocaleDateString('pt-BR')} às{' '}
+                  {new Date(pendingDraft.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}{' '}
+                  na Etapa {pendingDraft.step} ({STEPS[pendingDraft.step - 1]?.title || 'Geral'}).
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleDiscardDraft}
+                className="text-xs border-surface hover:bg-surface-2 rounded-xl h-9"
+              >
+                Começar novo
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleRestoreDraft}
+                className="btn-brand text-xs font-bold rounded-xl gap-1.5 h-9 px-4"
+              >
+                <Check className="h-3.5 w-3.5" /> Continuar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ═════════════════════════════════════════════════════════════ */}
       {/* PASSO 1: QUALIFICAÇÃO DAS PARTES                              */}
@@ -972,6 +1524,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">Nome Completo do Comprador *</Label>
                       <Input
+                        id="buyer-name"
                         placeholder="Ex: Roberto Carlos Pereira"
                         value={buyer.name}
                         onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
@@ -981,6 +1534,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CPF do Comprador *</Label>
                       <Input
+                        id="buyer-cpf"
                         inputMode="numeric"
                         placeholder="000.000.000-00"
                         maxLength={14}
@@ -995,6 +1549,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">RG / RNE / Órgão</Label>
                       <Input
+                        id="buyer-rg"
                         placeholder="Ex: 12.345.678-9 SSP/SP"
                         value={buyer.rg_ie || ''}
                         onChange={(e) => setBuyer({ ...buyer, rg_ie: e.target.value })}
@@ -1004,6 +1559,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CNH (opcional)</Label>
                       <Input
+                        id="buyer-cnh"
                         inputMode="numeric"
                         placeholder="Nº da CNH (11 dígitos)"
                         maxLength={11}
@@ -1012,13 +1568,15 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                         className="bg-surface-1 border-surface font-mono"
                       />
                     </div>
-                    <ModernDatePicker
-                      label="Data de Nascimento"
-                      value={buyer.birth_date || ''}
-                      onChange={(val) => setBuyer({ ...buyer, birth_date: val })}
-                      isBirthDate={true}
-                      placeholder="DD/MM/AAAA"
-                    />
+                    <div id="buyer-birth-date">
+                      <ModernDatePicker
+                        label="Data de Nascimento"
+                        value={buyer.birth_date || ''}
+                        onChange={(val) => setBuyer({ ...buyer, birth_date: val })}
+                        isBirthDate={true}
+                        placeholder="DD/MM/AAAA"
+                      />
+                    </div>
                   </div>
                 </>
               ) : (
@@ -1027,6 +1585,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">Razão Social da Empresa *</Label>
                       <Input
+                        id="buyer-name"
                         placeholder="Ex: Comercial Automotiva Ltda"
                         value={buyer.name}
                         onChange={(e) => setBuyer({ ...buyer, name: e.target.value })}
@@ -1036,6 +1595,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CNPJ *</Label>
                       <Input
+                        id="buyer-cpf"
                         inputMode="numeric"
                         placeholder="00.000.000/0001-00"
                         maxLength={18}
@@ -1050,6 +1610,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">Nome do Representante Legal</Label>
                       <Input
+                        id="buyer-rep-name"
                         placeholder="Representante que assina pela PJ"
                         value={buyer.rep_name || ''}
                         onChange={(e) => setBuyer({ ...buyer, rep_name: e.target.value })}
@@ -1059,6 +1620,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-foreground">CPF do Representante</Label>
                       <Input
+                        id="buyer-rep-cpf"
                         inputMode="numeric"
                         placeholder="000.000.000-00"
                         maxLength={14}
@@ -1076,6 +1638,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Telefone / WhatsApp *</Label>
                   <Input
+                    id="buyer-phone"
                     inputMode="tel"
                     placeholder="(11) 99999-9999"
                     maxLength={15}
@@ -1087,6 +1650,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">E-mail do Comprador</Label>
                   <Input
+                    id="buyer-email"
                     type="email"
                     inputMode="email"
                     placeholder="comprador@email.com"
@@ -1104,6 +1668,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
               <div className="space-y-1.5 pt-2 border-t border-surface">
                 <Label className="text-xs font-semibold text-foreground">Endereço Completo (Rua, Número, Bairro)</Label>
                 <Input
+                  id="buyer-address"
                   placeholder="Ex: Rua das Flores, 123, Apto 45 - Jardim Paulista"
                   value={buyer.address}
                   onChange={(e) => setBuyer({ ...buyer, address: e.target.value })}
@@ -1115,6 +1680,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Cidade</Label>
                   <Input
+                    id="buyer-city"
                     placeholder="São Paulo"
                     value={buyer.city}
                     onChange={(e) => setBuyer({ ...buyer, city: e.target.value })}
@@ -1124,6 +1690,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Estado (UF)</Label>
                   <Input
+                    id="buyer-state"
                     placeholder="SP"
                     maxLength={2}
                     value={buyer.state}
@@ -1134,6 +1701,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">CEP</Label>
                   <Input
+                    id="buyer-zip"
                     placeholder="00000-000"
                     value={buyer.zip}
                     onChange={(e) => setBuyer({ ...buyer, zip: maskCep(e.target.value) })}
@@ -1294,6 +1862,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Marca / Fabricante *</Label>
                   <Input
+                    id="vehicle-brand"
                     placeholder="Ex: Honda, Toyota, Volkswagen"
                     value={vehicle.brand}
                     onChange={(e) => setVehicle({ ...vehicle, brand: e.target.value })}
@@ -1303,6 +1872,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Modelo e Versão *</Label>
                   <Input
+                    id="vehicle-model"
                     placeholder="Ex: Civic Touring 1.5 Turbo CVT"
                     value={vehicle.model}
                     onChange={(e) => setVehicle({ ...vehicle, model: e.target.value })}
@@ -1315,6 +1885,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Ano Fabricação</Label>
                   <Input
+                    id="vehicle-year-fab"
                     type="number"
                     placeholder="2022"
                     value={vehicle.year_fab}
@@ -1325,6 +1896,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Ano Modelo</Label>
                   <Input
+                    id="vehicle-year-model"
                     type="number"
                     placeholder="2023"
                     value={vehicle.year_model}
@@ -1335,6 +1907,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Placa *</Label>
                   <Input
+                    id="vehicle-plate"
                     autoCapitalize="characters"
                     placeholder="ABC1D23"
                     maxLength={8}
@@ -1346,6 +1919,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Renavam</Label>
                   <Input
+                    id="vehicle-renavam"
                     inputMode="numeric"
                     placeholder="00000000000"
                     maxLength={11}
@@ -1360,6 +1934,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Chassi (VIN)</Label>
                   <Input
+                    id="vehicle-chassis"
                     autoCapitalize="characters"
                     placeholder="9BWCA... (17 chars)"
                     maxLength={17}
@@ -1450,6 +2025,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                   </span>
                 </div>
                 <Input
+                  id="fin-total-amount"
                   type="number"
                   min="0"
                   step="100"
@@ -1468,6 +2044,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Sinal / Entrada (Arras) - R$</Label>
                   <Input
+                    id="fin-down-payment"
                     type="number"
                     min="0"
                     placeholder="Ex: 5000"
@@ -1476,12 +2053,14 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                     className="bg-surface-1 border-surface"
                   />
                 </div>
-                <ModernDatePicker
-                  label="Data do Pagamento do Sinal"
-                  value={downPaymentDate}
-                  onChange={setDownPaymentDate}
-                  placeholder="DD/MM/AAAA"
-                />
+                <div id="fin-down-payment-date">
+                  <ModernDatePicker
+                    label="Data do Pagamento do Sinal"
+                    value={downPaymentDate}
+                    onChange={setDownPaymentDate}
+                    placeholder="DD/MM/AAAA"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1500,6 +2079,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">Valor Estimado das Taxas / Documento (R$)</Label>
                   <Input
+                    id="fin-transfer-fee"
                     type="number"
                     min="0"
                     placeholder="Ex: 650"
@@ -1557,7 +2137,7 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
                             className="h-9 text-xs bg-surface-1 border-surface"
                           />
                         </div>
-                        <div className="sm:col-span-3">
+                        <div className="sm:col-span-3" id={`inst-due-date-${inst.number}`}>
                           <Label className="text-[10px] text-muted-foreground block mb-1">Vencimento</Label>
                           <ModernDatePicker
                             value={inst.due_date}
@@ -1645,88 +2225,36 @@ export default function VehicleContractWizard({ store, slug, vehicles, preselect
       )}
 
       {/* ═════════════════════════════════════════════════════════════ */}
-      {/* PASSO 4: CLÁUSULAS CONTRATUAIS                                */}
+      {/* PASSO 4: CLÁUSULAS CONTRATUAIS (QUESTIONÁRIO GUIADO)          */}
       {/* ═════════════════════════════════════════════════════════════ */}
       {currentStep === 4 && (
         <div className="space-y-6 animate-in fade-in-50 duration-200">
-          <Card className="border-surface bg-surface-1">
-            <CardHeader className="pb-3 border-b border-surface flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-brand" /> Cláusulas Contratuais
-                </CardTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Personalize ou adicione cláusulas específicas para esta negociação.
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setClauses(DEFAULT_SALE_CLAUSES)}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Restaurar Padrão
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={handleAddClause}
-                  className="gap-1.5 text-xs border-surface hover:bg-surface-2 rounded-xl"
-                >
-                  <Plus className="h-3.5 w-3.5 text-brand" /> Nova Cláusula
-                </Button>
-              </div>
-            </CardHeader>
-
-            <CardContent className="pt-5 space-y-4">
-              {/* Aviso Jurídico */}
-              <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 flex items-start gap-3">
-                <Scale className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                  <strong>Aviso legal:</strong> Este é um modelo padrão sugerido para compra e venda de veículos seminovos. Recomendamos revisar as cláusulas com a assessoria jurídica da sua empresa antes de utilizar.
-                </p>
-              </div>
-
-              {/* Lista de Cláusulas */}
-              <div className="space-y-4">
-                {clauses.map((clause, index) => (
-                  <div
-                    key={clause.id}
-                    className="p-4 rounded-xl border border-surface bg-surface-2/30 space-y-2.5"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <Input
-                        value={clause.title}
-                        onChange={(e) => handleUpdateClause(clause.id, 'title', e.target.value)}
-                        className="text-xs font-bold bg-surface-1 border-surface h-8"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveClause(clause.id)}
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0"
-                        title="Remover cláusula"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-
-                    <textarea
-                      rows={3}
-                      value={clause.text}
-                      onChange={(e) => handleUpdateClause(clause.id, 'text', e.target.value)}
-                      className="w-full p-2.5 rounded-lg border border-surface bg-surface-1 text-xs text-foreground outline-none resize-y leading-relaxed"
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <ContractClauseQuestionnaire
+            answers={clauseAnswers}
+            onAnswersChange={(newAnswers) => {
+              setClauseAnswers(newAnswers)
+              queueAutosave()
+            }}
+            clauses={clauses}
+            onClausesChange={(newClauses) => {
+              setClauses(newClauses)
+              queueAutosave()
+            }}
+            manuallyEditedIds={manuallyEditedClauseIds}
+            onManuallyEditedIdsChange={(ids) => {
+              setManuallyEditedClauseIds(ids)
+              queueAutosave()
+            }}
+            clauseMode={clauseMode}
+            onClauseModeChange={(mode) => {
+              setClauseMode(mode)
+              queueAutosave()
+            }}
+            context={clauseContext}
+            onSaveTemplate={handleSaveTemplate}
+            savingTemplate={savingTemplate}
+            onRestoreDefault={handleRestoreDefaultClauses}
+          />
         </div>
       )}
 

@@ -204,6 +204,77 @@ export interface ContractClause {
   text: string
 }
 
+// -------------------------------------------------------------
+// ORDINAIS FEMININOS E FORMATAÇÃO DE TÍTULOS DE CLÁUSULAS (Fase 2)
+// -------------------------------------------------------------
+
+const UNIDADES_ORDINAIS = [
+  '',
+  'PRIMEIRA',
+  'SEGUNDA',
+  'TERCEIRA',
+  'QUARTA',
+  'QUINTA',
+  'SEXTA',
+  'SÉTIMA',
+  'OITAVA',
+  'NONA',
+]
+
+const DEZENAS_ORDINAIS = [
+  '',
+  'DÉCIMA',
+  'VIGÉSIMA',
+  'TRIGÉSIMA',
+  'QUADRAGÉSIMA',
+  'QUINQUAGÉSIMA',
+  'SEXAGÉSIMA',
+  'SEPTUAGÉSIMA',
+  'OCTOGÉSIMA',
+  'NONAGÉSIMA',
+]
+
+/**
+ * Retorna o ordinal feminino por extenso para numeração de cláusulas contratuais.
+ * Ex: 1 -> PRIMEIRA, 2 -> SEGUNDA, 11 -> DÉCIMA PRIMEIRA, 25 -> VIGÉSIMA QUINTA
+ */
+export function getOrdinalFeminine(n: number): string {
+  if (n <= 0) return `${n}ª`
+  if (n <= 9) return UNIDADES_ORDINAIS[n]
+  if (n < 100) {
+    const d = Math.floor(n / 10)
+    const u = n % 10
+    if (u === 0) return DEZENAS_ORDINAIS[d]
+    return `${DEZENAS_ORDINAIS[d]} ${UNIDADES_ORDINAIS[u]}`
+  }
+  if (n === 100) return 'CENTÉSIMA'
+  return `${n}ª`
+}
+
+/**
+ * Remove qualquer prefixo legado de numeração ordinal da cláusula,
+ * permitindo que ela seja renumerada automaticamente pela posição do array.
+ * Ex: "CLÁUSULA PRIMEIRA – DO ESTADO E VISTORIA" -> "DO ESTADO E VISTORIA"
+ */
+export function stripClauseOrdinalPrefix(title: string): string {
+  if (!title) return ''
+  return title
+    .replace(/^CLÁUSULA\s+[A-ZÀ-Ú0-9ºª\s]+[-–—]\s*/i, '')
+    .replace(/^CLÁUSULA\s+[A-ZÀ-Ú0-9ºª\s]+:\s*/i, '')
+    .replace(/^CLÁUSULA\s+[A-ZÀ-Ú0-9ºª\s]+\s+/i, '')
+    .trim()
+}
+
+/**
+ * Formata o título completo da cláusula a partir do seu índice (base 0) e texto de título.
+ * Ex: index 0, "DO ESTADO" -> "CLÁUSULA PRIMEIRA – DO ESTADO"
+ */
+export function formatClauseFullTitle(index: number, rawTitle: string): string {
+  const clean = stripClauseOrdinalPrefix(rawTitle)
+  const ordinal = getOrdinalFeminine(index + 1)
+  return clean ? `CLÁUSULA ${ordinal} – ${clean.toUpperCase()}` : `CLÁUSULA ${ordinal}`
+}
+
 export const DEFAULT_SALE_CLAUSES: ContractClause[] = [
   {
     id: 'cl-1',
@@ -218,7 +289,7 @@ export const DEFAULT_SALE_CLAUSES: ContractClause[] = [
   {
     id: 'cl-3',
     title: 'CLÁUSULA TERCEIRA – DA TRADIÇÃO E PRAZO DE ENTREGA',
-    text: 'A entrega física do veículo dar-se-á em até {prazo_entrega_dias} dias úteis contados a partir da quitação integral do preço pactuado ou da confirmação da liberação dos recursos de financiamento/consórcio pelas respectivas instituições financeiras.',
+    text: 'A entrega física do veículo dar-se-á em até 5 (cinco) dias úteis contados a partir da quitação integral do preço pactuado ou da confirmação da liberação dos recursos de financiamento/consórcio pelas respectivas instituições financeiras.',
   },
   {
     id: 'cl-4',
@@ -238,7 +309,7 @@ export const DEFAULT_SALE_CLAUSES: ContractClause[] = [
   {
     id: 'cl-7',
     title: 'CLÁUSULA SÉTIMA – DO FORO DE ELEIÇÃO',
-    text: 'As partes elegem, de comum acordo, o Foro da Comarca de {cidade_foro} - {estado_foro}, com renúncia expressa a qualquer outro por mais privilegiado que seja, para dirimir quaisquer dúvidas ou litígios decorrentes do presente instrumento.',
+    text: 'As partes elegem, de comum acordo, o Foro da Comarca da sede do VENDEDOR, com renúncia expressa a qualquer outro por mais privilegiado que seja, para dirimir quaisquer dúvidas ou litígios decorrentes do presente instrumento.',
   },
 ]
 

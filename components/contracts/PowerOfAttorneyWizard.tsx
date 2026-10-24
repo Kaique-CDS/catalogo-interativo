@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -28,6 +28,8 @@ import {
   Check,
   MessageCircle,
   FileText,
+  History,
+  AlertTriangle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -99,6 +101,22 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
   const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [viewingPdf, setViewingPdf] = useState(false)
   const [generatingPreview, setGeneratingPreview] = useState(false)
+
+  // -------------------------------------------------------------
+  // RASCUNHO AUTOMÁTICO & AUTOSAVE (FASE 2)
+  // -------------------------------------------------------------
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
+  const [pendingDraft, setPendingDraft] = useState<{
+    id: string
+    step: number
+    updated_at: string
+    payload: any
+  } | null>(null)
+  const isDirtyRef = useRef(false)
+  const isSavingRef = useRef(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isDraftInitializedRef = useRef(false)
 
   // -------------------------------------------------------------
   // PASSO 1: OUTORGANTE (QUEM CONCEDE) E OUTORGADO (QUEM RECEBE)
@@ -343,18 +361,241 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
   }
 
   // -------------------------------------------------------------
+  // AUTOSAVE & GESTÃO DE RASCUNHOS (FASE 2)
+  // -------------------------------------------------------------
+
+  const saveDraftToServer = useCallback(
+    async (stepToSave?: number) => {
+      const targetStep = stepToSave || currentStep
+      try {
+        isSavingRef.current = true
+        setSaveStatus('saving')
+
+        // Fallback local em sessionStorage (estritamente não-sensível, sem PII)
+        try {
+          const nonPiiPayload = {
+            step: targetStep,
+            vehicle,
+            selectedVehicleId,
+            validityDays,
+            additionalPowers,
+            observations,
+          }
+          sessionStorage.setItem(`poa_draft_${slug}`, JSON.stringify(nonPiiPayload))
+        } catch {
+          // ignore storage error
+        }
+
+        const res = await fetch('/api/contracts/drafts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug,
+            type: 'procuracao',
+            step: targetStep,
+            payload: {
+              grantor,
+              grantee,
+              vehicle,
+              selectedVehicleId,
+              validityDays,
+              additionalPowers,
+              observations,
+              crlvData,
+              crlvFileUrl,
+            },
+          }),
+        })
+
+        if (!res.ok) throw new Error('Falha ao salvar rascunho de procuração no servidor')
+
+        isDirtyRef.current = false
+        setSaveStatus('saved')
+        setLastSavedAt(
+          new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        )
+      } catch (err) {
+        console.warn('Erro ao salvar rascunho de procuração:', err)
+        setSaveStatus('error')
+      } finally {
+        isSavingRef.current = false
+      }
+    },
+    [
+      slug,
+      currentStep,
+      grantor,
+      grantee,
+      vehicle,
+      selectedVehicleId,
+      validityDays,
+      additionalPowers,
+      observations,
+      crlvData,
+      crlvFileUrl,
+    ]
+  )
+
+  const queueAutosave = useCallback(() => {
+    if (!isDraftInitializedRef.current) return
+    isDirtyRef.current = true
+    setSaveStatus('saving')
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    saveTimeoutRef.current = setTimeout(() => {
+      saveDraftToServer()
+    }, 1500)
+  }, [saveDraftToServer])
+
+  // Sincroniza etapa na URL (?etapa=X) e salva imediatamente ao trocar
+  const changeStep = useCallback(
+    (newStep: number) => {
+      setCurrentStep(newStep)
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.set('etapa', String(newStep))
+        window.history.replaceState(null, '', url.toString())
+      }
+      saveDraftToServer(newStep)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    [saveDraftToServer]
+  )
+
+  // 1. Verificação de rascunho inicial no mount
+  useEffect(() => {
+    let isCancelled = false
+
+    const checkDraft = async () => {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const stepParam = Number(urlParams.get('etapa'))
+        if (stepParam >= 1 && stepParam <= 4) {
+          setCurrentStep(stepParam)
+        }
+      }
+
+      try {
+        const res = await fetch(`/api/contracts/drafts?slug=${slug}&type=procuracao`)
+        if (!res.ok) throw new Error()
+        const data = await res.json()
+        if (data.draft && !isCancelled) {
+          setPendingDraft(data.draft)
+        }
+      } catch {
+        try {
+          const local = sessionStorage.getItem(`poa_draft_${slug}`)
+          if (local && !isCancelled) {
+            const parsed = JSON.parse(local)
+            if (parsed.vehicle) setVehicle(parsed.vehicle)
+            if (parsed.validityDays) setValidityDays(parsed.validityDays)
+            if (parsed.additionalPowers) setAdditionalPowers(parsed.additionalPowers)
+            if (parsed.observations) setObservations(parsed.observations)
+          }
+        } catch {}
+      } finally {
+        if (!isCancelled) {
+          isDraftInitializedRef.current = true
+        }
+      }
+    }
+
+    checkDraft()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [slug])
+
+  // 2. Autosave em mudanças de formulário
+  useEffect(() => {
+    if (!isDraftInitializedRef.current) return
+    queueAutosave()
+  }, [
+    grantor,
+    grantee,
+    vehicle,
+    validityDays,
+    additionalPowers,
+    observations,
+    queueAutosave,
+  ])
+
+  // 3. Proteção beforeunload
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirtyRef.current || isSavingRef.current) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
+
+  const handleRestoreDraft = () => {
+    if (!pendingDraft?.payload) return
+    const p = pendingDraft.payload
+    if (p.grantor) setGrantor((prev) => ({ ...prev, ...p.grantor }))
+    if (p.grantee) setGrantee((prev) => ({ ...prev, ...p.grantee }))
+    if (p.vehicle) setVehicle(p.vehicle)
+    if (p.selectedVehicleId) setSelectedVehicleId(p.selectedVehicleId)
+    if (p.validityDays !== undefined) setValidityDays(p.validityDays)
+    if (p.additionalPowers !== undefined) setAdditionalPowers(p.additionalPowers)
+    if (p.observations !== undefined) setObservations(p.observations)
+    if (p.crlvData) setCrlvData(p.crlvData)
+    if (p.crlvFileUrl) setCrlvFileUrl(p.crlvFileUrl)
+
+    const step = pendingDraft.step || 1
+    changeStep(step)
+    setPendingDraft(null)
+    setSaveStatus('saved')
+    setLastSavedAt(
+      new Date(pendingDraft.updated_at).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    )
+    toast.success('Rascunho de procuração recuperado com sucesso!')
+  }
+
+  const handleDiscardDraft = async () => {
+    try {
+      await fetch(`/api/contracts/drafts?slug=${slug}&type=procuracao`, { method: 'DELETE' })
+      try {
+        sessionStorage.removeItem(`poa_draft_${slug}`)
+      } catch {}
+      setPendingDraft(null)
+      toast.info('Rascunho descartado. Nova procuração iniciada.')
+    } catch {
+      setPendingDraft(null)
+    }
+  }
+
+  const focusField = (id: string) => {
+    setTimeout(() => {
+      const el = document.getElementById(id)
+      if (el) {
+        el.focus()
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 50)
+  }
+
+  // -------------------------------------------------------------
   // PASSO 4: VALIDAÇÕES & EMISSÃO
   // -------------------------------------------------------------
   const validateStep = (step: number): boolean => {
     if (step === 1) {
       if (!grantor.name.trim() || grantor.name.trim().length < 3) {
         toast.error('Informe o nome completo ou razão social do Outorgante.')
+        focusField('grantor-name')
         return false
       }
 
       const grantorDoc = validateCpfOrCnpj(grantor.cpf_cnpj)
       if (!grantorDoc.valid) {
         toast.error(`Outorgante: ${grantorDoc.message || 'CPF ou CNPJ inválido'}`)
+        focusField('grantor-cpf')
         return false
       }
 
@@ -369,10 +610,12 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const phoneVal = validatePhoneBr(grantor.phone)
         if (!phoneVal.valid) {
           toast.error(`Outorgante: ${phoneVal.message}`)
+          focusField('grantor-phone')
           return false
         }
       } else {
         toast.error('Informe o telefone / WhatsApp do Outorgante.')
+        focusField('grantor-phone')
         return false
       }
 
@@ -380,10 +623,12 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const emailVal = validateEmail(grantor.email)
         if (!emailVal.valid) {
           toast.error(`Outorgante: ${emailVal.message}`)
+          focusField('grantor-email')
           return false
         }
       } else {
         toast.error('Informe o e-mail do Outorgante para assinatura digital.')
+        focusField('grantor-email')
         return false
       }
 
@@ -391,18 +636,21 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const cepVal = validateCep(grantor.zip)
         if (!cepVal.valid) {
           toast.error(`Outorgante: ${cepVal.message}`)
+          focusField('grantor-zip')
           return false
         }
       }
 
       if (!grantee.name.trim() || grantee.name.trim().length < 3) {
         toast.error('Informe o nome completo ou razão social do Outorgado.')
+        focusField('grantee-name')
         return false
       }
 
       const granteeDoc = validateCpfOrCnpj(grantee.cpf_cnpj)
       if (!granteeDoc.valid) {
         toast.error(`Outorgado: ${granteeDoc.message || 'CPF ou CNPJ inválido'}`)
+        focusField('grantee-cpf')
         return false
       }
 
@@ -410,10 +658,12 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const phoneVal = validatePhoneBr(grantee.phone)
         if (!phoneVal.valid) {
           toast.error(`Outorgado: ${phoneVal.message}`)
+          focusField('grantee-phone')
           return false
         }
       } else {
         toast.error('Informe o telefone / WhatsApp do Outorgado.')
+        focusField('grantee-phone')
         return false
       }
 
@@ -421,10 +671,12 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const emailVal = validateEmail(grantee.email)
         if (!emailVal.valid) {
           toast.error(`Outorgado: ${emailVal.message}`)
+          focusField('grantee-email')
           return false
         }
       } else {
         toast.error('Informe o e-mail do Outorgado.')
+        focusField('grantee-email')
         return false
       }
 
@@ -432,6 +684,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const cepVal = validateCep(grantee.zip)
         if (!cepVal.valid) {
           toast.error(`Outorgado: ${cepVal.message}`)
+          focusField('grantee-zip')
           return false
         }
       }
@@ -442,12 +695,15 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
     if (step === 2) {
       if (!vehicle.brand.trim() || !vehicle.model.trim()) {
         toast.error('Informe a marca e o modelo do veículo.')
+        if (!vehicle.brand.trim()) focusField('vehicle-brand')
+        else focusField('vehicle-model')
         return false
       }
 
       const plateVal = validatePlaca(vehicle.plate)
       if (!plateVal.valid) {
         toast.error(plateVal.message || 'Placa do veículo inválida.')
+        focusField('vehicle-plate')
         return false
       }
 
@@ -455,6 +711,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const renavamVal = validateRenavam(vehicle.renavam)
         if (!renavamVal.valid) {
           toast.error(renavamVal.message || 'Renavam inválido.')
+          focusField('vehicle-renavam')
           return false
         }
       }
@@ -463,6 +720,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
         const chassisVal = validateChassi(vehicle.chassis)
         if (!chassisVal.valid) {
           toast.error(chassisVal.message || 'Chassi inválido.')
+          focusField('vehicle-chassis')
           return false
         }
       }
@@ -473,6 +731,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
     if (step === 3) {
       if (!validityDays || validityDays <= 0 || validityDays > 1825) {
         toast.error('Informe um prazo de validade válido (entre 1 e 1825 dias).')
+        focusField('poa-validity-days')
         return false
       }
       return true
@@ -483,14 +742,14 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 4))
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      const next = Math.min(currentStep + 1, 4)
+      changeStep(next)
     }
   }
 
   const handleBack = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    const prev = Math.max(currentStep - 1, 1)
+    changeStep(prev)
   }
 
   const handleGeneratePoa = async () => {
@@ -525,6 +784,12 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Erro ao gerar procuração.')
       }
+
+      // Limpa rascunho salvo da procuração
+      try {
+        await fetch(`/api/contracts/drafts?slug=${slug}&type=procuracao`, { method: 'DELETE' })
+        sessionStorage.removeItem(`poa_draft_${slug}`)
+      } catch {}
 
       setGeneratedPoa({
         id: data.contract_id || data.contract?.id,
@@ -642,6 +907,35 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
     <div className="max-w-4xl mx-auto space-y-6 pb-28 sm:pb-20">
       {/* Barra de Progresso Mobile-First */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+          <div>
+            <h1 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">
+              Nova Procuração Veicular
+            </h1>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Passo {currentStep} de 4: {STEPS[currentStep - 1]?.title} – {STEPS[currentStep - 1]?.desc}
+            </p>
+          </div>
+          {/* Indicador discreto de autosave (Fase 2) */}
+          <div className="flex items-center gap-2">
+            {saveStatus === 'saving' && (
+              <span className="text-[11px] text-zinc-400 flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin text-zinc-600 dark:text-zinc-300" /> Salvando...
+              </span>
+            )}
+            {saveStatus === 'saved' && lastSavedAt && (
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
+                <Check className="h-3 w-3" /> Rascunho salvo às {lastSavedAt}
+              </span>
+            )}
+            {saveStatus === 'error' && (
+              <span className="text-[11px] text-rose-500 flex items-center gap-1 font-medium">
+                <AlertTriangle className="h-3 w-3" /> Erro ao salvar
+              </span>
+            )}
+          </div>
+        </div>
+
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {STEPS.map((step) => {
             const Icon = step.icon
@@ -651,7 +945,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
               <button
                 key={step.id}
                 onClick={() => {
-                  if (isDone) setCurrentStep(step.id)
+                  if (isDone || validateStep(currentStep)) changeStep(step.id)
                 }}
                 disabled={!isDone && !isActive}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
@@ -683,6 +977,48 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
           })}
         </div>
       </div>
+
+      {/* ── BANNER DE CONTINUAR RASCUNHO SALVO (FASE 2) ── */}
+      {pendingDraft && (
+        <div className="p-4 sm:p-5 rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/60 shadow-sm space-y-3 animate-in fade-in-50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center shrink-0">
+                <History className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">
+                  Continuar de onde parou?
+                </h4>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  Rascunho de procuração salvo em {new Date(pendingDraft.updated_at).toLocaleDateString('pt-BR')} às{' '}
+                  {new Date(pendingDraft.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}{' '}
+                  na Etapa {pendingDraft.step} ({STEPS[pendingDraft.step - 1]?.title || 'Geral'}).
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleDiscardDraft}
+                className="text-xs rounded-xl h-9"
+              >
+                Começar novo
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleRestoreDraft}
+                className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold rounded-xl gap-1.5 h-9 px-4"
+              >
+                <Check className="h-3.5 w-3.5" /> Continuar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Conteúdo dos Passos */}
       <div className="space-y-6">
@@ -756,6 +1092,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       {grantor.type === 'pf' ? 'Nome Completo *' : 'Razão Social *'}
                     </Label>
                     <Input
+                      id="grantor-name"
                       value={grantor.name}
                       onChange={(e) => setGrantor((p) => ({ ...p, name: e.target.value }))}
                       placeholder={grantor.type === 'pf' ? 'Ex: João da Silva' : 'Ex: Auto Peças e Veículos Ltda'}
@@ -768,6 +1105,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       {grantor.type === 'pf' ? 'CPF *' : 'CNPJ *'}
                     </Label>
                     <Input
+                      id="grantor-cpf"
                       value={grantor.cpf_cnpj}
                       inputMode="numeric"
                       onChange={(e) =>
@@ -846,6 +1184,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       WhatsApp / Telefone *
                     </Label>
                     <Input
+                      id="grantor-phone"
                       value={grantor.phone}
                       inputMode="tel"
                       onChange={(e) => setGrantor((p) => ({ ...p, phone: maskPhoneBr(e.target.value) }))}
@@ -860,6 +1199,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       E-mail (para assinatura digital OTP) *
                     </Label>
                     <Input
+                      id="grantor-email"
                       type="email"
                       inputMode="email"
                       value={grantor.email}
@@ -874,6 +1214,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Endereço Completo (Rua, Número, Bairro)
                     </Label>
                     <Input
+                      id="grantor-address"
                       value={grantor.address}
                       onChange={(e) => setGrantor((p) => ({ ...p, address: e.target.value }))}
                       placeholder="Ex: Av. Brasil, 1500, Centro"
@@ -887,6 +1228,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                         Cidade
                       </Label>
                       <Input
+                        id="grantor-city"
                         value={grantor.city}
                         onChange={(e) => setGrantor((p) => ({ ...p, city: e.target.value }))}
                         placeholder="São Paulo"
@@ -898,6 +1240,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                         UF
                       </Label>
                       <Input
+                        id="grantor-state"
                         value={grantor.state}
                         onChange={(e) => setGrantor((p) => ({ ...p, state: e.target.value.toUpperCase() }))}
                         placeholder="SP"
@@ -910,6 +1253,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                         CEP
                       </Label>
                       <Input
+                        id="grantor-zip"
                         value={grantor.zip}
                         inputMode="numeric"
                         onChange={(e) => setGrantor((p) => ({ ...p, zip: maskCep(e.target.value) }))}
@@ -982,6 +1326,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       {grantee.type === 'pf' ? 'Nome Completo do Outorgado *' : 'Razão Social da Loja / Empresa *'}
                     </Label>
                     <Input
+                      id="grantee-name"
                       value={grantee.name}
                       onChange={(e) => setGrantee((p) => ({ ...p, name: e.target.value }))}
                       placeholder={grantee.type === 'pf' ? 'Ex: Carlos Eduardo Silveira' : 'Ex: Milhaticar Veículos Ltda'}
@@ -994,6 +1339,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       {grantee.type === 'pf' ? 'CPF do Outorgado *' : 'CNPJ da Empresa *'}
                     </Label>
                     <Input
+                      id="grantee-cpf"
                       value={grantee.cpf_cnpj}
                       inputMode="numeric"
                       onChange={(e) =>
@@ -1011,6 +1357,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                         Representante Legal (quem assina pela loja)
                       </Label>
                       <Input
+                        id="grantee-rep-name"
                         value={grantee.rep_name || ''}
                         onChange={(e) => setGrantee((p) => ({ ...p, rep_name: e.target.value }))}
                         placeholder="Nome do responsável"
@@ -1036,6 +1383,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Telefone / WhatsApp *
                     </Label>
                     <Input
+                      id="grantee-phone"
                       value={grantee.phone}
                       inputMode="tel"
                       onChange={(e) => setGrantee((p) => ({ ...p, phone: maskPhoneBr(e.target.value) }))}
@@ -1050,6 +1398,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       E-mail *
                     </Label>
                     <Input
+                      id="grantee-email"
                       type="email"
                       inputMode="email"
                       value={grantee.email}
@@ -1064,6 +1413,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Endereço Completo
                     </Label>
                     <Input
+                      id="grantee-address"
                       value={grantee.address}
                       onChange={(e) => setGrantee((p) => ({ ...p, address: e.target.value }))}
                       placeholder="Ex: Av. dos Bandeirantes, 3000"
@@ -1154,6 +1504,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Marca / Fabricante *
                     </Label>
                     <Input
+                      id="vehicle-brand"
                       value={vehicle.brand}
                       onChange={(e) => setVehicle((p) => ({ ...p, brand: e.target.value }))}
                       placeholder="Ex: Toyota, Honda, Volkswagen"
@@ -1166,6 +1517,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Modelo / Versão *
                     </Label>
                     <Input
+                      id="vehicle-model"
                       value={vehicle.model}
                       onChange={(e) => setVehicle((p) => ({ ...p, model: e.target.value }))}
                       placeholder="Ex: Corolla Altis Premium 2.0 Flex"
@@ -1178,6 +1530,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Placa do Veículo *
                     </Label>
                     <Input
+                      id="vehicle-plate"
                       value={vehicle.plate}
                       inputMode="text"
                       onChange={(e) =>
@@ -1194,6 +1547,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Renavam
                     </Label>
                     <Input
+                      id="vehicle-renavam"
                       value={vehicle.renavam}
                       inputMode="numeric"
                       onChange={(e) =>
@@ -1210,6 +1564,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                       Chassi
                     </Label>
                     <Input
+                      id="vehicle-chassis"
                       value={vehicle.chassis}
                       inputMode="text"
                       onChange={(e) =>
@@ -1351,6 +1706,7 @@ export default function PowerOfAttorneyWizard({ store, slug, vehicles }: Props) 
                     </Label>
                     <div className="flex items-center gap-3">
                       <Input
+                        id="poa-validity-days"
                         type="number"
                         min={30}
                         max={1825}

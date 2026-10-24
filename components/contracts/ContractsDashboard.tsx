@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   UserCheck,
   Building2,
+  History,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -127,12 +128,46 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
   const [manualFile, setManualFile] = useState<File | null>(null)
   const [manualSubmitting, setManualSubmitting] = useState(false)
 
+  const [drafts, setDrafts] = useState<any[]>([])
+  const [draftsLoading, setDraftsLoading] = useState(false)
+
   const isConfigured = Boolean(
     store.contract_razao_social || store.contract_cnpj || store.contract_rep_nome
   )
 
+  const fetchDrafts = useCallback(async () => {
+    setDraftsLoading(true)
+    try {
+      const res = await fetch(`/api/contracts/drafts?slug=${slug}&list=true`, { cache: 'no-store' })
+      if (!res.ok) return
+      const data = await res.json()
+      setDrafts(data.drafts || [])
+    } catch {
+      // silent
+    } finally {
+      setDraftsLoading(false)
+    }
+  }, [slug])
+
+  const handleDeleteDraft = async (draftId: string) => {
+    if (!confirm('Deseja realmente excluir este rascunho em andamento?')) return
+    try {
+      const res = await fetch(`/api/contracts/drafts?slug=${slug}&id=${draftId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      setDrafts((prev) => prev.filter((d) => d.id !== draftId))
+      toast.success('Rascunho excluído com sucesso!')
+    } catch {
+      toast.error('Erro ao excluir rascunho.')
+    }
+  }
+
+  useEffect(() => {
+    fetchDrafts()
+  }, [fetchDrafts])
+
   const fetchContracts = useCallback(async () => {
     setLoading(true)
+    fetchDrafts()
     try {
       const params = new URLSearchParams()
       params.set('slug', slug)
@@ -148,7 +183,7 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
     } finally {
       setLoading(false)
     }
-  }, [slug, statusFilter, search])
+  }, [slug, statusFilter, search, fetchDrafts])
 
   const handleDeleteContract = async (c: ContractItem) => {
     if (!confirm(`Deseja realmente cancelar o Contrato Nº ${c.number}?`)) return
@@ -512,6 +547,74 @@ export default function ContractsDashboard({ store, slug, initialContracts }: Pr
           </div>
         </div>
       </div>
+
+      {/* ── SEÇÃO DE RASCUNHOS EM ANDAMENTO (FASE 2) ── */}
+      {drafts.length > 0 && (
+        <div className="p-4 sm:p-5 rounded-2xl border border-surface bg-surface-1 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4 text-brand" />
+              <h3 className="text-xs sm:text-sm font-bold text-foreground">
+                Rascunhos em Andamento ({drafts.length})
+              </h3>
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              Salvos automaticamente com criptografia
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {drafts.map((d) => (
+              <div
+                key={d.id}
+                className="p-3.5 rounded-xl border border-surface bg-surface-2/40 flex items-center justify-between gap-3"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-brand/10 text-brand">
+                      {d.type === 'procuracao' ? 'Procuração' : 'Contrato Venda'}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      Etapa {d.step} de {d.type === 'procuracao' ? 4 : 5}
+                    </span>
+                  </div>
+                  <p className="text-xs font-semibold text-foreground truncate mt-1">
+                    {d.vehicle_summary || d.title}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Atualizado em {new Date(d.updated_at).toLocaleDateString('pt-BR')} às{' '}
+                    {new Date(d.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteDraft(d.id)}
+                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                    title="Excluir rascunho"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                  <Link
+                    href={
+                      d.type === 'procuracao'
+                        ? `/${slug}/admin/contratos/procuracao/novo?etapa=${d.step}`
+                        : `/${slug}/admin/contratos/novo?etapa=${d.step}`
+                    }
+                  >
+                    <Button size="sm" className="btn-brand text-xs font-bold rounded-xl h-8 px-3 gap-1">
+                      Continuar <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── LISTAGEM DE CONTRATOS E PROCURAÇÕES ── */}
       <div className="bg-surface-1 border border-surface rounded-2xl shadow-xs overflow-hidden">
